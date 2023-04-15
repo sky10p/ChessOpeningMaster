@@ -37,6 +37,7 @@ module.exports = {
     static: {
       directory: path.join(__dirname, 'build', 'frontend'),
     },
+    historyApiFallback: true,
     compress: true,
     port: 9000
   }
