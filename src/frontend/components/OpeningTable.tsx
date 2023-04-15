@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 export const OpeningTable: React.FC = () => {
-  // Simula una lista de aperturas; esto se reemplazaría con datos reales en el futuro.
   const openings = [
     { id: 1, name: 'Apertura Española', moves: '1.e4 e5 2.Nf3 Nc6 3.Bb5' },
     { id: 2, name: 'Defensa Siciliana', moves: '1.e4 c5' },
