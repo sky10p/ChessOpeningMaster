@@ -1,15 +1,14 @@
-// src/components/RepertoryView.tsx
 import React, { CSSProperties, useEffect, useState } from "react";
-import { Chess, Color, Move, Square } from "chess.js";
+import { Color, Move, Square } from "chess.js";
 import Chessboard from "chessboardjsx";
+import { useBoardContext } from "./BoardContext";
 
 interface BoardProps {
   calcWidth?: ((dimensions: {screenWidth: number}) => number)
 }
 
 const Board: React.FC<BoardProps> = ({calcWidth}) => {
-  const [chess] = useState(new Chess());
-  const [fen, setFen] = useState(chess.fen());
+  const {chess, setChess, addMove} = useBoardContext();
   const [squareStyles, setSquareStyles] = useState({});
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
   const [possibleMoves, setPossibleMoves] = useState<Move[]>([]);
@@ -73,7 +72,8 @@ const Board: React.FC<BoardProps> = ({calcWidth}) => {
     if (isMoveValid(from, to)) {
       const move = chess.move({ from, to, promotion: "q" });
       if (move) {
-        setFen(chess.fen());
+        setChess(chess);
+        addMove(move);
       }
     }
     setPossibleMoves([]);
@@ -120,7 +120,7 @@ const Board: React.FC<BoardProps> = ({calcWidth}) => {
   return (
     <div>
       <Chessboard
-        position={fen}
+        position={chess.fen()}
         onSquareClick={handleSquareClick}
         onDrop={onDrop}
         onDragOverSquare={onDragOverSquare}
