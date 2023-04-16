@@ -22,9 +22,14 @@ const repertoires = [
   { id: 3, name: 'Repertoire Under Construction' },
 ];
 
-const Navbar = () => {
+interface NavbarProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+const Navbar: React.FC<NavbarProps> = ({open, onClose}) => {
   return (
-    <Drawer variant="permanent" sx={drawerStyles}>
+    <Drawer  sx={drawerStyles} open={open} onClose={onClose}>
       <List>
         <ButtonBase component={Link} to="/create-repertoire">
           <ListItem>

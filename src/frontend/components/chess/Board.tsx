@@ -3,7 +3,11 @@ import React, { CSSProperties, useEffect, useState } from "react";
 import { Chess, Color, Move, Square } from "chess.js";
 import Chessboard from "chessboardjsx";
 
-const Board = () => {
+interface BoardProps {
+  calcWidth?: ((dimensions: {screenWidth: number}) => number)
+}
+
+const Board: React.FC<BoardProps> = ({calcWidth}) => {
   const [chess] = useState(new Chess());
   const [fen, setFen] = useState(chess.fen());
   const [squareStyles, setSquareStyles] = useState({});
@@ -112,6 +116,7 @@ const Board = () => {
     }
   };
 
+
   return (
     <div>
       <Chessboard
@@ -120,7 +125,9 @@ const Board = () => {
         onDrop={onDrop}
         onDragOverSquare={onDragOverSquare}
         squareStyles={squareStyles}
+        calcWidth={calcWidth ? calcWidth : undefined}
         dropSquareStyle={{}}
+        
       />
     </div>
   );

@@ -1,7 +1,7 @@
 // src/pages/Repertoire.tsx
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import Board from '../chess/Board';
+import BoardContainer from '../chess/BoardContainer';
 
 const Repertoire = () => {
   const { id } = useParams();
@@ -9,7 +9,7 @@ const Repertoire = () => {
   return (
     <div>
       <h2>Repertoire ID: {id}</h2>
-      <Board />
+      <BoardContainer />
     </div>
   );
 };

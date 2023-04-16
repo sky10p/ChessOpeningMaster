@@ -1,18 +1,25 @@
-import React from 'react';
-import { AppBar, Toolbar, Typography, IconButton } from '@mui/material';
-import { useLocation } from 'react-router-dom';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import React from "react";
+import { AppBar, Toolbar, Typography, IconButton } from "@mui/material";
+import { useLocation } from "react-router-dom";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import MenuIcon from "@mui/icons-material/Menu";
 
-const drawerWidth = 240;
 
-const Header = () => {
+interface HeaderProps {
+  onMenuClicked: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({onMenuClicked}) => {
   const location = useLocation();
-  const isRepertoireView = location.pathname.startsWith('/repertoire/');
+  const isRepertoireView = location.pathname.startsWith("/repertoire/");
 
   return (
-    <AppBar position="fixed" sx={{ width: `calc(100% - ${drawerWidth}px)` }}>
+    <AppBar position="fixed">
       <Toolbar>
+        <IconButton edge="start" color="inherit" aria-label="menu" onClick={onMenuClicked}>
+          <MenuIcon></MenuIcon>
+        </IconButton>
         <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
           Chess Opening Master
         </Typography>
