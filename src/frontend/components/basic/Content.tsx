@@ -1,6 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import Repertoire from "./repertoires/Repertoire";
+import Repertoire from "../repertoires/Repertoire";
 
 const headerHeight = 64;
 
