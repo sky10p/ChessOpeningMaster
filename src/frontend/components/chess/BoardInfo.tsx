@@ -1,17 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useBoardContext } from "./BoardContext";
-import { parse } from "chess-pgn-parser";
 
 const BoardInfo: React.FC = () => {
-  const { chess, goToMove, currentIndex } = useBoardContext();
-  const [pgnMoves, setPgnMoves] = useState<string[]>([]);
-
-  useEffect(() => {
-    const pgn = chess.pgn();
-    const parsedPgn = parse(pgn);
-    const moves = parsedPgn.moves.map((move) => move);
-    setPgnMoves(moves);
-  }, [chess]);
+  const { goToMove, currentIndex, getMovements } = useBoardContext();
 
   
 
@@ -19,7 +10,7 @@ const BoardInfo: React.FC = () => {
     <div>
       <h2>Moves</h2>
       <div>
-        {pgnMoves.map((move, index) => (
+        {getMovements().map((move, index) => (
           <button
             key={`move-${index}`}
             onClick={() => goToMove(index)}
@@ -27,7 +18,7 @@ const BoardInfo: React.FC = () => {
               fontWeight: index === currentIndex() ? "bold" : "normal",
             }}
           >
-            {move}
+            {move.san}
           </button>
         ))}
       </div>

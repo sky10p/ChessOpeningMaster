@@ -9,5 +9,5 @@
     "strict": true /* Enable all strict type-checking options. */,
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
-  "include": ["src/frontend/**/*", "src/backend/**/*", "src/common/**/*", "typings"]
+  "include": ["src/frontend/**/*", "src/backend/**/*", "src/common/**/*"]
 }

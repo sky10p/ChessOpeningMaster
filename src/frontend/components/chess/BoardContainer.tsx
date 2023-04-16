@@ -3,6 +3,7 @@ import { Grid, useTheme } from "@mui/material";
 import Board from "./Board";
 import BoardActions from "./BoardActions";
 import { BoardContextProvider } from "./BoardContext";
+import BoardInfo from "./BoardInfo";
 
 const BoardContainer: React.FC = () => {
   const theme = useTheme();
@@ -37,7 +38,7 @@ const BoardContainer: React.FC = () => {
           </Grid>
         </Grid>
         <Grid item xs={12} sm={4}>
-          {/* <BoardInfo /> */}
+          <BoardInfo />
         </Grid>
       </Grid>
     </BoardContextProvider>

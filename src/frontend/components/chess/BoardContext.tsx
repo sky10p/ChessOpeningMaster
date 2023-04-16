@@ -11,6 +11,7 @@ interface BoardContextProps {
     hasNext: () => boolean;
     hasPrev: () => boolean;
     addMove: (move: Move) => void;
+    getMovements: () => Move[];
     
 }
 
@@ -68,7 +69,8 @@ export const BoardContextProvider: React.FC<{children: React.ReactNode}> = ({chi
         hasNext,
         hasPrev,
         addMove,
-        currentIndex: () => moveIndex   
+        currentIndex: () => moveIndex,
+        getMovements: () => moveHistory
      }
 
     return (
