@@ -3,7 +3,7 @@ import React, { CSSProperties, useEffect, useState } from "react";
 import { Chess, Color, Move, Square } from "chess.js";
 import Chessboard from "chessboardjsx";
 
-const RepertoryView = () => {
+const Board = () => {
   const [chess] = useState(new Chess());
   const [fen, setFen] = useState(chess.fen());
   const [squareStyles, setSquareStyles] = useState({});
@@ -126,4 +126,4 @@ const RepertoryView = () => {
   );
 };
 
-export default RepertoryView;
+export default Board;
