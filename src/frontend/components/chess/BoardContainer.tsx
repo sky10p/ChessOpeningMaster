@@ -1,11 +1,22 @@
 import React, { useCallback } from "react";
-import { Grid, useTheme } from "@mui/material";
+import { Button, Grid, useTheme } from "@mui/material";
 import Board from "./Board";
 import BoardActions from "./BoardActions";
 import { BoardContextProvider } from "./BoardContext";
 import BoardInfo from "./BoardInfo";
+import { IMoveNode } from "../../../common/types/MoveNode";
+import BoardSaveButton from "./BoardSaveButton";
 
-const BoardContainer: React.FC = () => {
+interface BoardContainerProps {
+  repertoireId: string;
+  repertoireName: string;
+  initialMoves?: IMoveNode;
+}
+const BoardContainer: React.FC<BoardContainerProps> = ({
+  repertoireId,
+  repertoireName,
+  initialMoves,
+}) => {
   const theme = useTheme();
 
   const calcWidth = useCallback(
@@ -19,8 +30,14 @@ const BoardContainer: React.FC = () => {
     [theme.breakpoints.values.sm]
   );
 
+
+
   return (
-    <BoardContextProvider>
+    <BoardContextProvider
+      repertoireId={repertoireId}
+      repertoireName={repertoireName}
+      initialMoves={initialMoves}
+    >
       <Grid container spacing={2}>
         <Grid
           item
@@ -38,6 +55,7 @@ const BoardContainer: React.FC = () => {
           </Grid>
         </Grid>
         <Grid item xs={12} sm={4}>
+        <BoardSaveButton/>
           <BoardInfo />
         </Grid>
       </Grid>

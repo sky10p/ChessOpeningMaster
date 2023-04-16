@@ -1,6 +1,7 @@
 import { Chess, Move } from "chess.js";
 import React, { useState } from "react";
 import { MoveVariantNode } from "./utils/VariantNode";
+import { IMoveNode } from "../../../common/types/MoveNode";
 
 interface BoardContextProps {
     chess: Chess;
@@ -12,6 +13,8 @@ interface BoardContextProps {
     hasPrev: () => boolean;
     addMove: (move: Move) => void;
     moveHistory: MoveVariantNode;
+    repertoireId: string;
+    repertoireName: string;
     currentMoveNode: MoveVariantNode;
     
 }
@@ -28,9 +31,15 @@ export const useBoardContext = () => {
     return context;
 }
 
-export const BoardContextProvider: React.FC<{children: React.ReactNode}> = ({children}) => {
+interface BoardContextProviderProps {
+    children: React.ReactNode;
+    repertoireId: string;
+    repertoireName: string;
+    initialMoves?: IMoveNode;
+}
+export const BoardContextProvider: React.FC<BoardContextProviderProps> = ({children, repertoireId, repertoireName, initialMoves}) => {
     const [chess, setChess] = useState<Chess>(new Chess());
-    const [moveHistory] = useState<MoveVariantNode>(new MoveVariantNode());
+    const [moveHistory] = useState<MoveVariantNode>(initialMoves ? MoveVariantNode.initMoveVariantNode(initialMoves) : new MoveVariantNode());
     const [currentMove, setCurrentMove] = useState<MoveVariantNode>(moveHistory);
     const next = () => {
         if(currentMove.children.length === 0) return;
@@ -87,6 +96,8 @@ export const BoardContextProvider: React.FC<{children: React.ReactNode}> = ({chi
         hasPrev,
         addMove,
         moveHistory,
+        repertoireId,
+        repertoireName,
         currentMoveNode: currentMove
      }
 

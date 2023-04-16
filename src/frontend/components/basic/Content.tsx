@@ -1,6 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Repertoire from "../repertoires/Repertoire";
+import Home from "./Home";
 
 const headerHeight = 64;
 
@@ -25,7 +26,7 @@ const Content = () => {
         />
         <Route path="/repertoire/:id" element={<Repertoire/>} />
 
-        <Route path="/" element={<Repertoire/>} />
+        <Route path="/" element={<Home/>} />
       </Routes>
     </main>
   );

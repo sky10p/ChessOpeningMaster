@@ -37,7 +37,12 @@ module.exports = {
     static: {
       directory: path.join(__dirname, 'build', 'frontend'),
     },
-    historyApiFallback: true,
+    historyApiFallback: {
+      index: '/index.html',
+      rewrites: [
+        { from: /^\/repertoire\/[0-9]+/, to: '/index.html' }
+      ]
+    },
     compress: true,
     port: 9000
   }
