@@ -1,28 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useBoardContext } from "./BoardContext";
+import { Box,  Typography,  } from "@mui/material";
+import VariantTree from "./VariantTree";
+
 
 const BoardInfo: React.FC = () => {
-  const { goToMove, currentIndex, getMovements } = useBoardContext();
-
-  
+  const {goToMove, moveHistory, currentMoveNode } = useBoardContext();
 
   return (
-    <div>
-      <h2>Moves</h2>
-      <div>
-        {getMovements().map((move, index) => (
-          <button
-            key={`move-${index}`}
-            onClick={() => goToMove(index)}
-            style={{
-              fontWeight: index === currentIndex() ? "bold" : "normal",
-            }}
-          >
-            {move.san}
-          </button>
-        ))}
-      </div>
-    </div>
+    <Box>
+      <Typography variant="h6" gutterBottom>
+        Variants
+      </Typography>
+      <VariantTree variants={moveHistory.getVariants()}   currentNode={currentMoveNode} onClickNode={goToMove}></VariantTree>
+    </Box>
   );
 };
 

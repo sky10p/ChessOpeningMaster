@@ -1,17 +1,18 @@
 import { Chess, Move } from "chess.js";
 import React, { useState } from "react";
+import { MoveVariantNode } from "./utils/VariantNode";
 
 interface BoardContextProps {
     chess: Chess;
     setChess: (chess: Chess) => void;
     next: () => void;
     prev: () => void;
-    goToMove: (index: number) => void;
-    currentIndex: () => number;
+    goToMove: (moveNode: MoveVariantNode) => void;
     hasNext: () => boolean;
     hasPrev: () => boolean;
     addMove: (move: Move) => void;
-    getMovements: () => Move[];
+    moveHistory: MoveVariantNode;
+    currentMoveNode: MoveVariantNode;
     
 }
 
@@ -29,34 +30,50 @@ export const useBoardContext = () => {
 
 export const BoardContextProvider: React.FC<{children: React.ReactNode}> = ({children}) => {
     const [chess, setChess] = useState<Chess>(new Chess());
-    const [moveHistory, setMoveHistory] = useState<Move[]>([]);
-    const [moveIndex, setMoveIndex] = useState<number>(-1);
-
+    const [moveHistory] = useState<MoveVariantNode>(new MoveVariantNode());
+    const [currentMove, setCurrentMove] = useState<MoveVariantNode>(moveHistory);
     const next = () => {
-        setMoveIndex(moveIndex + 1);
-        chess.move(moveHistory[moveIndex+1]);
+        if(currentMove.children.length === 0) return;
+        const moveNode = currentMove.children[0];
+        chess.move(moveNode.getMove());
+        setCurrentMove(moveNode);
+
+
     }
 
     const prev = () => {
-        setMoveIndex(moveIndex - 1);
+        if(!currentMove.parent) return;
+        setCurrentMove(currentMove.parent);
         chess.undo();
     }
 
     const addMove = (move: Move) => {
-        setMoveHistory([...moveHistory, move]);
-        setMoveIndex(moveIndex + 1);
+        const newMove = currentMove.addMove(move);
+        setCurrentMove(newMove);
     }
 
-    const hasNext = () => moveIndex < moveHistory.length - 1;
+    const hasNext = () => {
+        return currentMove.children.length > 0;
+    }
 
-    const hasPrev = () => moveIndex > -1;
+    const hasPrev = () =>{
+        return !!currentMove.parent;
+    }
 
-    const goToMove = (index: number) => {
+    const goToMove = (moveNode: MoveVariantNode) => {
         const newChess = new Chess();
-        const moves = moveHistory.slice(0, index + 1);
-        moves.forEach((move) => newChess.move(move));
+        const moves = [];
+        let currentNode = moveNode;
+        while(currentNode.parent !== null){
+            moves.push(currentNode.getMove());
+            currentNode = currentNode.parent;
+        }
+        moves.reverse();
+        moves.forEach(move => {
+            newChess.move(move);
+        })
         setChess(newChess);
-        setMoveIndex(index);
+        setCurrentMove(moveNode);
     }
 
 
@@ -69,8 +86,8 @@ export const BoardContextProvider: React.FC<{children: React.ReactNode}> = ({chi
         hasNext,
         hasPrev,
         addMove,
-        currentIndex: () => moveIndex,
-        getMovements: () => moveHistory
+        moveHistory,
+        currentMoveNode: currentMove
      }
 
     return (
