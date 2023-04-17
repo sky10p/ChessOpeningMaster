@@ -27,7 +27,8 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './src/frontend/index.html'
+      template: './src/frontend/index.html',
+      publicPath: '/'
     }),
     new MiniCssExtractPlugin({
       filename: 'styles.css',
