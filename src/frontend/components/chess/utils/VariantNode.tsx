@@ -10,12 +10,14 @@ export class MoveVariantNode implements IMoveNode {
   parent: MoveVariantNode | null;
   comment?: string;
   variantName?: string;
+  turn: number;
 
   constructor() {
     this.id = "initial";
     this.move = null;
     this.children = [];
     this.parent = null;
+    this.turn = 0;
   }
 
   public static initMoveVariantNode = (
@@ -34,6 +36,9 @@ export class MoveVariantNode implements IMoveNode {
     return moveVariantNode;
   };
 
+  getUniqueKey(): string {
+        return `${this.turn}. ${this.getMove().color}#${this.getMove().san}`
+  }
   getMove(): Move {
     if (!this.move) throw new Error("Move is null");
     return this.move;
@@ -49,6 +54,11 @@ export class MoveVariantNode implements IMoveNode {
     newNode.parent = this;
     newNode.id = move.lan;
     newNode.variantName = name;
+    if(this.move === null || this.move.color === "b") {
+      newNode.turn = this.turn + 1;
+    }else{
+      newNode.turn = this.turn;
+    }
     this.children.push(newNode);
     return newNode;
   }

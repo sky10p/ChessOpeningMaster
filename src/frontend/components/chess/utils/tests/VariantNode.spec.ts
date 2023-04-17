@@ -1,13 +1,13 @@
-import { Move } from "chess.js";
+import { Color, Move } from "chess.js";
 import { MoveVariantNode } from "../VariantNode";
 
-const getMove = (move: string): Move => {
+const getMove = (move: string, color: Color = 'w'): Move => {
     return {
         from: move,
         to: move,
         lan: move,
         san: move,
-        color: "w",
+        color: color,
         flags: "b",
         piece: "p",
     } as Move;
@@ -194,6 +194,35 @@ describe("MoveVariantNode", () => {
         name: "Gambito escocés",
         moves: [e4, e5, Cf6, Cc6, d4, exd4, Bc4Alt]
     })
+ 
+
+  });
+
+  it("should return unique key names for each node", () => {
+    
+    const e4= moveVariantNode.addMove(getMove("e4", 'w'));
+    const e5 = e4.addMove(getMove("e5", 'b'));
+    const Cf6 = e5.addMove(getMove("Cf6", 'w'));
+    const Cc6 = Cf6.addMove(getMove("Cc6", 'b'));
+    const Bc4 = Cc6.addMove(getMove("Bc4", 'w'), "Apertura Italiana");
+   
+    const Bb5 = Cc6.addMove(getMove("Bb5", 'b'), "Apertura Española");
+    const d4 = Cc6.addMove(getMove("d4", 'w'));
+    const exd4 = d4.addMove(getMove("exd4", 'b'));
+    const Bc4Alt = exd4.addMove(getMove("Bc4"), "Gambito escocés");
+
+    expect(e4.getUniqueKey()).toEqual("1. w#e4");
+    expect(e5.getUniqueKey()).toEqual("1. b#e5");
+    expect(Cf6.getUniqueKey()).toEqual("2. w#Cf6");
+    expect(Cc6.getUniqueKey()).toEqual("2. b#Cc6");
+    expect(Bc4.getUniqueKey()).toEqual("3. w#Bc4");
+
+    expect(Bb5.getUniqueKey()).toEqual("3. b#Bb5");
+
+    expect(d4.getUniqueKey()).toEqual("3. w#d4");
+    expect(exd4.getUniqueKey()).toEqual("3. b#exd4");
+    expect(Bc4Alt.getUniqueKey()).toEqual("4. w#Bc4");
+
  
 
   });
