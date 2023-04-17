@@ -14,7 +14,7 @@ const Board: React.FC<BoardProps> = ({calcWidth}) => {
   const [possibleMoves, setPossibleMoves] = useState<Move[]>([]);
   const [dragOverSquare, setDragOverSquare] = useState<Square | null>(null);
 
-  const dropSquareStyle = {
+  const dropSquareStyle: React.CSSProperties = {
     background: "rgba(20, 85, 30, 0.4)",
   };
 

@@ -5,7 +5,7 @@ import Home from "./Home";
 
 const headerHeight = 64;
 
-const contentStyles = {
+const contentStyles: React.CSSProperties = {
   flexGrow: 1,
   marginTop: headerHeight,
   padding: "1rem",

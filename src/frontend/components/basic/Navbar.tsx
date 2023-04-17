@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import { getRepertoires } from '../../repository/repertoires/repertoires';
 import { IRepertoire } from '../../../common/types/Repertoire';
+import { useNavbarContext } from '../../contexts/NavbarContext';
 
 const drawerWidth = 240;
 
@@ -19,19 +20,14 @@ const drawerStyles = {
 };
 
 
-interface NavbarProps {
-  open: boolean;
-  onClose: () => void;
-}
-
-const Navbar: React.FC<NavbarProps> = ({open, onClose}) => {
+const Navbar: React.FC = () => {
   const [repertoires, setRepertoires] = React.useState<IRepertoire[]>([]);
-
+  const {open, setOpen} = useNavbarContext();
   useEffect(() => {
     getRepertoires().then((repertoires) => setRepertoires(repertoires));
   }, []);
   return (
-    <Drawer  sx={drawerStyles} open={open} onClose={onClose}>
+    <Drawer  sx={drawerStyles} open={open} onClose={() => setOpen(false)}>
       <List>
         <ButtonBase component={Link} to="/create-repertoire">
           <ListItem>
