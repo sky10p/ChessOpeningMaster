@@ -24,27 +24,37 @@ export class MoveVariantNode implements IMoveNode {
     initialMoveNode: IMoveNode
   ): MoveVariantNode => {
     const moveVariantNode = new MoveVariantNode();
+    
     moveVariantNode.id = initialMoveNode.id;
     moveVariantNode.move = initialMoveNode.move;
     moveVariantNode.comment = initialMoveNode.comment;
     moveVariantNode.variantName = initialMoveNode.variantName;
-    moveVariantNode.children = initialMoveNode.children.map((child) => {
-      const newNode = MoveVariantNode.initMoveVariantNode(child);
-      newNode.parent = moveVariantNode;
-      return newNode;
-    });
+    this.addMoveNodesToMoveVariantNode(moveVariantNode, initialMoveNode.children);
     return moveVariantNode;
   };
+
+  private static addMoveNodesToMoveVariantNode = (moveVariantNode: MoveVariantNode, moveNodes: IMoveNode[]) => {
+    if(moveNodes.length === 0) return;
+    moveNodes.forEach((moveNode) => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const newNode = moveVariantNode.addMove(moveNode.move!, moveNode.variantName, moveNode.comment);
+      MoveVariantNode.addMoveNodesToMoveVariantNode(newNode, moveNode.children);
+    });
+  }
 
   getUniqueKey(): string {
         return `${this.turn}. ${this.getMove().color}#${this.getMove().san}`
   }
+
+  toString(): string {
+    return `${this.turn}. ${this.getMove().color === 'b' ? "..." : ""}${this.getMove().san}`
+}
   getMove(): Move {
     if (!this.move) throw new Error("Move is null");
     return this.move;
   }
 
-  addMove(move: Move, name?: string) {
+  addMove(move: Move, name?: string, comment?: string) {
     const foundChild = this.children.find((child) => child.id === move.lan);
     if (foundChild) {
       return foundChild;
@@ -54,6 +64,7 @@ export class MoveVariantNode implements IMoveNode {
     newNode.parent = this;
     newNode.id = move.lan;
     newNode.variantName = name;
+    newNode.comment = comment;
     if(this.move === null || this.move.color === "b") {
       newNode.turn = this.turn + 1;
     }else{
@@ -80,18 +91,23 @@ export class MoveVariantNode implements IMoveNode {
 
     const traverseChildren = (
       node: MoveVariantNode,
-      path: MoveVariantNode[] = []
+      path: MoveVariantNode[] = [],
+      lastVariantName?: string,
+      lastNodeWithName: MoveVariantNode | null = null
     ) => {
       if (node.children.length === 0) {
+        const lastVariantNameString = `${lastVariantName} (${lastNodeWithName?.toString()})`;
         variants.push({
           moves: [...path, node],
           name: node.variantName
             ? node.variantName
-            : `Variant ${++numVariants}`,
+            : lastVariantNameString ?? `Variant ${++numVariants}`,
         });
       } else {
         for (const child of node.children) {
-          traverseChildren(child, [...path, node]);
+          const childVariantName = child.variantName ? child.variantName : lastVariantName;
+          const lastChildWithName = child.parent?.variantName && !child.variantName ? child : lastNodeWithName;
+          traverseChildren(child, [...path, node], childVariantName, lastChildWithName );
         }
       }
     };

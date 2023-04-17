@@ -1,13 +1,19 @@
-import { Color, Move } from "chess.js";
+import { Move } from "chess.js";
 import { MoveVariantNode } from "../VariantNode";
+import { expectVariant } from "./VariantNodes.helpers";
 
-const getMove = (move: string, color: Color = 'w'): Move => {
+let moveTurn = 'w';
+
+const getMove = (move: string): Move => {
+
+    const currentTurn = moveTurn;
+    moveTurn = moveTurn === 'w' ? 'b' : 'w';
     return {
         from: move,
         to: move,
         lan: move,
         san: move,
-        color: color,
+        color: currentTurn,
         flags: "b",
         piece: "p",
     } as Move;
@@ -19,6 +25,7 @@ describe("MoveVariantNode", () => {
 
   beforeEach(() => {
     moveVariantNode = new MoveVariantNode();
+    moveTurn = 'w';
   });
 
   it("should create an initial node with correct properties", () => {
@@ -171,6 +178,32 @@ describe("MoveVariantNode", () => {
     
     const e4= moveVariantNode.addMove(getMove("e4"));
     const e5 = e4.addMove(getMove("e5"));
+    const Cf3 = e5.addMove(getMove("Cf3"));
+    const Cc6 = Cf3.addMove(getMove("Cc6"));
+    const Bc4 = Cc6.addMove(getMove("Bc4"), "Apertura Italiana");
+   
+    moveTurn = 'w'
+    const Bb5 = Cc6.addMove(getMove("Bb5"), "Apertura Española");
+    const a6 = Bb5.addMove(getMove("a6"));
+    moveTurn = 'b'
+    const Cf6 = Bb5.addMove(getMove("Cf6"));
+    const d4 = Cc6.addMove(getMove("d4"));
+    const exd4 = d4.addMove(getMove("exd4"));
+    const Bc4Alt = exd4.addMove(getMove("Bc4"), "Gambito escocés");
+    const variants = moveVariantNode.getVariants();
+
+    expect(variants.length).toEqual(4);
+    expectVariant(variants[0], "Apertura Italiana", [e4, e5, Cf3, Cc6, Bc4])
+    expectVariant(variants[1], "Apertura Española (3. ...a6)", [e4, e5, Cf3, Cc6, Bb5, a6])
+    expectVariant(variants[2], "Apertura Española (3. ...Cf6)", [e4, e5, Cf3, Cc6, Bb5, Cf6])
+    expectVariant(variants[3], "Gambito escocés", [e4, e5, Cf3, Cc6, d4, exd4, Bc4Alt]) 
+
+  });
+
+  it("should return unique key names for each node", () => {
+    
+    const e4= moveVariantNode.addMove(getMove("e4"));
+    const e5 = e4.addMove(getMove("e5"));
     const Cf6 = e5.addMove(getMove("Cf6"));
     const Cc6 = Cf6.addMove(getMove("Cc6"));
     const Bc4 = Cc6.addMove(getMove("Bc4"), "Apertura Italiana");
@@ -178,37 +211,6 @@ describe("MoveVariantNode", () => {
     const Bb5 = Cc6.addMove(getMove("Bb5"), "Apertura Española");
     const d4 = Cc6.addMove(getMove("d4"));
     const exd4 = d4.addMove(getMove("exd4"));
-    const Bc4Alt = exd4.addMove(getMove("Bc4"), "Gambito escocés");
-    const variants = moveVariantNode.getVariants();
-
-    expect(variants.length).toEqual(3);
-    expect(variants[0]).toEqual({
-        name: "Apertura Italiana",
-        moves: [e4, e5, Cf6, Cc6, Bc4]
-    })
-    expect(variants[1]).toEqual({
-        name: "Apertura Española",
-        moves: [e4, e5, Cf6, Cc6, Bb5]
-    })
-    expect(variants[2]).toEqual({
-        name: "Gambito escocés",
-        moves: [e4, e5, Cf6, Cc6, d4, exd4, Bc4Alt]
-    })
- 
-
-  });
-
-  it("should return unique key names for each node", () => {
-    
-    const e4= moveVariantNode.addMove(getMove("e4", 'w'));
-    const e5 = e4.addMove(getMove("e5", 'b'));
-    const Cf6 = e5.addMove(getMove("Cf6", 'w'));
-    const Cc6 = Cf6.addMove(getMove("Cc6", 'b'));
-    const Bc4 = Cc6.addMove(getMove("Bc4", 'w'), "Apertura Italiana");
-   
-    const Bb5 = Cc6.addMove(getMove("Bb5", 'b'), "Apertura Española");
-    const d4 = Cc6.addMove(getMove("d4", 'w'));
-    const exd4 = d4.addMove(getMove("exd4", 'b'));
     const Bc4Alt = exd4.addMove(getMove("Bc4"), "Gambito escocés");
 
     expect(e4.getUniqueKey()).toEqual("1. w#e4");
@@ -222,6 +224,35 @@ describe("MoveVariantNode", () => {
     expect(d4.getUniqueKey()).toEqual("3. w#d4");
     expect(exd4.getUniqueKey()).toEqual("3. b#exd4");
     expect(Bc4Alt.getUniqueKey()).toEqual("4. w#Bc4");
+
+ 
+
+  });
+
+  it("should return string names for each node", () => {
+    
+    const e4= moveVariantNode.addMove(getMove("e4"));
+    const e5 = e4.addMove(getMove("e5"));
+    const Cf6 = e5.addMove(getMove("Cf6"));
+    const Cc6 = Cf6.addMove(getMove("Cc6"));
+    const Bc4 = Cc6.addMove(getMove("Bc4"), "Apertura Italiana");
+   
+    const Bb5 = Cc6.addMove(getMove("Bb5"), "Apertura Española");
+    const d4 = Cc6.addMove(getMove("d4"));
+    const exd4 = d4.addMove(getMove("exd4"));
+    const Bc4Alt = exd4.addMove(getMove("Bc4"), "Gambito escocés");
+
+    expect(e4.toString()).toEqual("1. e4");
+    expect(e5.toString()).toEqual("1. ...e5");
+    expect(Cf6.toString()).toEqual("2. Cf6");
+    expect(Cc6.toString()).toEqual("2. ...Cc6");
+    expect(Bc4.toString()).toEqual("3. Bc4");
+
+    expect(Bb5.toString()).toEqual("3. ...Bb5");
+
+    expect(d4.toString()).toEqual("3. d4");
+    expect(exd4.toString()).toEqual("3. ...exd4");
+    expect(Bc4Alt.toString()).toEqual("4. Bc4");
 
  
 
