@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Button, Grid, useTheme } from "@mui/material";
+import { Grid, useTheme } from "@mui/material";
 import Board from "./Board";
 import BoardActions from "./BoardActions";
 import { BoardContextProvider } from "./BoardContext";

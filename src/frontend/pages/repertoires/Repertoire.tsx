@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import BoardContainer from '../../components/chess/BoardContainer';
 import { IRepertoire } from '../../../common/types/Repertoire';
 import { getRepertoire } from '../../repository/repertoires/repertoires';
+import { useNavbarContext } from '../../contexts/NavbarContext';
 
 const Repertoire = () => {
   const { id } = useParams();
@@ -14,6 +15,11 @@ const Repertoire = () => {
     }
     
   }, [id]);
+
+  const { setOpen } = useNavbarContext();
+  useEffect(() => {
+    setOpen(false);
+  }, []);
 
   return (repertoire?._id ? <div>
       <h2>Repertoire name: {repertoire?.name}</h2>

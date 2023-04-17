@@ -1,5 +1,5 @@
 import { Chess, Move } from "chess.js";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MoveVariantNode } from "./utils/VariantNode";
 import { IMoveNode } from "../../../common/types/MoveNode";
 import { Variant } from "./chess.models";
@@ -49,7 +49,7 @@ export const BoardContextProvider: React.FC<BoardContextProviderProps> = ({
   initialMoves,
 }) => {
   const [chess, setChess] = useState<Chess>(new Chess());
-  const [moveHistory] = useState<MoveVariantNode>(
+  const [moveHistory, setMoveHistory] = useState<MoveVariantNode>(
     initialMoves
       ? MoveVariantNode.initMoveVariantNode(initialMoves)
       : new MoveVariantNode()
@@ -58,6 +58,16 @@ export const BoardContextProvider: React.FC<BoardContextProviderProps> = ({
   const [variants, setVariants] = useState<Variant[]>(
     moveHistory.getVariants()
   );
+
+  useEffect(() => {
+    setMoveHistory(initialMoves
+      ? MoveVariantNode.initMoveVariantNode(initialMoves)
+      : new MoveVariantNode());
+  }, [initialMoves])
+
+  useEffect(() => {
+    updateVariants();
+  }, [moveHistory])
 
   const updateVariants = () => {
     setVariants(moveHistory.getVariants());

@@ -2,6 +2,7 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Repertoire from "../../pages/repertoires/Repertoire";
 import Home from "./Home";
+import CreateRepertoire from "../../pages/repertoires/CreateRepertoire";
 
 const headerHeight = 64;
 
@@ -17,7 +18,7 @@ const Content = () => {
       <Routes>
         <Route
           path="/create-repertoire"
-          element={<div>Create repertoire</div>}
+          element={<CreateRepertoire/>}
         />
         <Route path="/edit-repertoire" element={<div>Edit repertoire</div>} />
         <Route
