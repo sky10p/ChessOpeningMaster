@@ -6,15 +6,18 @@ import { BoardContextProvider } from "./BoardContext";
 import BoardInfo from "./BoardInfo";
 import { IMoveNode } from "../../../common/types/MoveNode";
 import BoardSaveButton from "./BoardSaveButton";
+import { BoardOrientation } from "../../../common/types/Orientation";
 
 interface BoardContainerProps {
   repertoireId: string;
   repertoireName: string;
+  orientation?: BoardOrientation;
   initialMoves?: IMoveNode;
 }
 const BoardContainer: React.FC<BoardContainerProps> = ({
   repertoireId,
   repertoireName,
+  orientation,
   initialMoves,
 }) => {
   const theme = useTheme();
@@ -35,6 +38,7 @@ const BoardContainer: React.FC<BoardContainerProps> = ({
       repertoireId={repertoireId}
       repertoireName={repertoireName}
       initialMoves={initialMoves}
+      initialOrientation={orientation ?? "white"}
     >
       <Grid container spacing={2}>
         <Grid

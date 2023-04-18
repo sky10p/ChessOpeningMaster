@@ -1,1 +1,1 @@
-export type Orientation = "white" | "black";
+export type BoardOrientation = "white" | "black";

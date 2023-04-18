@@ -46,6 +46,15 @@ app.put("/repertoires/:id", async (req, res)=>{
     res.json(repertoire);
 });
 
+app.put("/repertoires/:id/name", async (req, res)=>{
+    await client.connect();
+    const {id} = req.params;
+    const {name} = req.body;
+    const db = client.db("chess-opening-master");
+    const repertoire = await db.collection("repertoires").findOneAndUpdate({_id: new ObjectId(id)}, {$set: {name}});
+    res.json(repertoire);
+});
+
 app.delete("/repertoires/:id", async (req, res)=>{
     await client.connect();
     const {id} = req.params;

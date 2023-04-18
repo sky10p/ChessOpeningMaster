@@ -93,20 +93,20 @@ export class MoveVariantNode implements IMoveNode {
       node: MoveVariantNode,
       path: MoveVariantNode[] = [],
       lastVariantName?: string,
-      lastNodeWithName: MoveVariantNode | null = null
+      firstNodeAfterName: MoveVariantNode | null = null
     ) => {
       if (node.children.length === 0) {
-        const lastVariantNameString = `${lastVariantName} (${lastNodeWithName?.toString()})`;
+        const lastVariantNameString = `${lastVariantName} (${firstNodeAfterName?.toString()})`;
         variants.push({
           moves: [...path, node],
           name: node.variantName
             ? node.variantName
-            : lastVariantNameString ?? `Variant ${++numVariants}`,
+            : lastVariantName ? lastVariantNameString : `Variant ${++numVariants}`,
         });
       } else {
         for (const child of node.children) {
           const childVariantName = child.variantName ? child.variantName : lastVariantName;
-          const lastChildWithName = child.parent?.variantName && !child.variantName ? child : lastNodeWithName;
+          const lastChildWithName = child.parent?.variantName && !child.variantName ? child : firstNodeAfterName;
           traverseChildren(child, [...path, node], childVariantName, lastChildWithName );
         }
       }

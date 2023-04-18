@@ -1,12 +1,13 @@
 import React, { useEffect } from 'react';
 import { Drawer, List, ListItem, ListItemIcon, ListItemText, Divider, ButtonBase, ListItemSecondaryAction, IconButton } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { IRepertoire } from '../../../../common/types/Repertoire';
 import { useNavbarContext } from '../../../contexts/NavbarContext';
-import { deleteRepertoire } from '../../../repository/repertoires/repertoires';
+import { deleteRepertoire, putRepertoireName } from '../../../repository/repertoires/repertoires';
+import { useDialogContext } from '../../../contexts/DialogContext';
 
 const drawerWidth = 240;
 
@@ -24,17 +25,34 @@ const drawerStyles = {
 
 const Navbar: React.FC = () => {
   const {open, setOpen, repertoires, updateRepertoires} = useNavbarContext();
+  const {showConfirmDialog, showTextDialog} = useDialogContext();
+  const navigate = useNavigate();
   useEffect(() => {
     updateRepertoires();
   }, []);
 
   const handleEdit = (repertoire: IRepertoire) => {
-    console.log('edit', repertoire);
+    showTextDialog({
+      title: 'Edit Repertoire',
+      contentText: 'Enter a new name for the repertoire',
+      onTextConfirm: async (newName: string) => {
+        await putRepertoireName(repertoire._id, newName);
+        updateRepertoires();
+        navigate(`/repertoire/${repertoire._id}`)
+      }
+    })
   };
 
-  const handleDelete = async (repertoire: IRepertoire) => {
-    await deleteRepertoire(repertoire._id);
-    updateRepertoires();
+  const handleDelete = (repertoire: IRepertoire) => {
+    showConfirmDialog({
+      title: 'Delete Repertoire',
+      contentText: `Are you sure you want to delete ${repertoire.name}?`,
+      onConfirm: async () => {
+        await deleteRepertoire(repertoire._id);
+        updateRepertoires();
+      }
+    })
+  
   };
 
   return (
@@ -51,8 +69,8 @@ const Navbar: React.FC = () => {
         <Divider />
         {repertoires.map((repertoire) => (
           
-            <ListItem>
-              <ButtonBase key={repertoire._id} component={Link} to={`/repertoire/${repertoire._id}`}>
+            <ListItem key={repertoire._id}>
+              <ButtonBase  component={Link} to={`/repertoire/${repertoire._id}`} onClick={() => setOpen(false)}>
               <ListItemText primary={repertoire.name} />
               </ButtonBase>
               <ListItemSecondaryAction>

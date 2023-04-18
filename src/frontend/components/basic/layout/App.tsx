@@ -7,11 +7,13 @@ import Header from "./Header";
 import Navbar from "./Navbar";
 import { NavbarContextProvider } from "../../../contexts/NavbarContext";
 import { AlertContextProvider } from "../../../contexts/AlertContext";
+import { DialogContextProvider } from "../../../contexts/DialogContext";
 
 const App: React.FC = (): React.ReactElement => {
   return (
     <BrowserRouter>
       <AlertContextProvider>
+        <DialogContextProvider>
         <NavbarContextProvider>
           <Header />
           <Box
@@ -24,6 +26,7 @@ const App: React.FC = (): React.ReactElement => {
           </Box>
           <Footer />
         </NavbarContextProvider>
+        </DialogContextProvider>
       </AlertContextProvider>
     </BrowserRouter>
   );

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { MoveVariantNode } from "./utils/VariantNode";
 import { IMoveNode } from "../../../common/types/MoveNode";
 import { Variant } from "./chess.models";
+import { BoardOrientation } from "../../../common/types/Orientation";
 
 interface BoardContextProps {
   chess: Chess;
@@ -42,17 +43,18 @@ interface BoardContextProviderProps {
   children: React.ReactNode;
   repertoireId: string;
   repertoireName: string;
+  initialOrientation: BoardOrientation;
   initialMoves?: IMoveNode;
 }
 export const BoardContextProvider: React.FC<BoardContextProviderProps> = ({
   children,
   repertoireId,
   repertoireName,
-
+  initialOrientation,
   initialMoves,
 }) => {
   const [chess, setChess] = useState<Chess>(new Chess());
-  const [orientation, setOrientation] = useState<"white" | "black">("white");
+  const [orientation, setOrientation] = useState<BoardOrientation>(initialOrientation);
   const [moveHistory, setMoveHistory] = useState<MoveVariantNode>(
     initialMoves
       ? MoveVariantNode.initMoveVariantNode(initialMoves)
@@ -67,9 +69,15 @@ export const BoardContextProvider: React.FC<BoardContextProviderProps> = ({
     setMoveHistory(initialMoves
       ? MoveVariantNode.initMoveVariantNode(initialMoves)
       : new MoveVariantNode());
+
   }, [initialMoves])
 
   useEffect(() => {
+    setOrientation(initialOrientation);
+  }, [initialOrientation])
+
+  useEffect(() => {
+    setCurrentMove(moveHistory);
     updateVariants();
   }, [moveHistory])
 

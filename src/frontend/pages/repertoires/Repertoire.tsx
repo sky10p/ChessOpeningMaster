@@ -23,7 +23,7 @@ const Repertoire = () => {
 
   return (repertoire?._id ? <div>
       <h2>{repertoire?.name}</h2>
-      <BoardContainer repertoireId={repertoire?._id} repertoireName={repertoire.name} initialMoves={repertoire?.moveNodes} />
+      <BoardContainer repertoireId={repertoire?._id} orientation={repertoire?.orientation} repertoireName={repertoire.name} initialMoves={repertoire?.moveNodes} />
     </div> : <div>Repertoire not found</div>)
 };
 

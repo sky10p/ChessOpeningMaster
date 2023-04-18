@@ -9,6 +9,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { createRepertoire } from "../../repository/repertoires/repertoires";
 import { useNavbarContext } from "../../contexts/NavbarContext";
+import { useNavigate } from "react-router-dom";
 
 const CreateRepertoireContent = styled("div")`
   padding: ${(props) => props.theme.spacing(8, 0, 6)};
@@ -20,7 +21,8 @@ const CreateRepertoireButtons = styled("div")`
 
 const CreateRepertoire: React.FC = () => {
   const [repertoireName, setRepertoireName] = useState("");
-  const { setOpen } = useNavbarContext();
+  const { setOpen, updateRepertoires } = useNavbarContext();
+  const navigate = useNavigate();
   useEffect(() => {
     setOpen(false);
   }, []);
@@ -30,7 +32,11 @@ const CreateRepertoire: React.FC = () => {
   };
 
   const handleCreateRepertoire = async () => {
-    await createRepertoire(repertoireName);
+    const createdRepertoire = await createRepertoire(repertoireName);
+    const id = createdRepertoire.insertedId;
+    updateRepertoires();
+    navigate(`/repertoire/${id}`)
+    
   };
 
   return (
