@@ -6,7 +6,9 @@ import { Variant } from "./chess.models";
 
 interface BoardContextProps {
   chess: Chess;
+  orientation: "white" | "black";
   setChess: (chess: Chess) => void;
+  rotateBoard: () => void;
   next: () => void;
   prev: () => void;
   goToMove: (moveNode: MoveVariantNode) => void;
@@ -46,9 +48,11 @@ export const BoardContextProvider: React.FC<BoardContextProviderProps> = ({
   children,
   repertoireId,
   repertoireName,
+
   initialMoves,
 }) => {
   const [chess, setChess] = useState<Chess>(new Chess());
+  const [orientation, setOrientation] = useState<"white" | "black">("white");
   const [moveHistory, setMoveHistory] = useState<MoveVariantNode>(
     initialMoves
       ? MoveVariantNode.initMoveVariantNode(initialMoves)
@@ -74,6 +78,11 @@ export const BoardContextProvider: React.FC<BoardContextProviderProps> = ({
   };
 
   const [currentMove, setCurrentMove] = useState<MoveVariantNode>(moveHistory);
+
+  const rotateBoard = () => {
+    setOrientation((prev) => (prev === "white" ? "black" : "white"));
+  };
+    
   const next = () => {
     if (currentMove.children.length === 0) return;
     const moveNode = currentMove.children[0];
@@ -136,6 +145,8 @@ export const BoardContextProvider: React.FC<BoardContextProviderProps> = ({
 
   const value: BoardContextProps = {
     chess,
+    orientation,
+    rotateBoard,
     setChess,
     goToMove,
     changeNameMove,

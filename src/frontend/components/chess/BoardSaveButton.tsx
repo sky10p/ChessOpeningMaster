@@ -1,27 +1,21 @@
-import React, { useState } from 'react';
-import { Button, Snackbar } from '@mui/material';
-import Alert, { AlertColor } from '@mui/material/Alert';
+import React from 'react';
+import { Button } from '@mui/material';
 import { useBoardContext } from './BoardContext';
 import { putRepertoire } from '../../repository/repertoires/repertoires';
+import { useAlertContext } from '../../contexts/AlertContext';
 
 const BoardSaveButton = () => {
-  const { repertoireId, repertoireName, moveHistory } = useBoardContext();
-  const [open, setOpen] = useState(false);
-  const [alertSeverity, setAlertSeverity] = useState<AlertColor>('success');
-  const [alertMessage, setAlertMessage] = useState('Repertoire saved successfully.');
+  const { repertoireId, repertoireName, moveHistory, orientation } = useBoardContext();
+  const {showAlert} = useAlertContext();
 
   const onSave = async () => {
     try {
-      setOpen(true);
-      setAlertSeverity('info');
-      setAlertMessage('Saving repertoire...');
-      await putRepertoire(repertoireId, repertoireName, moveHistory.getMoveNodeWithoutParent());
-      setAlertSeverity('success');
-      setAlertMessage('Repertoire saved successfully.');
+      showAlert('Saving repertoire...', 'info');
+      await putRepertoire(repertoireId, repertoireName, moveHistory.getMoveNodeWithoutParent(), orientation);
+      showAlert('Repertoire saved successfully.', 'success');
     } catch (error) {
-      setOpen(true);
-      setAlertSeverity('error');
-      setAlertMessage('Error saving repertoire.');
+      showAlert('Error saving repertoire.', 'error');
+    
     }
   };
 
@@ -30,11 +24,6 @@ const BoardSaveButton = () => {
       <Button variant="contained" color="primary" onClick={onSave}>
         Save
       </Button>
-      <Snackbar open={open} autoHideDuration={6000} onClose={() => setOpen(false)}>
-        <Alert onClose={() => setOpen(false)} severity={alertSeverity} sx={{ width: '100%' }}>
-          {alertMessage}
-        </Alert>
-      </Snackbar>
     </>
   );
 };

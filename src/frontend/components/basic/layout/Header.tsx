@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import MenuIcon from "@mui/icons-material/Menu";
-import { useNavbarContext } from "../../contexts/NavbarContext";
+import { useNavbarContext } from "../../../contexts/NavbarContext";
 
 
 

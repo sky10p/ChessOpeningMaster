@@ -7,7 +7,7 @@ import {
   styled,
 } from "@mui/material";
 import React from "react";
-import { useNavbarContext } from "../../contexts/NavbarContext";
+import { useNavbarContext } from "../../../contexts/NavbarContext";
 
 const HeroContent = styled("div")`
   padding: ${(props) => props.theme.spacing(8, 0, 6)};

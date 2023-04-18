@@ -31,18 +31,26 @@ app.get("/repertoires/:id", async (req, res)=>{
 
 app.post("/repertoires", async (req, res)=>{
     await client.connect();
-    const {name, moveNodes} = req.body;
+    const {name, orientation, moveNodes} = req.body;
     const db = client.db("chess-opening-master");
-    const repertoire = await db.collection("repertoires").insertOne({name, moveNodes});
+    const repertoire = await db.collection("repertoires").insertOne({name, moveNodes, orientation});
     res.json(repertoire);
 });
 
 app.put("/repertoires/:id", async (req, res)=>{
     await client.connect();
     const {id} = req.params;
-    const {name, moveNodes} = req.body;
+    const {name, orientation, moveNodes} = req.body;
     const db = client.db("chess-opening-master");
-    const repertoire = await db.collection("repertoires").findOneAndUpdate({_id: new ObjectId(id)}, {$set: {name, moveNodes}});
+    const repertoire = await db.collection("repertoires").findOneAndUpdate({_id: new ObjectId(id)}, {$set: {name, moveNodes, orientation}});
+    res.json(repertoire);
+});
+
+app.delete("/repertoires/:id", async (req, res)=>{
+    await client.connect();
+    const {id} = req.params;
+    const db = client.db("chess-opening-master");
+    const repertoire = await db.collection("repertoires").deleteOne({_id: new ObjectId(id)});
     res.json(repertoire);
 });
 

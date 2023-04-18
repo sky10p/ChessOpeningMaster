@@ -30,8 +30,6 @@ const BoardContainer: React.FC<BoardContainerProps> = ({
     [theme.breakpoints.values.sm]
   );
 
-
-
   return (
     <BoardContextProvider
       repertoireId={repertoireId}
@@ -55,7 +53,7 @@ const BoardContainer: React.FC<BoardContainerProps> = ({
           </Grid>
         </Grid>
         <Grid item xs={12} sm={4}>
-        <BoardSaveButton/>
+          <BoardSaveButton />
           <BoardInfo />
         </Grid>
       </Grid>

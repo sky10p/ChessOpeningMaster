@@ -8,7 +8,7 @@ interface BoardProps {
 }
 
 const Board: React.FC<BoardProps> = ({calcWidth}) => {
-  const {chess, setChess, addMove} = useBoardContext();
+  const {chess, setChess, addMove, orientation} = useBoardContext();
   const [squareStyles, setSquareStyles] = useState({});
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
   const [possibleMoves, setPossibleMoves] = useState<Move[]>([]);
@@ -127,6 +127,8 @@ const Board: React.FC<BoardProps> = ({calcWidth}) => {
         squareStyles={squareStyles}
         calcWidth={calcWidth ? calcWidth : undefined}
         dropSquareStyle={{}}
+        orientation={orientation}
+        
         
       />
     </div>
