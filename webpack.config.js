@@ -12,6 +12,7 @@ module.exports = {
     path: path.resolve(__dirname, 'build', 'frontend'),
     filename: 'bundle.js'
   },
+  target: "web",
   resolve: {
     extensions: ['.tsx', '.ts', '.js', ".css"]
   },
