@@ -28,7 +28,7 @@ module.exports = {
     ]
   },
   plugins: [
-    DotenvWebpackPlugin(),
+    new DotenvWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: './src/frontend/index.html',
       publicPath: '/'
