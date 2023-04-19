@@ -4,8 +4,6 @@ const DotenvWebpackPlugin = require('dotenv-webpack');
 
 const path = require('path');
 
-const isProduction = process.env.NODE_ENV === 'production';
-
 module.exports = {
   entry: './src/frontend/index.tsx',
   output: {
@@ -30,7 +28,7 @@ module.exports = {
     ]
   },
   plugins: [
-    !isProduction && new DotenvWebpackPlugin(),
+    DotenvWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: './src/frontend/index.html',
       publicPath: '/'

@@ -9,7 +9,7 @@
   "scripts": {
     "build": "cross-env NODE_ENV=production tsc",
     "start:front:dev": "cross-env NODE_ENV=development FRONT_PORT=3002 webpack serve --mode development --open",
-    "start:front:prod": "cross-env NODE_ENV=production webpack --mode production",
+    "start:front:prod": "cross-env NODE_ENV=production FRONT_PORT=3002 webpack --mode production",
     "start:backend:dev": "cross-env NODE_ENV=development ts-node-dev -r dotenv/config --respawn --ignore-watch node_modules src/backend/server.ts",
     "start:backend:prod": "cross-env NODE_ENV=production node dist/backend/server.js",
     "start:dev": "concurrently \"npm run start:backend:dev\" \"npm run start:front:dev\"",
