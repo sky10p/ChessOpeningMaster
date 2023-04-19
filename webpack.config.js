@@ -1,7 +1,10 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const DotenvWebpackPlugin = require('dotenv-webpack');
 
 const path = require('path');
+
+const isProduction = process.env.NODE_ENV === 'production';
 
 module.exports = {
   entry: './src/frontend/index.tsx',
@@ -26,6 +29,7 @@ module.exports = {
     ]
   },
   plugins: [
+    !isProduction && new DotenvWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: './src/frontend/index.html',
       publicPath: '/'
@@ -33,7 +37,7 @@ module.exports = {
     new MiniCssExtractPlugin({
       filename: 'styles.css',
     }),
-  ],
+  ].filter(Boolean),
   devServer: {
     static: {
       directory: path.join(__dirname, 'build', 'frontend'),
@@ -45,6 +49,6 @@ module.exports = {
       ]
     },
     compress: true,
-    port: 9000
+    port: process.env.FRONT_PORT
   }
 };

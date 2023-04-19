@@ -7,7 +7,7 @@ const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/chess_opening_
 const client = new MongoClient(uri);
 
 const app = express();
-const port = 3000;
+const port = process.env.BACKEND_PORT || 3001;
 
 app.use(express.json());
 app.use(cors());
