@@ -5,10 +5,12 @@ import CreateRepertoire from "../../../pages/repertoires/CreateRepertoire";
 import Repertoire from "../../../pages/repertoires/RepertoirePage/RepertoirePage";
 
 const headerHeight = 64;
+const footerHeight = 64;
 
 const contentStyles: React.CSSProperties = {
   flexGrow: 1,
   marginTop: headerHeight,
+  marginBottom: footerHeight,
   padding: "1rem",
 };
 

@@ -15,7 +15,7 @@ export const BoardComment = () => {
           <TextField
         label="Add a comment to the current position"
         multiline
-        rows={20}
+        rows={10}
         value={comment}
         onChange={handleChange}
         variant="outlined"

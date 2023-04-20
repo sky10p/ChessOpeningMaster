@@ -106,12 +106,13 @@ const RepertoireViewContainer: React.FC = () => {
         )}
         {!isMobile && (
           <>
-            <Grid item>
+            <Grid item style={{marginTop: "36px", height: "47%", overflowY: "auto"}}>
               <BoardInfo />
             </Grid>
-            <Grid item>
+            <Grid item style={{marginTop: "24px"}}>
               <BoardComment />
             </Grid>
+            
           </>
         )}
       </Grid>

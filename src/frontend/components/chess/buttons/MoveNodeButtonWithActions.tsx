@@ -8,15 +8,7 @@ interface MoveNodeButtonProps {
   move: MoveVariantNode;
 }
 
-const MoveButton = styled(Button)({
-  minWidth: "40px",
-  minHeight: "30px",
-  margin: "2px",
-  padding: "2px 4px",
-  textTransform: "none",
-  fontSize: "0.9rem",
-  fontWeight: "normal",
-});
+
 
 export const MoveNodeButtonWithActions: React.FC<MoveNodeButtonProps> = ({
   move,
@@ -66,6 +58,27 @@ export const MoveNodeButtonWithActions: React.FC<MoveNodeButtonProps> = ({
     }
     handleCloseRenameDialog();
   };
+
+  const MoveButton = styled(Button)({
+    minWidth: "40px",
+    minHeight: "30px",
+    margin: "2px",
+    padding: "2px 4px",
+    textTransform: "none",
+    fontSize: "0.9rem",
+    fontWeight: "normal",
+    ...(isSelected(move) ? {
+      backgroundColor: "#3f51b5",
+      color: "white",
+      borderColor: "#3f51b5",
+    } : {} ),
+    '&:hover':{
+      backgroundColor: '#0069d9',
+      borderColor: '#0062cc',
+      boxShadow: 'none',
+      color: "white"
+    },
+  });
 
   return (
     <>

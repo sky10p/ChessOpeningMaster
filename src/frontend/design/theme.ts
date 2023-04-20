@@ -10,8 +10,8 @@ const theme = createTheme({
         },
         secondary: {
             main: "#FFFFFF"
-        },
-    },
+        }
+    }
 })
 
 const responsiveTheme = responsiveFontSizes(theme);
