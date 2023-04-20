@@ -7,9 +7,9 @@ import {
   Typography,
 } from "@mui/material";
 import { ExpandMore as ExpandMoreIcon } from "@mui/icons-material";
-import { MoveVariantNode } from "./utils/VariantNode";
-import { Variant } from "./chess.models";
-import { MoveNodeButtonWithActions } from "./MoveNodeButtonWithActions";
+import { MoveVariantNode } from "../../utils/VariantNode";
+import { Variant } from "../../models/chess.models";
+import { MoveNodeButtonWithActions } from "../../buttons/MoveNodeButtonWithActions";
 
 interface VariantTreeProps {
   variants: Variant[];

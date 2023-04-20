@@ -1,12 +1,12 @@
 import React, { useCallback } from "react";
 import { Grid, useTheme } from "@mui/material";
-import Board from "./Board";
-import BoardActions from "./BoardActions";
-import BoardInfo from "./BoardInfo";
-import useSaveRepertoire from "../../hooks.tsx/useSaveRepertoire";
+import Board from "../board/Board";
+import BoardActions from "../board/BoardActions";
+import BoardInfo from "../panels/Variants/VariantsInfo";
+import useSaveRepertoire from "../../../hooks.tsx/useSaveRepertoire";
 
 
-const BoardContainer: React.FC = () => {
+const RepertoireViewContainer: React.FC = () => {
   const theme = useTheme();
   useSaveRepertoire();
 
@@ -46,4 +46,4 @@ const BoardContainer: React.FC = () => {
   );
 };
 
-export default BoardContainer;
+export default RepertoireViewContainer;

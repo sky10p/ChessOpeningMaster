@@ -1,7 +1,7 @@
 import React, { CSSProperties, useEffect, useState } from "react";
 import { Color, Move, Square } from "chess.js";
 import Chessboard from "chessboardjsx";
-import { useBoardContext } from "./BoardContext";
+import { useBoardContext } from "../../../contexts/RepertoireContext";
 
 interface BoardProps {
   calcWidth?: ((dimensions: {screenWidth: number}) => number)

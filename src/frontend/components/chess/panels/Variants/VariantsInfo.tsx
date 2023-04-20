@@ -1,5 +1,5 @@
 import React from "react";
-import { useBoardContext } from "./BoardContext";
+import { useBoardContext } from "../../../../contexts/RepertoireContext";
 import { Box, Typography } from "@mui/material";
 import VariantsTree from "./VariantTree";
 

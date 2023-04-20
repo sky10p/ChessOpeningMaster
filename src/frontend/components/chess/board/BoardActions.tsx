@@ -4,7 +4,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import RotateLeftIcon from "@mui/icons-material/RotateLeft";
 
-import { useBoardContext } from "./BoardContext";
+import { useBoardContext } from "../../../contexts/RepertoireContext";
 
 const BoardActions: React.FC = () => {
 

@@ -1,9 +1,9 @@
 import { Chess, Move } from "chess.js";
 import React, { useEffect, useState } from "react";
-import { MoveVariantNode } from "./utils/VariantNode";
-import { IMoveNode } from "../../../common/types/MoveNode";
-import { Variant } from "./chess.models";
-import { BoardOrientation } from "../../../common/types/Orientation";
+import { MoveVariantNode } from "../components/chess/utils/VariantNode";
+import { IMoveNode } from "../../common/types/MoveNode";
+import { Variant } from "../components/chess/models/chess.models";
+import { BoardOrientation } from "../../common/types/Orientation";
 
 interface BoardContextProps {
   chess: Chess;

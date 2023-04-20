@@ -1,12 +1,12 @@
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import BoardContainer from "../../components/chess/BoardContainer";
+import RepertoireViewContainer from "../../components/chess/repertoires/RepertoireViewContainer";
 import { IRepertoire } from "../../../common/types/Repertoire";
 import { getRepertoire } from "../../repository/repertoires/repertoires";
 import { useNavbarContext } from "../../contexts/NavbarContext";
 import { useHeaderContext } from "../../contexts/HeaderContext";
 import PlayLessonIcon from "@mui/icons-material/PlayLesson";
-import { BoardContextProvider } from "../../components/chess/BoardContext";
+import { BoardContextProvider } from "../../contexts/RepertoireContext";
 
 const Repertoire = () => {
   const { id } = useParams();
@@ -44,7 +44,7 @@ const Repertoire = () => {
       initialOrientation={repertoire.orientation ?? "white"}
     >
       <h2>{repertoire?.name}</h2>
-      <BoardContainer />
+      <RepertoireViewContainer />
     </BoardContextProvider>
   ) : (
     <div>Repertoire not found</div>

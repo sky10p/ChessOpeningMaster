@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import SaveIcon from "@mui/icons-material/Save";
-import { useBoardContext } from "../components/chess/BoardContext";
+import { useBoardContext } from "../contexts/RepertoireContext";
 import { useAlertContext } from "../contexts/AlertContext";
 import { putRepertoire } from "../repository/repertoires/repertoires";
 import { useHeaderContext } from "../contexts/HeaderContext";
