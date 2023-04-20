@@ -1,11 +1,11 @@
 import React from "react";
-import { useBoardContext } from "../../../../contexts/RepertoireContext";
+import { useRepertoireContext } from "../../../../contexts/RepertoireContext";
 import { Box, Typography } from "@mui/material";
 import VariantsTree from "./VariantTree";
 
 const BoardInfo: React.FC = () => {
   const { variants, currentMoveNode } =
-    useBoardContext();
+    useRepertoireContext();
   return (
     <Box>
       <Typography variant="h6" gutterBottom>

@@ -1,14 +1,14 @@
 import React, { CSSProperties, useEffect, useState } from "react";
 import { Color, Move, Square } from "chess.js";
 import Chessboard from "chessboardjsx";
-import { useBoardContext } from "../../../contexts/RepertoireContext";
+import { useRepertoireContext } from "../../../contexts/RepertoireContext";
 
 interface BoardProps {
   calcWidth?: ((dimensions: {screenWidth: number}) => number)
 }
 
 const Board: React.FC<BoardProps> = ({calcWidth}) => {
-  const {chess, setChess, addMove, orientation} = useBoardContext();
+  const {chess, setChess, addMove, orientation} = useRepertoireContext();
   const [squareStyles, setSquareStyles] = useState({});
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
   const [possibleMoves, setPossibleMoves] = useState<Move[]>([]);

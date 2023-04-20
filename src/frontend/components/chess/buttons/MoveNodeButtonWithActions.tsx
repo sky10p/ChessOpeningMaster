@@ -1,7 +1,7 @@
 import { Button, Menu, MenuItem, styled } from "@mui/material";
 import React, { useState } from "react";
 import { MoveVariantNode } from "../utils/VariantNode";
-import { useBoardContext } from "../../../contexts/RepertoireContext";
+import { useRepertoireContext } from "../../../contexts/RepertoireContext";
 import { TextDialog } from "../../basic/dialogs/TextDialog";
 
 interface MoveNodeButtonProps {
@@ -22,7 +22,7 @@ export const MoveNodeButtonWithActions: React.FC<MoveNodeButtonProps> = ({
   move,
 }) => {
   const { goToMove, changeNameMove, deleteMove, currentMoveNode } =
-    useBoardContext();
+    useRepertoireContext();
   const isSelected = (node: MoveVariantNode) => node === currentMoveNode;
 
   const [contextMenu, setContextMenu] = useState<{

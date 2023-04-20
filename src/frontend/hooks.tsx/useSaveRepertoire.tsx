@@ -1,31 +1,38 @@
 import React, { useEffect } from "react";
 import SaveIcon from "@mui/icons-material/Save";
-import { useBoardContext } from "../contexts/RepertoireContext";
+import { useRepertoireContext } from "../contexts/RepertoireContext";
 import { useAlertContext } from "../contexts/AlertContext";
 import { putRepertoire } from "../repository/repertoires/repertoires";
 import { useHeaderContext } from "../contexts/HeaderContext";
 
-const BoardSaveButton = () => {
-  const { repertoireId, repertoireName, moveHistory, orientation } =
-    useBoardContext();
+const useSaveRepertoire = () => {
+  const { repertoireId, repertoireName, moveHistory, orientation, comment } =
+    useRepertoireContext();
   const { showAlert } = useAlertContext();
 
-  const { addIcon, removeIcon } = useHeaderContext();
+  const { addIcon, changeIconCallback, removeIcon } = useHeaderContext();
 
-  const onSave = async () => {
+ 
+    const onSave = React.useCallback(async () => {
     try {
-      showAlert("Saving repertoire...", "info");
-      await putRepertoire(
-        repertoireId,
-        repertoireName,
-        moveHistory.getMoveNodeWithoutParent(),
-        orientation
-      );
-      showAlert("Repertoire saved successfully.", "success");
+        showAlert("Saving repertoire...", "info");
+        if(comment){
+            console.log(moveHistory)
+        }else{
+            console.log("no comment")
+        }
+        await putRepertoire(
+            repertoireId,
+            repertoireName,
+            moveHistory.getMoveNodeWithoutParent(),
+            orientation
+        );
+        showAlert("Repertoire saved successfully.", "success");
     } catch (error) {
-      showAlert("Error saving repertoire.", "error");
+        showAlert("Error saving repertoire.", "error");
     }
-  };
+    }, [repertoireId, repertoireName, moveHistory, orientation, comment, showAlert]);
+
 
   useEffect(() => {
     addIcon({
@@ -38,6 +45,10 @@ const BoardSaveButton = () => {
         removeIcon("saveRepertoire");
     };
   }, []);
+
+  useEffect(()=> {
+    changeIconCallback("saveRepertoire", onSave)
+  }, [onSave])
 };
 
-export default BoardSaveButton;
+export default useSaveRepertoire;

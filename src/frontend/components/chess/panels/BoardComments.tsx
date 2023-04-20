@@ -1,11 +1,11 @@
 import { Box, TextField, Typography } from "@mui/material";
 import React from "react"
+import { useRepertoireContext } from "../../../contexts/RepertoireContext";
 
-export const BoardComments = () => {
-    const [comments, setComments] = React.useState<string>("");
-
+export const BoardComment = () => {
+    const {comment, updateComment} = useRepertoireContext();
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setComments(event.target.value);
+        updateComment(event.target.value);
         };
     return (
         <Box>
@@ -16,7 +16,7 @@ export const BoardComments = () => {
         label="Add a comment to the current position"
         multiline
         rows={20}
-        value={comments}
+        value={comment}
         onChange={handleChange}
         variant="outlined"
         fullWidth

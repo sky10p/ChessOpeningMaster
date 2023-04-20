@@ -5,7 +5,7 @@ import { IMoveNode } from "../../common/types/MoveNode";
 import { Variant } from "../components/chess/models/chess.models";
 import { BoardOrientation } from "../../common/types/Orientation";
 
-interface BoardContextProps {
+interface RepertoireContextProps {
   chess: Chess;
   orientation: "white" | "black";
   setChess: (chess: Chess) => void;
@@ -23,12 +23,14 @@ interface BoardContextProps {
   repertoireName: string;
   variants: Variant[];
   currentMoveNode: MoveVariantNode;
+  comment: string;
+  updateComment: (comment: string) => void;
 }
 
-const BoardContext = React.createContext<BoardContextProps | null>(null);
+const RepertoireContext = React.createContext<RepertoireContextProps | null>(null);
 
-export const useBoardContext = () => {
-  const context = React.useContext(BoardContext);
+export const useRepertoireContext = () => {
+  const context = React.useContext(RepertoireContext);
 
   if (!context) {
     throw new Error(
@@ -39,14 +41,14 @@ export const useBoardContext = () => {
   return context;
 };
 
-interface BoardContextProviderProps {
+interface RepertoireContextProviderProps {
   children: React.ReactNode;
   repertoireId: string;
   repertoireName: string;
   initialOrientation: BoardOrientation;
   initialMoves?: IMoveNode;
 }
-export const BoardContextProvider: React.FC<BoardContextProviderProps> = ({
+export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps> = ({
   children,
   repertoireId,
   repertoireName,
@@ -61,9 +63,14 @@ export const BoardContextProvider: React.FC<BoardContextProviderProps> = ({
       : new MoveVariantNode()
   );
 
+  const [comment, setComment] = useState<string>("");
+
   const [variants, setVariants] = useState<Variant[]>(
     moveHistory.getVariants()
   );
+
+  const [currentMove, setCurrentMove] = useState<MoveVariantNode>(moveHistory);
+
 
   useEffect(() => {
     setMoveHistory(initialMoves
@@ -81,12 +88,15 @@ export const BoardContextProvider: React.FC<BoardContextProviderProps> = ({
     updateVariants();
   }, [moveHistory])
 
+  useEffect(() => {
+    setComment(currentMove.comment ?? "");
+  }, [currentMove])
+
   const updateVariants = () => {
     setVariants(moveHistory.getVariants());
   };
 
-  const [currentMove, setCurrentMove] = useState<MoveVariantNode>(moveHistory);
-
+  
   const rotateBoard = () => {
     setOrientation((prev) => (prev === "white" ? "black" : "white"));
   };
@@ -151,7 +161,12 @@ export const BoardContextProvider: React.FC<BoardContextProviderProps> = ({
     updateVariants();
   };
 
-  const value: BoardContextProps = {
+  const updateComment = (comment: string) => {
+    setComment(comment);
+    currentMove.comment = comment;
+  };
+
+  const value: RepertoireContextProps = {
     chess,
     orientation,
     rotateBoard,
@@ -169,9 +184,11 @@ export const BoardContextProvider: React.FC<BoardContextProviderProps> = ({
     repertoireName,
     variants,
     currentMoveNode: currentMove,
+    comment,
+    updateComment
   };
 
   return (
-    <BoardContext.Provider value={value}>{children}</BoardContext.Provider>
+    <RepertoireContext.Provider value={value}>{children}</RepertoireContext.Provider>
   );
 };

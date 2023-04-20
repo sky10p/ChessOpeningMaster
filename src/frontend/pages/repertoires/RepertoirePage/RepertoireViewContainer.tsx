@@ -10,8 +10,8 @@ import Board from "../../../components/chess/board/Board";
 import BoardActions from "../../../components/chess/board/BoardActions";
 import BoardInfo from "../../../components/chess/panels/Variants/VariantsInfo";
 import useSaveRepertoire from "../../../hooks.tsx/useSaveRepertoire";
-import { useBoardContext } from "../../../contexts/RepertoireContext";
-import { BoardComments } from "../../../components/chess/panels/BoardComments";
+import { useRepertoireContext } from "../../../contexts/RepertoireContext";
+import { BoardComment } from "../../../components/chess/panels/BoardComments";
 import { useFooterContext } from "../../../contexts/FooterContext";
 
 import ChatIcon from '@mui/icons-material/Chat';
@@ -26,7 +26,7 @@ const RepertoireViewContainer: React.FC = () => {
 
 
 
-  const { repertoireName } = useBoardContext();
+  const { repertoireName } = useRepertoireContext();
   useSaveRepertoire();
 
   const {addIcon, removeIcon, setIsVisible } = useFooterContext();
@@ -100,7 +100,7 @@ const RepertoireViewContainer: React.FC = () => {
         {isMobile && panelSelected === "comments" && (
           <>
             <Grid item>
-              <BoardComments />
+              <BoardComment />
             </Grid>
           </>
         )}
@@ -110,7 +110,7 @@ const RepertoireViewContainer: React.FC = () => {
               <BoardInfo />
             </Grid>
             <Grid item>
-              <BoardComments />
+              <BoardComment />
             </Grid>
           </>
         )}

@@ -6,7 +6,7 @@ import { getRepertoire } from "../../../repository/repertoires/repertoires";
 import { useNavbarContext } from "../../../contexts/NavbarContext";
 import { useHeaderContext } from "../../../contexts/HeaderContext";
 import PlayLessonIcon from "@mui/icons-material/PlayLesson";
-import { BoardContextProvider } from "../../../contexts/RepertoireContext";
+import { RepertoireContextProvider } from "../../../contexts/RepertoireContext";
 
 const Repertoire = () => {
   const { id } = useParams();
@@ -37,14 +37,14 @@ const Repertoire = () => {
   }, []);
 
   return repertoire?._id ? (
-    <BoardContextProvider
+    <RepertoireContextProvider
       repertoireId={repertoire._id}
       repertoireName={repertoire.name}
       initialMoves={repertoire.moveNodes}
       initialOrientation={repertoire.orientation ?? "white"}
     > 
       <RepertoireViewContainer />
-    </BoardContextProvider>
+    </RepertoireContextProvider>
   ) : (
     <div>Repertoire not found</div>
   );

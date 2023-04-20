@@ -9,6 +9,7 @@ interface HeaderIcon {
 export interface HeaderContextProps {
     icons: HeaderIcon[];
     addIcon: (icon: HeaderIcon) => void;
+    changeIconCallback: (key: string, onClick: () => void) => void;
     removeIcon: (iconKey: string) => void;
 }
 
@@ -32,11 +33,21 @@ export const HeaderContextProvider = ({ children }: { children: React.ReactNode 
         setIcons((prevIcons) => [...prevIcons, icon]);
     };
 
+    const changeIconCallback = (key: string, onClick: () => void) => {
+        const icon = icons.find((i) => i.key === key);
+
+        if(icon){
+            icon.onClick = onClick;
+            setIcons([...icons])
+
+        }
+    }
+
     const removeIcon = (iconKey: string) => {
         setIcons((prevIcons) => prevIcons.filter((icon) => icon.key !== iconKey));  
     };
     return (
-        <HeaderContext.Provider value={{icons, addIcon, removeIcon }}>
+        <HeaderContext.Provider value={{icons, addIcon, removeIcon, changeIconCallback }}>
             {children}
         </HeaderContext.Provider>
     );
