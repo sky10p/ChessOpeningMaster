@@ -2,25 +2,13 @@ import React, { useCallback } from "react";
 import { Grid, useTheme } from "@mui/material";
 import Board from "./Board";
 import BoardActions from "./BoardActions";
-import { BoardContextProvider } from "./BoardContext";
 import BoardInfo from "./BoardInfo";
-import { IMoveNode } from "../../../common/types/MoveNode";
-import BoardSaveButton from "./BoardSaveButton";
-import { BoardOrientation } from "../../../common/types/Orientation";
+import useSaveRepertoire from "../../hooks.tsx/useSaveRepertoire";
 
-interface BoardContainerProps {
-  repertoireId: string;
-  repertoireName: string;
-  orientation?: BoardOrientation;
-  initialMoves?: IMoveNode;
-}
-const BoardContainer: React.FC<BoardContainerProps> = ({
-  repertoireId,
-  repertoireName,
-  orientation,
-  initialMoves,
-}) => {
+
+const BoardContainer: React.FC = () => {
   const theme = useTheme();
+  useSaveRepertoire();
 
   const calcWidth = useCallback(
     ({ screenWidth }: { screenWidth: number }): number => {
@@ -34,12 +22,7 @@ const BoardContainer: React.FC<BoardContainerProps> = ({
   );
 
   return (
-    <BoardContextProvider
-      repertoireId={repertoireId}
-      repertoireName={repertoireName}
-      initialMoves={initialMoves}
-      initialOrientation={orientation ?? "white"}
-    >
+    
       <Grid container spacing={2}>
         <Grid
           item
@@ -57,11 +40,9 @@ const BoardContainer: React.FC<BoardContainerProps> = ({
           </Grid>
         </Grid>
         <Grid item xs={12} sm={4}>
-          <BoardSaveButton />
           <BoardInfo />
         </Grid>
       </Grid>
-    </BoardContextProvider>
   );
 };
 

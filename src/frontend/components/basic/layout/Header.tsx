@@ -1,15 +1,12 @@
 import React from "react";
 import { AppBar, Toolbar, Typography, IconButton } from "@mui/material";
-import { useLocation } from "react-router-dom";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useNavbarContext } from "../../../contexts/NavbarContext";
+import { useHeaderContext } from "../../../contexts/HeaderContext";
 
 const Header: React.FC = () => {
   const {setOpen} = useNavbarContext()
-  const location = useLocation();
-  const isRepertoireView = location.pathname.startsWith("/repertoire/");
+  const {icons} = useHeaderContext();
 
   return (
     <AppBar position="fixed">
@@ -20,16 +17,11 @@ const Header: React.FC = () => {
         <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
           Chess Opening Master
         </Typography>
-        {isRepertoireView && (
-          <>
-            <IconButton color="inherit">
-              <EditIcon />
-            </IconButton>
-            <IconButton color="inherit">
-              <DeleteIcon />
-            </IconButton>
-          </>
-        )}
+        {icons.map((icon) => {
+          return <IconButton key={icon.key} color="inherit" onClick={icon.onClick}>
+            {icon.icon}
+        </IconButton>
+        })}   
       </Toolbar>
     </AppBar>
   );
