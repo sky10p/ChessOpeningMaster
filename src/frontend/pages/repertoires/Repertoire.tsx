@@ -42,8 +42,7 @@ const Repertoire = () => {
       repertoireName={repertoire.name}
       initialMoves={repertoire.moveNodes}
       initialOrientation={repertoire.orientation ?? "white"}
-    >
-      <h2>{repertoire?.name}</h2>
+    > 
       <RepertoireViewContainer />
     </BoardContextProvider>
   ) : (
