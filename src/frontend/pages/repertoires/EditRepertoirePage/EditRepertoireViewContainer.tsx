@@ -17,7 +17,7 @@ import { useFooterContext } from "../../../contexts/FooterContext";
 import ChatIcon from '@mui/icons-material/Chat';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 
-const RepertoireViewContainer: React.FC = () => {
+const EditRepertoireViewContainer: React.FC = () => {
   const theme = useTheme();
 
   const [panelSelected, setPanelSelected] = React.useState<
@@ -120,4 +120,4 @@ const RepertoireViewContainer: React.FC = () => {
   );
 };
 
-export default RepertoireViewContainer;
+export default EditRepertoireViewContainer;

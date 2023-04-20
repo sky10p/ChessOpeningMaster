@@ -2,7 +2,8 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Home from "../../../pages/Home";
 import CreateRepertoire from "../../../pages/repertoires/CreateRepertoire";
-import Repertoire from "../../../pages/repertoires/RepertoirePage/RepertoirePage";
+import EditRepertoirePage from "../../../pages/repertoires/EditRepertoirePage/EditRepertoirePage";
+import TrainRepertoirePage from "../../../pages/repertoires/TrainRepertoryPage/TrainRepertoirePage";
 
 const headerHeight = 64;
 const footerHeight = 64;
@@ -27,7 +28,8 @@ const Content = () => {
           path="/remove-repertoire"
           element={<div>Delete repertoire</div>}
         />
-        <Route path="/repertoire/:id" element={<Repertoire/>} />
+        <Route path="/repertoire/:id" element={<EditRepertoirePage/>} />
+        <Route path="/repertoire/train/:id" element={<TrainRepertoirePage/>} />
 
         <Route path="/" element={<Home/>} />
       </Routes>

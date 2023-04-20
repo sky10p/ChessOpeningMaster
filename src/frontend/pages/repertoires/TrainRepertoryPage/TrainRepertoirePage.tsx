@@ -1,15 +1,16 @@
 import React, { useEffect } from "react";
-import { useParams } from "react-router-dom";
-import RepertoireViewContainer from "./RepertoireViewContainer";
+import { useNavigate, useParams } from "react-router-dom";
 import { IRepertoire } from "../../../../common/types/Repertoire";
 import { getRepertoire } from "../../../repository/repertoires/repertoires";
 import { useNavbarContext } from "../../../contexts/NavbarContext";
 import { useHeaderContext } from "../../../contexts/HeaderContext";
-import PlayLessonIcon from "@mui/icons-material/PlayLesson";
 import { RepertoireContextProvider } from "../../../contexts/RepertoireContext";
+import EditRepertoireViewContainer from "../EditRepertoirePage/EditRepertoireViewContainer";
+import EditIcon from '@mui/icons-material/Edit';
 
-const Repertoire = () => {
+const TrainRepertoirePage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [repertoire, setRepertoire] = React.useState<IRepertoire | undefined>(
     undefined
   );
@@ -19,15 +20,15 @@ const Repertoire = () => {
     if (id) {
       getRepertoire(id).then((repertoire) => setRepertoire(repertoire));
       addIcon({
-        key: "trainRepertoire",
-        icon: <PlayLessonIcon />,
+        key: "goToEditRepertoire",
+        icon: <EditIcon />,
         onClick: () => {
-          console.log("train repertoire" + id);
+          navigate(`/repertoire/${id}`);
         },
       });
     }
     return () => {
-      removeIcon("trainRepertoire");
+      removeIcon("goToEditRepertoire");
     };
   }, [id]);
 
@@ -43,11 +44,11 @@ const Repertoire = () => {
       initialMoves={repertoire.moveNodes}
       initialOrientation={repertoire.orientation ?? "white"}
     > 
-      <RepertoireViewContainer />
+      <EditRepertoireViewContainer />
     </RepertoireContextProvider>
   ) : (
     <div>Repertoire not found</div>
   );
 };
 
-export default Repertoire;
+export default TrainRepertoirePage;
