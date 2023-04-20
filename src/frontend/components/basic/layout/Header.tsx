@@ -6,9 +6,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useNavbarContext } from "../../../contexts/NavbarContext";
 
-
-
-
 const Header: React.FC = () => {
   const {setOpen} = useNavbarContext()
   const location = useLocation();

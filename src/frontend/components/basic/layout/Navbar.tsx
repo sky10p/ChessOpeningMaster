@@ -9,6 +9,8 @@ import { useNavbarContext } from '../../../contexts/NavbarContext';
 import { deleteRepertoire, putRepertoireName } from '../../../repository/repertoires/repertoires';
 import { useDialogContext } from '../../../contexts/DialogContext';
 
+import chessNavbarBackground from '../../../assets/chess-navbar-background.jpg';
+
 const drawerWidth = 240;
 
 const drawerStyles = {
@@ -57,6 +59,7 @@ const Navbar: React.FC = () => {
 
   return (
     <Drawer  sx={drawerStyles} open={open} onClose={() => setOpen(false)}>
+      <img src={chessNavbarBackground} alt="Chess Navbar Background" style={{width: '100%', height: "81px", objectFit: "cover", marginBottom: "16px"}}/>
       <List>
         <ButtonBase component={Link} to="/create-repertoire">
           <ListItem>

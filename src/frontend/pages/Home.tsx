@@ -1,23 +1,17 @@
 import {
   Box,
-  Button,
   Container,
   Grid,
   Typography,
   styled,
 } from "@mui/material";
 import React from "react";
-import { useNavbarContext } from "../../../contexts/NavbarContext";
 
 const HeroContent = styled("div")`
   padding: ${(props) => props.theme.spacing(8, 0, 6)};
-  background: linear-gradient(45deg, #1565c0 30%, #2196f3 90%);
+  background: linear-gradient(45deg, #2F3337 30%, #62676a 90%);
   color: white;
   margin: -17px;
-`;
-
-const HeroButtons = styled("div")`
-  margin-top: ${(props) => props.theme.spacing(4)};
 `;
 
 const FeatureContent = styled(Container)`
@@ -25,7 +19,6 @@ const FeatureContent = styled(Container)`
 `;
 
 const Home: React.FC = () => {
-    const {setOpen} = useNavbarContext();
   return (
     <div>
       <HeroContent>
@@ -38,15 +31,6 @@ const Home: React.FC = () => {
             herramienta interactiva. Explora, aprende y crea tus propios
             repertorios personalizados.
           </Typography>
-          <HeroButtons>
-            <Grid container spacing={2} justifyContent="center">
-              <Grid item>
-                <Button variant="contained" color="primary" onClick={() => setOpen(true)}>
-                  Comenzar
-                </Button>
-              </Grid>
-            </Grid>
-          </HeroButtons>
         </Container>
       </HeroContent>
 

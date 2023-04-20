@@ -6,7 +6,7 @@ const Footer = () => {
     <footer>
       <Container>
         <Typography variant="body1" align="center">
-          To improve your chess openings © {new Date().getFullYear()}
+          
         </Typography>
       </Container>
     </footer>

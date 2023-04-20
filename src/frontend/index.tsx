@@ -1,9 +1,9 @@
 import * as React from "react";
 import ReactDOM from "react-dom/client";
 import "typeface-roboto";
-import { CssBaseline } from "@mui/material";
+import { CssBaseline, ThemeProvider } from "@mui/material";
 import App from "./components/basic/layout/App";
-
+import theme from "./components/basic/design/theme";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -11,6 +11,8 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <CssBaseline />
-    <App />
+    <ThemeProvider theme={theme}>
+      <App />
+    </ThemeProvider>
   </React.StrictMode>
 );

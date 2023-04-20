@@ -1,6 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import Home from "./Home";
+import Home from "../../../pages/Home";
 import CreateRepertoire from "../../../pages/repertoires/CreateRepertoire";
 import Repertoire from "../../../pages/repertoires/Repertoire";
 
