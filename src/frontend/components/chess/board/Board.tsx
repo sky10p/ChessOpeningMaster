@@ -3,7 +3,6 @@ import { Color, Move, Square } from "chess.js";
 import Chessboard from "chessboardjsx";
 import { useRepertoireContext } from "../../../contexts/RepertoireContext";
 import { useTrainRepertoireContext } from "../../../contexts/TrainRepertoireContext";
-import { MoveVariantNode } from "../utils/VariantNode";
 
 interface BoardProps {
   calcWidth?: (dimensions: { screenWidth: number }) => number;
@@ -11,7 +10,7 @@ interface BoardProps {
 }
 
 const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
-  const { chess, setChess, addMove, orientation, currentMoveNode } =
+  const { chess, setChess, addMove, orientation } =
     useRepertoireContext();
   const trainRepertoireContext = isTraining
     ? useTrainRepertoireContext()
@@ -57,7 +56,6 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
   const selectPiece = (square: Square) => {
     if (isCorrectPieceSelected(square, chess.turn())) {
       setSelectedSquare(square);
-      //const moves = isTraining && trainRepertoireContext ? trainRepertoireContext.allowedMoves.map(allowedMove => allowedMove.getMove()) : chess.moves({ square: square as Square, verbose: true });
       const moves = chess.moves({ square: square as Square, verbose: true });
       const trainingMoves =
         isTraining && trainRepertoireContext
@@ -88,25 +86,17 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
   };
 
   const handleMove = (from: string, to: string) => {
-    let lastMove: MoveVariantNode | undefined;
     if (isMoveValid(from, to)) {
       const move = chess.move({ from, to, promotion: "q" });
 
       if (move) {
         setChess(chess);
-        lastMove = currentMoveNode.children.find(
-          (child) =>
-            child.getMove().from === move.from && child.getMove().to === move.to
-        );
         addMove(move);
       }
     }
     setPossibleMoves([]);
     setSelectedSquare(null);
     setSquareStyles({});
-    if (isTraining && lastMove && trainRepertoireContext) {
-      trainRepertoireContext.playOpponentMove(lastMove);
-    }
   };
 
   const handleSquareClick = (square: Square) => {

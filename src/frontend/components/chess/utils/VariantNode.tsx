@@ -11,6 +11,7 @@ export class MoveVariantNode implements IMoveNode {
   comment?: string;
   variantName?: string;
   turn: number;
+  position: number;
 
   constructor() {
     this.id = "initial";
@@ -18,6 +19,7 @@ export class MoveVariantNode implements IMoveNode {
     this.children = [];
     this.parent = null;
     this.turn = 0;
+    this.position = 0;
   }
 
   public static initMoveVariantNode = (
@@ -70,6 +72,7 @@ export class MoveVariantNode implements IMoveNode {
     }else{
       newNode.turn = this.turn;
     }
+    newNode.position = this.position + 1;
     this.children.push(newNode);
     return newNode;
   }
@@ -83,7 +86,6 @@ export class MoveVariantNode implements IMoveNode {
       children: this.children.map((child) => child.getMoveNodeWithoutParent()),
     };
   }
-
 
   getVariants = (): Variant[] => {
     const variants: Variant[] = [];

@@ -2,72 +2,134 @@ import React, { useEffect } from "react";
 import { Turn } from "../../common/types/Orientation";
 import { useRepertoireContext } from "./RepertoireContext";
 import { MoveVariantNode } from "../components/chess/utils/VariantNode";
+import { Variant } from "../components/chess/models/chess.models";
 
 interface TrainRepertoireContextProps {
-    turn: Turn;
-    isYourTurn: boolean;
-    allowedMoves: MoveVariantNode[];
-    playOpponentMove: (lastMove: MoveVariantNode) => void;
-    finishedTrain: boolean;
+  turn: Turn;
+  isYourTurn: boolean;
+  allowedMoves: MoveVariantNode[];
+  finishedTrain: boolean;
+  trainVariants: TrainVariant[];
 }
 
-export const TrainRepertoireContext = React.createContext<TrainRepertoireContextProps | null>(null);
+interface TrainVariant {
+  variant: Variant;
+  state: "inProgress" | "discarded" | "finished";
+}
+
+export const TrainRepertoireContext =
+  React.createContext<TrainRepertoireContextProps | null>(null);
 
 export const useTrainRepertoireContext = () => {
-    const context = React.useContext(TrainRepertoireContext);
+  const context = React.useContext(TrainRepertoireContext);
 
-    if (!context) {
-        throw new Error(
-            "useTrainRepertoireContext must be used within a TrainRepertoireContextProvider"
-        );
-    }
+  if (!context) {
+    throw new Error(
+      "useTrainRepertoireContext must be used within a TrainRepertoireContextProvider"
+    );
+  }
 
-    return context;
-}
+  return context;
+};
 
 interface TrainRepertoireContextProviderProps {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }
 
 const sleep = async (ms: number) => {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
-export const TrainRepertoireContextProvider: React.FC<TrainRepertoireContextProviderProps> = ({
-    children,
-}) => {
-    const [turn, setTurn] = React.useState<Turn>("white");
-    const {orientation, currentMoveNode, goToMove, initBoard} = useRepertoireContext();
-    const [allowedMoves, setAllowedMoves] = React.useState<MoveVariantNode[]>([]); 
-    const notFinishedVariants = true;
-    
-    useEffect(()=>{
-        setTurn(currentMoveNode.move?.color ==="w" ? "black" : "white")
-    }, [currentMoveNode]);
+export const TrainRepertoireContextProvider: React.FC<
+  TrainRepertoireContextProviderProps
+> = ({ children }) => {
+  const [turn, setTurn] = React.useState<Turn>("white");
+  const { orientation, currentMoveNode, goToMove, initBoard, variants } =
+    useRepertoireContext();
+  const [allowedMoves, setAllowedMoves] = React.useState<MoveVariantNode[]>([]);
+  const [trainVariants, setTrainVariants] = React.useState<TrainVariant[]>(
+    variants.map((v) => ({ variant: v, state: "inProgress" }))
+  );
 
-    useEffect(()=>{
-        setAllowedMoves(currentMoveNode.children);
-    }, [turn]);
+  const playOpponentMove = async () => {
+    await sleep(1000);
+    const randomMove = Math.floor(Math.random() * allowedMoves.length);
+    goToMove(allowedMoves[randomMove]);
+  };
 
-    const playOpponentMove = async (lastMove: MoveVariantNode) => {
-        await sleep(2000);
-        const randomMove = Math.floor(Math.random() * lastMove.children.length);
-        goToMove(lastMove.children[randomMove]);
-    };
+  useEffect(() => {
+    setTurn(currentMoveNode.move?.color === "w" ? "black" : "white");
+    updateTrainVariants(currentMoveNode);
+  }, [currentMoveNode]);
 
-    const isFinishedTrain = () => {
-        return allowedMoves.length === 0;
-    }
+  useEffect(() => {
+    const turnNumber = currentMoveNode.position;
+    const allowedMovesFromVariants = trainVariants
+      .filter((trainVariant) => {
+        return trainVariant.state === "inProgress";
+      })
+      .map((trainVariant) => {
+        return trainVariant.variant.moves[turnNumber];
+      });
+      
+    setAllowedMoves(allowedMovesFromVariants);
+  }, [turn, trainVariants]);
 
-    if(isFinishedTrain() && notFinishedVariants){
+  useEffect(() => {
+   
+      if(allowedMoves.length === 0){
         initBoard();
+        if(trainVariants.some((trainVariant) => trainVariant.state === "inProgress" || trainVariant.state === "discarded")){
+          setTrainVariants(trainVariants.map((trainVariant) => {
+            if (trainVariant.state === "discarded") {
+                return { ...trainVariant, state: "inProgress" } as TrainVariant;
+            }
+            return trainVariant;
+        }))
+        }
+      }
+    if (turn != orientation && allowedMoves.length > 0) {
+        playOpponentMove()
     }
+  }, [allowedMoves]);
 
-    const isYourTurn = turn === orientation;
+  const updateTrainVariants = (lastMove: MoveVariantNode) => {
+    const newTrainVariants = trainVariants.map((trainVariant) => {
+      if (
+        trainVariant.state === "inProgress" &&
+        lastMove.position >0 &&
+        trainVariant.variant.moves[lastMove.position - 1].id !== lastMove.id
+      ) {
+        return { ...trainVariant, state: "discarded" } as TrainVariant;
+      }
+      if (
+        trainVariant.state === "inProgress" &&
+        trainVariant.variant.moves.length === lastMove.position &&
+        trainVariant.variant.moves[lastMove.position - 1].id === lastMove.id
+      ) {
+        return { ...trainVariant, state: "finished" } as TrainVariant;
+      }
+      return trainVariant;
+    });
+    setTrainVariants(newTrainVariants);
+    return newTrainVariants;
+  };
+ 
 
-    return (
-        <TrainRepertoireContext.Provider value={{ turn, isYourTurn, allowedMoves, playOpponentMove, finishedTrain: isFinishedTrain() }}>
-            {children}
-        </TrainRepertoireContext.Provider>
-    );
+  const isYourTurn = turn === orientation;
+
+  return (
+    <TrainRepertoireContext.Provider
+      value={{
+        turn,
+        isYourTurn,
+        allowedMoves,
+        trainVariants,
+        finishedTrain: trainVariants.every((trainVariant) => trainVariant.state === "finished"),
+        
+      }}
+    >
+      {children}
+    </TrainRepertoireContext.Provider>
+  );
 };

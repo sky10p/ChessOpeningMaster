@@ -1,19 +1,19 @@
 // TrainInfo.tsx
 import React from "react";
-import { Grid, Typography, Card, CardContent, Theme, useMediaQuery } from "@mui/material";
+import { Grid, Typography, Card, CardContent, Theme, useMediaQuery, LinearProgress } from "@mui/material";
 import whiteKing from "../../../../assets/white-king.svg";
 import blackKing from "../../../../assets/black-king.svg";
 import { useTrainRepertoireContext } from "../../../../contexts/TrainRepertoireContext";
 
 const TrainInfo: React.FC = () => {
- const {turn, isYourTurn, finishedTrain} = useTrainRepertoireContext();
+ const {turn, isYourTurn, trainVariants, finishedTrain} = useTrainRepertoireContext();
 
   const isMobile = useMediaQuery((theme: Theme) =>
   theme.breakpoints.down("sm")
 );
 
-  const currentVariant = 1;
-  const totalVariants = 5;
+  const currentVariant = trainVariants.filter((variant) => variant.state === "finished").length;
+  const totalVariants = trainVariants.length;
 
   return (
     <Card>
@@ -36,14 +36,14 @@ const TrainInfo: React.FC = () => {
             </Typography>}
           </Grid>
         </Grid>
-        {/*  <Typography variant="body1" style={{ marginTop: 16 }}>
+         <Typography variant="body1" style={{ marginTop: 16 }}>
           {currentVariant} de {totalVariants} variantes
         </Typography>
         <LinearProgress
           value={(currentVariant / totalVariants) * 100}
           variant="determinate"
           style={{ marginTop: 8 }}
-        /> */}
+        />
       </CardContent>
     </Card>
   );

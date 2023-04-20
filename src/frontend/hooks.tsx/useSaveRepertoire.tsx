@@ -16,11 +16,6 @@ const useSaveRepertoire = () => {
     const onSave = React.useCallback(async () => {
     try {
         showAlert("Saving repertoire...", "info");
-        if(comment){
-            console.log(moveHistory)
-        }else{
-            console.log("no comment")
-        }
         await putRepertoire(
             repertoireId,
             repertoireName,
