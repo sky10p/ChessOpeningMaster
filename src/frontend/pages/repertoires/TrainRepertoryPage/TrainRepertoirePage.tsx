@@ -7,6 +7,7 @@ import { useHeaderContext } from "../../../contexts/HeaderContext";
 import { RepertoireContextProvider } from "../../../contexts/RepertoireContext";
 import EditRepertoireViewContainer from "../EditRepertoirePage/EditRepertoireViewContainer";
 import EditIcon from '@mui/icons-material/Edit';
+import TrainRepertoireViewContainer from "./TrainRepertoireViewContainer";
 
 const TrainRepertoirePage = () => {
   const { id } = useParams();
@@ -44,7 +45,7 @@ const TrainRepertoirePage = () => {
       initialMoves={repertoire.moveNodes}
       initialOrientation={repertoire.orientation ?? "white"}
     > 
-      <EditRepertoireViewContainer />
+      <TrainRepertoireViewContainer />
     </RepertoireContextProvider>
   ) : (
     <div>Repertoire not found</div>

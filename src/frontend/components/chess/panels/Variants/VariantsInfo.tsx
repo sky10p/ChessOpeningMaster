@@ -3,7 +3,7 @@ import { useRepertoireContext } from "../../../../contexts/RepertoireContext";
 import { Box, Typography } from "@mui/material";
 import VariantsTree from "./VariantTree";
 
-const BoardInfo: React.FC = () => {
+const VariantsInfo: React.FC = () => {
   const { variants, currentMoveNode } =
     useRepertoireContext();
   return (
@@ -19,4 +19,4 @@ const BoardInfo: React.FC = () => {
   );
 };
 
-export default BoardInfo;
+export default VariantsInfo;

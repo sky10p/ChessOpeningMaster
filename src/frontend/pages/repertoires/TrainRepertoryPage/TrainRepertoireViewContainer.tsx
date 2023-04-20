@@ -8,28 +8,28 @@ import {
 } from "@mui/material";
 import Board from "../../../components/chess/board/Board";
 import BoardActions from "../../../components/chess/board/BoardActions";
-import BoardInfo from "../../../components/chess/panels/Variants/VariantsInfo";
+import VariantsInfo from "../../../components/chess/panels/Variants/VariantsInfo";
 import useSaveRepertoire from "../../../hooks.tsx/useSaveRepertoire";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import InfoIcon from "@mui/icons-material/Info";
 import { useRepertoireContext } from "../../../contexts/RepertoireContext";
 import { BoardComment } from "../../../components/chess/panels/BoardComments";
 import { useFooterContext } from "../../../contexts/FooterContext";
 
-import ChatIcon from '@mui/icons-material/Chat';
-import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import ChatIcon from "@mui/icons-material/Chat";
+import TrainInfo from "../../../components/chess/panels/train/TrainInfo";
+import HelpInfo from "../../../components/chess/panels/train/HelpInfo";
 
 const TrainRepertoireViewContainer: React.FC = () => {
   const theme = useTheme();
 
   const [panelSelected, setPanelSelected] = React.useState<
-    "variants" | "comments"
-  >("variants");
-
-
+    "info" | "help" | "trainComments"
+  >("info");
 
   const { repertoireName } = useRepertoireContext();
-  useSaveRepertoire();
 
-  const {addIcon, removeIcon, setIsVisible } = useFooterContext();
+  const { addIcon, removeIcon, setIsVisible } = useFooterContext();
 
   const calcWidth = useCallback(
     ({ screenWidth }: { screenWidth: number }): number => {
@@ -46,29 +46,36 @@ const TrainRepertoireViewContainer: React.FC = () => {
     theme.breakpoints.down("sm")
   );
 
-  useEffect(()=> {
-    if(isMobile){
+  useEffect(() => {
+    if (isMobile) {
       setIsVisible(true);
       addIcon({
-        key: "variants",
-        label: "Variants",
-        icon: <AccountTreeIcon/>,
-        onClick: () => setPanelSelected("variants"),
+        key: "info",
+        label: "Train info",
+        icon: <InfoIcon />,
+        onClick: () => setPanelSelected("info"),
       });
       addIcon({
-        key: "comments",
+        key: "help",
+        label: "Help",
+        icon: <HelpOutlineIcon />,
+        onClick: () => setPanelSelected("help"),
+      });
+      addIcon({
+        key: "trainComments",
         label: "Comments",
-        icon: <ChatIcon/>,
-        onClick: () => setPanelSelected("comments"),
+        icon: <ChatIcon />,
+        onClick: () => setPanelSelected("trainComments"),
       });
     }
 
-    return ()=> {
+    return () => {
       setIsVisible(false);
-      removeIcon("variants");
-      removeIcon("comments");
-    }
-  }, [isMobile])
+      removeIcon("info");
+      removeIcon("help");
+      removeIcon("trainComments");
+    };
+  }, [isMobile]);
 
   return (
     <Grid container spacing={2}>
@@ -79,7 +86,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
             gutterBottom
             style={{ marginBottom: "16px" }}
           >
-            {repertoireName}
+            Training {repertoireName}
           </Typography>
         </Grid>
         <Grid item container justifyContent={"center"}>
@@ -90,29 +97,38 @@ const TrainRepertoireViewContainer: React.FC = () => {
         </Grid>
       </Grid>
       <Grid item xs={12} sm={5} container direction="column" alignItems="left">
-        {isMobile && panelSelected === "variants" && (
+        {isMobile && panelSelected === "info" && (
           <>
             <Grid item>
-              <BoardInfo />
+              <TrainInfo />
             </Grid>
           </>
         )}
-        {isMobile && panelSelected === "comments" && (
+        {isMobile && panelSelected === "help" && (
           <>
             <Grid item>
-              <BoardComment />
+              <HelpInfo />
+            </Grid>
+          </>
+        )}
+        {isMobile && panelSelected === "trainComments" && (
+          <>
+            <Grid item>
+              <BoardComment editable={false} />
             </Grid>
           </>
         )}
         {!isMobile && (
           <>
-            <Grid item style={{marginTop: "36px", height: "47%", overflowY: "auto"}}>
-              <BoardInfo />
+            <Grid item style={{ marginTop: "24px" }}>
+              <BoardComment editable={false} />
             </Grid>
-            <Grid item style={{marginTop: "24px"}}>
-              <BoardComment />
+            <Grid item style={{ marginTop: "36px" }}>
+              <TrainInfo />
             </Grid>
-            
+            <Grid item style={{ marginTop: "36px" }}>
+              <HelpInfo />
+            </Grid>
           </>
         )}
       </Grid>

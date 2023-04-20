@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import Board from "../../../components/chess/board/Board";
 import BoardActions from "../../../components/chess/board/BoardActions";
-import BoardInfo from "../../../components/chess/panels/Variants/VariantsInfo";
+import VariantsInfo from "../../../components/chess/panels/Variants/VariantsInfo";
 import useSaveRepertoire from "../../../hooks.tsx/useSaveRepertoire";
 import { useRepertoireContext } from "../../../contexts/RepertoireContext";
 import { BoardComment } from "../../../components/chess/panels/BoardComments";
@@ -93,7 +93,7 @@ const EditRepertoireViewContainer: React.FC = () => {
         {isMobile && panelSelected === "variants" && (
           <>
             <Grid item>
-              <BoardInfo />
+              <VariantsInfo />
             </Grid>
           </>
         )}
@@ -107,7 +107,7 @@ const EditRepertoireViewContainer: React.FC = () => {
         {!isMobile && (
           <>
             <Grid item style={{marginTop: "36px", height: "47%", overflowY: "auto"}}>
-              <BoardInfo />
+              <VariantsInfo />
             </Grid>
             <Grid item style={{marginTop: "24px"}}>
               <BoardComment />
