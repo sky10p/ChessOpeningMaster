@@ -1,12 +1,12 @@
 import React, { useEffect } from "react";
 import { useParams } from "react-router-dom";
-import RepertoireViewContainer from "../../components/chess/repertoires/RepertoireViewContainer";
-import { IRepertoire } from "../../../common/types/Repertoire";
-import { getRepertoire } from "../../repository/repertoires/repertoires";
-import { useNavbarContext } from "../../contexts/NavbarContext";
-import { useHeaderContext } from "../../contexts/HeaderContext";
+import RepertoireViewContainer from "./RepertoireViewContainer";
+import { IRepertoire } from "../../../../common/types/Repertoire";
+import { getRepertoire } from "../../../repository/repertoires/repertoires";
+import { useNavbarContext } from "../../../contexts/NavbarContext";
+import { useHeaderContext } from "../../../contexts/HeaderContext";
 import PlayLessonIcon from "@mui/icons-material/PlayLesson";
-import { BoardContextProvider } from "../../contexts/RepertoireContext";
+import { BoardContextProvider } from "../../../contexts/RepertoireContext";
 
 const Repertoire = () => {
   const { id } = useParams();

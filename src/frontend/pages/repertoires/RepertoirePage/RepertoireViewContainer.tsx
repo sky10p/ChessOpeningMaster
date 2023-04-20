@@ -6,12 +6,12 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import Board from "../board/Board";
-import BoardActions from "../board/BoardActions";
-import BoardInfo from "../panels/Variants/VariantsInfo";
+import Board from "../../../components/chess/board/Board";
+import BoardActions from "../../../components/chess/board/BoardActions";
+import BoardInfo from "../../../components/chess/panels/Variants/VariantsInfo";
 import useSaveRepertoire from "../../../hooks.tsx/useSaveRepertoire";
 import { useBoardContext } from "../../../contexts/RepertoireContext";
-import { BoardComments } from "../panels/BoardComments";
+import { BoardComments } from "../../../components/chess/panels/BoardComments";
 import { useFooterContext } from "../../../contexts/FooterContext";
 
 import ChatIcon from '@mui/icons-material/Chat';
