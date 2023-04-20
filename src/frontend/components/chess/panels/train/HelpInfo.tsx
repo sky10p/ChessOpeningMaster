@@ -4,16 +4,16 @@ import {
   Grid,
   Typography,
   IconButton,
-  Button,
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import { useTrainRepertoireContext } from "../../../../contexts/TrainRepertoireContext";
+import { MoveNodeButtonWithActions } from "../../buttons/MoveNodeButtonWithActions";
 
 const HelpInfo: React.FC = () => {
   const [iconVisible, setIconVisible] = useState(true);
+  const {allowedMoves} = useTrainRepertoireContext();
 
-  // Simula las jugadas permitidas
-  const allowedMoves = ["e4", "d4", "Nf3", "c4", "g3"];
 
   const toggleVisibility = () => {
     setIconVisible(!iconVisible);
@@ -38,7 +38,7 @@ const HelpInfo: React.FC = () => {
       <Grid item container direction="row" wrap="wrap" spacing={1}>
         {!iconVisible && allowedMoves.map((move, index) => (
           <Grid item key={index}>
-            <Button variant="outlined">{move}</Button>
+            <MoveNodeButtonWithActions move={move} />
           </Grid>
         ))}
       </Grid>

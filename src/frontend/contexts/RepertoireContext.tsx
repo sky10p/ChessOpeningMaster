@@ -8,6 +8,7 @@ import { BoardOrientation } from "../../common/types/Orientation";
 interface RepertoireContextProps {
   chess: Chess;
   orientation: "white" | "black";
+  initBoard: () => void;
   setChess: (chess: Chess) => void;
   rotateBoard: () => void;
   next: () => void;
@@ -96,6 +97,11 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
     setVariants(moveHistory.getVariants());
   };
 
+  const initBoard = () => {
+    const newChess = new Chess();
+    setCurrentMove(moveHistory);
+    setChess(newChess);
+  };
   
   const rotateBoard = () => {
     setOrientation((prev) => (prev === "white" ? "black" : "white"));
@@ -169,6 +175,7 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
   const value: RepertoireContextProps = {
     chess,
     orientation,
+    initBoard,
     rotateBoard,
     setChess,
     goToMove,

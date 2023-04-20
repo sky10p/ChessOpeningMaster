@@ -3,9 +3,10 @@ import React from "react";
 import { Grid, Typography, Card, CardContent, Theme, useMediaQuery } from "@mui/material";
 import whiteKing from "../../../../assets/white-king.svg";
 import blackKing from "../../../../assets/black-king.svg";
+import { useTrainRepertoireContext } from "../../../../contexts/TrainRepertoireContext";
 
 const TrainInfo: React.FC = () => {
-  const turn = "white";
+ const {turn, isYourTurn, finishedTrain} = useTrainRepertoireContext();
 
   const isMobile = useMediaQuery((theme: Theme) =>
   theme.breakpoints.down("sm")
@@ -18,19 +19,20 @@ const TrainInfo: React.FC = () => {
     <Card>
       <CardContent>
         <Grid container alignItems="center" spacing={2}>
-          <Grid item>
+          {!finishedTrain && <Grid item>
             {turn === "white" ? (
               <img src={whiteKing} alt="white king" />
             ) : (
               <img src={blackKing} alt="black king" />
             )}
-          </Grid>
+          </Grid>}
           <Grid item>
             <Typography variant="h5" component="div">
-              Your turn
+            {finishedTrain ? "Finished Training" : isYourTurn ? "Your turn" : "Opponent's turn"}
             </Typography>
             {!isMobile && <Typography variant="subtitle1" color="textSecondary">
-              Play one of your allowed moves according to your repertoire
+              
+              {finishedTrain ? "You have finished one full variant" :isYourTurn ? "Play one of your allowed moves according to your repertoire" : "Wait for your opponent to play"}
             </Typography>}
           </Grid>
         </Grid>

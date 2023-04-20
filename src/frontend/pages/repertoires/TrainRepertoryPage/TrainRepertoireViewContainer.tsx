@@ -7,9 +7,6 @@ import {
   useTheme,
 } from "@mui/material";
 import Board from "../../../components/chess/board/Board";
-import BoardActions from "../../../components/chess/board/BoardActions";
-import VariantsInfo from "../../../components/chess/panels/Variants/VariantsInfo";
-import useSaveRepertoire from "../../../hooks.tsx/useSaveRepertoire";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import InfoIcon from "@mui/icons-material/Info";
 import { useRepertoireContext } from "../../../contexts/RepertoireContext";
@@ -90,11 +87,9 @@ const TrainRepertoireViewContainer: React.FC = () => {
           </Typography>
         </Grid>
         <Grid item container justifyContent={"center"}>
-          <Board calcWidth={calcWidth} />
+          <Board calcWidth={calcWidth} isTraining={true} />
         </Grid>
-        <Grid item container justifyContent="center">
-          <BoardActions />
-        </Grid>
+       
       </Grid>
       <Grid item xs={12} sm={5} container direction="column" alignItems="left">
         {isMobile && panelSelected === "info" && (

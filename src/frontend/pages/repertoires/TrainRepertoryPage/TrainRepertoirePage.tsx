@@ -5,9 +5,9 @@ import { getRepertoire } from "../../../repository/repertoires/repertoires";
 import { useNavbarContext } from "../../../contexts/NavbarContext";
 import { useHeaderContext } from "../../../contexts/HeaderContext";
 import { RepertoireContextProvider } from "../../../contexts/RepertoireContext";
-import EditRepertoireViewContainer from "../EditRepertoirePage/EditRepertoireViewContainer";
-import EditIcon from '@mui/icons-material/Edit';
+import EditIcon from "@mui/icons-material/Edit";
 import TrainRepertoireViewContainer from "./TrainRepertoireViewContainer";
+import { TrainRepertoireContextProvider } from "../../../contexts/TrainRepertoireContext";
 
 const TrainRepertoirePage = () => {
   const { id } = useParams();
@@ -44,8 +44,11 @@ const TrainRepertoirePage = () => {
       repertoireName={repertoire.name}
       initialMoves={repertoire.moveNodes}
       initialOrientation={repertoire.orientation ?? "white"}
-    > 
-      <TrainRepertoireViewContainer />
+    >
+      {" "}
+      <TrainRepertoireContextProvider>
+        <TrainRepertoireViewContainer />
+      </TrainRepertoireContextProvider>
     </RepertoireContextProvider>
   ) : (
     <div>Repertoire not found</div>

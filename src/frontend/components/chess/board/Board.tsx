@@ -2,13 +2,20 @@ import React, { CSSProperties, useEffect, useState } from "react";
 import { Color, Move, Square } from "chess.js";
 import Chessboard from "chessboardjsx";
 import { useRepertoireContext } from "../../../contexts/RepertoireContext";
+import { useTrainRepertoireContext } from "../../../contexts/TrainRepertoireContext";
+import { MoveVariantNode } from "../utils/VariantNode";
 
 interface BoardProps {
-  calcWidth?: ((dimensions: {screenWidth: number}) => number)
+  calcWidth?: (dimensions: { screenWidth: number }) => number;
+  isTraining?: boolean;
 }
 
-const Board: React.FC<BoardProps> = ({calcWidth}) => {
-  const {chess, setChess, addMove, orientation} = useRepertoireContext();
+const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
+  const { chess, setChess, addMove, orientation, currentMoveNode } =
+    useRepertoireContext();
+  const trainRepertoireContext = isTraining
+    ? useTrainRepertoireContext()
+    : null;
   const [squareStyles, setSquareStyles] = useState({});
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
   const [possibleMoves, setPossibleMoves] = useState<Move[]>([]);
@@ -38,7 +45,6 @@ const Board: React.FC<BoardProps> = ({calcWidth}) => {
       styles[dragOverSquare] = dropSquareStyle;
     }
 
-
     setSquareStyles(styles);
   }, [selectedSquare, possibleMoves, dragOverSquare]);
 
@@ -51,8 +57,21 @@ const Board: React.FC<BoardProps> = ({calcWidth}) => {
   const selectPiece = (square: Square) => {
     if (isCorrectPieceSelected(square, chess.turn())) {
       setSelectedSquare(square);
+      //const moves = isTraining && trainRepertoireContext ? trainRepertoireContext.allowedMoves.map(allowedMove => allowedMove.getMove()) : chess.moves({ square: square as Square, verbose: true });
       const moves = chess.moves({ square: square as Square, verbose: true });
-      setPossibleMoves(moves);
+      const trainingMoves =
+        isTraining && trainRepertoireContext
+          ? trainRepertoireContext.allowedMoves.map((allowedMove) =>
+              allowedMove.getMove()
+            )
+          : [];
+      const filteredMoves = moves.filter((move) =>
+        trainingMoves.some(
+          (trainingMove) =>
+            trainingMove.from === move.from && trainingMove.to === move.to
+        )
+      );
+      setPossibleMoves(isTraining ? filteredMoves : moves);
     } else {
       unselectPiece();
     }
@@ -69,18 +88,26 @@ const Board: React.FC<BoardProps> = ({calcWidth}) => {
   };
 
   const handleMove = (from: string, to: string) => {
+    let lastMove: MoveVariantNode | undefined;
     if (isMoveValid(from, to)) {
       const move = chess.move({ from, to, promotion: "q" });
+
       if (move) {
         setChess(chess);
+        lastMove = currentMoveNode.children.find(
+          (child) =>
+            child.getMove().from === move.from && child.getMove().to === move.to
+        );
         addMove(move);
       }
     }
     setPossibleMoves([]);
     setSelectedSquare(null);
     setSquareStyles({});
+    if (isTraining && lastMove && trainRepertoireContext) {
+      trainRepertoireContext.playOpponentMove(lastMove);
+    }
   };
-
 
   const handleSquareClick = (square: Square) => {
     if (!selectedSquare) {
@@ -116,7 +143,6 @@ const Board: React.FC<BoardProps> = ({calcWidth}) => {
     }
   };
 
-
   return (
     <div>
       <Chessboard
@@ -128,8 +154,6 @@ const Board: React.FC<BoardProps> = ({calcWidth}) => {
         calcWidth={calcWidth ? calcWidth : undefined}
         dropSquareStyle={{}}
         orientation={orientation}
-        
-        
       />
     </div>
   );
