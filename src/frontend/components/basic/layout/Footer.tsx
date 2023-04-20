@@ -1,14 +1,35 @@
-import React from 'react';
-import { Container, Typography } from '@mui/material';
+import React, { useState } from 'react';
+import { BottomNavigation, BottomNavigationAction, useTheme } from '@mui/material';
+import { useFooterContext } from '../../../contexts/FooterContext';
 
 const Footer = () => {
+  const theme = useTheme();
+  const {isVisible, icons} = useFooterContext();
+
+  const [value, setValue] = useState(0);
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    icons[newValue].onClick();
+    setValue(newValue);
+  };
+
   return (
     <footer>
-      <Container>
-        <Typography variant="body1" align="center">
-          
-        </Typography>
-      </Container>
+      {isVisible && icons.length > 0 && <BottomNavigation
+      value={value}
+      onChange={handleChange}
+      showLabels
+      sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: 'background.default' }}
+    >
+      {icons.map((icon) => (
+      <BottomNavigationAction key={icon.key} label={icon.label} icon={icon.icon} sx={{
+          '&.Mui-selected': {
+            color: theme.palette.secondary.main,
+          },
+        }}  />
+      ))}
+    </BottomNavigation> }
+     
     </footer>
   );
 };

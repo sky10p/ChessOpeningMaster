@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import "typeface-roboto";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import App from "./components/basic/layout/App";
-import theme from "./components/basic/design/theme";
+import theme from "./design/theme";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
