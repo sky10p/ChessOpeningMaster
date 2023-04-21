@@ -4,6 +4,8 @@ import { MoveVariantNode } from "../components/chess/utils/VariantNode";
 import { IMoveNode } from "../../common/types/MoveNode";
 import { Variant } from "../components/chess/models/chess.models";
 import { BoardOrientation } from "../../common/types/Orientation";
+import { useAlertContext } from "./AlertContext";
+import { putRepertoire } from "../repository/repertoires/repertoires";
 
 interface RepertoireContextProps {
   chess: Chess;
@@ -26,6 +28,7 @@ interface RepertoireContextProps {
   currentMoveNode: MoveVariantNode;
   comment: string;
   updateComment: (comment: string) => void;
+  saveRepertory: () => void;
 }
 
 const RepertoireContext = React.createContext<RepertoireContextProps | null>(null);
@@ -58,6 +61,8 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
 }) => {
   const [chess, setChess] = useState<Chess>(new Chess());
   const [orientation, setOrientation] = useState<BoardOrientation>(initialOrientation);
+  
+
   const [moveHistory, setMoveHistory] = useState<MoveVariantNode>(
     initialMoves
       ? MoveVariantNode.initMoveVariantNode(initialMoves)
@@ -71,6 +76,9 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
   );
 
   const [currentMove, setCurrentMove] = useState<MoveVariantNode>(moveHistory);
+
+  const { showAlert } = useAlertContext();
+
 
 
   useEffect(() => {
@@ -172,6 +180,21 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
     currentMove.comment = comment;
   };
 
+  const saveRepertory = React.useCallback(async () => {
+    try {
+        showAlert("Saving repertoire...", "info");
+        await putRepertoire(
+            repertoireId,
+            repertoireName,
+            moveHistory.getMoveNodeWithoutParent(),
+            orientation
+        );
+        showAlert("Repertoire saved successfully.", "success");
+    } catch (error) {
+        showAlert("Error saving repertoire.", "error");
+    }
+    }, [repertoireId, repertoireName, moveHistory, orientation, comment, showAlert]);
+
   const value: RepertoireContextProps = {
     chess,
     orientation,
@@ -190,9 +213,10 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
     repertoireId,
     repertoireName,
     variants,
-    currentMoveNode: currentMove,
     comment,
-    updateComment
+    updateComment,
+    saveRepertory,
+    currentMoveNode: currentMove,
   };
 
   return (

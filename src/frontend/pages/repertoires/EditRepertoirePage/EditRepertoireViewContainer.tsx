@@ -9,27 +9,39 @@ import {
 import Board from "../../../components/chess/board/Board";
 import BoardActions from "../../../components/chess/board/BoardActions";
 import VariantsInfo from "../../../components/chess/panels/Variants/VariantsInfo";
-import useSaveRepertoire from "../../../hooks.tsx/useSaveRepertoire";
 import { useRepertoireContext } from "../../../contexts/RepertoireContext";
 import { BoardComment } from "../../../components/chess/panels/BoardComments";
 import { useFooterContext } from "../../../contexts/FooterContext";
 
-import ChatIcon from '@mui/icons-material/Chat';
-import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import ChatIcon from "@mui/icons-material/Chat";
+import AccountTreeIcon from "@mui/icons-material/AccountTree";
+import SaveIcon from "@mui/icons-material/Save";
+import PlayLessonIcon from "@mui/icons-material/PlayLesson";
+
+import { useHeaderContext } from "../../../contexts/HeaderContext";
+import { useNavigate } from "react-router-dom";
 
 const EditRepertoireViewContainer: React.FC = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
 
   const [panelSelected, setPanelSelected] = React.useState<
     "variants" | "comments"
   >("variants");
 
+  const { repertoireId, repertoireName, saveRepertory } =
+    useRepertoireContext();
 
-
-  const { repertoireName } = useRepertoireContext();
-  useSaveRepertoire();
-
-  const {addIcon, removeIcon, setIsVisible } = useFooterContext();
+  const {
+    addIcon: addIconHeader,
+    removeIcon: removeIconHeader,
+    changeIconCallback,
+  } = useHeaderContext();
+  const {
+    addIcon: addIconFooter,
+    removeIcon: removeIconFooter,
+    setIsVisible,
+  } = useFooterContext();
 
   const calcWidth = useCallback(
     ({ screenWidth }: { screenWidth: number }): number => {
@@ -46,29 +58,58 @@ const EditRepertoireViewContainer: React.FC = () => {
     theme.breakpoints.down("sm")
   );
 
-  useEffect(()=> {
-    if(isMobile){
+  useEffect(() => {
+    addIconHeader({
+      key: "trainRepertoire",
+      icon: <PlayLessonIcon />,
+      onClick: () => {
+        saveRepertory();
+        navigate(`/repertoire/train/${repertoireId}`);
+      },
+    }),
+      addIconHeader({
+        key: "saveRepertoire",
+        icon: <SaveIcon />,
+        onClick: saveRepertory,
+      });
+
+    return () => {
+      removeIconHeader("trainRepertoire");
+      removeIconHeader("saveRepertoire");
+    };
+  }, []);
+
+  useEffect(() => {
+    changeIconCallback("trainRepertoire", () => {
+      saveRepertory();
+      navigate(`/repertoire/train/${repertoireId}`);
+    });
+    changeIconCallback("saveRepertoire", saveRepertory);
+  }, [saveRepertory]);
+
+  useEffect(() => {
+    if (isMobile) {
       setIsVisible(true);
-      addIcon({
+      addIconFooter({
         key: "variants",
         label: "Variants",
-        icon: <AccountTreeIcon/>,
+        icon: <AccountTreeIcon />,
         onClick: () => setPanelSelected("variants"),
       });
-      addIcon({
+      addIconFooter({
         key: "comments",
         label: "Comments",
-        icon: <ChatIcon/>,
+        icon: <ChatIcon />,
         onClick: () => setPanelSelected("comments"),
       });
     }
 
-    return ()=> {
+    return () => {
       setIsVisible(false);
-      removeIcon("variants");
-      removeIcon("comments");
-    }
-  }, [isMobile])
+      removeIconFooter("variants");
+      removeIconFooter("comments");
+    };
+  }, [isMobile]);
 
   return (
     <Grid container spacing={2}>
@@ -106,13 +147,15 @@ const EditRepertoireViewContainer: React.FC = () => {
         )}
         {!isMobile && (
           <>
-            <Grid item style={{marginTop: "36px", height: "47%", overflowY: "auto"}}>
+            <Grid
+              item
+              style={{ marginTop: "36px", height: "47%", overflowY: "auto" }}
+            >
               <VariantsInfo />
             </Grid>
-            <Grid item style={{marginTop: "24px"}}>
+            <Grid item style={{ marginTop: "24px" }}>
               <BoardComment />
             </Grid>
-            
           </>
         )}
       </Grid>
