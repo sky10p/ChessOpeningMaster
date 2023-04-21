@@ -200,6 +200,37 @@ describe("MoveVariantNode", () => {
 
   });
 
+  it("should return the specified variants when subvariants are deeper", () => {
+    const e4 = moveVariantNode.addMove(getMove("e4"));
+    const e5 = e4.addMove(getMove("e5"));
+    const Nf3 = e5.addMove(getMove("Nf3"));
+    const Nc6 = Nf3.addMove(getMove("Nc6"));
+    const d4 = Nc6.addMove(getMove("d4"));
+    const exd4 = d4.addMove(getMove("exd4"));
+    const Bc4 = exd4.addMove(getMove("Bc4"), "Gambito escocés");
+    const Bc5 = Bc4.addMove(getMove("Bc5"));
+    const c3 = Bc5.addMove(getMove("c3"));
+    const dxc3 = c3.addMove(getMove("dxc3"));
+    const Bxf7 = dxc3.addMove(getMove("Bxf7+"));
+    const Kxf7 = Bxf7.addMove(getMove("Kxf7"));
+    const Qd5 = Kxf7.addMove(getMove("Qd5+"));
+    const Ke8 = Qd5.addMove(getMove("Ke8"));
+    const Qh5 = Ke8.addMove(getMove("Qh5+"));
+    const g6 = Qh5.addMove(getMove("g6"));
+    const Qxc5 = g6.addMove(getMove("Qxc5"));
+    const d6 = Qxc5.addMove(getMove("d6"));
+    const Qxc3 = d6.addMove(getMove("Qxc3"));
+    const cxb2 = Qxc5.addMove(getMove("cxb2"));
+    const Bxb2 = cxb2.addMove(getMove("Bxb2"));
+
+    const variants = moveVariantNode.getVariants();
+
+    expect(variants.length).toEqual(2);
+    expectVariant(variants[0], "Gambito escocés (9. ...d6)", [e4, e5, Nf3, Nc6, d4, exd4, Bc4, Bc5, c3, dxc3, Bxf7, Kxf7, Qd5, Ke8, Qh5, g6, Qxc5, d6, Qxc3]);
+    expectVariant(variants[1], "Gambito escocés (9. ...cxb2)", [e4, e5, Nf3, Nc6, d4, exd4, Bc4, Bc5, c3, dxc3, Bxf7, Kxf7, Qd5, Ke8, Qh5, g6, Qxc5, cxb2, Bxb2]);
+});
+
+
   it("should return unique key names for each node", () => {
     
     const e4= moveVariantNode.addMove(getMove("e4"));
@@ -257,4 +288,6 @@ describe("MoveVariantNode", () => {
  
 
   });
+
+ 
 });

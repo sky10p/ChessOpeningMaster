@@ -93,7 +93,7 @@ export class MoveVariantNode implements IMoveNode {
 
     const getDifferentNodesString = (differentNodes: MoveVariantNode[]): string => {
       if(differentNodes.length === 0) return "";
-      return ` (${differentNodes.map((node) => node.toString()).join(" ")})`;
+      return `(${differentNodes.map((node) => node.toString()).join(" ")})`;
     }
 
     const traverseChildren = (
