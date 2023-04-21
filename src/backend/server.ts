@@ -1,9 +1,9 @@
 import express from "express";
 import { MongoClient, ObjectId } from "mongodb";
-import cors from 'cors';
+import cors from "cors";
 
-
-const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/chess_opening_master";
+const uri =
+  process.env.MONGODB_URI || "mongodb://localhost:27017/chess_opening_master";
 const client = new MongoClient(uri);
 
 const app = express();
@@ -11,70 +11,166 @@ const port = process.env.BACKEND_PORT || 3001;
 
 app.use(express.json());
 app.use(cors());
-app.get("/repertoires", async (req, res)=>{
-    await client.connect();
-    const db = client.db("chess-opening-master");
-    const repertoires = await db.collection("repertoires").find({}).project({
-        name: 1,
-        _id: 1,
-    }).toArray();
-    res.json(repertoires);
-})
-
-app.get("/repertoires/:id", async (req, res)=>{
-    await client.connect();
-    const {id} = req.params;
-    const db = client.db("chess-opening-master");
-    const repertoire = await db.collection("repertoires").findOne({_id: new ObjectId(id)});
-    res.json(repertoire);
-})
-
-app.post("/repertoires", async (req, res)=>{
-    await client.connect();
-    const {name, orientation, moveNodes} = req.body;
-    const db = client.db("chess-opening-master");
-    const repertoire = await db.collection("repertoires").insertOne({name, moveNodes, orientation});
-    res.json(repertoire);
+app.get("/repertoires", async (req, res) => {
+  await client.connect();
+  const db = client.db("chess-opening-master");
+  const repertoires = await db
+    .collection("repertoires")
+    .find({})
+    .sort({ order: 1 })
+    .project({
+      name: 1,
+      _id: 1,
+    })
+    .toArray();
+  res.json(repertoires);
 });
 
-app.post("/repertoires/:id/duplicate", async (req, res)=>{
-    await client.connect();
-    const {id} = req.params;
-    const {name} = req.body;
-    const db = client.db("chess-opening-master");
-    const repertoire = await db.collection("repertoires").findOne({_id: new ObjectId(id)});
-    const repertoireWithoutId = {...repertoire, _id: undefined};
-    const newRepertoire = await db.collection("repertoires").insertOne({...repertoireWithoutId, name });
-    res.json(newRepertoire);
+app.get("/repertoires/:id", async (req, res) => {
+  await client.connect();
+  const { id } = req.params;
+  const db = client.db("chess-opening-master");
+  const repertoire = await db
+    .collection("repertoires")
+    .findOne({ _id: new ObjectId(id) });
+  res.json(repertoire);
 });
 
-app.put("/repertoires/:id", async (req, res)=>{
-    await client.connect();
-    const {id} = req.params;
-    const {name, orientation, moveNodes} = req.body;
-    const db = client.db("chess-opening-master");
-    const repertoire = await db.collection("repertoires").findOneAndUpdate({_id: new ObjectId(id)}, {$set: {name, moveNodes, orientation}});
-    res.json(repertoire);
+app.post("/repertoires", async (req, res) => {
+  await client.connect();
+  const { name, orientation, moveNodes } = req.body;
+  const db = client.db("chess-opening-master");
+
+  const highestOrderRepertoire = await db
+    .collection("repertoires")
+    .findOne({}, { sort: { order: -1 } });
+  const order = highestOrderRepertoire ? highestOrderRepertoire.order + 1 : 1;
+
+  const repertoire = await db
+    .collection("repertoires")
+    .insertOne({ name, moveNodes, orientation, order });
+  res.json(repertoire);
 });
 
-app.put("/repertoires/:id/name", async (req, res)=>{
-    await client.connect();
-    const {id} = req.params;
-    const {name} = req.body;
-    const db = client.db("chess-opening-master");
-    const repertoire = await db.collection("repertoires").findOneAndUpdate({_id: new ObjectId(id)}, {$set: {name}});
-    res.json(repertoire);
+app.post("/repertoires/:id/duplicate", async (req, res) => {
+  await client.connect();
+  const { id } = req.params;
+  const { name } = req.body;
+  const db = client.db("chess-opening-master");
+
+  const highestOrderRepertoire = await db
+    .collection("repertoires")
+    .findOne({}, { sort: { order: -1 } });
+  const order = highestOrderRepertoire ? highestOrderRepertoire.order + 1 : 1;
+
+  const repertoire = await db
+    .collection("repertoires")
+    .findOne({ _id: new ObjectId(id) });
+  const repertoireWithoutId = { ...repertoire, _id: undefined };
+  const newRepertoire = await db
+    .collection("repertoires")
+    .insertOne({ ...repertoireWithoutId, name, order });
+  res.json(newRepertoire);
 });
 
-app.delete("/repertoires/:id", async (req, res)=>{
-    await client.connect();
-    const {id} = req.params;
-    const db = client.db("chess-opening-master");
-    const repertoire = await db.collection("repertoires").deleteOne({_id: new ObjectId(id)});
-    res.json(repertoire);
+app.put("/repertoires/:id", async (req, res) => {
+  await client.connect();
+  const { id } = req.params;
+  const { name, orientation, moveNodes } = req.body;
+  const db = client.db("chess-opening-master");
+  const repertoire = await db
+    .collection("repertoires")
+    .findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      { $set: { name, moveNodes, orientation } }
+    );
+  res.json(repertoire);
+});
+
+app.put("/repertoires/:id/name", async (req, res) => {
+  await client.connect();
+  const { id } = req.params;
+  const { name } = req.body;
+  const db = client.db("chess-opening-master");
+  const repertoire = await db
+    .collection("repertoires")
+    .findOneAndUpdate({ _id: new ObjectId(id) }, { $set: { name } });
+  res.json(repertoire);
+});
+
+app.patch("/repertoires/:id/order/up", async (req, res) => {
+  await client.connect();
+  const { id } = req.params;
+  const db = client.db("chess-opening-master");
+
+  const currentRepertoire = await db
+    .collection("repertoires")
+    .findOne({ _id: new ObjectId(id) });
+
+  if (!currentRepertoire) {
+    return res.status(404).json({ message: "Repertoire not found" });
+  }
+
+  if (currentRepertoire.order === 0) {
+    return res.status(200).json(currentRepertoire);
+  }
+
+  const upperRepertoire = await db
+    .collection("repertoires")
+    .findOne({ order: currentRepertoire.order - 1 });
+
+  if (!upperRepertoire) {
+    return res.status(500).json({ message: "Upper repertoire not found" });
+  }
+
+  const currentRepertoireUpdateResult = await db
+    .collection("repertoires")
+    .findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      { $set: { order: upperRepertoire.order } }
+    );
+
+  await db
+    .collection("repertoires")
+    .findOneAndUpdate(
+      { _id: new ObjectId(upperRepertoire._id) },
+      { $set: { order: currentRepertoire.order } }
+    );
+
+  res.json(currentRepertoireUpdateResult);
+});
+
+app.delete("/repertoires/:id", async (req, res) => {
+  await client.connect();
+  const { id } = req.params;
+  const db = client.db("chess-opening-master");
+  const repertoire = await db
+    .collection("repertoires")
+    .deleteOne({ _id: new ObjectId(id) });
+  const repertoireToDelete = await db
+    .collection("repertoires")
+    .findOne({ _id: new ObjectId(id) });
+
+  if (repertoireToDelete) {
+    const deleteResult = await db
+      .collection("repertoires")
+      .deleteOne({ _id: new ObjectId(id) });
+
+    if (deleteResult.deletedCount > 0) {
+      await db
+        .collection("repertoires")
+        .updateMany(
+          { order: { $gt: repertoireToDelete.order } },
+          { $inc: { order: -1 } }
+        );
+      res.json(deleteResult);
+    }
+  } else {
+    res.json({ message: "Repertoire not found or already deleted" });
+  }
 });
 
 app.listen(port, () => {
-    console.log(process.env.MONGODB_URI)
-    console.log(`Example app listening at http://localhost:${port}`)
+  console.log(process.env.MONGODB_URI);
+  console.log(`Example app listening at http://localhost:${port}`);
 });

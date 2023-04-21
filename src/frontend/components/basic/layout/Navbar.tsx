@@ -5,9 +5,10 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import { IRepertoire } from '../../../../common/types/Repertoire';
 import { useNavbarContext } from '../../../contexts/NavbarContext';
-import { deleteRepertoire, duplicateRepertoire, putRepertoireName } from '../../../repository/repertoires/repertoires';
+import { deleteRepertoire, duplicateRepertoire, putRepertoireName, putRepertoireOrderUp } from '../../../repository/repertoires/repertoires';
 import { useDialogContext } from '../../../contexts/DialogContext';
 
 import chessNavbarBackground from '../../../assets/chess-navbar-background.jpg';
@@ -58,6 +59,11 @@ const Navbar: React.FC = () => {
     });
   };
 
+  const handleOrderUp = async (repertoire: IRepertoire) => {
+    await putRepertoireOrderUp(repertoire._id);
+    updateRepertoires();
+  };
+
   const handleDelete = (repertoire: IRepertoire) => {
     showConfirmDialog({
       title: 'Delete Repertoire',
@@ -90,6 +96,9 @@ const Navbar: React.FC = () => {
               <ListItemText primary={repertoire.name} />
               </ButtonBase>
               <ListItemSecondaryAction>
+              <IconButton edge="end" aria-label="up-order" onClick={() => handleOrderUp(repertoire)}>
+                  <ArrowUpwardIcon />
+                </IconButton>
               <IconButton edge="end" aria-label="duplicate" onClick={() => handleDuplicate(repertoire)}>
                   <FileCopyIcon />
                 </IconButton>

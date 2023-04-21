@@ -62,6 +62,14 @@ export const putRepertoireName = async (id: string, nameRepertory: string) => {
   return data;
 }
 
+export const putRepertoireOrderUp = async (id: string) => {
+  const response = await fetch(`${API_URL}/repertoires/${id}/order/up`, {
+    method: "PATCH",
+  });
+  const data = await response.json();
+  return data;
+}
+
 export const deleteRepertoire = async (id: string) => {
   const response = await fetch(`${API_URL}/repertoires/${id}`, {
     method: "DELETE",
