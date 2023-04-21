@@ -91,14 +91,19 @@ export class MoveVariantNode implements IMoveNode {
     const variants: Variant[] = [];
     let numVariants = 0;
 
+    const getDifferentNodesString = (differentNodes: MoveVariantNode[]): string => {
+      if(differentNodes.length === 0) return "";
+      return ` (${differentNodes.map((node) => node.toString()).join(" ")})`;
+    }
+
     const traverseChildren = (
       node: MoveVariantNode,
       path: MoveVariantNode[] = [],
       lastVariantName?: string,
-      firstNodeAfterName: MoveVariantNode | null = null
+      differentNodes: MoveVariantNode[] = [],
     ) => {
       if (node.children.length === 0) {
-        const lastVariantNameString = `${lastVariantName} (${firstNodeAfterName?.toString()})`;
+        const lastVariantNameString = `${lastVariantName} ${getDifferentNodesString(differentNodes)}`;
         variants.push({
           moves: [...path, node],
           name: node.variantName
@@ -108,8 +113,10 @@ export class MoveVariantNode implements IMoveNode {
       } else {
         for (const child of node.children) {
           const childVariantName = child.variantName ? child.variantName : lastVariantName;
-          const lastChildWithName = child.parent?.variantName && !child.variantName ? child : firstNodeAfterName;
-          traverseChildren(child, [...path, node], childVariantName, lastChildWithName );
+          const currentDifferentNodes = child.variantName ? [] : differentNodes;
+          const updatedDifferentNodes = node.children.length > 1 && !child.variantName ? [...currentDifferentNodes, child] : currentDifferentNodes;
+         
+          traverseChildren(child, [...path, node], childVariantName, updatedDifferentNodes );
         }
       }
     };
