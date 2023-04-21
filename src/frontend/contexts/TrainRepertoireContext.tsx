@@ -70,9 +70,14 @@ export const TrainRepertoireContextProvider: React.FC<
       })
       .map((trainVariant) => {
         return trainVariant.variant.moves[turnNumber];
-      });
+      }).reduce((uniqueAllowedMoves, trainVariant) => {
+        if(trainVariant){
+          uniqueAllowedMoves.add(trainVariant);
+        }
+        return uniqueAllowedMoves;
+      }, new Set<MoveVariantNode>());
       
-    setAllowedMoves(allowedMovesFromVariants);
+    setAllowedMoves([...allowedMovesFromVariants]);
   }, [turn, trainVariants]);
 
   useEffect(() => {
