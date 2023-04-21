@@ -27,9 +27,6 @@ export const HeaderContextProvider = ({ children }: { children: React.ReactNode 
     const [icons, setIcons] = React.useState<HeaderIcon[]>([]);
 
     const addIcon = (icon: HeaderIcon) => {
-        if(icons.find((i) => i.key === icon.key)){
-            throw new Error(`Icon with key ${icon.key} already exists`);
-        }
         setIcons((prevIcons) => [...prevIcons, icon]);
     };
 

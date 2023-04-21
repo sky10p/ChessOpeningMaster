@@ -4,14 +4,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { IRepertoire } from '../../../../common/types/Repertoire';
 import { useNavbarContext } from '../../../contexts/NavbarContext';
-import { deleteRepertoire, putRepertoireName } from '../../../repository/repertoires/repertoires';
+import { deleteRepertoire, duplicateRepertoire, putRepertoireName } from '../../../repository/repertoires/repertoires';
 import { useDialogContext } from '../../../contexts/DialogContext';
 
 import chessNavbarBackground from '../../../assets/chess-navbar-background.jpg';
 
-const drawerWidth = 240;
+const drawerWidth = 350;
 
 const drawerStyles = {
   width: drawerWidth,
@@ -43,6 +44,18 @@ const Navbar: React.FC = () => {
         navigate(`/repertoire/${repertoire._id}`)
       }
     })
+  };
+
+  const handleDuplicate = (repertoire: IRepertoire) => {
+    showTextDialog({
+      title: 'Duplicate Repertoire',
+      contentText: 'Enter a new name for the repertoire',
+      onTextConfirm: async (newName: string) => {
+        await duplicateRepertoire(repertoire._id, newName); 
+        updateRepertoires();
+        navigate(`/repertoire/${repertoire._id}`)
+      }
+    });
   };
 
   const handleDelete = (repertoire: IRepertoire) => {
@@ -77,6 +90,9 @@ const Navbar: React.FC = () => {
               <ListItemText primary={repertoire.name} />
               </ButtonBase>
               <ListItemSecondaryAction>
+              <IconButton edge="end" aria-label="duplicate" onClick={() => handleDuplicate(repertoire)}>
+                  <FileCopyIcon />
+                </IconButton>
                 <IconButton edge="end" aria-label="edit" onClick={() => handleEdit(repertoire)}>
                   <EditIcon />
                 </IconButton>

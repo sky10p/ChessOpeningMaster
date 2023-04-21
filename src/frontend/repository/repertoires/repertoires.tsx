@@ -26,6 +26,18 @@ export const createRepertoire = async (nameRepertory: string, moveNodes?: IMoveN
   return data;
 };
 
+export const duplicateRepertoire = async (id: string, nameRepertory: string) => {
+  const response = await fetch(`${API_URL}/repertoires/${id}/duplicate`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ name: nameRepertory }),
+  });
+  const data = await response.json();
+  return data;
+}
+
 export const putRepertoire = async (id: string, nameRepertory: string, moveNodes: IMoveNode, orientation: BoardOrientation) => {
   const response = await fetch(`${API_URL}/repertoires/${id}`, {
     method: "PUT",

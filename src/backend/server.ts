@@ -37,6 +37,17 @@ app.post("/repertoires", async (req, res)=>{
     res.json(repertoire);
 });
 
+app.post("/repertoires/:id/duplicate", async (req, res)=>{
+    await client.connect();
+    const {id} = req.params;
+    const {name} = req.body;
+    const db = client.db("chess-opening-master");
+    const repertoire = await db.collection("repertoires").findOne({_id: new ObjectId(id)});
+    const repertoireWithoutId = {...repertoire, _id: undefined};
+    const newRepertoire = await db.collection("repertoires").insertOne({...repertoireWithoutId, name });
+    res.json(newRepertoire);
+});
+
 app.put("/repertoires/:id", async (req, res)=>{
     await client.connect();
     const {id} = req.params;
