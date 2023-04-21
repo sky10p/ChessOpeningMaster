@@ -9,6 +9,8 @@ import {
 import Board from "../../../components/chess/board/Board";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import InfoIcon from "@mui/icons-material/Info";
+import EditIcon from "@mui/icons-material/Edit";
+
 import { useRepertoireContext } from "../../../contexts/RepertoireContext";
 import { BoardComment } from "../../../components/chess/panels/BoardComments";
 import { useFooterContext } from "../../../contexts/FooterContext";
@@ -16,6 +18,12 @@ import { useFooterContext } from "../../../contexts/FooterContext";
 import ChatIcon from "@mui/icons-material/Chat";
 import TrainInfo from "../../../components/chess/panels/train/TrainInfo";
 import HelpInfo from "../../../components/chess/panels/train/HelpInfo";
+import ChecklistIcon from '@mui/icons-material/Checklist';
+import { useTrainRepertoireContext } from "../../../contexts/TrainRepertoireContext";
+import { useHeaderContext } from "../../../contexts/HeaderContext";
+import { useNavigate } from "react-router-dom";
+import { useDialogContext } from "../../../contexts/DialogContext";
+import { TrainVariant } from "../../../components/chess/models/chess.models";
 
 const TrainRepertoireViewContainer: React.FC = () => {
   const theme = useTheme();
@@ -24,9 +32,16 @@ const TrainRepertoireViewContainer: React.FC = () => {
     "info" | "help" | "trainComments"
   >("info");
 
-  const { repertoireName } = useRepertoireContext();
+  const navigate = useNavigate();
 
-  const { addIcon, removeIcon, setIsVisible } = useFooterContext();
+
+  const { repertoireId, repertoireName } = useRepertoireContext();
+  const {showTrainVariantsDialog} = useDialogContext();
+  const { addIcon: addIconHeader, removeIcon: removeIconHeader } = useHeaderContext();
+
+  const {trainVariants, chooseTrainVariantsToTrain} = useTrainRepertoireContext();
+
+  const { addIcon: addIconFooter, removeIcon: removeIconFooter, setIsVisible } = useFooterContext();
 
   const calcWidth = useCallback(
     ({ screenWidth }: { screenWidth: number }): number => {
@@ -44,21 +59,48 @@ const TrainRepertoireViewContainer: React.FC = () => {
   );
 
   useEffect(() => {
+    addIconHeader({
+      key: "selectTrainVariants",
+      icon: <ChecklistIcon />,
+      onClick: () => {
+        showTrainVariantsDialog({
+          title: "Select train variants",
+          contentText: "Select the variants you want to train",
+          trainVariants,
+          onTrainVariantsConfirm: (selectedTrainVariants: TrainVariant[]) => {
+            chooseTrainVariantsToTrain(selectedTrainVariants)
+          },
+        });
+    }}),
+    addIconHeader({
+      key: "goToEditRepertoire",
+      icon: <EditIcon />,
+      onClick: () => {
+        navigate(`/repertoire/${repertoireId}`);
+      },
+    });
+    return () => {
+      removeIconHeader("selectTrainVariants");
+      removeIconHeader("goToEditRepertoire");
+    };
+  }, [])
+
+  useEffect(() => {
     if (isMobile) {
       setIsVisible(true);
-      addIcon({
+      addIconFooter({
         key: "info",
         label: "Train info",
         icon: <InfoIcon />,
         onClick: () => setPanelSelected("info"),
       });
-      addIcon({
+      addIconFooter({
         key: "help",
         label: "Help",
         icon: <HelpOutlineIcon />,
         onClick: () => setPanelSelected("help"),
       });
-      addIcon({
+      addIconFooter({
         key: "trainComments",
         label: "Comments",
         icon: <ChatIcon />,
@@ -68,9 +110,9 @@ const TrainRepertoireViewContainer: React.FC = () => {
 
     return () => {
       setIsVisible(false);
-      removeIcon("info");
-      removeIcon("help");
-      removeIcon("trainComments");
+      removeIconFooter("info");
+      removeIconFooter("help");
+      removeIconFooter("trainComments");
     };
   }, [isMobile]);
 

@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Turn } from "../../common/types/Orientation";
 import { useRepertoireContext } from "./RepertoireContext";
 import { MoveVariantNode } from "../components/chess/utils/VariantNode";
-import { Variant } from "../components/chess/models/chess.models";
+import { TrainVariant } from "../components/chess/models/chess.models";
 
 interface TrainRepertoireContextProps {
   turn: Turn;
@@ -10,11 +10,7 @@ interface TrainRepertoireContextProps {
   allowedMoves: MoveVariantNode[];
   finishedTrain: boolean;
   trainVariants: TrainVariant[];
-}
-
-interface TrainVariant {
-  variant: Variant;
-  state: "inProgress" | "discarded" | "finished";
+  chooseTrainVariantsToTrain: (trainVariants: TrainVariant[]) => void;
 }
 
 export const TrainRepertoireContext =
@@ -55,6 +51,11 @@ export const TrainRepertoireContextProvider: React.FC<
     await sleep(1000);
     const randomMove = Math.floor(Math.random() * allowedMoves.length);
     goToMove(allowedMoves[randomMove]);
+  };
+
+  const chooseTrainVariantsToTrain = (trainVariants: TrainVariant[]) => {
+    setTrainVariants(trainVariants);
+    initBoard();
   };
 
   useEffect(() => {
@@ -131,7 +132,7 @@ export const TrainRepertoireContextProvider: React.FC<
         allowedMoves,
         trainVariants,
         finishedTrain: trainVariants.every((trainVariant) => trainVariant.state === "finished"),
-        
+        chooseTrainVariantsToTrain
       }}
     >
       {children}
