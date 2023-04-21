@@ -5,4 +5,5 @@ export interface IRepertoire {
     name: string;
     moveNodes: IMoveNode;
     orientation: "white" | "black";
+    order: number;
 }
