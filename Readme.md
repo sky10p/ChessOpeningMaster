@@ -121,6 +121,11 @@ The Chessboard library being used is no longer maintained, it will be replace as
 
 Although ChessOpeningMaster was initially created as a personal use tool, any type of collaboration is welcome. If you have ideas for improving the project, feel free to open issues or make pull requests.
 
+## Screenshots
+
+<img src="src/doc/screenshots/edit_repertoire.png" width="200">
+<img src="src/doc/screenshots/train_repertoire.png" width="200">
+
 ## License
 
 ChessOpeningMaster is licensed under a Non-Commercial Free Software License. You may use, modify, and distribute the software in accordance with the terms of this license. However, commercial use of the software requires prior consent from the author. For more information about commercial use, please contact the project author.
