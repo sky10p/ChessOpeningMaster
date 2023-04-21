@@ -103,7 +103,7 @@ export class MoveVariantNode implements IMoveNode {
       differentNodes: MoveVariantNode[] = [],
     ) => {
       if (node.children.length === 0) {
-        const lastVariantNameString = `${lastVariantName} ${getDifferentNodesString(differentNodes)}`;
+        const lastVariantNameString = [lastVariantName, getDifferentNodesString(differentNodes)].filter((value) => value!== "").join(" ");
         variants.push({
           moves: [...path, node],
           name: node.variantName
@@ -121,7 +121,7 @@ export class MoveVariantNode implements IMoveNode {
       }
     };
 
-    this.children.forEach((child) => traverseChildren(child));
+    this.children.forEach((child) => traverseChildren(child, [], child.variantName, []));
     return variants;
   };
 }

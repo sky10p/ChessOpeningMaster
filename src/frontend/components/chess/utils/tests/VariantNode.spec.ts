@@ -174,6 +174,18 @@ describe("MoveVariantNode", () => {
 
   });
 
+  it("should return name to variants if the name if in the first movement node", () => {
+    
+    const e4= moveVariantNode.addMove(getMove("e4"), "Apertura e4");
+    const e5 = e4.addMove(getMove("e5"));
+    
+    const variants = moveVariantNode.getVariants();
+
+    expect(variants.length).toEqual(1);
+    expectVariant(variants[0], "Apertura e4", [e4, e5]) 
+
+  });
+
   it("should return name to variants", () => {
     
     const e4= moveVariantNode.addMove(getMove("e4"));
