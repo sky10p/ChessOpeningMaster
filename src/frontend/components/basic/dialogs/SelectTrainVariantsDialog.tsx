@@ -30,21 +30,19 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
 }) => {
   const [selectedTrainVariants, setSelectedTrainVariants] = useState<
     Set<number>
-  >(
-    new Set()
-  );
+  >(new Set());
 
   useEffect(() => {
     setSelectedTrainVariants(
-        new Set(
-            trainVariants
-                .map((trainVariant, index) => (trainVariant.state !== "finished" ? index : -1))
-                .filter((variantIndex) => variantIndex !== -1)
-        )
+      new Set(
+        trainVariants
+          .map((trainVariant, index) =>
+            trainVariant.state !== "finished" ? index : -1
+          )
+          .filter((variantIndex) => variantIndex !== -1)
+      )
     );
-    }, [trainVariants]);
-
-
+  }, [trainVariants]);
 
   const handleToggleVariant = (variantIndex: number) => {
     const newSelectedVariants = new Set(selectedTrainVariants);
@@ -54,6 +52,16 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
       newSelectedVariants.add(variantIndex);
     }
     setSelectedTrainVariants(newSelectedVariants);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedTrainVariants.size === trainVariants.length) {
+      setSelectedTrainVariants(new Set());
+    } else {
+      setSelectedTrainVariants(
+        new Set(trainVariants.map((trainVariant, index) => index))
+      );
+    }
   };
 
   const handleClose = () => {
@@ -74,11 +82,24 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
     handleClose();
   };
 
+  const isAllSelected = selectedTrainVariants.size === trainVariants.length;
+  const isSomeSelected = selectedTrainVariants.size > 0 && !isAllSelected;
+
   return (
     <Dialog open={open} onClose={handleClose}>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <DialogContentText>{contentText}</DialogContentText>
+        <div><FormControlLabel
+          control={
+            <Checkbox
+              checked={isAllSelected}
+              indeterminate={isSomeSelected}
+              onChange={handleSelectAll}
+            />
+          }
+          label="Select All"
+        /></div>
         {trainVariants.map((trainVariant, index) => (
           <FormControlLabel
             key={index}
