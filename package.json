@@ -13,7 +13,7 @@
     "start:backend:dev": "cross-env NODE_ENV=development ts-node-dev -r dotenv/config --respawn --ignore-watch node_modules src/backend/server.ts",
     "start:backend:prod": "cross-env NODE_ENV=production node dist/backend/server.js",
     "start:dev": "concurrently \"npm run start:backend:dev\" \"npm run start:front:dev\"",
-    "start:prod": "concurrently \"npm run start:backend:prod\" \"npm run start:front:prod\"",
+    "start:prod": "concurrently \"npm run start:backend:prod\" \"npm run build:front:prod\"",
     "test": "jest",
     "lint": "eslint 'src/**/*.{js,ts,tsx}'"
   },
