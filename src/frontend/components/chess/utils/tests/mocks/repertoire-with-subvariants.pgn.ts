@@ -1,6 +1,6 @@
 export const repertoireWithSubvariantsPgn = `[Event "Repertoire to test pgn"]
 [Site "https://chessrepertoire.com"]
-[Date "2018.01.31"]
+[Date "2018.01.01"]
 [Round "?"]
 [White "Repertoire to test pgn"]
 [Black "?"]
