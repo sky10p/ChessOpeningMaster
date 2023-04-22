@@ -12,18 +12,18 @@ import InfoIcon from "@mui/icons-material/Info";
 import EditIcon from "@mui/icons-material/Edit";
 
 import { useRepertoireContext } from "../../../contexts/RepertoireContext";
-import { BoardComment } from "../../../components/chess/panels/BoardComments";
 import { useFooterContext } from "../../../contexts/FooterContext";
 
 import ChatIcon from "@mui/icons-material/Chat";
 import TrainInfo from "../../../components/chess/panels/train/TrainInfo";
 import HelpInfo from "../../../components/chess/panels/train/HelpInfo";
-import ChecklistIcon from '@mui/icons-material/Checklist';
+import ChecklistIcon from "@mui/icons-material/Checklist";
 import { useTrainRepertoireContext } from "../../../contexts/TrainRepertoireContext";
 import { useHeaderContext } from "../../../contexts/HeaderContext";
 import { useNavigate } from "react-router-dom";
 import { useDialogContext } from "../../../contexts/DialogContext";
 import { TrainVariant } from "../../../components/chess/models/chess.models";
+import { HintInfo } from "../../../components/chess/panels/train/HintInfo";
 
 const TrainRepertoireViewContainer: React.FC = () => {
   const theme = useTheme();
@@ -34,14 +34,19 @@ const TrainRepertoireViewContainer: React.FC = () => {
 
   const navigate = useNavigate();
 
-
   const { repertoireId, repertoireName } = useRepertoireContext();
-  const {showTrainVariantsDialog} = useDialogContext();
-  const { addIcon: addIconHeader, removeIcon: removeIconHeader } = useHeaderContext();
+  const { showTrainVariantsDialog } = useDialogContext();
+  const { addIcon: addIconHeader, removeIcon: removeIconHeader } =
+    useHeaderContext();
 
-  const {trainVariants, chooseTrainVariantsToTrain} = useTrainRepertoireContext();
+  const { trainVariants, chooseTrainVariantsToTrain } =
+    useTrainRepertoireContext();
 
-  const { addIcon: addIconFooter, removeIcon: removeIconFooter, setIsVisible } = useFooterContext();
+  const {
+    addIcon: addIconFooter,
+    removeIcon: removeIconFooter,
+    setIsVisible,
+  } = useFooterContext();
 
   const calcWidth = useCallback(
     ({ screenWidth }: { screenWidth: number }): number => {
@@ -68,22 +73,23 @@ const TrainRepertoireViewContainer: React.FC = () => {
           contentText: "Select the variants you want to train",
           trainVariants,
           onTrainVariantsConfirm: (selectedTrainVariants: TrainVariant[]) => {
-            chooseTrainVariantsToTrain(selectedTrainVariants)
+            chooseTrainVariantsToTrain(selectedTrainVariants);
           },
         });
-    }}),
-    addIconHeader({
-      key: "goToEditRepertoire",
-      icon: <EditIcon />,
-      onClick: () => {
-        navigate(`/repertoire/${repertoireId}`);
       },
-    });
+    }),
+      addIconHeader({
+        key: "goToEditRepertoire",
+        icon: <EditIcon />,
+        onClick: () => {
+          navigate(`/repertoire/${repertoireId}`);
+        },
+      });
     return () => {
       removeIconHeader("selectTrainVariants");
       removeIconHeader("goToEditRepertoire");
     };
-  }, [])
+  }, []);
 
   useEffect(() => {
     if (isMobile) {
@@ -131,7 +137,6 @@ const TrainRepertoireViewContainer: React.FC = () => {
         <Grid item container justifyContent={"center"}>
           <Board calcWidth={calcWidth} isTraining={true} />
         </Grid>
-       
       </Grid>
       <Grid item xs={12} sm={5} container direction="column" alignItems="left">
         {isMobile && panelSelected === "info" && (
@@ -151,14 +156,14 @@ const TrainRepertoireViewContainer: React.FC = () => {
         {isMobile && panelSelected === "trainComments" && (
           <>
             <Grid item>
-              <BoardComment editable={false} />
+              <HintInfo />
             </Grid>
           </>
         )}
         {!isMobile && (
           <>
             <Grid item style={{ marginTop: "24px" }}>
-              <BoardComment editable={false} />
+              <HintInfo />
             </Grid>
             <Grid item style={{ marginTop: "36px" }}>
               <TrainInfo />
