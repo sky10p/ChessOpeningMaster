@@ -10,7 +10,7 @@ interface BoardProps {
 }
 
 const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
-  const { chess, setChess, addMove, orientation } = useRepertoireContext();
+  const { chess, setChess, addMove, orientation, currentMoveNode } = useRepertoireContext();
   const trainRepertoireContext = isTraining
     ? useTrainRepertoireContext()
     : null;
@@ -19,6 +19,9 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
   const [possibleMoves, setPossibleMoves] = useState<Move[]>([]);
   const [dragOverSquare, setDragOverSquare] = useState<Square | null>(null);
   const [circleSquares, setCircleSquares] = useState<Set<Square>>(new Set());
+  const [arrows, setArrows] = useState<Square[][]>([]);
+  const [pieceMoved, setPieceMoved] = useState(false);
+
   const [boardWidth, setBoardWidth] = useState(
     calcWidth({ screenWidth: window.innerWidth })
   );
@@ -35,6 +38,12 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
     };
   }, []);
 
+  useEffect(() => {
+    console.log(currentMoveNode.arrows)
+    setCircleSquares(currentMoveNode.circles ? new Set(currentMoveNode.circles) : new Set());
+    setArrows(currentMoveNode.arrows ?? [])
+  }, [currentMoveNode])
+
   const dropSquareStyle: React.CSSProperties = {
     background: "rgba(20, 85, 30, 0.4)",
   };
@@ -48,7 +57,7 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
       };
     }
 
-    for (const circleSquare of circleSquares) {
+    for (const circleSquare of Array.from(circleSquares)) {
       styles[circleSquare] = {
         borderRadius: "50%",
         boxSizing: "border-box",
@@ -134,6 +143,8 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
       selectPiece(square);
     } else if (selectedSquare && isMoveValid(selectedSquare, square)) {
       handleMove(selectedSquare, square);
+      setPieceMoved(true);
+
     }
   };
 
@@ -144,6 +155,15 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
       circleSquares.add(square);
     }
     setCircleSquares(new Set(circleSquares));
+    currentMoveNode.circles = Array.from(circleSquares);
+  };
+
+  const updateArrows = (arrows: Square[][]) => {
+    if(pieceMoved) {
+      setPieceMoved(false);
+      return;
+    }
+    currentMoveNode.arrows = arrows;
   };
 
   const onDrop = ({
@@ -155,7 +175,10 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
   }) => {
     setDragOverSquare(null);
 
-    return handleMove(sourceSquare, targetSquare);
+    const handleMoveResult =  handleMove(sourceSquare, targetSquare);
+    setPieceMoved(true);
+
+    return handleMoveResult
   };
 
   const onDragOverSquare = (square: Square) => {
@@ -179,6 +202,8 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
         onPieceDrop={(sourceSquare, targetSquare) =>
           onDrop({ sourceSquare, targetSquare })
         }
+        customArrows={arrows}
+        onArrowsChange={(squares) => updateArrows(squares)}
         customArrowColor="rgba(20, 85, 30, 0.5)"
         onDragOverSquare={onDragOverSquare}
         customSquareStyles={squareStyles}

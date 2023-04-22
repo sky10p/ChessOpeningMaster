@@ -23,7 +23,6 @@ import { useHeaderContext } from "../../../contexts/HeaderContext";
 import { useNavigate } from "react-router-dom";
 import { useMenuContext } from "../../../contexts/MenuContext";
 import { API_URL } from "../../../repository/constants";
-import { toPGN } from "../../../components/chess/utils/pgn.utils";
 
 const EditRepertoireViewContainer: React.FC = () => {
   const theme = useTheme();

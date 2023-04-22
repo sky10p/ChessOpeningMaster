@@ -1,4 +1,4 @@
-import { Move } from "chess.js";
+import { Move, Square } from "chess.js";
 
 export interface IMoveNode {
   id: string;
@@ -6,4 +6,6 @@ export interface IMoveNode {
   children: IMoveNode[];
   comment?: string;
   variantName?: string;
+  circles?: Square[];
+  arrows?: Square[][];
 }

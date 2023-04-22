@@ -1,4 +1,4 @@
-import { Move } from "chess.js";
+import { Move, Square } from "chess.js";
 import { Variant } from "../models/chess.models";
 import { IMoveNode } from "../../../../common/types/MoveNode";
 
@@ -12,6 +12,9 @@ export class MoveVariantNode implements IMoveNode {
   variantName?: string;
   turn: number;
   position: number;
+  circles?: Square[];
+  arrows?: Square[][];
+  
 
   constructor() {
     this.id = "initial";
@@ -20,6 +23,8 @@ export class MoveVariantNode implements IMoveNode {
     this.parent = null;
     this.turn = 0;
     this.position = 0;
+    this.circles = [];
+    this.arrows = [];
   }
 
   public static initMoveVariantNode = (
@@ -31,6 +36,7 @@ export class MoveVariantNode implements IMoveNode {
     moveVariantNode.move = initialMoveNode.move;
     moveVariantNode.comment = initialMoveNode.comment;
     moveVariantNode.variantName = initialMoveNode.variantName;
+
     this.addMoveNodesToMoveVariantNode(moveVariantNode, initialMoveNode.children);
     return moveVariantNode;
   };
@@ -40,6 +46,8 @@ export class MoveVariantNode implements IMoveNode {
     moveNodes.forEach((moveNode) => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const newNode = moveVariantNode.addMove(moveNode.move!, moveNode.variantName, moveNode.comment);
+      newNode.circles = moveNode.circles ? moveNode.circles : [];
+      newNode.arrows = moveNode.arrows ? moveNode.arrows : [];
       MoveVariantNode.addMoveNodesToMoveVariantNode(newNode, moveNode.children);
     });
   }
@@ -84,6 +92,8 @@ export class MoveVariantNode implements IMoveNode {
       comment: this.comment,
       variantName: this.variantName,
       children: this.children.map((child) => child.getMoveNodeWithoutParent()),
+      circles: this.circles ? Array.from(this.circles) : [],
+      arrows: this.arrows,
     };
   }
 

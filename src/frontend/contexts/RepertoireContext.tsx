@@ -31,6 +31,7 @@ interface RepertoireContextProps {
   updateComment: (comment: string) => void;
   saveRepertory: () => void;
   getPgn: () => string;
+  updateRepertoire : () => void;
 }
 
 const RepertoireContext = React.createContext<RepertoireContextProps | null>(null);
@@ -182,6 +183,10 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
     currentMove.comment = comment;
   };
 
+  const updateRepertoire = async () => {
+    setCurrentMove(currentMove);
+  }
+
   const saveRepertory = React.useCallback(async () => {
     try {
         showAlert("Saving repertoire...", "info");
@@ -224,7 +229,9 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
     updateComment,
     saveRepertory,
     getPgn,
+    updateRepertoire,
     currentMoveNode: currentMove,
+
   };
 
   return (
