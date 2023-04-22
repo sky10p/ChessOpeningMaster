@@ -6,6 +6,6 @@ export interface IMoveNode {
   children: IMoveNode[];
   comment?: string;
   variantName?: string;
-  circles?: Set<Square>;
+  circles?: Square[];
   arrows?: Square[][];
 }

@@ -20,6 +20,8 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
   const [dragOverSquare, setDragOverSquare] = useState<Square | null>(null);
   const [circleSquares, setCircleSquares] = useState<Set<Square>>(new Set());
   const [arrows, setArrows] = useState<Square[][]>([]);
+  const [pieceMoved, setPieceMoved] = useState(false);
+
   const [boardWidth, setBoardWidth] = useState(
     calcWidth({ screenWidth: window.innerWidth })
   );
@@ -37,8 +39,9 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
   }, []);
 
   useEffect(() => {
-    setCircleSquares(currentMoveNode.circles);
-    setArrows(currentMoveNode.arrows)
+    console.log(currentMoveNode.arrows)
+    setCircleSquares(currentMoveNode.circles ? new Set(currentMoveNode.circles) : new Set());
+    setArrows(currentMoveNode.arrows ?? [])
   }, [currentMoveNode])
 
   const dropSquareStyle: React.CSSProperties = {
@@ -54,7 +57,7 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
       };
     }
 
-    for (const circleSquare of circleSquares) {
+    for (const circleSquare of Array.from(circleSquares)) {
       styles[circleSquare] = {
         borderRadius: "50%",
         boxSizing: "border-box",
@@ -140,6 +143,8 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
       selectPiece(square);
     } else if (selectedSquare && isMoveValid(selectedSquare, square)) {
       handleMove(selectedSquare, square);
+      setPieceMoved(true);
+
     }
   };
 
@@ -150,10 +155,14 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
       circleSquares.add(square);
     }
     setCircleSquares(new Set(circleSquares));
-    currentMoveNode.circles = circleSquares;
+    currentMoveNode.circles = Array.from(circleSquares);
   };
 
   const updateArrows = (arrows: Square[][]) => {
+    if(pieceMoved) {
+      setPieceMoved(false);
+      return;
+    }
     currentMoveNode.arrows = arrows;
   };
 
@@ -166,7 +175,10 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
   }) => {
     setDragOverSquare(null);
 
-    return handleMove(sourceSquare, targetSquare);
+    const handleMoveResult =  handleMove(sourceSquare, targetSquare);
+    setPieceMoved(true);
+
+    return handleMoveResult
   };
 
   const onDragOverSquare = (square: Square) => {
