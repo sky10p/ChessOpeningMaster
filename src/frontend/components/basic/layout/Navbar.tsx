@@ -2,11 +2,8 @@ import React, { useEffect } from 'react';
 import { Drawer, List, ListItem, ListItemIcon, ListItemText, Divider, ButtonBase, ListItemSecondaryAction, IconButton, Button, Box } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import FileCopyIcon from '@mui/icons-material/FileCopy';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { IRepertoire } from '../../../../common/types/Repertoire';
 import { useNavbarContext } from '../../../contexts/NavbarContext';
 import { deleteRepertoire, duplicateRepertoire, putRepertoireName, putRepertoireOrderUp } from '../../../repository/repertoires/repertoires';
@@ -14,6 +11,7 @@ import { useDialogContext } from '../../../contexts/DialogContext';
 
 import chessNavbarBackground from '../../../assets/chess-navbar-background.jpg';
 import { API_URL } from '../../../repository/constants';
+import { useMenuContext } from '../../../contexts/MenuContext';
 
 const drawerWidth = 350;
 
@@ -32,6 +30,7 @@ const drawerStyles = {
 const Navbar: React.FC = () => {
   const {open, setOpen, repertoires, updateRepertoires} = useNavbarContext();
   const {showConfirmDialog, showTextDialog} = useDialogContext();
+  const {showMenu} = useMenuContext();
   const navigate = useNavigate();
   useEffect(() => {
     updateRepertoires();
@@ -107,22 +106,15 @@ const Navbar: React.FC = () => {
               <ListItemText primary={repertoire.name} />
               </ButtonBase>
               <ListItemSecondaryAction>
-              <IconButton edge="end" aria-label="up-order" onClick={() => handleOrderUp(repertoire)}>
-                  <ArrowUpwardIcon />
-                </IconButton>
-              <IconButton edge="end" aria-label="duplicate" onClick={() => handleDuplicate(repertoire)}>
-                  <FileCopyIcon />
-                </IconButton>
-                <IconButton edge="end" aria-label="edit" onClick={() => handleEdit(repertoire)}>
-                  <EditIcon />
-                </IconButton>
-                <IconButton
-                  edge="end"
-                  aria-label="delete"
-                  onClick={() => handleDelete(repertoire)}
-                >
-                  <DeleteIcon />
-                </IconButton>
+                
+              <IconButton edge="end" aria-label="up-order" onClick={(event) => showMenu(event.currentTarget, [
+                {name: 'Move to Up', action: () => handleOrderUp(repertoire)},
+                {name: 'Duplicate', action: () => handleDuplicate(repertoire)},
+                {name: 'Edit', action: () => handleEdit(repertoire)},
+                {name: 'Delete', action: () => handleDelete(repertoire)},
+              ])}>
+                  <MoreVertIcon />
+               </IconButton>
               </ListItemSecondaryAction>
             </ListItem>
         ))}
