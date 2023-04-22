@@ -10,7 +10,7 @@ interface BoardProps {
 }
 
 const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
-  const { chess, setChess, addMove, orientation } = useRepertoireContext();
+  const { chess, setChess, addMove, orientation, currentMoveNode } = useRepertoireContext();
   const trainRepertoireContext = isTraining
     ? useTrainRepertoireContext()
     : null;
@@ -19,6 +19,7 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
   const [possibleMoves, setPossibleMoves] = useState<Move[]>([]);
   const [dragOverSquare, setDragOverSquare] = useState<Square | null>(null);
   const [circleSquares, setCircleSquares] = useState<Set<Square>>(new Set());
+  const [arrows, setArrows] = useState<Square[][]>([]);
   const [boardWidth, setBoardWidth] = useState(
     calcWidth({ screenWidth: window.innerWidth })
   );
@@ -34,6 +35,11 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+
+  useEffect(() => {
+    setCircleSquares(currentMoveNode.circles);
+    setArrows(currentMoveNode.arrows)
+  }, [currentMoveNode])
 
   const dropSquareStyle: React.CSSProperties = {
     background: "rgba(20, 85, 30, 0.4)",
@@ -144,6 +150,11 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
       circleSquares.add(square);
     }
     setCircleSquares(new Set(circleSquares));
+    currentMoveNode.circles = circleSquares;
+  };
+
+  const updateArrows = (arrows: Square[][]) => {
+    currentMoveNode.arrows = arrows;
   };
 
   const onDrop = ({
@@ -179,6 +190,8 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
         onPieceDrop={(sourceSquare, targetSquare) =>
           onDrop({ sourceSquare, targetSquare })
         }
+        customArrows={arrows}
+        onArrowsChange={(squares) => updateArrows(squares)}
         customArrowColor="rgba(20, 85, 30, 0.5)"
         onDragOverSquare={onDragOverSquare}
         customSquareStyles={squareStyles}
