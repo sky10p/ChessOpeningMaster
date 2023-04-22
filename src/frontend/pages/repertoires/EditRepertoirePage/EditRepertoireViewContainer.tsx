@@ -17,9 +17,12 @@ import ChatIcon from "@mui/icons-material/Chat";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import SaveIcon from "@mui/icons-material/Save";
 import PlayLessonIcon from "@mui/icons-material/PlayLesson";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 import { useHeaderContext } from "../../../contexts/HeaderContext";
 import { useNavigate } from "react-router-dom";
+import { useMenuContext } from "../../../contexts/MenuContext";
+import { API_URL } from "../../../repository/constants";
 
 const EditRepertoireViewContainer: React.FC = () => {
   const theme = useTheme();
@@ -31,6 +34,8 @@ const EditRepertoireViewContainer: React.FC = () => {
 
   const { repertoireId, repertoireName, saveRepertory } =
     useRepertoireContext();
+
+  const {showMenu} = useMenuContext();
 
   const {
     addIcon: addIconHeader,
@@ -73,9 +78,31 @@ const EditRepertoireViewContainer: React.FC = () => {
         onClick: saveRepertory,
       });
 
+      addIconHeader({
+        key: "moreOptions",
+        icon: <MoreVertIcon />,
+        onClick: (event) => {
+          showMenu(event?.currentTarget as HTMLElement || null, [
+            /* {
+              name: "Download PGN",
+              action: () => {
+                console.log("Download PGN");
+              },
+            }, */
+            {
+              name: "Download JSON",
+              action: () => {
+                window.open(`${API_URL}/repertoires/${repertoireId}/download`)
+              },
+            },
+          ]);
+        },
+      });
+
     return () => {
       removeIconHeader("trainRepertoire");
       removeIconHeader("saveRepertoire");
+      removeIconHeader("moreOptions");
     };
   }, []);
 

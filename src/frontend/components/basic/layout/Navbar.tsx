@@ -1,17 +1,19 @@
 import React, { useEffect } from 'react';
-import { Drawer, List, ListItem, ListItemIcon, ListItemText, Divider, ButtonBase, ListItemSecondaryAction, IconButton } from '@mui/material';
+import { Drawer, List, ListItem, ListItemIcon, ListItemText, Divider, ButtonBase, ListItemSecondaryAction, IconButton, Button, Box } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { IRepertoire } from '../../../../common/types/Repertoire';
 import { useNavbarContext } from '../../../contexts/NavbarContext';
 import { deleteRepertoire, duplicateRepertoire, putRepertoireName, putRepertoireOrderUp } from '../../../repository/repertoires/repertoires';
 import { useDialogContext } from '../../../contexts/DialogContext';
 
 import chessNavbarBackground from '../../../assets/chess-navbar-background.jpg';
+import { API_URL } from '../../../repository/constants';
 
 const drawerWidth = 350;
 
@@ -80,6 +82,15 @@ const Navbar: React.FC = () => {
     <Drawer  sx={drawerStyles} open={open} onClose={() => setOpen(false)}>
       <img src={chessNavbarBackground} alt="Chess Navbar Background" style={{width: '100%', height: "81px", objectFit: "cover", marginBottom: "16px"}}/>
       <List>
+        
+        <ButtonBase component={Link} to={`${API_URL}/repertoires/download`}>
+          <ListItem>
+            <ListItemIcon>
+              <FileDownloadIcon />
+            </ListItemIcon>
+            <ListItemText primary="Download Repertoires" />
+          </ListItem>
+        </ButtonBase>
         <ButtonBase component={Link} to="/create-repertoire">
           <ListItem>
             <ListItemIcon>
@@ -115,6 +126,7 @@ const Navbar: React.FC = () => {
               </ListItemSecondaryAction>
             </ListItem>
         ))}
+        
       </List>
     </Drawer>
   );

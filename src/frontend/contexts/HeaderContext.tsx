@@ -3,7 +3,7 @@ import React from "react";
 interface HeaderIcon {
     key: string;
     icon: React.ReactNode;
-    onClick: () => void;
+    onClick: (event: MouseEvent | undefined) => void;
 }
 
 export interface HeaderContextProps {

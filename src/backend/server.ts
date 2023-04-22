@@ -26,6 +26,20 @@ app.get("/repertoires", async (req, res) => {
   res.json(repertoires);
 });
 
+app.get("/repertoires/download", async (req, res) => {
+  await client.connect();
+  const db = client.db("chess-opening-master");
+  const repertoires = await db
+    .collection("repertoires")
+    .find({})
+    .sort({ order: 1 })
+    .toArray();
+  res.setHeader("Content-disposition", "attachment; filename=repertoires.json");
+  res.setHeader("Content-type", "application/json");
+  res.write(JSON.stringify(repertoires));
+  res.end();
+});
+
 app.get("/repertoires/:id", async (req, res) => {
   await client.connect();
   const { id } = req.params;
@@ -34,6 +48,26 @@ app.get("/repertoires/:id", async (req, res) => {
     .collection("repertoires")
     .findOne({ _id: new ObjectId(id) });
   res.json(repertoire);
+});
+
+app.get("/repertoires/:id/download", async (req, res) => {
+  await client.connect();
+  const { id } = req.params;
+  const db = client.db("chess-opening-master");
+  const repertoire = await db
+    .collection("repertoires")
+    .findOne({ _id: new ObjectId(id) });
+
+  if(!repertoire) {
+    return res.status(404).json({ message: "Repertoire not found" });
+  }
+  res.setHeader(
+    "Content-disposition",
+    `attachment; filename=${repertoire.name}.json`
+  );
+  res.setHeader("Content-type", "application/json");
+  res.write(JSON.stringify(repertoire));
+  res.end();
 });
 
 app.post("/repertoires", async (req, res) => {
@@ -144,7 +178,7 @@ app.delete("/repertoires/:id", async (req, res) => {
   await client.connect();
   const { id } = req.params;
   const db = client.db("chess-opening-master");
-  const repertoire = await db
+  await db
     .collection("repertoires")
     .deleteOne({ _id: new ObjectId(id) });
   const repertoireToDelete = await db
@@ -169,6 +203,7 @@ app.delete("/repertoires/:id", async (req, res) => {
     res.json({ message: "Repertoire not found or already deleted" });
   }
 });
+
 
 app.listen(port, () => {
   console.log(process.env.MONGODB_URI);
