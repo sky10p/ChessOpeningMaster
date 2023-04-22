@@ -8,6 +8,7 @@
   "private": false,
   "scripts": {
     "build": "cross-env NODE_ENV=production tsc && npm run build:front:prod",
+    "build:backend:dev": "cross-env NODE_ENV=production tsc",
     "start:front:dev": "cross-env NODE_ENV=development FRONT_PORT=3002 webpack serve --mode development --open",
     "build:front:prod": "cross-env NODE_ENV=production FRONT_PORT=3002 webpack --mode production",
     "start:backend:dev": "cross-env NODE_ENV=development ts-node-dev -r dotenv/config --respawn --ignore-watch node_modules src/backend/server.ts",
