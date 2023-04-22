@@ -9,7 +9,7 @@ interface HeaderIcon {
 export interface HeaderContextProps {
     icons: HeaderIcon[];
     addIcon: (icon: HeaderIcon) => void;
-    changeIconCallback: (key: string, onClick: () => void) => void;
+    changeIconCallback: (key: string, onClick: (event: React.MouseEvent<HTMLElement>) => void) => void;
     removeIcon: (iconKey: string) => void;
 }
 
@@ -30,7 +30,7 @@ export const HeaderContextProvider = ({ children }: { children: React.ReactNode 
         setIcons((prevIcons) => [...prevIcons, icon]);
     };
 
-    const changeIconCallback = (key: string, onClick: () => void) => {
+    const changeIconCallback = (key: string, onClick: (event: React.MouseEvent<HTMLElement>) => void) => {
         const icon = icons.find((i) => i.key === key);
 
         if(icon){

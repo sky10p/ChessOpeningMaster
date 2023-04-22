@@ -1,11 +1,12 @@
 import { Chess, Move } from "chess.js";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { MoveVariantNode } from "../components/chess/utils/VariantNode";
 import { IMoveNode } from "../../common/types/MoveNode";
 import { Variant } from "../components/chess/models/chess.models";
 import { BoardOrientation } from "../../common/types/Orientation";
 import { useAlertContext } from "./AlertContext";
 import { putRepertoire } from "../repository/repertoires/repertoires";
+import { toPGN } from "../components/chess/utils/pgn.utils";
 
 interface RepertoireContextProps {
   chess: Chess;
@@ -29,6 +30,7 @@ interface RepertoireContextProps {
   comment: string;
   updateComment: (comment: string) => void;
   saveRepertory: () => void;
+  getPgn: () => string;
 }
 
 const RepertoireContext = React.createContext<RepertoireContextProps | null>(null);
@@ -195,6 +197,11 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
     }
     }, [repertoireId, repertoireName, moveHistory, orientation, comment, showAlert]);
 
+    const getPgn = useCallback(() => {
+        const pgn = toPGN(repertoireName, new Date(), orientation, moveHistory);
+        return pgn;
+    }, [repertoireName, orientation, moveHistory])
+
   const value: RepertoireContextProps = {
     chess,
     orientation,
@@ -216,6 +223,7 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
     comment,
     updateComment,
     saveRepertory,
+    getPgn,
     currentMoveNode: currentMove,
   };
 

@@ -23,6 +23,7 @@ import { useHeaderContext } from "../../../contexts/HeaderContext";
 import { useNavigate } from "react-router-dom";
 import { useMenuContext } from "../../../contexts/MenuContext";
 import { API_URL } from "../../../repository/constants";
+import { toPGN } from "../../../components/chess/utils/pgn.utils";
 
 const EditRepertoireViewContainer: React.FC = () => {
   const theme = useTheme();
@@ -32,10 +33,10 @@ const EditRepertoireViewContainer: React.FC = () => {
     "variants" | "comments"
   >("variants");
 
-  const { repertoireId, repertoireName, saveRepertory } =
+  const { repertoireId, repertoireName, saveRepertory, getPgn } =
     useRepertoireContext();
 
-  const {showMenu} = useMenuContext();
+  const { showMenu } = useMenuContext();
 
   const {
     addIcon: addIconHeader,
@@ -63,6 +64,29 @@ const EditRepertoireViewContainer: React.FC = () => {
     theme.breakpoints.down("sm")
   );
 
+  const showMenuHeader = (event: React.MouseEvent<HTMLElement>) => {
+    showMenu((event.currentTarget) || null, [
+      {
+        name: "Download PGN",
+        action: () => {
+          const pgn = getPgn();
+          const blob = new Blob([pgn], { type: "text/plain" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.download = `${repertoireName}.pgn`;
+          link.href = url;
+          link.click();
+        },
+      },
+      {
+        name: "Download JSON",
+        action: () => {
+          window.open(`${API_URL}/repertoires/${repertoireId}/download`);
+        },
+      },
+    ])
+  }
+
   useEffect(() => {
     addIconHeader({
       key: "trainRepertoire",
@@ -78,26 +102,11 @@ const EditRepertoireViewContainer: React.FC = () => {
         onClick: saveRepertory,
       });
 
-      addIconHeader({
-        key: "moreOptions",
-        icon: <MoreVertIcon />,
-        onClick: (event) => {
-          showMenu(event?.currentTarget as HTMLElement || null, [
-            /* {
-              name: "Download PGN",
-              action: () => {
-                console.log("Download PGN");
-              },
-            }, */
-            {
-              name: "Download JSON",
-              action: () => {
-                window.open(`${API_URL}/repertoires/${repertoireId}/download`)
-              },
-            },
-          ]);
-        },
-      });
+    addIconHeader({
+      key: "moreOptions",
+      icon: <MoreVertIcon />,
+      onClick: showMenuHeader,
+    });
 
     return () => {
       removeIconHeader("trainRepertoire");
@@ -113,6 +122,12 @@ const EditRepertoireViewContainer: React.FC = () => {
     });
     changeIconCallback("saveRepertoire", saveRepertory);
   }, [saveRepertory]);
+
+  useEffect(() => {
+    changeIconCallback("moreOptions", (event: React.MouseEvent<HTMLElement>) => {
+      showMenuHeader(event);
+    });
+  }, [getPgn]);
 
   useEffect(() => {
     if (isMobile) {
