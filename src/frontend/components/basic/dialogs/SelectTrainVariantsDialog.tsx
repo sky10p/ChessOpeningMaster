@@ -9,6 +9,7 @@ import {
   DialogActions,
   Button,
   DialogContentText,
+  Box,
 } from "@mui/material";
 
 interface SelectTrainVariantsDialogProps {
@@ -18,6 +19,10 @@ interface SelectTrainVariantsDialogProps {
   trainVariants: TrainVariant[];
   onConfirm: (trainVariants: TrainVariant[]) => void;
   onClose: () => void;
+}
+
+interface GroupedTrainVariant extends TrainVariant {
+  originalIndex: number;
 }
 
 const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
@@ -31,6 +36,18 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
   const [selectedTrainVariants, setSelectedTrainVariants] = useState<
     Set<number>
   >(new Set());
+
+  const groupedTrainVariantsByName = trainVariants.reduce(
+    (groupedTrainVariants, trainVariant, index) => {
+      const groupName = trainVariant.variant.name;
+      if (!groupedTrainVariants[groupName]) {
+        groupedTrainVariants[groupName] = [];
+      }
+      groupedTrainVariants[groupName].push({...trainVariant, originalIndex: index});
+      return groupedTrainVariants;
+    },
+    {} as Record<string, GroupedTrainVariant[]>
+  );
 
   useEffect(() => {
     setSelectedTrainVariants(
@@ -64,6 +81,17 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
     }
   };
 
+  const handleSelectAllGroup = (groupName: string) => {
+    const group = groupedTrainVariantsByName[groupName];
+    const newSelectedVariants = new Set(selectedTrainVariants);
+    if (isGroupSelected(groupName)) {
+      group.forEach((trainVariant) => newSelectedVariants.delete(trainVariant.originalIndex));
+    } else {
+      group.forEach((trainVariant) => newSelectedVariants.add(trainVariant.originalIndex));
+    }
+    setSelectedTrainVariants(newSelectedVariants);
+  };
+
   const handleClose = () => {
     setSelectedTrainVariants(new Set());
 
@@ -83,6 +111,14 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
   };
 
   const isAllSelected = selectedTrainVariants.size === trainVariants.length;
+  const isGroupSelected = (groupName: string) => {
+    const group = groupedTrainVariantsByName[groupName];
+    return group.every((trainVariant) => selectedTrainVariants.has(trainVariant.originalIndex));
+  };
+  const isSomeOfGroupSelected = (groupName: string) => {
+    const group = groupedTrainVariantsByName[groupName];
+    return group.some((trainVariant) => selectedTrainVariants.has(trainVariant.originalIndex)) && !isGroupSelected(groupName);
+  };
   const isSomeSelected = selectedTrainVariants.size > 0 && !isAllSelected;
 
   return (
@@ -100,17 +136,26 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
           }
           label="Select All"
         /></div>
-        {trainVariants.map((trainVariant, index) => (
-          <FormControlLabel
-            key={index}
-            control={
-              <Checkbox
-                checked={selectedTrainVariants.has(index)}
-                onChange={() => handleToggleVariant(index)}
+        {Object.keys(groupedTrainVariantsByName).map((groupName) => (
+          <div key={groupName}>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+
+            <Checkbox checked={isGroupSelected(groupName)} indeterminate={isSomeOfGroupSelected(groupName)} onChange={() => handleSelectAllGroup(groupName)} />
+            <h3>{groupName}</h3>
+            </Box>
+            {groupedTrainVariantsByName[groupName].length > 1 && groupedTrainVariantsByName[groupName].map((trainVariant) => (
+              <FormControlLabel
+                key={trainVariant.originalIndex}
+                control={
+                  <Checkbox
+                    checked={selectedTrainVariants.has(trainVariant.originalIndex)}
+                    onChange={() => handleToggleVariant(trainVariant.originalIndex)}
+                  />
+                }
+                label={trainVariant.variant.fullName}
               />
-            }
-            label={trainVariant.variant.fullName}
-          />
+            ))}
+          </div>
         ))}
       </DialogContent>
       <DialogActions>
