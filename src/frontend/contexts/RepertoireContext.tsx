@@ -144,10 +144,9 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
   };
 
   const addMove = (move: Move) => {
-    const newMove = currentMove.addMove(move);
+    const newMove = currentMove.addMove(move, undefined, undefined, () => setHasChanges(true));
     setCurrentMove(newMove);
     updateVariants();
-    setHasChanges(true);
   };
 
   const hasNext = () => {

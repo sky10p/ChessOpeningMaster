@@ -74,7 +74,7 @@ export class MoveVariantNode implements IMoveNode {
     return this.move;
   }
 
-  addMove(move: Move, name?: string, comment?: string) {
+  addMove(move: Move, name?: string, comment?: string, callbackNewNode?: (node: MoveVariantNode) => void): MoveVariantNode {
     const foundChild = this.children.find((child) => child.id === move.lan);
     if (foundChild) {
       return foundChild;
@@ -92,6 +92,7 @@ export class MoveVariantNode implements IMoveNode {
     }
     newNode.position = this.position + 1;
     this.children.push(newNode);
+    callbackNewNode && callbackNewNode(newNode);
     return newNode;
   }
 
