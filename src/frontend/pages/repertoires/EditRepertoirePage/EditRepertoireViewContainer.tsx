@@ -91,8 +91,7 @@ const EditRepertoireViewContainer: React.FC = () => {
       key: "trainRepertoire",
       icon: <PlayLessonIcon />,
       onClick: () => {
-        saveRepertory();
-        navigate(`/repertoire/train/${repertoireId}`);
+           navigate(`/repertoire/train/${repertoireId}`);
       },
     }),
       addIconHeader({
@@ -115,10 +114,6 @@ const EditRepertoireViewContainer: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    changeIconCallback("trainRepertoire", () => {
-      saveRepertory();
-      navigate(`/repertoire/train/${repertoireId}`);
-    });
     changeIconCallback("saveRepertoire", saveRepertory);
   }, [saveRepertory]);
 

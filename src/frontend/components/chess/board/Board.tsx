@@ -39,7 +39,6 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
   }, []);
 
   useEffect(() => {
-    console.log(currentMoveNode.arrows)
     setCircleSquares(currentMoveNode.circles ? new Set(currentMoveNode.circles) : new Set());
     setArrows(currentMoveNode.arrows ?? [])
   }, [currentMoveNode])

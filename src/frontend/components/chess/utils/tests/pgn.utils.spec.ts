@@ -24,19 +24,16 @@ describe("Pgn test utils", () => {
 
     it("should return a pgn string", () => {
         const pgn = toPGN(repertoireToTest.name, new Date(Date.UTC(2018, 0, 1, 5, 0, 0)), "white", MoveVariantNode.initMoveVariantNode(testRepertoireMock));
-        console.log(pgn);
         expect(pgn).toEqual(repertoirePgn);
     });
 
     it("should return a pgn string with subvariants", () => {
         const pgn = toPGN(repertoireToTest.name, new Date(Date.UTC(2018, 0, 1, 5, 0, 0)), "white", MoveVariantNode.initMoveVariantNode(testRepertoireWithSubvariantsMock));
-        console.log(pgn);
         expect(pgn).toEqual(repertoireWithSubvariantsPgn);
     });
 
     it("should return a pgn string with comments", () => {
         const pgn = toPGN(repertoireToTest.name, new Date(Date.UTC(2018, 0, 1, 5, 0, 0)), "white", MoveVariantNode.initMoveVariantNode(testRepertoireWithCommentsMock));
-        console.log(pgn);
         expect(pgn).toEqual(repertoireWithCommentsPgn);
     });
 });

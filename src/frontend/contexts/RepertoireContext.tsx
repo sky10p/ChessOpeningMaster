@@ -64,6 +64,18 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
 }) => {
   const [chess, setChess] = useState<Chess>(new Chess());
   const [orientation, setOrientation] = useState<BoardOrientation>(initialOrientation);
+  const [hasChanges, setHasChanges] = useState<boolean>(false);
+
+  useEffect(() => {
+    const intervalSave = setInterval(()=>{
+      if(hasChanges){
+        saveRepertory();
+        setHasChanges(false);
+      }
+    }, 500)
+
+    return () => clearInterval(intervalSave);
+  }, [hasChanges])
   
 
   const [moveHistory, setMoveHistory] = useState<MoveVariantNode>(
@@ -135,6 +147,7 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
     const newMove = currentMove.addMove(move);
     setCurrentMove(newMove);
     updateVariants();
+    setHasChanges(true);
   };
 
   const hasNext = () => {
@@ -165,6 +178,7 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
     moveNode.variantName = newName;
     goToMove(moveNode);
     updateVariants();
+    setHasChanges(true)
   };
 
   const deleteMove = (moveNode: MoveVariantNode) => {
@@ -176,11 +190,13 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
 
     goToMove(parentNode);
     updateVariants();
+    setHasChanges(true)
   };
 
   const updateComment = (comment: string) => {
     setComment(comment);
     currentMove.comment = comment;
+    setHasChanges(true)
   };
 
   const updateRepertoire = async () => {
