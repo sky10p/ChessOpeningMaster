@@ -65,9 +65,10 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
     }
 
     for (const move of possibleMoves) {
+      const piece = chess.get(move.to);
       styles[move.to] = {
         background:
-          "radial-gradient(rgba(20, 85, 30, 0.5) 19%, rgba(0, 0, 0, 0) 20%)",
+          piece ? "radial-gradient(transparent 0%, transparent 79%, rgba(20, 85, 0, 0.3) 80%)": "radial-gradient(rgba(20, 85, 30, 0.5) 19%, rgba(0, 0, 0, 0) 20%)",
       };
     }
 
