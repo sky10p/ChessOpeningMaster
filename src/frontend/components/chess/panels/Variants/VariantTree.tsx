@@ -1,15 +1,11 @@
 import React, { useEffect, useState } from "react";
 import {
   Box,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Typography,
 } from "@mui/material";
-import { ExpandMore as ExpandMoreIcon } from "@mui/icons-material";
 import { MoveVariantNode } from "../../utils/VariantNode";
 import { Variant } from "../../models/chess.models";
 import { MoveNodeButtonWithActions } from "../../buttons/MoveNodeButtonWithActions";
+import { SelectVariant } from "../../selects/SelectVariant";
 
 interface VariantTreeProps {
   variants: Variant[];
@@ -18,49 +14,31 @@ interface VariantTreeProps {
 
 const VariantTree: React.FC<VariantTreeProps> = ({ variants, currentNode }) => {
   const isSelected = (node: MoveVariantNode) => node === currentNode;
-  const [expandedVariant, setExpandedVariant] = useState(0);
+  const [selectedVariant, setSelectedVariant] = useState<Variant>(variants[0]); // TODO: [0
 
   useEffect(() => {
-    setExpandedVariant(
-      variants.findIndex((variant) =>
+    setSelectedVariant(
+      variants.find((variant) =>
         variant.moves.some((move) => isSelected(move))
-      )
+      ) ?? variants[0]
     );
   }, [variants]);
 
-  const handleAccordionChange = (index: number) => {
-    setExpandedVariant(expandedVariant === index ? -1 : index);
-  };
+ 
 
   return (
     <>
       {" "}
       <Box>
-        {variants.map((variant, index) => (
-          <Accordion
-            key={index}
-            expanded={expandedVariant === index}
-            onChange={() => handleAccordionChange(index)}
-          >
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              aria-controls={`variant-content-${index}`}
-              id={`variant-header-${index}`}
-            >
-              <Typography>{variant.fullName}</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Box>
-                {variant.moves.map((move) => (
+        <SelectVariant variants={variants} selectedVariant={selectedVariant} onSelectVariant={setSelectedVariant}></SelectVariant>
+        <Box>
+                {selectedVariant.moves.map((move) => (
                   <MoveNodeButtonWithActions
                     key={move.getUniqueKey()}
                     move={move}
                   />
                 ))}
               </Box>
-            </AccordionDetails>
-          </Accordion>
-        ))}
       </Box>
     </>
   );
