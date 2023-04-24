@@ -109,7 +109,7 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
                 onChange={() => handleToggleVariant(index)}
               />
             }
-            label={trainVariant.variant.name}
+            label={trainVariant.variant.fullName}
           />
         ))}
       </DialogContent>

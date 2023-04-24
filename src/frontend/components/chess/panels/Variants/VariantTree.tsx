@@ -47,7 +47,7 @@ const VariantTree: React.FC<VariantTreeProps> = ({ variants, currentNode }) => {
               aria-controls={`variant-content-${index}`}
               id={`variant-header-${index}`}
             >
-              <Typography>{variant.name}</Typography>
+              <Typography>{variant.fullName}</Typography>
             </AccordionSummary>
             <AccordionDetails>
               <Box>

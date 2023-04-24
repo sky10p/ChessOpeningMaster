@@ -3,7 +3,6 @@ import { Variant } from "../models/chess.models";
 import { IMoveNode } from "../../../../common/types/MoveNode";
 
 export class MoveVariantNode implements IMoveNode {
- 
   id: string;
   move: Move | null;
   children: MoveVariantNode[];
@@ -14,7 +13,6 @@ export class MoveVariantNode implements IMoveNode {
   position: number;
   circles?: Square[];
   arrows?: Square[][];
-  
 
   constructor() {
     this.id = "initial";
@@ -31,34 +29,46 @@ export class MoveVariantNode implements IMoveNode {
     initialMoveNode: IMoveNode
   ): MoveVariantNode => {
     const moveVariantNode = new MoveVariantNode();
-    
+
     moveVariantNode.id = initialMoveNode.id;
     moveVariantNode.move = initialMoveNode.move;
     moveVariantNode.comment = initialMoveNode.comment;
     moveVariantNode.variantName = initialMoveNode.variantName;
 
-    this.addMoveNodesToMoveVariantNode(moveVariantNode, initialMoveNode.children);
+    this.addMoveNodesToMoveVariantNode(
+      moveVariantNode,
+      initialMoveNode.children
+    );
     return moveVariantNode;
   };
 
-  private static addMoveNodesToMoveVariantNode = (moveVariantNode: MoveVariantNode, moveNodes: IMoveNode[]) => {
-    if(moveNodes.length === 0) return;
+  private static addMoveNodesToMoveVariantNode = (
+    moveVariantNode: MoveVariantNode,
+    moveNodes: IMoveNode[]
+  ) => {
+    if (moveNodes.length === 0) return;
     moveNodes.forEach((moveNode) => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const newNode = moveVariantNode.addMove(moveNode.move!, moveNode.variantName, moveNode.comment);
+      const newNode = moveVariantNode.addMove(
+        moveNode.move!,
+        moveNode.variantName,
+        moveNode.comment
+      );
       newNode.circles = moveNode.circles ? moveNode.circles : [];
       newNode.arrows = moveNode.arrows ? moveNode.arrows : [];
       MoveVariantNode.addMoveNodesToMoveVariantNode(newNode, moveNode.children);
     });
-  }
+  };
 
   getUniqueKey(): string {
-        return `${this.turn}. ${this.getMove().color}#${this.getMove().san}`
+    return `${this.turn}. ${this.getMove().color}#${this.getMove().san}`;
   }
 
   toString(): string {
-    return `${this.turn}. ${this.getMove().color === 'b' ? "..." : ""}${this.getMove().san}`
-}
+    return `${this.turn}. ${this.getMove().color === "b" ? "..." : ""}${
+      this.getMove().san
+    }`;
+  }
   getMove(): Move {
     if (!this.move) throw new Error("Move is null");
     return this.move;
@@ -75,9 +85,9 @@ export class MoveVariantNode implements IMoveNode {
     newNode.id = move.lan;
     newNode.variantName = name;
     newNode.comment = comment;
-    if(this.move === null || this.move.color === "b") {
+    if (this.move === null || this.move.color === "b") {
       newNode.turn = this.turn + 1;
-    }else{
+    } else {
       newNode.turn = this.turn;
     }
     newNode.position = this.position + 1;
@@ -101,37 +111,64 @@ export class MoveVariantNode implements IMoveNode {
     const variants: Variant[] = [];
     let numVariants = 0;
 
-    const getDifferentNodesString = (differentNodes: MoveVariantNode[]): string => {
-      if(differentNodes.length === 0) return "";
+    const getDifferentNodesString = (
+      differentNodes: MoveVariantNode[]
+    ): string => {
+      if (differentNodes.length === 0) return "";
       return `(${differentNodes.map((node) => node.toString()).join(" ")})`;
-    }
+    };
 
     const traverseChildren = (
       node: MoveVariantNode,
       path: MoveVariantNode[] = [],
       lastVariantName?: string,
-      differentNodes: MoveVariantNode[] = [],
+      differentNodes: MoveVariantNode[] = []
     ) => {
       if (node.children.length === 0) {
-        const lastVariantNameString = [lastVariantName, getDifferentNodesString(differentNodes)].filter((value) => value!== "").join(" ");
+        const lastVariantNameString = [
+          lastVariantName,
+          getDifferentNodesString(differentNodes),
+        ]
+          .filter((value) => value !== "")
+          .join(" ");
         variants.push({
           moves: [...path, node],
+          fullName: node.variantName
+            ? node.variantName
+            : lastVariantName
+            ? lastVariantNameString
+            : `Variant ${++numVariants}`,
           name: node.variantName
             ? node.variantName
-            : lastVariantName ? lastVariantNameString : `Variant ${++numVariants}`,
+            : lastVariantName
+            ? lastVariantName
+            : `Variant ${++numVariants}`,
+          differentMoves: !node.variantName && lastVariantName ? getDifferentNodesString(differentNodes) : "",
         });
       } else {
         for (const child of node.children) {
-          const childVariantName = child.variantName ? child.variantName : lastVariantName;
+          const childVariantName = child.variantName
+            ? child.variantName
+            : lastVariantName;
           const currentDifferentNodes = child.variantName ? [] : differentNodes;
-          const updatedDifferentNodes = node.children.length > 1 && !child.variantName ? [...currentDifferentNodes, child] : currentDifferentNodes;
-         
-          traverseChildren(child, [...path, node], childVariantName, updatedDifferentNodes );
+          const updatedDifferentNodes =
+            node.children.length > 1 && !child.variantName
+              ? [...currentDifferentNodes, child]
+              : currentDifferentNodes;
+
+          traverseChildren(
+            child,
+            [...path, node],
+            childVariantName,
+            updatedDifferentNodes
+          );
         }
       }
     };
 
-    this.children.forEach((child) => traverseChildren(child, [], child.variantName, []));
+    this.children.forEach((child) =>
+      traverseChildren(child, [], child.variantName, [])
+    );
     return variants;
   };
 }
