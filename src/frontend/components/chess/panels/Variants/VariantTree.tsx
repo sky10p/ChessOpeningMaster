@@ -14,7 +14,7 @@ interface VariantTreeProps {
 
 const VariantTree: React.FC<VariantTreeProps> = ({ variants, currentNode }) => {
   const isSelected = (node: MoveVariantNode) => node === currentNode;
-  const [selectedVariant, setSelectedVariant] = useState<Variant>(variants[0]); // TODO: [0
+  const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>(variants[0]); // TODO: [0
 
   useEffect(() => {
     setSelectedVariant(
@@ -30,9 +30,9 @@ const VariantTree: React.FC<VariantTreeProps> = ({ variants, currentNode }) => {
     <>
       {" "}
       <Box>
-        <SelectVariant variants={variants} selectedVariant={selectedVariant} onSelectVariant={setSelectedVariant}></SelectVariant>
+        {selectedVariant && <SelectVariant variants={variants} selectedVariant={selectedVariant} onSelectVariant={setSelectedVariant}></SelectVariant>}
         <Box>
-                {selectedVariant.moves.map((move) => (
+                {selectedVariant?.moves.map((move) => (
                   <MoveNodeButtonWithActions
                     key={move.getUniqueKey()}
                     move={move}
