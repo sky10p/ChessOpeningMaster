@@ -4,8 +4,8 @@ import {
 } from "@mui/material";
 import { MoveVariantNode } from "../../utils/VariantNode";
 import { Variant } from "../../models/chess.models";
-import { MoveNodeButtonWithActions } from "../../buttons/MoveNodeButtonWithActions";
 import { SelectVariant } from "../../selects/SelectVariant";
+import { MovementAndTurnNodeButtonWithActions } from "../../buttons/MovementAndTurnNodeButtonWithActions";
 
 interface VariantTreeProps {
   variants: Variant[];
@@ -33,7 +33,7 @@ const VariantTree: React.FC<VariantTreeProps> = ({ variants, currentNode }) => {
       const moveWhite = moves[i];
       const moveBlack = moves[i + 1]; 
       moveComponents.push(
-        <MoveNodeButtonWithActions
+        <MovementAndTurnNodeButtonWithActions
           key={moveWhite.getUniqueKey()}
           moveWhite={moveWhite}
           moveBlack={moveBlack}
