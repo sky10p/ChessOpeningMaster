@@ -9,7 +9,10 @@ const client = new MongoClient(uri);
 const app = express();
 const port = process.env.BACKEND_PORT || 3001;
 
-app.use(express.json());
+app.use(express.json({
+  limit: "100mb",
+  type: ["application/json", "text/plain"],
+}));
 app.use(cors());
 app.get("/repertoires", async (req, res) => {
   await client.connect();
