@@ -76,7 +76,8 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
 
     return () => clearInterval(intervalSave);
   }, [hasChanges])
-  
+
+   
 
   const [moveHistory, setMoveHistory] = useState<MoveVariantNode>(
     initialMoves
@@ -100,6 +101,9 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
     setMoveHistory(initialMoves
       ? MoveVariantNode.initMoveVariantNode(initialMoves)
       : new MoveVariantNode());
+
+    chess.reset();
+    
 
   }, [initialMoves])
 

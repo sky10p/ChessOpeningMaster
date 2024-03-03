@@ -67,5 +67,9 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.10.0",
     "typeface-roboto": "^1.1.13"
+  },
+  "volta": {
+    "node": "20.11.1",
+    "yarn": "1.22.19"
   }
 }
