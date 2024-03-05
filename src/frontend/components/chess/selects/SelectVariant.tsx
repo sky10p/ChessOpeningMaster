@@ -18,15 +18,13 @@ export const SelectVariant: React.FC<SelectVariantProps> = ({
   selectedVariant,
   onSelectVariant,
 }) => {
-    
   const groupedVariants = variants.reduce((acc, variant) => {
     if (!acc[variant.name]) {
-        acc[variant.name] = [];
+      acc[variant.name] = [];
     }
     acc[variant.name].push(variant);
     return acc;
-    }, {} as Record<string, Variant[]>);
-
+  }, {} as Record<string, Variant[]>);
 
   const handleChange = (event: SelectChangeEvent<string>) => {
     const variant = variants.find(
@@ -48,15 +46,17 @@ export const SelectVariant: React.FC<SelectVariantProps> = ({
         label="Variant"
         onChange={handleChange}
       >
-        {Object.keys(groupedVariants).sort().flatMap((name) => [
-          <optgroup key={name} label={name}>
-            {groupedVariants[name].map((variant) => (
-              <option key={variant.fullName} value={variant.fullName}>
-                {variant.fullName}
-              </option>
-            ))}
-          </optgroup>,
-        ])}
+        {Object.keys(groupedVariants)
+          .sort()
+          .flatMap((name) => [
+            <optgroup key={name} label={name}>
+              {groupedVariants[name].map((variant) => (
+                <option key={variant.fullName} value={variant.fullName}>
+                  {variant.fullName}
+                </option>
+              ))}
+            </optgroup>,
+          ])}
       </Select>
     </FormControl>
   );
