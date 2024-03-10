@@ -7,6 +7,7 @@ import { BoardOrientation } from "../../common/types/Orientation";
 import { useAlertContext } from "./AlertContext";
 import { putRepertoire } from "../repository/repertoires/repertoires";
 import { toPGN } from "../components/chess/utils/pgn.utils";
+import { useDialogContext } from "./DialogContext";
 
 interface RepertoireContextProps {
   chess: Chess;
@@ -65,6 +66,8 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
   const [chess, setChess] = useState<Chess>(new Chess());
   const [orientation, setOrientation] = useState<BoardOrientation>(initialOrientation);
   const [hasChanges, setHasChanges] = useState<boolean>(false);
+
+  const {showSelectNextMoveDialog} = useDialogContext();
 
   useEffect(() => {
     const intervalSave = setInterval(()=>{
@@ -136,9 +139,26 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
     
   const next = () => {
     if (currentMove.children.length === 0) return;
-    const moveNode = currentMove.children[0];
-    chess.move(moveNode.getMove());
-    setCurrentMove(moveNode);
+    if(currentMove.children.length === 1){
+      const moveNode = currentMove.children[0];
+      chess.move(moveNode.getMove());
+      setCurrentMove(moveNode);
+      return;
+    }
+
+    if(currentMove.children.length > 1){
+      showSelectNextMoveDialog({
+        title: "Select next move",
+        contentText: "Select the movement to play",
+        nextMovements: currentMove.children.map((child) => child.variantName ?? child.getMove().san),
+        onNextMoveConfirm: (nextMove: string) => {
+          const nextMoveVarianteNode = currentMove.children.find((child) => child.getMove().san === nextMove)
+          if(!nextMoveVarianteNode) return;
+          chess.move(nextMoveVarianteNode.getMove());
+          setCurrentMove(nextMoveVarianteNode);
+        },
+      })
+    }
   };
 
   const prev = () => {
