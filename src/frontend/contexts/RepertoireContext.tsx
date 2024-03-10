@@ -143,6 +143,7 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
       const moveNode = currentMove.children[0];
       chess.move(moveNode.getMove());
       setCurrentMove(moveNode);
+      updateVariants();
       return;
     }
 
@@ -156,9 +157,12 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
           if(!nextMoveVarianteNode) return;
           chess.move(nextMoveVarianteNode.getMove());
           setCurrentMove(nextMoveVarianteNode);
+          updateVariants();
         },
       })
     }
+
+    
   };
 
   const prev = () => {
