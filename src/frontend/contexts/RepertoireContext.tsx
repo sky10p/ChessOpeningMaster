@@ -151,7 +151,7 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
       showSelectNextMoveDialog({
         title: "Select next move",
         contentText: "Select the movement to play",
-        nextMovements: currentMove.children.map((child) => child.variantName ?? child.getMove().san),
+        nextMovements: currentMove.children.map((child) => child.getMove().san),
         onNextMoveConfirm: (nextMove: string) => {
           const nextMoveVarianteNode = currentMove.children.find((child) => child.getMove().san === nextMove)
           if(!nextMoveVarianteNode) return;
