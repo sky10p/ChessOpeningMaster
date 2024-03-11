@@ -202,7 +202,7 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
   };
 
   const changeNameMove = (moveNode: MoveVariantNode, newName: string) => {
-    moveNode.variantName = newName;
+    moveNode.variantName = newName == "" ? undefined : newName;
     goToMove(moveNode);
     updateVariants();
     setHasChanges(true)

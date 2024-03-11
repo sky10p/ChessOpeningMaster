@@ -56,7 +56,7 @@ export const MovementAndTurnNodeButtonWithActions: React.FC<MoveNodeButtonProps>
   };
 
   const handleRenameNode = (newName: string) => {
-    if (contextRenameDialog.node !== null && newName !== "") {
+    if (contextRenameDialog.node !== null) {
       changeNameMove(contextRenameDialog.node, newName);
     }
     handleCloseRenameDialog();
@@ -73,7 +73,7 @@ export const MovementAndTurnNodeButtonWithActions: React.FC<MoveNodeButtonProps>
     boxShadow: "2px 2px 5px rgba(0, 0, 0, 0.1)",
   });
 
-  const MoveButton = styled(Button)<MoveButtonProps>(({isSelectedMove}) => ({
+   const MoveButton = styled(Button)<MoveButtonProps>(({isSelectedMove}) => ({
     minWidth: "40px",
     minHeight: "30px",
     margin: "2px",
@@ -106,7 +106,7 @@ export const MovementAndTurnNodeButtonWithActions: React.FC<MoveNodeButtonProps>
         color={isSelected(moveWhite) ? "primary" : "inherit"}
         isSelectedMove={isSelected(moveWhite)}
       >
-        {moveWhite.getMove().san}
+        {moveWhite.getMove().san} {moveWhite.variantName ? "*" : ""}
       </MoveButton>
       {moveBlack && <MoveButton
         key={moveBlack.getUniqueKey()}
@@ -116,7 +116,7 @@ export const MovementAndTurnNodeButtonWithActions: React.FC<MoveNodeButtonProps>
         color={isSelected(moveBlack) ? "primary" : "inherit"}
         isSelectedMove={isSelected(moveBlack)}
       >
-        {moveBlack.getMove().san}
+        {moveBlack.getMove().san}  {moveBlack.variantName ? "*" : ""}
       </MoveButton>}
     </MovementContainer>
      
@@ -145,6 +145,7 @@ export const MovementAndTurnNodeButtonWithActions: React.FC<MoveNodeButtonProps>
       </Menu>
       <TextDialog
         open={contextRenameDialog.open}
+        initialValue={contextRenameDialog.node?.variantName || ""}
         onClose={handleCloseRenameDialog}
         title="Rename Move"
         contentText="Please enter the new name for the move:"

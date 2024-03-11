@@ -1,17 +1,24 @@
 import { Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Button } from "@mui/material"
-import React from "react"
+import React, { useEffect } from "react"
 
 interface TextDialogProps {
     open: boolean;
+    initialValue: string;
     onTextConfirm: (text: string) => void;
     onClose: () => void;
     title: string;
     contentText: string;
 }
 
-export const TextDialog: React.FC<TextDialogProps> = ({open, onTextConfirm, onClose, title, contentText: contextText}) => {
+export const TextDialog: React.FC<TextDialogProps> = ({open, initialValue, onTextConfirm, onClose, title, contentText: contextText}) => {
 
-    const [value, setValue] = React.useState("")
+    const [value, setValue] = React.useState(initialValue)
+
+    useEffect(() => {
+      if(initialValue && initialValue !== value){
+        setValue(initialValue)
+      }
+    }, [initialValue])
 
     return <Dialog open={open} onClose={onClose}>
     <DialogTitle>{title}</DialogTitle>

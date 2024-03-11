@@ -42,7 +42,7 @@ const SelectNextMoveDialog: React.FC<SelectNextMoveDialogProps> = ({
       <DialogContent>
         <DialogContentText>{contentText}</DialogContentText>
         <RadioGroup
-            value={selectedNextMove}
+            value={selectedNextMove || null}
             onChange={(e) => setSelectedNextMove(e.target.value)}
         >
             {nextMovements.map((nextMove) => (

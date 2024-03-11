@@ -89,7 +89,7 @@ export const MoveNodeButtonWithActions: React.FC<MoveNodeButtonProps> = ({
         onContextMenu={(event) => handleContextMenu(event, move)}
         color={isSelected(move) ? "primary" : "inherit"}
       >
-        {move.getMove().san}
+        {move.getMove().san} {move.variantName ? "*" : ""}
       </MoveButton>
       <Menu
         open={contextMenu.node !== null}
@@ -115,6 +115,7 @@ export const MoveNodeButtonWithActions: React.FC<MoveNodeButtonProps> = ({
       </Menu>
       <TextDialog
         open={contextRenameDialog.open}
+        initialValue={contextRenameDialog.node?.variantName || ""}
         onClose={handleCloseRenameDialog}
         title="Rename Move"
         contentText="Please enter the new name for the move:"
