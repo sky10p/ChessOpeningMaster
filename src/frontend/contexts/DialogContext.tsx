@@ -141,7 +141,7 @@ export const DialogContextProvider = ({ children }: { children: React.ReactNode 
     return (
         <DialogContext.Provider value={{ showTextDialog, showConfirmDialog, showTrainVariantsDialog, showSelectNextMoveDialog }}>
             {children}
-           <TextDialog open={openTextDialog} onClose={handleDialogClose} contentText={contentText} onTextConfirm={handleTextConfirm} title={title}></TextDialog>
+           <TextDialog open={openTextDialog} initialValue="" onClose={handleDialogClose} contentText={contentText} onTextConfirm={handleTextConfirm} title={title}></TextDialog>
            <ConfirmDialog open={openConfirmDialog} onClose={handleDialogClose} contentText={contentText} onConfirm={handleConfirm} title={title}></ConfirmDialog>
            <SelectTrainVariantsDialog open={openTrainVariantsDialog} contentText={contentText} trainVariants={trainVariants} onClose={handleDialogClose} onConfirm={handleTrainVariantsConfirm} title={title}></SelectTrainVariantsDialog>
            <SelectNextMoveDialog open={openSelectNextMoveDialog} contentText={contentText} nextMovements={nextMovements} onClose={handleDialogClose} onConfirm={handleNextMoveConfirm} title={title}></SelectNextMoveDialog>
