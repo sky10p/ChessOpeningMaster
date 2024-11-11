@@ -1,5 +1,5 @@
 import React, { CSSProperties, useEffect, useState } from "react";
-import { Color, Move, Square } from "chess.js";
+import { Color, Move, Square, Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import { useRepertoireContext } from "../../../contexts/RepertoireContext";
 import { useTrainRepertoireContext } from "../../../contexts/TrainRepertoireContext";
@@ -89,19 +89,7 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
     if (isCorrectPieceSelected(square, chess.turn())) {
       setSelectedSquare(square);
       const moves = chess.moves({ square: square as Square, verbose: true });
-      const trainingMoves =
-        isTraining && trainRepertoireContext
-          ? trainRepertoireContext.allowedMoves.map((allowedMove) =>
-              allowedMove.getMove()
-            )
-          : [];
-      const filteredMoves = moves.filter((move) =>
-        trainingMoves.some(
-          (trainingMove) =>
-            trainingMove.from === move.from && trainingMove.to === move.to
-        )
-      );
-      setPossibleMoves(isTraining ? filteredMoves : moves);
+      setPossibleMoves(moves);
     } else {
       unselectPiece();
     }
@@ -118,20 +106,34 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
   };
 
   const handleMove = (from: string, to: string): boolean => {
-    let correctMove = false;
-    if (isMoveValid(from, to)) {
-      const move = chess.move({ from, to, promotion: "q" });
-
-      if (move) {
-        setChess(chess);
+    const tempChess = new Chess(chess.fen());
+    const move = tempChess.move({ from, to, promotion: "q" });
+    if (move) {
+      let isMoveAllowed = true;
+      if (isTraining && trainRepertoireContext) {
+        const trainingMoves = trainRepertoireContext.allowedMoves.map((allowedMove) =>
+          allowedMove.getMove()
+        );
+        isMoveAllowed = trainingMoves.some(
+          (trainingMove) =>
+            trainingMove.from === move.from && trainingMove.to === move.to
+        );
+      }
+      if (isTraining && !isMoveAllowed) {
+        alert("La jugada no es válida según el repertorio.");
+        unselectPiece();
+        return false;
+      } else {
+        setChess(tempChess);
         addMove(move);
-        correctMove = true;
+        unselectPiece();
+        return true;
       }
     }
     setPossibleMoves([]);
     setSelectedSquare(null);
     setSquareStyles({});
-    return correctMove;
+    return false;
   };
 
   const handleSquareClick = (square: Square) => {
