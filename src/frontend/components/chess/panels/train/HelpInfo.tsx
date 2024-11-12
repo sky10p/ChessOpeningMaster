@@ -12,16 +12,15 @@ import { MoveNodeButtonWithActions } from "../../buttons/MoveNodeButtonWithActio
 
 const HelpInfo: React.FC = () => {
   const [iconVisible, setIconVisible] = useState(true);
-  const {allowedMoves} = useTrainRepertoireContext();
-
+  const {allowedMoves, isYourTurn} = useTrainRepertoireContext();
 
   const toggleVisibility = () => {
     setIconVisible(!iconVisible);
   };
 
   return (
-    <Grid container direction="column" spacing={2}>
-      <Grid item container alignItems="center" spacing={1}>
+    <Grid container direction="column" alignItems="center" spacing={2} style={{ marginBottom: "16px" }}>
+      <Grid item container alignItems="center" justifyContent="center" spacing={1}>
         <Grid item>
           <IconButton onClick={toggleVisibility}>
             {iconVisible ? (
@@ -32,16 +31,20 @@ const HelpInfo: React.FC = () => {
           </IconButton>
         </Grid>
         <Grid item>
-          <Typography variant="body1">View available movements</Typography>
+          <Typography variant="body1" fontWeight="bold">
+            Available Moves
+          </Typography>
         </Grid>
       </Grid>
-      <Grid item container direction="row" wrap="wrap" spacing={1}>
-        {!iconVisible && allowedMoves.map((move, index) => (
-          <Grid item key={index}>
-            <MoveNodeButtonWithActions move={move} />
-          </Grid>
-        ))}
-      </Grid>
+      {!iconVisible && isYourTurn && (
+        <Grid item container direction="row" justifyContent="center" wrap="wrap" spacing={1}>
+          {allowedMoves.map((move, index) => (
+            <Grid item key={index}>
+              <MoveNodeButtonWithActions move={move} />
+            </Grid>
+          ))}
+        </Grid>
+      )}
     </Grid>
   );
 };

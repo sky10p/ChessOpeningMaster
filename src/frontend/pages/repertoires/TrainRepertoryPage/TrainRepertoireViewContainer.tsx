@@ -7,7 +7,6 @@ import {
   useTheme,
 } from "@mui/material";
 import Board from "../../../components/chess/board/Board";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import InfoIcon from "@mui/icons-material/Info";
 import EditIcon from "@mui/icons-material/Edit";
 
@@ -27,41 +26,20 @@ import { HintInfo } from "../../../components/chess/panels/train/HintInfo";
 
 const TrainRepertoireViewContainer: React.FC = () => {
   const theme = useTheme();
-
-  const [panelSelected, setPanelSelected] = React.useState<
-    "info" | "help" | "trainComments"
-  >("info");
-
+  const [panelSelected, setPanelSelected] = React.useState<"info" | "help" | "trainComments">("info");
   const navigate = useNavigate();
-
   const { repertoireId, repertoireName } = useRepertoireContext();
   const { showTrainVariantsDialog } = useDialogContext();
-  const { addIcon: addIconHeader, removeIcon: removeIconHeader } =
-    useHeaderContext();
-
-  const { trainVariants, chooseTrainVariantsToTrain } =
-    useTrainRepertoireContext();
-
-  const {
-    addIcon: addIconFooter,
-    removeIcon: removeIconFooter,
-    setIsVisible,
-  } = useFooterContext();
+  const { addIcon: addIconHeader, removeIcon: removeIconHeader } = useHeaderContext();
+  const { trainVariants, chooseTrainVariantsToTrain } = useTrainRepertoireContext();
+  const { addIcon: addIconFooter, removeIcon: removeIconFooter, setIsVisible } = useFooterContext();
 
   const calcWidth = useCallback(
-    ({ screenWidth }: { screenWidth: number }): number => {
-      if (screenWidth >= theme.breakpoints.values.sm) {
-        return (screenWidth * 35) / 100;
-      } else {
-        return (screenWidth * 90) / 100;
-      }
-    },
+    ({ screenWidth }: { screenWidth: number }): number => screenWidth >= theme.breakpoints.values.sm ? (screenWidth * 35) / 100 : (screenWidth * 90) / 100,
     [theme.breakpoints.values.sm]
   );
 
-  const isMobile = useMediaQuery((theme: Theme) =>
-    theme.breakpoints.down("sm")
-  );
+  const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down("sm"));
 
   useEffect(() => {
     addIconHeader({
@@ -77,19 +55,19 @@ const TrainRepertoireViewContainer: React.FC = () => {
           },
         });
       },
-    }),
-      addIconHeader({
-        key: "goToEditRepertoire",
-        icon: <EditIcon />,
-        onClick: () => {
-          navigate(`/repertoire/${repertoireId}`);
-        },
-      });
+    });
+    addIconHeader({
+      key: "goToEditRepertoire",
+      icon: <EditIcon />,
+      onClick: () => {
+        navigate(`/repertoire/${repertoireId}`);
+      },
+    });
     return () => {
       removeIconHeader("selectTrainVariants");
       removeIconHeader("goToEditRepertoire");
     };
-  }, []);
+  }, [addIconHeader, removeIconHeader, showTrainVariantsDialog, trainVariants, chooseTrainVariantsToTrain, navigate, repertoireId]);
 
   useEffect(() => {
     if (isMobile) {
@@ -99,12 +77,6 @@ const TrainRepertoireViewContainer: React.FC = () => {
         label: "Train info",
         icon: <InfoIcon />,
         onClick: () => setPanelSelected("info"),
-      });
-      addIconFooter({
-        key: "help",
-        label: "Help",
-        icon: <HelpOutlineIcon />,
-        onClick: () => setPanelSelected("help"),
       });
       addIconFooter({
         key: "trainComments",
@@ -117,20 +89,20 @@ const TrainRepertoireViewContainer: React.FC = () => {
     return () => {
       setIsVisible(false);
       removeIconFooter("info");
-      removeIconFooter("help");
       removeIconFooter("trainComments");
     };
-  }, [isMobile]);
+  }, [isMobile, addIconFooter, removeIconFooter, setIsVisible]);
 
   return (
     <Grid container spacing={2}>
       <Grid item container direction="column" alignItems="left" xs={12} sm={5}>
+        {isMobile && (
+          <Grid item container justifyContent="center" style={{ marginBottom: "16px" }}>
+            <HelpInfo />
+          </Grid>
+        )}
         <Grid item container justifyContent={"center"}>
-          <Typography
-            variant="h5"
-            gutterBottom
-            style={{ marginBottom: "16px" }}
-          >
+          <Typography variant="h5" gutterBottom style={{ marginBottom: "16px" }}>
             Training {repertoireName}
           </Typography>
         </Grid>
@@ -140,36 +112,30 @@ const TrainRepertoireViewContainer: React.FC = () => {
       </Grid>
       <Grid item xs={12} sm={5} container direction="column" alignItems="left">
         {isMobile && panelSelected === "info" && (
-          <>
-            <Grid item>
-              <TrainInfo />
-            </Grid>
-          </>
+          <Grid item>
+            <TrainInfo />
+          </Grid>
         )}
         {isMobile && panelSelected === "help" && (
-          <>
-            <Grid item>
-              <HelpInfo />
-            </Grid>
-          </>
+          <Grid item>
+            <HelpInfo />
+          </Grid>
         )}
         {isMobile && panelSelected === "trainComments" && (
-          <>
-            <Grid item>
-              <HintInfo />
-            </Grid>
-          </>
+          <Grid item>
+            <HintInfo />
+          </Grid>
         )}
         {!isMobile && (
           <>
             <Grid item style={{ marginTop: "24px" }}>
+              <HelpInfo />
+            </Grid>
+            <Grid item style={{ marginTop: "36px" }}>
               <HintInfo />
             </Grid>
             <Grid item style={{ marginTop: "36px" }}>
               <TrainInfo />
-            </Grid>
-            <Grid item style={{ marginTop: "36px" }}>
-              <HelpInfo />
             </Grid>
           </>
         )}
