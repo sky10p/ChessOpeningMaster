@@ -198,6 +198,7 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
   return (
     <div>
       <Chessboard
+        id="game-board"
         position={chess.fen()}
         onSquareClick={handleSquareClick}
         onSquareRightClick={handleSquareRightClick}
