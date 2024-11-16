@@ -93,6 +93,32 @@ const TrainRepertoireViewContainer: React.FC = () => {
     };
   }, [isMobile, addIconFooter, removeIconFooter, setIsVisible]);
 
+  const renderPanelContent = () => {
+    if (isMobile) {
+      return (
+        <Grid item>
+          {panelSelected === "info" && <TrainInfo />}
+          {panelSelected === "help" && <HelpInfo />}
+          {panelSelected === "trainComments" && <HintInfo />}
+        </Grid>
+      );
+    } else {
+      return (
+        <>
+          <Grid item style={{ marginTop: "24px" }}>
+            <HelpInfo />
+          </Grid>
+          <Grid item style={{ marginTop: "36px" }}>
+            <HintInfo />
+          </Grid>
+          <Grid item style={{ marginTop: "36px" }}>
+            <TrainInfo />
+          </Grid>
+        </>
+      );
+    }
+  };
+
   return (
     <Grid container spacing={2}>
       <Grid item container direction="column" alignItems="left" xs={12} sm={5}>
@@ -111,34 +137,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
         </Grid>
       </Grid>
       <Grid item xs={12} sm={5} container direction="column" alignItems="left">
-        {isMobile && panelSelected === "info" && (
-          <Grid item>
-            <TrainInfo />
-          </Grid>
-        )}
-        {isMobile && panelSelected === "help" && (
-          <Grid item>
-            <HelpInfo />
-          </Grid>
-        )}
-        {isMobile && panelSelected === "trainComments" && (
-          <Grid item>
-            <HintInfo />
-          </Grid>
-        )}
-        {!isMobile && (
-          <>
-            <Grid item style={{ marginTop: "24px" }}>
-              <HelpInfo />
-            </Grid>
-            <Grid item style={{ marginTop: "36px" }}>
-              <HintInfo />
-            </Grid>
-            <Grid item style={{ marginTop: "36px" }}>
-              <TrainInfo />
-            </Grid>
-          </>
-        )}
+        {renderPanelContent()}
       </Grid>
     </Grid>
   );

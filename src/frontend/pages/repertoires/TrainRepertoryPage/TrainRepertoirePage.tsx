@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { IRepertoire } from "../../../../common/types/Repertoire";
 import { getRepertoire } from "../../../repository/repertoires/repertoires";
@@ -9,22 +9,40 @@ import { TrainRepertoireContextProvider } from "../../../contexts/TrainRepertoir
 
 const TrainRepertoirePage = () => {
   const { id } = useParams();
-  const [repertoire, setRepertoire] = React.useState<IRepertoire | undefined>(
-    undefined
-  );
+  const [repertoire, setRepertoire] = useState<IRepertoire | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchRepertoire = async (id: string) => {
+    try {
+      const repertoire = await getRepertoire(id);
+      setRepertoire(repertoire);
+    } catch (error) {
+      console.error("Failed to fetch repertoire", error);
+      setError("Failed to fetch repertoire. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (id) {
-      getRepertoire(id).then((repertoire) => setRepertoire(repertoire));
-     
+      fetchRepertoire(id);
     }
-    
   }, [id]);
 
   const { setOpen } = useNavbarContext();
   useEffect(() => {
     setOpen(false);
   }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
 
   return repertoire?._id ? (
     <RepertoireContextProvider
@@ -33,7 +51,6 @@ const TrainRepertoirePage = () => {
       initialMoves={repertoire.moveNodes}
       initialOrientation={repertoire.orientation ?? "white"}
     >
-      {" "}
       <TrainRepertoireContextProvider>
         <TrainRepertoireViewContainer />
       </TrainRepertoireContextProvider>

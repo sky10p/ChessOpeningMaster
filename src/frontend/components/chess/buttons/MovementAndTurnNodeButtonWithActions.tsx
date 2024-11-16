@@ -73,7 +73,9 @@ export const MovementAndTurnNodeButtonWithActions: React.FC<MoveNodeButtonProps>
     boxShadow: "2px 2px 5px rgba(0, 0, 0, 0.1)",
   });
 
-   const MoveButton = styled(Button)<MoveButtonProps>(({isSelectedMove}) => ({
+   const MoveButton = styled(Button, {
+    shouldForwardProp: (prop) => prop !== "isSelectedMove",
+  })<MoveButtonProps>(({isSelectedMove}) => ({
     minWidth: "40px",
     minHeight: "30px",
     margin: "2px",

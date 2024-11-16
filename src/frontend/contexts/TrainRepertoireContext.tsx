@@ -3,6 +3,7 @@ import { Turn } from "../../common/types/Orientation";
 import { useRepertoireContext } from "./RepertoireContext";
 import { MoveVariantNode } from "../components/chess/utils/VariantNode";
 import { TrainVariant } from "../components/chess/models/chess.models";
+import { deepEqual } from "../utils/deepEqual";
 
 interface TrainRepertoireContextProps {
   turn: Turn;
@@ -71,31 +72,42 @@ export const TrainRepertoireContextProvider: React.FC<
       })
       .map((trainVariant) => {
         return trainVariant.variant.moves[turnNumber];
-      }).reduce((uniqueAllowedMoves, trainVariant) => {
-        if(trainVariant){
+      })
+      .reduce((uniqueAllowedMoves, trainVariant) => {
+        if (trainVariant) {
           uniqueAllowedMoves.add(trainVariant);
         }
         return uniqueAllowedMoves;
       }, new Set<MoveVariantNode>());
-      
-    setAllowedMoves([...allowedMovesFromVariants]);
+
+    const newAllowedMoves = [...allowedMovesFromVariants];
+    if (!deepEqual(newAllowedMoves, allowedMoves)) {
+      setAllowedMoves(newAllowedMoves);
+    }
   }, [turn, trainVariants]);
 
   useEffect(() => {
-   
-      if(allowedMoves.length === 0){
-        initBoard();
-        if(trainVariants.some((trainVariant) => trainVariant.state === "inProgress" || trainVariant.state === "discarded")){
-          setTrainVariants(trainVariants.map((trainVariant) => {
+    if (allowedMoves.length === 0) {
+      initBoard();
+      if (
+        trainVariants.some(
+          (trainVariant) =>
+            trainVariant.state === "inProgress" ||
+            trainVariant.state === "discarded"
+        )
+      ) {
+        setTrainVariants(
+          trainVariants.map((trainVariant) => {
             if (trainVariant.state === "discarded") {
-                return { ...trainVariant, state: "inProgress" } as TrainVariant;
+              return { ...trainVariant, state: "inProgress" } as TrainVariant;
             }
             return trainVariant;
-        }))
-        }
+          })
+        );
       }
+    }
     if (turn != orientation && allowedMoves.length > 0) {
-        playOpponentMove()
+      playOpponentMove();
     }
   }, [allowedMoves]);
 
@@ -103,7 +115,7 @@ export const TrainRepertoireContextProvider: React.FC<
     const newTrainVariants = trainVariants.map((trainVariant) => {
       if (
         trainVariant.state === "inProgress" &&
-        lastMove.position >0 &&
+        lastMove.position > 0 &&
         trainVariant.variant.moves[lastMove.position - 1].id !== lastMove.id
       ) {
         return { ...trainVariant, state: "discarded" } as TrainVariant;
@@ -120,7 +132,6 @@ export const TrainRepertoireContextProvider: React.FC<
     setTrainVariants(newTrainVariants);
     return newTrainVariants;
   };
- 
 
   const isYourTurn = turn === orientation;
 
@@ -131,8 +142,10 @@ export const TrainRepertoireContextProvider: React.FC<
         isYourTurn,
         allowedMoves,
         trainVariants,
-        finishedTrain: trainVariants.every((trainVariant) => trainVariant.state === "finished"),
-        chooseTrainVariantsToTrain
+        finishedTrain: trainVariants.every(
+          (trainVariant) => trainVariant.state === "finished"
+        ),
+        chooseTrainVariantsToTrain,
       }}
     >
       {children}
