@@ -82,7 +82,7 @@ const TrainInfo: React.FC = () => {
               Available Variants to Play
             </Typography>
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={12} style={{ maxHeight: '400px', overflowY: 'auto' }}>
             <ul style={{ listStyleType: "none", padding: 0, margin: 0 }}>
               {availableVariants.map((variant, index) => (
                 <li
