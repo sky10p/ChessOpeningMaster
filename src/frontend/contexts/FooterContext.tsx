@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 
 interface FooterIcon {
     key: string;
@@ -29,16 +29,19 @@ export const FooterContextProvider = ({ children }: { children: React.ReactNode 
     const [icons, setIcons] = React.useState<FooterIcon[]>([]);
     const [isVisible, setIsVisible] = React.useState(false);
 
-    const addIcon = (icon: FooterIcon) => {
-        if(icons.find((i) => i.key === icon.key)){
-            throw new Error(`Icon with key ${icon.key} already exists`);
-        }
-        setIcons((prevIcons) => [...prevIcons, icon]);
-    };
+    const addIcon = useCallback((icon: FooterIcon) => {
+        setIcons((prevIcons) => {
+            if (prevIcons.find((i) => i.key === icon.key)) {
+                throw new Error(`Icon with key ${icon.key} already exists`);
+            }
+            return [...prevIcons, icon];
+        });
+    }, []);
 
-    const removeIcon = (iconKey: string) => {
+    const removeIcon = useCallback((iconKey: string) => {
         setIcons((prevIcons) => prevIcons.filter((icon) => icon.key !== iconKey));  
-    };
+    }, []);
+
     return (
         <FooterContext.Provider value={{icons, addIcon, removeIcon, isVisible, setIsVisible }}>
             {children}

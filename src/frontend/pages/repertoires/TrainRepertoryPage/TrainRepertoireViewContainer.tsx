@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import {
   Grid,
   Theme,
@@ -42,58 +42,73 @@ const TrainRepertoireViewContainer: React.FC = () => {
   const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down("sm"));
 
   useEffect(() => {
-    addIconHeader({
-      key: "selectTrainVariants",
-      icon: <ChecklistIcon />,
-      onClick: () => {
-        showTrainVariantsDialog({
-          title: "Select train variants",
-          contentText: "Select the variants you want to train",
-          trainVariants,
-          onTrainVariantsConfirm: (selectedTrainVariants: TrainVariant[]) => {
-            chooseTrainVariantsToTrain(selectedTrainVariants);
-          },
-        });
+    const headerIcons = [
+      {
+        key: "selectTrainVariants",
+        icon: <ChecklistIcon />,
+        onClick: () => {
+          showTrainVariantsDialog({
+            title: "Select train variants",
+            contentText: "Select the variants you want to train",
+            trainVariants,
+            onTrainVariantsConfirm: (selectedTrainVariants: TrainVariant[]) => {
+              chooseTrainVariantsToTrain(selectedTrainVariants);
+            },
+          });
+        },
       },
-    });
-    addIconHeader({
-      key: "goToEditRepertoire",
-      icon: <EditIcon />,
-      onClick: () => {
-        navigate(`/repertoire/${repertoireId}`);
+      {
+        key: "goToEditRepertoire",
+        icon: <EditIcon />,
+        onClick: () => {
+          navigate(`/repertoire/${repertoireId}`);
+        },
       },
+    ];
+
+    headerIcons.forEach(({ key, icon, onClick }) => {
+      addIconHeader({ key, icon, onClick });
     });
+
     return () => {
-      removeIconHeader("selectTrainVariants");
-      removeIconHeader("goToEditRepertoire");
+      headerIcons.forEach(({ key }) => {
+        removeIconHeader(key);
+      });
     };
   }, [addIconHeader, removeIconHeader, showTrainVariantsDialog, trainVariants, chooseTrainVariantsToTrain, navigate, repertoireId]);
 
   useEffect(() => {
     if (isMobile) {
       setIsVisible(true);
-      addIconFooter({
-        key: "info",
-        label: "Train info",
-        icon: <InfoIcon />,
-        onClick: () => setPanelSelected("info"),
-      });
-      addIconFooter({
-        key: "trainComments",
-        label: "Comments",
-        icon: <ChatIcon />,
-        onClick: () => setPanelSelected("trainComments"),
-      });
-    }
+      const footerIcons = [
+        {
+          key: "info",
+          label: "Train info",
+          icon: <InfoIcon />,
+          onClick: () => setPanelSelected("info"),
+        },
+        {
+          key: "trainComments",
+          label: "Comments",
+          icon: <ChatIcon />,
+          onClick: () => setPanelSelected("trainComments"),
+        },
+      ];
 
-    return () => {
-      setIsVisible(false);
-      removeIconFooter("info");
-      removeIconFooter("trainComments");
-    };
+      footerIcons.forEach(({ key, label, icon, onClick }) => {
+        addIconFooter({ key, label, icon, onClick });
+      });
+
+      return () => {
+        setIsVisible(false);
+        footerIcons.forEach(({ key }) => {
+          removeIconFooter(key);
+        });
+      };
+    }
   }, [isMobile, addIconFooter, removeIconFooter, setIsVisible]);
 
-  const renderPanelContent = () => {
+  const renderPanelContent = useMemo(() => {
     if (isMobile) {
       return (
         <Grid item>
@@ -117,7 +132,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
         </>
       );
     }
-  };
+  }, [isMobile, panelSelected]);
 
   return (
     <Grid container spacing={2}>
@@ -137,7 +152,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
         </Grid>
       </Grid>
       <Grid item xs={12} sm={5} container direction="column" alignItems="left">
-        {renderPanelContent()}
+        {renderPanelContent}
       </Grid>
     </Grid>
   );

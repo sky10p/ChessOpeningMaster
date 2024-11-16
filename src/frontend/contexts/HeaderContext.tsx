@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 
 interface HeaderIcon {
     key: string;
@@ -26,25 +26,33 @@ export const useHeaderContext = () => {
 export const HeaderContextProvider = ({ children }: { children: React.ReactNode }) => {
     const [icons, setIcons] = React.useState<HeaderIcon[]>([]);
 
-    const addIcon = (icon: HeaderIcon) => {
-        setIcons((prevIcons) => [...prevIcons, icon]);
-    };
+    const addIcon = useCallback((icon: HeaderIcon) => {
+        setIcons((prevIcons) => {
+            if (prevIcons.find((i) => i.key === icon.key)) {
+                throw new Error(`Icon with key ${icon.key} already exists`);
+            }
+            return [...prevIcons, icon];
+        });
+    }, []);
 
-    const changeIconCallback = (key: string, onClick: (event: React.MouseEvent<HTMLElement>) => void) => {
-        const icon = icons.find((i) => i.key === key);
+    const changeIconCallback = useCallback((key: string, onClick: (event: React.MouseEvent<HTMLElement>) => void) => {
+        setIcons((prevIcons) => {
+            const iconIndex = prevIcons.findIndex((i) => i.key === key);
+            if (iconIndex !== -1) {
+                const updatedIcons = [...prevIcons];
+                updatedIcons[iconIndex] = { ...updatedIcons[iconIndex], onClick };
+                return updatedIcons;
+            }
+            return prevIcons;
+        });
+    }, []);
 
-        if(icon){
-            icon.onClick = onClick;
-            setIcons([...icons])
+    const removeIcon = useCallback((iconKey: string) => {
+        setIcons((prevIcons) => prevIcons.filter((icon) => icon.key !== iconKey));
+    }, []);
 
-        }
-    }
-
-    const removeIcon = (iconKey: string) => {
-        setIcons((prevIcons) => prevIcons.filter((icon) => icon.key !== iconKey));  
-    };
     return (
-        <HeaderContext.Provider value={{icons, addIcon, removeIcon, changeIconCallback }}>
+        <HeaderContext.Provider value={{ icons, addIcon, removeIcon, changeIconCallback }}>
             {children}
         </HeaderContext.Provider>
     );
