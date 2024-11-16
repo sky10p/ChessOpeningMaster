@@ -12,10 +12,14 @@ import {
 import whiteKing from "../../../../assets/white-king.svg";
 import blackKing from "../../../../assets/black-king.svg";
 import { useTrainRepertoireContext } from "../../../../contexts/TrainRepertoireContext";
+import { useRepertoireContext } from "../../../../contexts/RepertoireContext";
+import { getMovementsFromVariant } from "../Variants/getMovementsFromVariants";
 
 const TrainInfo: React.FC = () => {
   const { turn, isYourTurn, trainVariants, finishedTrain } =
     useTrainRepertoireContext();
+
+  const {currentMoveNode} = useRepertoireContext();
 
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("sm")
@@ -27,7 +31,7 @@ const TrainInfo: React.FC = () => {
   const totalVariants = trainVariants.length;
 
   const availableVariants = trainVariants.filter(
-    (variant) => variant.state !== "finished"
+    (variant) => variant.state === "inProgress"
   );
 
   const [expandedVariant, setExpandedVariant] = useState<number | null>(null);
@@ -120,9 +124,9 @@ const TrainInfo: React.FC = () => {
                   </div>
                   {expandedVariant === index && (
                     <div style={{ marginTop: "8px", paddingLeft: "24px", display: "flex", flexWrap: "wrap" }}>
-                      {variant.variant.moves.slice(0, 6).map((move, moveIndex) => (
+                      {getMovementsFromVariant(variant, currentMoveNode).map((move, moveIndex) => (
                         <Typography key={moveIndex} variant="body2" style={{ marginRight: "16px", marginBottom: "8px" }}>
-                          {move.getMove().san}
+                          {move}
                         </Typography>
                       ))}
                     </div>
