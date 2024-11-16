@@ -112,7 +112,7 @@ const TrainInfo: React.FC = () => {
                       }}
                     ></span>
                     <Typography variant="body1" style={{ fontWeight: 500, flexGrow: 1 }}>
-                      {variant.variant.name}
+                      {variant.variant.fullName}
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
                       Click to see variant
