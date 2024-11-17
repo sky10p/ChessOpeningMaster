@@ -166,7 +166,7 @@ const EditRepertoireViewContainer: React.FC = () => {
           <BoardActions />
         </Grid>
       </Grid>
-      <Grid item xs={12} sm={5} container direction="column" alignItems="left">
+      <Grid item xs={12} sm={7} container direction="column" alignItems="left">
         {isMobile && panelSelected === "variants" && (
           <>
             <Grid item>
@@ -183,13 +183,10 @@ const EditRepertoireViewContainer: React.FC = () => {
         )}
         {!isMobile && (
           <>
-            <Grid
-              item
-              style={{ marginTop: "36px", height: "47%", overflowY: "auto" }}
-            >
+            <Grid item style={{ marginTop: "36px", overflowY: "auto" }}>
               <VariantsInfo />
             </Grid>
-            <Grid item style={{ marginTop: "24px" }}>
+            <Grid item style={{ marginTop: "24px", overflowY: "auto" }}>
               <BoardComment />
             </Grid>
           </>

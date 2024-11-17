@@ -1,5 +1,6 @@
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 import { MoveVariantNode } from "./VariantNode";
+import { Variant } from "../models/chess.models";
 
 export const toPGN = (
   nameRepertoire: string,
@@ -24,6 +25,33 @@ export const toPGN = (
 
   return [header + movesPgn, "*"].join(" ");
 };
+
+export const variantToPgn = (
+  variant: Variant,
+  orientation: BoardOrientation,
+  date: Date
+): string => {
+  const header = `[Event "${variant.fullName}"]
+[Site "https://chessrepertoire.com"]
+[Date "${date.toISOString().split("T")[0].replace(/-/g, ".")}"]
+[Round "?"]
+[White "${orientation === "white" ? variant.fullName : "?"}"]
+[Black "${orientation === "black" ? variant.fullName : "?"}"]
+[Result "*"]
+[Variant "Standard"]
+[Opening "${variant.fullName}"]
+[Annotator "ChessOpeningMaster"]
+
+`;
+
+  const movesPgn = variant.moves.map((move, index) => {
+    const moveString = move.getMove().color === "w" ? `${Math.floor(index / 2) + 1}. ${move.getMove().san}` : `${Math.floor(index / 2) + 1}... ${move.getMove().san}`;
+    const comments = move.comment && move.comment !== "" ? `{${move.comment}}` : "";
+    return [moveString, comments].filter(text => text !== "").join(" ");
+  }).join(" ");
+
+  return [header + movesPgn, "*"].join(" ");
+}
 
 export const addNodeToPgn = (
   node: MoveVariantNode,

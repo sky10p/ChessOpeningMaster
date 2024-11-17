@@ -4,7 +4,7 @@ import { Box, Typography } from "@mui/material";
 import VariantsTree from "./VariantTree";
 
 const VariantsInfo: React.FC = () => {
-  const { variants, currentMoveNode } =
+  const { variants, currentMoveNode, orientation } =
     useRepertoireContext();
   return (
     <Box>
@@ -14,6 +14,7 @@ const VariantsInfo: React.FC = () => {
       <VariantsTree
         variants={variants}
         currentNode={currentMoveNode}
+        orientation={orientation}
       ></VariantsTree>
     </Box>
   );
