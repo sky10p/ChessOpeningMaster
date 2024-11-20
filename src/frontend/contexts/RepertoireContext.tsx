@@ -8,6 +8,7 @@ import { useAlertContext } from "./AlertContext";
 import { putRepertoire } from "../repository/repertoires/repertoires";
 import { toPGN } from "../components/chess/utils/pgn.utils";
 import { useDialogContext } from "./DialogContext";
+import { useHeaderContext } from "./HeaderContext";
 
 interface RepertoireContextProps {
   chess: Chess;
@@ -66,6 +67,8 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
   const [chess, setChess] = useState<Chess>(new Chess());
   const [orientation, setOrientation] = useState<BoardOrientation>(initialOrientation);
   const [hasChanges, setHasChanges] = useState<boolean>(false);
+
+  const {setIsSaving} = useHeaderContext();
 
   const {showSelectNextMoveDialog} = useDialogContext();
 
@@ -232,16 +235,17 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
 
   const saveRepertory = React.useCallback(async () => {
     try {
-        showAlert("Saving repertoire...", "info");
-        await putRepertoire(
+        setIsSaving(true);
+      await putRepertoire(
             repertoireId,
             repertoireName,
             moveHistory.getMoveNodeWithoutParent(),
             orientation
         );
-        showAlert("Repertoire saved successfully.", "success");
+        setIsSaving(false);
     } catch (error) {
         showAlert("Error saving repertoire.", "error");
+        setIsSaving(false);
     }
     }, [repertoireId, repertoireName, moveHistory, orientation, comment, showAlert]);
 

@@ -11,6 +11,8 @@ export interface HeaderContextProps {
     addIcon: (icon: HeaderIcon) => void;
     changeIconCallback: (key: string, onClick: (event: React.MouseEvent<HTMLElement>) => void) => void;
     removeIcon: (iconKey: string) => void;
+    isSaving: boolean;
+    setIsSaving: (isSaving: boolean) => void;
 }
 
 export const HeaderContext = React.createContext<HeaderContextProps | null>(null);
@@ -25,6 +27,7 @@ export const useHeaderContext = () => {
 
 export const HeaderContextProvider = ({ children }: { children: React.ReactNode }) => {
     const [icons, setIcons] = React.useState<HeaderIcon[]>([]);
+    const [isSaving, setIsSaving] = React.useState(false);
 
     const addIcon = useCallback((icon: HeaderIcon) => {
         setIcons((prevIcons) => {
@@ -52,7 +55,7 @@ export const HeaderContextProvider = ({ children }: { children: React.ReactNode 
     }, []);
 
     return (
-        <HeaderContext.Provider value={{ icons, addIcon, removeIcon, changeIconCallback }}>
+        <HeaderContext.Provider value={{ icons, addIcon, removeIcon, changeIconCallback, isSaving, setIsSaving }}>
             {children}
         </HeaderContext.Provider>
     );
