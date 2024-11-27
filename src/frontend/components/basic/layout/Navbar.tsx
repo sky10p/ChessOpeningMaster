@@ -116,14 +116,14 @@ const Navbar: React.FC = () => {
             <ListItemText primary="Download Repertoires" />
           </ListItem>
         </ButtonBase>
-        <ButtonBase component={Link} to="/manage-repertoires"> 
+        {/* <ButtonBase component={Link} to="/manage-repertoires"> 
           <ListItem>
             <ListItemIcon>
               <SettingsIcon />
             </ListItemIcon>
             <ListItemText primary="Manage Repertoires" />
           </ListItem>
-        </ButtonBase>
+        </ButtonBase> */}
         <ButtonBase component={Link} to="/create-repertoire">
           <ListItem>
             <ListItemIcon>
