@@ -31,9 +31,6 @@ const VariantsInfo: React.FC = () => {
   }
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>
-        Variants
-      </Typography>
       <VariantsTree
         variants={variants}
         currentNode={currentMoveNode}

@@ -90,13 +90,6 @@ const VariantTree: React.FC<VariantTreeProps> = ({ variants, currentNode, orient
       <Grid container spacing={2} alignItems="center" mb={2} justifyContent="flex-start" wrap="nowrap">
         {selectedVariant && (
           <>
-            <Grid item xs>
-              <SelectVariant
-                variants={variants}
-                selectedVariant={selectedVariant}
-                onSelectVariant={setSelectedVariant}
-              />
-            </Grid>
             <Grid item>
               <IconButton
                 onClick={downloadVariantPGN}
@@ -124,6 +117,15 @@ const VariantTree: React.FC<VariantTreeProps> = ({ variants, currentNode, orient
           </>
         )}
       </Grid>
+      {selectedVariant && (
+        <Grid item xs>
+          <SelectVariant
+            variants={variants}
+            selectedVariant={selectedVariant}
+            onSelectVariant={setSelectedVariant}
+          />
+        </Grid>
+      )}
       <Box>{moveNodesWithActions}</Box>
     </>
   );
