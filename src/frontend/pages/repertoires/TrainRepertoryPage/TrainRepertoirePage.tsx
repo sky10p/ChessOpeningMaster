@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { IRepertoire } from "../../../../common/types/Repertoire";
 import { getRepertoire } from "../../../repository/repertoires/repertoires";
@@ -13,7 +13,7 @@ const TrainRepertoirePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchRepertoire = async (id: string) => {
+  const fetchRepertoire = useCallback(async (id: string) => {
     try {
       const repertoire = await getRepertoire(id);
       setRepertoire(repertoire);
@@ -23,13 +23,17 @@ const TrainRepertoirePage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  useEffect(() => {
+  const refetchRepertoire = useCallback(() => {
     if (id) {
       fetchRepertoire(id);
     }
-  }, [id]);
+  }, [id, fetchRepertoire]);
+
+  useEffect(() => {
+    refetchRepertoire();
+  }, [refetchRepertoire]);
 
   const { setOpen } = useNavbarContext();
   useEffect(() => {
@@ -50,6 +54,7 @@ const TrainRepertoirePage = () => {
       repertoireName={repertoire.name}
       initialMoves={repertoire.moveNodes}
       initialOrientation={repertoire.orientation ?? "white"}
+      updateRepertoire={refetchRepertoire}
     >
       <TrainRepertoireContextProvider>
         <TrainRepertoireViewContainer />
