@@ -56,6 +56,7 @@ interface RepertoireContextProviderProps {
   repertoireName: string;
   initialOrientation: BoardOrientation;
   initialMoves?: IMoveNode;
+  updateRepertoire: () => void;
 }
 export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps> = ({
   children,
@@ -63,6 +64,7 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
   repertoireName,
   initialOrientation,
   initialMoves,
+  updateRepertoire,
 }) => {
   const [chess, setChess] = useState<Chess>(new Chess());
   const [orientation, setOrientation] = useState<BoardOrientation>(initialOrientation);
@@ -228,10 +230,6 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
     currentMove.comment = comment;
     setHasChanges(true)
   };
-
-  const updateRepertoire = async () => {
-    setCurrentMove(currentMove);
-  }
 
   const saveRepertory = React.useCallback(async () => {
     try {

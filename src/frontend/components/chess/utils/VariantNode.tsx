@@ -143,7 +143,7 @@ export class MoveVariantNode implements IMoveNode {
             ? node.variantName
             : lastVariantName
             ? lastVariantName
-            : `Variant ${++numVariants}`,
+            : `Variant ${numVariants}`,
           differentMoves: !node.variantName && lastVariantName ? getDifferentNodesString(differentNodes) : "",
         });
       } else {

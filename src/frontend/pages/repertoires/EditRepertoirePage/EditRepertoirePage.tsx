@@ -20,11 +20,15 @@ const EditRepertoirePage = () => {
     }
   }, []);
 
-  useEffect(() => {
+  const refetchRepertoire = useCallback(() => {
     if (id) {
       fetchRepertoire(id);
     }
   }, [id, fetchRepertoire]);
+
+  useEffect(() => {
+    refetchRepertoire();
+  }, [refetchRepertoire]);
 
   const { setOpen } = useNavbarContext();
   useEffect(() => {
@@ -41,6 +45,7 @@ const EditRepertoirePage = () => {
       repertoireName={repertoire.name}
       initialMoves={repertoire.moveNodes}
       initialOrientation={repertoire.orientation ?? "white"}
+      updateRepertoire={refetchRepertoire}
     >
       <EditRepertoireViewContainer />
     </RepertoireContextProvider>

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Box, Grid, IconButton } from "@mui/material";
 import DownloadIcon from '@mui/icons-material/Download';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { MoveVariantNode } from "../../utils/VariantNode";
 import { Variant } from "../../models/chess.models";
 import { SelectVariant } from "../../selects/SelectVariant";
@@ -13,9 +14,10 @@ interface VariantTreeProps {
   variants: Variant[];
   currentNode: MoveVariantNode;
   orientation: BoardOrientation;
+  deleteVariant: (variant: Variant) => void;
 }
 
-const VariantTree: React.FC<VariantTreeProps> = ({ variants, currentNode, orientation }) => {
+const VariantTree: React.FC<VariantTreeProps> = ({ variants, currentNode, orientation, deleteVariant }) => {
   const isSelected = (node: MoveVariantNode) => node === currentNode;
   const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>(
     variants[0]
@@ -82,6 +84,7 @@ const VariantTree: React.FC<VariantTreeProps> = ({ variants, currentNode, orient
     }
   };
 
+
   return (
     <>
       <Grid container spacing={2} alignItems="center" mb={2} justifyContent="flex-start" wrap="nowrap">
@@ -108,6 +111,14 @@ const VariantTree: React.FC<VariantTreeProps> = ({ variants, currentNode, orient
                 color="primary"
               >
                 <ContentCopyIcon />
+              </IconButton>
+            </Grid>
+            <Grid item>
+              <IconButton
+                onClick={() => deleteVariant(selectedVariant)}
+                color="primary"
+              >
+                <DeleteIcon />
               </IconButton>
             </Grid>
           </>

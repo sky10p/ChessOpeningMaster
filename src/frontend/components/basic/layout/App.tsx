@@ -12,11 +12,13 @@ const App: React.FC = (): React.ReactElement => {
     <BrowserRouter>
       <AppContext>
         <Header />
-        <Box display="flex" flexDirection="row" minHeight="calc(100vh - 64px)">
-          <Navbar />
-          <Content />
+        <Box display="flex" flexDirection="column" minHeight="100vh">
+          <Box display="flex" flexDirection="row" flexGrow={1}>
+            <Navbar />
+            <Content />
+          </Box>
+          <Footer />
         </Box>
-        <Footer />
       </AppContext>
     </BrowserRouter>
   );

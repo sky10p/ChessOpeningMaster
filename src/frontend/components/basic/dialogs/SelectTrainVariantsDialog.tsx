@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { TrainVariant } from "../../chess/models/chess.models";
 import {
   Checkbox,
@@ -10,6 +10,7 @@ import {
   Button,
   DialogContentText,
   Box,
+  TextField,
 } from "@mui/material";
 
 interface SelectTrainVariantsDialogProps {
@@ -36,30 +37,55 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
   const [selectedTrainVariants, setSelectedTrainVariants] = useState<
     Set<number>
   >(new Set());
+  const [filterText, setFilterText] = useState("");
 
-  const groupedTrainVariantsByName = trainVariants.reduce(
-    (groupedTrainVariants, trainVariant, index) => {
-      const groupName = trainVariant.variant.name;
-      if (!groupedTrainVariants[groupName]) {
-        groupedTrainVariants[groupName] = [];
-      }
-      groupedTrainVariants[groupName].push({...trainVariant, originalIndex: index});
-      return groupedTrainVariants;
-    },
-    {} as Record<string, GroupedTrainVariant[]>
-  );
+  const handleFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFilterText(event.target.value);
+  };
 
-  useEffect(() => {
-    setSelectedTrainVariants(
-      new Set(
-        trainVariants
-          .map((trainVariant, index) =>
-            trainVariant.state !== "finished" ? index : -1
-          )
-          .filter((variantIndex) => variantIndex !== -1)
-      )
+  const groupedTrainVariantsByName = useMemo(() => {
+    return trainVariants.reduce(
+      (groupedTrainVariants, trainVariant, index) => {
+        const groupName = trainVariant.variant.name;
+        if (!groupedTrainVariants[groupName]) {
+          groupedTrainVariants[groupName] = [];
+        }
+        groupedTrainVariants[groupName].push({...trainVariant, originalIndex: index});
+        return groupedTrainVariants;
+      },
+      {} as Record<string, GroupedTrainVariant[]>
     );
   }, [trainVariants]);
+
+  const filteredGroupedTrainVariantsByName = useMemo(() => {
+    return Object.keys(groupedTrainVariantsByName).reduce(
+      (filteredGroups, groupName) => {
+        const filteredVariants = groupedTrainVariantsByName[groupName].filter((trainVariant) =>
+          trainVariant.variant.fullName.toLowerCase().includes(filterText.toLowerCase())
+        );
+        if (filteredVariants.length > 0) {
+          filteredGroups[groupName] = filteredVariants;
+        }
+        return filteredGroups;
+      },
+      {} as Record<string, GroupedTrainVariant[]>
+    );
+  }, [groupedTrainVariantsByName, filterText]);
+
+  useEffect(() => {
+    if (open) {
+      setSelectedTrainVariants(
+        new Set(
+          trainVariants
+            .map((trainVariant, index) =>
+              trainVariant.state !== "finished" ? index : -1
+            )
+            .filter((variantIndex) => variantIndex !== -1)
+        )
+      );
+      setFilterText("");
+    }
+  }, [open, trainVariants]);
 
   const handleToggleVariant = (variantIndex: number) => {
     const newSelectedVariants = new Set(selectedTrainVariants);
@@ -94,7 +120,7 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
 
   const handleClose = () => {
     setSelectedTrainVariants(new Set());
-
+    setFilterText("");
     onClose();
   };
 
@@ -125,7 +151,15 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
     <Dialog open={open} onClose={handleClose}>
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
-        <DialogContentText>{contentText}</DialogContentText>
+        <DialogContentText sx={{ mb: 2 }}>{contentText}</DialogContentText>
+        <TextField
+          label="Filter Variants"
+          variant="outlined"
+          fullWidth
+          value={filterText}
+          onChange={handleFilterChange}
+          sx={{ mb: 2 }}
+        />
         <div><FormControlLabel
           control={
             <Checkbox
@@ -136,14 +170,14 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
           }
           label="Select All"
         /></div>
-        {Object.keys(groupedTrainVariantsByName).map((groupName) => (
+        {Object.keys(filteredGroupedTrainVariantsByName).map((groupName) => (
           <div key={groupName}>
             <Box sx={{ display: "flex", alignItems: "center" }}>
 
             <Checkbox checked={isGroupSelected(groupName)} indeterminate={isSomeOfGroupSelected(groupName)} onChange={() => handleSelectAllGroup(groupName)} />
             <h3>{groupName}</h3>
             </Box>
-            {groupedTrainVariantsByName[groupName].length > 1 && groupedTrainVariantsByName[groupName].map((trainVariant) => (
+            {filteredGroupedTrainVariantsByName[groupName].length > 1 && filteredGroupedTrainVariantsByName[groupName].map((trainVariant) => (
               <FormControlLabel
                 key={trainVariant.originalIndex}
                 control={

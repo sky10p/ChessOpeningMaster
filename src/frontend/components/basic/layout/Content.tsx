@@ -4,6 +4,7 @@ import Home from "../../../pages/Home";
 import CreateRepertoire from "../../../pages/repertoires/CreateRepertoire";
 import EditRepertoirePage from "../../../pages/repertoires/EditRepertoirePage/EditRepertoirePage";
 import TrainRepertoirePage from "../../../pages/repertoires/TrainRepertoryPage/TrainRepertoirePage";
+import ManageRepertoirePage from "../../../pages/repertoires/ManageRepertoirePage/ManageRepertoirePage";
 
 const headerHeight = 64;
 const footerHeight = 64;
@@ -13,6 +14,7 @@ const contentStyles: React.CSSProperties = {
   marginTop: headerHeight,
   marginBottom: footerHeight,
   padding: "1rem",
+  height: `calc(100vh - ${headerHeight + footerHeight}px)`,
 };
 
 const Content = () => {
@@ -24,6 +26,7 @@ const Content = () => {
           element={<CreateRepertoire/>}
         />
         <Route path="/edit-repertoire" element={<div>Edit repertoire</div>} />
+       {/*  <Route path="/manage-repertoires" element={<ManageRepertoirePage/>} /> */}
         <Route
           path="/remove-repertoire"
           element={<div>Delete repertoire</div>}

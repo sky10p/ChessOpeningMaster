@@ -87,13 +87,7 @@ const EditRepertoireViewContainer: React.FC = () => {
   }
 
   useEffect(() => {
-    addIconHeader({
-      key: "manageVariants",
-      icon: <AccountTreeIcon />,
-      onClick: () => {
-           navigate(`/repertoire/manage-variants/${repertoireId}`);
-      },
-    });
+    
     addIconHeader({
       key: "trainRepertoire",
       icon: <PlayLessonIcon />,
@@ -113,7 +107,6 @@ const EditRepertoireViewContainer: React.FC = () => {
     });
 
     return () => {
-      removeIconHeader("manageVariants");
       removeIconHeader("trainRepertoire");
       removeIconHeader("saveRepertoire");
       removeIconHeader("moreOptions");
