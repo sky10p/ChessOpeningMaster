@@ -5,7 +5,8 @@ import { ConfirmDialog } from "../components/basic/dialogs/ConfirmDialog";
 import SelectTrainVariantsDialog from "../components/basic/dialogs/SelectTrainVariantsDialog";
 import { TrainVariant } from "../components/chess/models/chess.models";
 import SelectNextMoveDialog from "../components/basic/dialogs/SelectNextMoveDialog";
-
+import RepertoireDialog from "../components/basic/dialogs/RepertoireDialog"; // Import RepertoireDialog
+import { IRepertoire } from "../../common/types/Repertoire"; // Import IRepertoire
 
 interface TextDialogProps {
     title: string;
@@ -38,11 +39,20 @@ interface SelectNextMoveDialog{
 
 }
 
+interface RepertoireDialogProps {
+    title: string;
+    contentText: string;
+    repertoires: IRepertoire[];
+    onConfirm: (repertoire: IRepertoire) => void;
+    onDialogClose?: () => void;
+}
+
 interface DialogContextProps {
     showTextDialog: (props: TextDialogProps) => void;
     showConfirmDialog: (props: ConfirmDialog) => void;
     showTrainVariantsDialog: (props: SelectTrainVariantsConfirmDialog) => void;
     showSelectNextMoveDialog: (props: SelectNextMoveDialog) => void;
+    showRepertoireDialog: (props: RepertoireDialogProps) => void;
 }
 
 export const DialogContext = React.createContext<DialogContextProps | null>(null);
@@ -62,16 +72,19 @@ export const DialogContextProvider = ({ children }: { children: React.ReactNode 
     const [openConfirmDialog, setOpenConfirmDialog] = React.useState(false);
     const [openTrainVariantsDialog, setOpenTrainVariantsDialog] = React.useState(false);
     const [openSelectNextMoveDialog, setOpenSelectNextMoveDialog] = React.useState(false);
+    const [openRepertoireDialog, setOpenRepertoireDialog] = React.useState(false); // Add state for RepertoireDialog
     const [title, setTitle ] = React.useState<string>("");
 
     const [onTextConfirm, setOnTextConfirm] = React.useState<(text: string)=>void>(()=>{});
     const [onConfirm, setOnConfirm] = React.useState<(()=>void)>(()=>{});
     const [onTrainVariantsConfirm, setOnTrainVariantsConfirm] = React.useState<((trainVariants: TrainVariant[])=>void)>(()=>{});
     const [onNextMoveConfirm, setOnNextMoveConfirm] = React.useState<((nextMove: string)=>void)>(()=>{});
+    const [onRepertoireConfirm, setOnRepertoireConfirm] = React.useState<(repertoire: IRepertoire) => void>(() => {}); // Add state for onRepertoireConfirm
     const [onDialogClose, setOnDialogClose] = React.useState<(()=>void) | undefined>(()=>{});
 
     const [trainVariants, setTrainVariants] = React.useState<TrainVariant[]>([]);
     const [nextMovements, setNextMovements] = React.useState<string[]>([]);
+    const [repertoires, setRepertoires] = React.useState<IRepertoire[]>([]); // Add state for repertoires
 
     const [contentText, setContentText] = React.useState<string>("");
 
@@ -109,11 +122,21 @@ export const DialogContextProvider = ({ children }: { children: React.ReactNode 
         setOpenSelectNextMoveDialog(true);
     }
 
+    const showRepertoireDialog = ({title, contentText, repertoires, onConfirm, onDialogClose}: RepertoireDialogProps) => {
+        setTitle(title);
+        setContentText(contentText);
+        setRepertoires(repertoires);
+        setOnRepertoireConfirm(() => onConfirm);
+        setOnDialogClose(() => onDialogClose);
+        setOpenRepertoireDialog(true);
+    };
+
     const handleDialogClose = () => {
         setOpenConfirmDialog(false);
         setOpenTextDialog(false);
         setOpenTrainVariantsDialog(false);
         setOpenSelectNextMoveDialog(false);
+        setOpenRepertoireDialog(false); // Close RepertoireDialog
         onDialogClose && onDialogClose();
     };
 
@@ -138,13 +161,19 @@ export const DialogContextProvider = ({ children }: { children: React.ReactNode 
         onNextMoveConfirm(nextMove);
     };
 
+    const handleRepertoireConfirm = (repertoire: IRepertoire) => {
+        setOpenRepertoireDialog(false);
+        onRepertoireConfirm(repertoire);
+    };
+
     return (
-        <DialogContext.Provider value={{ showTextDialog, showConfirmDialog, showTrainVariantsDialog, showSelectNextMoveDialog }}>
+        <DialogContext.Provider value={{ showTextDialog, showConfirmDialog, showTrainVariantsDialog, showSelectNextMoveDialog, showRepertoireDialog }}>
             {children}
            <TextDialog open={openTextDialog} initialValue="" onClose={handleDialogClose} contentText={contentText} onTextConfirm={handleTextConfirm} title={title}></TextDialog>
            <ConfirmDialog open={openConfirmDialog} onClose={handleDialogClose} contentText={contentText} onConfirm={handleConfirm} title={title}></ConfirmDialog>
            <SelectTrainVariantsDialog open={openTrainVariantsDialog} contentText={contentText} trainVariants={trainVariants} onClose={handleDialogClose} onConfirm={handleTrainVariantsConfirm} title={title}></SelectTrainVariantsDialog>
            <SelectNextMoveDialog open={openSelectNextMoveDialog} contentText={contentText} nextMovements={nextMovements} onClose={handleDialogClose} onConfirm={handleNextMoveConfirm} title={title}></SelectNextMoveDialog>
+           <RepertoireDialog open={openRepertoireDialog} contentText={contentText} repertoires={repertoires} onClose={handleDialogClose} onConfirm={handleRepertoireConfirm} title={title}></RepertoireDialog>
         </DialogContext.Provider>
     );
 };
