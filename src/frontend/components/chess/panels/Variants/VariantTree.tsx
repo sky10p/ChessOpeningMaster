@@ -4,6 +4,7 @@ import DownloadIcon from '@mui/icons-material/Download';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
+import { DeleteSweep, ContentPaste } from '@mui/icons-material';
 import { MoveVariantNode } from "../../utils/VariantNode";
 import { Variant } from "../../models/chess.models";
 import { SelectVariant } from "../../selects/SelectVariant";
@@ -17,13 +18,16 @@ interface VariantTreeProps {
   orientation: BoardOrientation;
   deleteVariant: (variant: Variant) => void;
   copyVariantToRepertoire: (variant: Variant) => void;
+  deleteVariants: () => void;
+  copyVariantsToRepertoire: () => void;
 }
 
-const VariantTree: React.FC<VariantTreeProps> = ({ variants, currentNode, orientation, deleteVariant, copyVariantToRepertoire }) => {
+const VariantTree: React.FC<VariantTreeProps> = ({ variants, currentNode, orientation, deleteVariant, copyVariantToRepertoire,copyVariantsToRepertoire,deleteVariants }) => {
   const isSelected = (node: MoveVariantNode) => node === currentNode;
   const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>(
     variants[0]
   );
+  const [selectedVariants, setSelectedVariants] = useState<Variant[]>([]);
 
   useEffect(() => {
     setSelectedVariant(
@@ -118,10 +122,26 @@ const VariantTree: React.FC<VariantTreeProps> = ({ variants, currentNode, orient
             </Grid>
             <Grid item>
               <IconButton
+                onClick={copyVariantsToRepertoire}
+                color="primary"
+              >
+                <ContentPaste />
+              </IconButton>
+            </Grid>
+            <Grid item>
+              <IconButton
                 onClick={() => deleteVariant(selectedVariant)}
                 color="primary"
               >
                 <DeleteIcon />
+              </IconButton>
+            </Grid>
+            <Grid item>
+              <IconButton
+                onClick={deleteVariants}
+                color="primary"
+              >
+                <DeleteSweep />
               </IconButton>
             </Grid>
           </>
