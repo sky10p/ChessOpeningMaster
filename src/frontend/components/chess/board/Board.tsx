@@ -3,6 +3,7 @@ import { Color, Move, Square, Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import { useRepertoireContext } from "../../../contexts/RepertoireContext";
 import { useTrainRepertoireContext } from "../../../contexts/TrainRepertoireContext";
+import { useAlertContext } from "../../../contexts/AlertContext";
 
 interface BoardProps {
   calcWidth: (dimensions: { screenWidth: number }) => number;
@@ -10,7 +11,9 @@ interface BoardProps {
 }
 
 const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
-  const { chess, setChess, addMove, orientation, currentMoveNode } = useRepertoireContext();
+  const { chess, setChess, addMove, orientation, currentMoveNode } =
+    useRepertoireContext();
+  const { showAlert } = useAlertContext();
   const trainRepertoireContext = isTraining
     ? useTrainRepertoireContext()
     : null;
@@ -39,9 +42,11 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
   }, []);
 
   useEffect(() => {
-    setCircleSquares(currentMoveNode.circles ? new Set(currentMoveNode.circles) : new Set());
-    setArrows(currentMoveNode.arrows ?? [])
-  }, [currentMoveNode])
+    setCircleSquares(
+      currentMoveNode.circles ? new Set(currentMoveNode.circles) : new Set()
+    );
+    setArrows(currentMoveNode.arrows ?? []);
+  }, [currentMoveNode]);
 
   const dropSquareStyle: React.CSSProperties = {
     background: "rgba(20, 85, 30, 0.4)",
@@ -67,8 +72,9 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
     for (const move of possibleMoves) {
       const piece = chess.get(move.to);
       styles[move.to] = {
-        background:
-          piece ? "radial-gradient(transparent 0%, transparent 79%, rgba(20, 85, 0, 0.3) 80%)": "radial-gradient(rgba(20, 85, 30, 0.5) 19%, rgba(0, 0, 0, 0) 20%)",
+        background: piece
+          ? "radial-gradient(transparent 0%, transparent 79%, rgba(20, 85, 0, 0.3) 80%)"
+          : "radial-gradient(rgba(20, 85, 30, 0.5) 19%, rgba(0, 0, 0, 0) 20%)",
       };
     }
 
@@ -105,14 +111,23 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
     return possibleMoves.some((move) => move.from === from && move.to === to);
   };
 
+  const safeMove = (chessInstance: Chess, from: string, to: string) => {
+    try {
+      return chessInstance.move({ from, to, promotion: "q" });
+    } catch (error) {
+      showAlert("Invalid move", "error", 1000);
+      return null;
+    }
+  };
+
   const handleMove = (from: string, to: string): boolean => {
     const tempChess = new Chess(chess.fen());
-    const move = tempChess.move({ from, to, promotion: "q" });
+    const move = safeMove(tempChess, from, to);
     if (move) {
       let isMoveAllowed = true;
       if (isTraining && trainRepertoireContext) {
-        const trainingMoves = trainRepertoireContext.allowedMoves.map((allowedMove) =>
-          allowedMove.getMove()
+        const trainingMoves = trainRepertoireContext.allowedMoves.map(
+          (allowedMove) => allowedMove.getMove()
         );
         isMoveAllowed = trainingMoves.some(
           (trainingMove) =>
@@ -146,7 +161,6 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
     } else if (selectedSquare && isMoveValid(selectedSquare, square)) {
       handleMove(selectedSquare, square);
       setPieceMoved(true);
-
     }
   };
 
@@ -161,7 +175,7 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
   };
 
   const updateArrows = (arrows: Square[][]) => {
-    if(pieceMoved) {
+    if (pieceMoved) {
       setPieceMoved(false);
       return;
     }
@@ -177,10 +191,10 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
   }) => {
     setDragOverSquare(null);
 
-    const handleMoveResult =  handleMove(sourceSquare, targetSquare);
+    const handleMoveResult = handleMove(sourceSquare, targetSquare);
     setPieceMoved(true);
 
-    return handleMoveResult
+    return handleMoveResult;
   };
 
   const onDragOverSquare = (square: Square) => {
