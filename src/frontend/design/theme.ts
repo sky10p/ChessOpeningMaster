@@ -11,7 +11,16 @@ const theme = createTheme({
         secondary: {
             main: "#FFFFFF"
         }
-    }
+    },
+    components: {
+        MuiCssBaseline: {
+          styleOverrides: {
+            body: {
+              backgroundColor: 'transparent',
+            },
+          },
+        },
+      },
 })
 
 const responsiveTheme = responsiveFontSizes(theme);

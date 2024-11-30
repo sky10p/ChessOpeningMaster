@@ -4,7 +4,6 @@ import Home from "../../../pages/Home";
 import CreateRepertoire from "../../../pages/repertoires/CreateRepertoire";
 import EditRepertoirePage from "../../../pages/repertoires/EditRepertoirePage/EditRepertoirePage";
 import TrainRepertoirePage from "../../../pages/repertoires/TrainRepertoryPage/TrainRepertoirePage";
-import ManageRepertoirePage from "../../../pages/repertoires/ManageRepertoirePage/ManageRepertoirePage";
 
 const headerHeight = 64;
 const footerHeight = 64;
