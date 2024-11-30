@@ -11,9 +11,9 @@ const App: React.FC = (): React.ReactElement => {
   return (
     <BrowserRouter>
       <AppContext>
-        <Header />
-        <Box display="flex" flexDirection="column" minHeight="100vh">
-          <Box display="flex" flexDirection="row" flexGrow={1}>
+        <Box display="flex" flexDirection="column" height="100dvh">
+          <Header />
+          <Box display="flex" flexDirection="column" flexGrow={1} overflow={"auto"}>
             <Navbar />
             <Content />
           </Box>

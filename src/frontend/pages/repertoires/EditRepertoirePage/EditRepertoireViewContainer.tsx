@@ -148,7 +148,7 @@ const EditRepertoireViewContainer: React.FC = () => {
   }, [isMobile]);
 
   return (
-    <Grid container spacing={2}>
+    <Grid container spacing={2} >
       <Grid item container direction="column" alignItems="left" xs={12} sm={5}>
         <Grid item container justifyContent={"center"}>
           <Typography
@@ -166,7 +166,7 @@ const EditRepertoireViewContainer: React.FC = () => {
           <BoardActions />
         </Grid>
       </Grid>
-      <Grid item xs={12} sm={7} container direction="column" alignItems="left">
+      <Grid item xs={12} sm={7} container direction="column" alignItems="left" display={"flex"} overflow={"auto"}>
         {isMobile && panelSelected === "variants" && (
           <>
             <Grid item>

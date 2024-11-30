@@ -19,7 +19,7 @@ const Footer = () => {
       value={value}
       onChange={handleChange}
       showLabels
-      sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: 'background.default' }}
+      sx={{backgroundColor: 'background.default' }}
     >
       {icons.map((icon) => (
       <BottomNavigationAction key={icon.key} label={icon.label} icon={icon.icon} sx={{

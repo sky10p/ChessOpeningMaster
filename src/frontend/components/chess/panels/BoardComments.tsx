@@ -11,7 +11,7 @@ export const BoardComment: React.FC<BoardCommentProps> = ({editable = true}) => 
         updateComment(event.target.value);
         };
     return (
-        <Box>
+        <Box display={"flex"} flexDirection={"column"}>
           <Typography variant="h6" gutterBottom>
             Comments
           </Typography>

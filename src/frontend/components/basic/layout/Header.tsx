@@ -13,7 +13,7 @@ const Header: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   return (
-    <AppBar position="fixed">
+    <AppBar position="relative">
       <Toolbar>
         <IconButton
           edge="start"

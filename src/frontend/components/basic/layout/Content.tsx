@@ -5,20 +5,19 @@ import CreateRepertoire from "../../../pages/repertoires/CreateRepertoire";
 import EditRepertoirePage from "../../../pages/repertoires/EditRepertoirePage/EditRepertoirePage";
 import TrainRepertoirePage from "../../../pages/repertoires/TrainRepertoryPage/TrainRepertoirePage";
 
-const headerHeight = 64;
-const footerHeight = 64;
 
 const contentStyles: React.CSSProperties = {
   flexGrow: 1,
-  marginTop: headerHeight,
-  marginBottom: footerHeight,
   padding: "1rem",
-  height: `calc(100vh - ${headerHeight + footerHeight}px)`,
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
 };
 
 const Content = () => {
   return (
-    <main style={contentStyles}>
+    <main style={contentStyles} >
       <Routes>
         <Route
           path="/create-repertoire"
