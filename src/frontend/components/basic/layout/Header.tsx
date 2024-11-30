@@ -25,7 +25,7 @@ const Header: React.FC = () => {
         </IconButton>
         <div style={{ display: "flex", alignItems: "center", flexGrow: 1 }}>
           <Typography variant="h6" noWrap>
-            Chess Opening Master
+          ChessKeep
           </Typography>
           <div style={{ display: "flex", alignItems: "center", marginLeft: isMobile ? 0 : '12px' }}>
             {!isMobile ? (
