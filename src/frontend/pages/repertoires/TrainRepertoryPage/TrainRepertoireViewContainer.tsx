@@ -26,20 +26,41 @@ import { HintInfo } from "../../../components/design/chess/train/HintInfo";
 
 const TrainRepertoireViewContainer: React.FC = () => {
   const theme = useTheme();
-  const [panelSelected, setPanelSelected] = React.useState<"info" | "help" | "trainComments">("info");
+  const [panelSelected, setPanelSelected] = React.useState<
+    "info" | "help" | "trainComments"
+  >("info");
   const navigate = useNavigate();
-  const { repertoireId, repertoireName, currentMoveNode } = useRepertoireContext();
+  const { repertoireId, repertoireName, currentMoveNode, variants } =
+    useRepertoireContext();
   const { showTrainVariantsDialog } = useDialogContext();
-  const { addIcon: addIconHeader, removeIcon: removeIconHeader } = useHeaderContext();
-  const { trainVariants, chooseTrainVariantsToTrain, allowedMoves, isYourTurn, turn, finishedTrain, lastTrainVariant } = useTrainRepertoireContext();
-  const { addIcon: addIconFooter, removeIcon: removeIconFooter, setIsVisible } = useFooterContext();
+  const { addIcon: addIconHeader, removeIcon: removeIconHeader } =
+    useHeaderContext();
+  const {
+    trainVariants,
+    chooseTrainVariantsToTrain,
+    allowedMoves,
+    isYourTurn,
+    turn,
+    finishedTrain,
+    lastTrainVariant,
+  } = useTrainRepertoireContext();
+  const {
+    addIcon: addIconFooter,
+    removeIcon: removeIconFooter,
+    setIsVisible,
+  } = useFooterContext();
 
   const calcWidth = useCallback(
-    ({ screenWidth }: { screenWidth: number }): number => screenWidth >= theme.breakpoints.values.sm ? (screenWidth * 35) / 100 : (screenWidth * 90) / 100,
+    ({ screenWidth }: { screenWidth: number }): number =>
+      screenWidth >= theme.breakpoints.values.sm
+        ? (screenWidth * 35) / 100
+        : (screenWidth * 90) / 100,
     [theme.breakpoints.values.sm]
   );
 
-  const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down("sm"));
+  const isMobile = useMediaQuery((theme: Theme) =>
+    theme.breakpoints.down("sm")
+  );
 
   useEffect(() => {
     const headerIcons = [
@@ -50,7 +71,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
           showTrainVariantsDialog({
             title: "Select train variants",
             contentText: "Select the variants you want to train",
-            trainVariants,
+            trainVariants: variants.map((v) => ({ variant: v, state: "inProgress" })),
             onTrainVariantsConfirm: (selectedTrainVariants: TrainVariant[]) => {
               chooseTrainVariantsToTrain(selectedTrainVariants);
             },
@@ -75,7 +96,15 @@ const TrainRepertoireViewContainer: React.FC = () => {
         removeIconHeader(key);
       });
     };
-  }, [addIconHeader, removeIconHeader, showTrainVariantsDialog, trainVariants, chooseTrainVariantsToTrain, navigate, repertoireId]);
+  }, [
+    addIconHeader,
+    removeIconHeader,
+    showTrainVariantsDialog,
+    trainVariants,
+    chooseTrainVariantsToTrain,
+    navigate,
+    repertoireId,
+  ]);
 
   useEffect(() => {
     if (isMobile) {
@@ -112,9 +141,22 @@ const TrainRepertoireViewContainer: React.FC = () => {
     if (isMobile) {
       return (
         <Grid item>
-          {panelSelected === "info" && <TrainInfo currentMoveNode={currentMoveNode} turn={turn} isYourTurn={isYourTurn} finishedTrain={finishedTrain} trainVariants={trainVariants} lastTrainVariant={lastTrainVariant} />}
-          {panelSelected === "help" && <HelpInfo allowedMoves={allowedMoves} isYourTurn={isYourTurn} />}
-          {panelSelected === "trainComments" && <HintInfo currentMoveNode={currentMoveNode} />}
+          {panelSelected === "info" && (
+            <TrainInfo
+              currentMoveNode={currentMoveNode}
+              turn={turn}
+              isYourTurn={isYourTurn}
+              finishedTrain={finishedTrain}
+              trainVariants={trainVariants}
+              lastTrainVariant={lastTrainVariant}
+            />
+          )}
+          {panelSelected === "help" && (
+            <HelpInfo allowedMoves={allowedMoves} isYourTurn={isYourTurn} />
+          )}
+          {panelSelected === "trainComments" && (
+            <HintInfo currentMoveNode={currentMoveNode} />
+          )}
         </Grid>
       );
     } else {
@@ -127,23 +169,49 @@ const TrainRepertoireViewContainer: React.FC = () => {
             <HintInfo currentMoveNode={currentMoveNode} />
           </Grid>
           <Grid item style={{ marginTop: "36px" }}>
-            <TrainInfo currentMoveNode={currentMoveNode} turn={turn} isYourTurn={isYourTurn} finishedTrain={finishedTrain} trainVariants={trainVariants} lastTrainVariant={lastTrainVariant}/>
+            <TrainInfo
+              currentMoveNode={currentMoveNode}
+              turn={turn}
+              isYourTurn={isYourTurn}
+              finishedTrain={finishedTrain}
+              trainVariants={trainVariants}
+              lastTrainVariant={lastTrainVariant}
+            />
           </Grid>
         </>
       );
     }
-  }, [isMobile, allowedMoves,turn,finishedTrain,trainVariants,lastTrainVariant, currentMoveNode, isYourTurn, panelSelected]);
+  }, [
+    isMobile,
+    allowedMoves,
+    turn,
+    finishedTrain,
+    trainVariants,
+    lastTrainVariant,
+    currentMoveNode,
+    isYourTurn,
+    panelSelected,
+  ]);
 
   return (
     <Grid container spacing={2}>
       <Grid item container direction="column" alignItems="left" xs={12} sm={5}>
         {isMobile && (
-          <Grid item container justifyContent="center" style={{ marginBottom: "16px" }}>
+          <Grid
+            item
+            container
+            justifyContent="center"
+            style={{ marginBottom: "16px" }}
+          >
             <HelpInfo allowedMoves={allowedMoves} isYourTurn={isYourTurn} />
           </Grid>
         )}
         <Grid item container justifyContent={"center"}>
-          <Typography variant="h5" gutterBottom style={{ marginBottom: "16px" }}>
+          <Typography
+            variant="h5"
+            gutterBottom
+            style={{ marginBottom: "16px" }}
+          >
             Training {repertoireName}
           </Typography>
         </Grid>

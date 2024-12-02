@@ -125,13 +125,7 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
   };
 
   const handleConfirm = () => {
-    const updatedTrainVariants = trainVariants.map(
-      (trainVariant, index) =>
-        ({
-          ...trainVariant,
-          state: selectedTrainVariants.has(index) ? "inProgress" : "finished",
-        } as TrainVariant)
-    );
+      const updatedTrainVariants = trainVariants.filter((trainVariant, index) => selectedTrainVariants.has(index));
     onConfirm(updatedTrainVariants);
     handleClose();
   };
