@@ -40,6 +40,7 @@ module.exports = {
       }
     ]
   },
+  devtool: 'source-map',
   plugins: [
     new DotenvWebpackPlugin(),
     new HtmlWebpackPlugin({
