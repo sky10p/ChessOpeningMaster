@@ -1,4 +1,4 @@
-import { Snackbar, Alert, AlertColor } from "@mui/material";
+import { Snackbar, Alert as MuiAlert, AlertColor } from "@mui/material";
 import React from "react";
 
 interface AlertContainerProps {
@@ -9,7 +9,7 @@ interface AlertContainerProps {
   autoHideDuration?: number;
 }
 
-export const AlertContainer: React.FC<AlertContainerProps> = ({
+export const Alert: React.FC<AlertContainerProps> = ({
   open,
   setOpen,
   alertSeverity,
@@ -22,13 +22,13 @@ export const AlertContainer: React.FC<AlertContainerProps> = ({
       autoHideDuration={autoHideDuration}
       onClose={() => setOpen(false)}
     >
-      <Alert
+      <MuiAlert
         onClose={() => setOpen(false)}
         severity={alertSeverity}
         sx={{ width: "100%" }}
       >
         {alertMessage}
-      </Alert>
+      </MuiAlert>
     </Snackbar>
   );
 };

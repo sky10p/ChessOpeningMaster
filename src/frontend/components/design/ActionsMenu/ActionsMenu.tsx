@@ -1,14 +1,14 @@
 import { Menu, MenuItem } from "@mui/material";
 import React from "react";
 
-interface MoreOptionsMenuProps {
+interface ActionsMenuProps {
     anchorEl: HTMLElement | null;
     setAnchorEl: React.Dispatch<React.SetStateAction<HTMLElement | null>>;
     items: {name: string, action: () => void}[];
 }
 
 
-export const MoreOptionsMenu: React.FC<MoreOptionsMenuProps> = ({anchorEl, setAnchorEl, items}) => {
+export const ActionsMenu: React.FC<ActionsMenuProps> = ({anchorEl, setAnchorEl, items}) => {
     const open = Boolean(anchorEl);
     const handleClose = () => {
         setAnchorEl(null);

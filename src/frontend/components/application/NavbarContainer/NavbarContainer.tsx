@@ -14,7 +14,6 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import SettingsIcon from "@mui/icons-material/Settings"; // Replace this import
 import { IRepertoire } from "../../../../common/types/Repertoire";
 import { useNavbarContext } from "../../../contexts/NavbarContext";
 import {
@@ -42,7 +41,7 @@ const drawerStyles = {
   },
 };
 
-const Navbar: React.FC = () => {
+const NavbarContainer: React.FC = () => {
   const { open, setOpen, repertoires, updateRepertoires } = useNavbarContext();
   const { showConfirmDialog, showTextDialog } = useDialogContext();
   const { showMenu } = useMenuContext();
@@ -116,14 +115,6 @@ const Navbar: React.FC = () => {
             <ListItemText primary="Download Repertoires" />
           </ListItem>
         </ButtonBase>
-        {/* <ButtonBase component={Link} to="/manage-repertoires"> 
-          <ListItem>
-            <ListItemIcon>
-              <SettingsIcon />
-            </ListItemIcon>
-            <ListItemText primary="Manage Repertoires" />
-          </ListItem>
-        </ButtonBase> */}
         <ButtonBase component={Link} to="/create-repertoire">
           <ListItem>
             <ListItemIcon>
@@ -171,4 +162,4 @@ const Navbar: React.FC = () => {
   );
 };
 
-export default Navbar;
+export default NavbarContainer;

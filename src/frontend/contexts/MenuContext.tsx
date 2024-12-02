@@ -1,5 +1,5 @@
 import React from "react";
-import { MoreOptionsMenu } from "../components/basic/buttons/MoreOptionsButton";
+import { ActionsMenu } from "../components/design/ActionsMenu/ActionsMenu";
 
 interface MenuContextProps {
   showMenu: (anchorEl: HTMLElement | null, items: {name: string, action: () => void}[]) => void;
@@ -35,7 +35,7 @@ export const MenuContextProvider: React.FC<MenuContextProviderProps> = ({
     return (
         <MenuContext.Provider value={{ showMenu }}>
             {children}
-            <MoreOptionsMenu anchorEl={anchorEl} setAnchorEl={setAnchorEl} items={items}/>
+            <ActionsMenu anchorEl={anchorEl} setAnchorEl={setAnchorEl} items={items}/>
         </MenuContext.Provider>
     );
 };

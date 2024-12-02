@@ -1,17 +1,26 @@
 import React from "react";
-import { AppBar, Toolbar, Typography, IconButton, useMediaQuery, useTheme } from "@mui/material";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloudDoneIcon from "@mui/icons-material/CloudDone";
 import CloudOffIcon from "@mui/icons-material/CloudOff";
-import { useNavbarContext } from "../../../contexts/NavbarContext";
-import { useHeaderContext } from "../../../contexts/HeaderContext";
+import { HeaderIcon } from "./models";
 
-const Header: React.FC = () => {
-  const { setOpen } = useNavbarContext();
-  const { icons, isSaving } = useHeaderContext();
+interface HeaderProps {
+  setOpenNavbar: (open: boolean) => void;
+  isSaving: boolean;
+  icons: HeaderIcon[];
+}
+
+const Header: React.FC<HeaderProps> = ({ setOpenNavbar, isSaving, icons }) => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   return (
     <AppBar position="relative">
       <Toolbar>
@@ -19,18 +28,30 @@ const Header: React.FC = () => {
           edge="start"
           color="inherit"
           aria-label="menu"
-          onClick={() => setOpen(true)}
+          onClick={() => setOpenNavbar(true)}
         >
           <MenuIcon></MenuIcon>
         </IconButton>
         <div style={{ display: "flex", alignItems: "center", flexGrow: 1 }}>
           <Typography variant="h6" noWrap>
-          ChessKeep
+            ChessKeep
           </Typography>
-          <div style={{ display: "flex", alignItems: "center", marginLeft: isMobile ? 0 : '12px' }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginLeft: isMobile ? 0 : "12px",
+            }}
+          >
             {!isMobile ? (
-              <div style={{ display: "flex", alignItems: "center", marginLeft: 2 }}>
-                <Typography variant="body2" noWrap sx={{ lineHeight: 'normal' }}>
+              <div
+                style={{ display: "flex", alignItems: "center", marginLeft: 2 }}
+              >
+                <Typography
+                  variant="body2"
+                  noWrap
+                  sx={{ lineHeight: "normal" }}
+                >
                   {isSaving ? "Saving repertoire..." : "Last repertoire saved"}
                 </Typography>
                 <IconButton color="inherit" sx={{ marginLeft: 1 }}>

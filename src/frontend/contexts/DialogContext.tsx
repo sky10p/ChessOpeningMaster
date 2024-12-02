@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import React from "react";
-import { TextDialog } from "../components/basic/dialogs/TextDialog";
-import { ConfirmDialog } from "../components/basic/dialogs/ConfirmDialog";
-import SelectTrainVariantsDialog from "../components/basic/dialogs/SelectTrainVariantsDialog";
+import { TextDialog } from "../components/design/dialogs/TextDialog";
+import { ConfirmDialog } from "../components/design/dialogs/ConfirmDialog";
+import SelectTrainVariantsDialog from "../components/design/dialogs/SelectTrainVariantsDialog";
 import { TrainVariant, Variant } from "../components/chess/models/chess.models";
-import SelectNextMoveDialog from "../components/basic/dialogs/SelectNextMoveDialog";
-import RepertoireDialog from "../components/basic/dialogs/RepertoireDialog"; // Import RepertoireDialog
+import SelectNextMoveDialog from "../components/design/dialogs/SelectNextMoveDialog";
+import RepertoireDialog from "../components/design/dialogs/RepertoireDialog"; // Import RepertoireDialog
 import { IRepertoire } from "../../common/types/Repertoire"; // Import IRepertoire
-import SelectVariantsDialog from "../components/basic/dialogs/SelectVariantsDialog";
+import SelectVariantsDialog from "../components/design/dialogs/SelectVariantsDialog";
 
 interface TextDialogProps {
     title: string;

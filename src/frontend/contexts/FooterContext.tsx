@@ -1,11 +1,5 @@
 import React, { useCallback } from "react";
-
-interface FooterIcon {
-    key: string;
-    label: string;
-    icon: React.ReactNode;
-    onClick: () => void;
-}
+import { FooterIcon } from "../components/design/Footer/models";
 
 export interface FooterContextProps {
     icons: FooterIcon[];

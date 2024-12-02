@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
 import { BottomNavigation, BottomNavigationAction, useTheme } from '@mui/material';
-import { useFooterContext } from '../../../contexts/FooterContext';
+import { FooterIcon } from './models';
 
-const Footer = () => {
+interface FooterProps {
+    isVisible: boolean;
+    icons: FooterIcon[];
+}
+
+const Footer: React.FC<FooterProps> = ({
+    isVisible,
+    icons,
+}) => {
   const theme = useTheme();
-  const {isVisible, icons} = useFooterContext();
-
   const [value, setValue] = useState(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {

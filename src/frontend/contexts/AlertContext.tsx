@@ -1,5 +1,5 @@
 import React from "react";
-import { AlertContainer } from "../components/basic/alerts/AlertContainer";
+import { Alert } from "../components/design/Alert/Alert";
 import { AlertColor } from "@mui/material";
 
 interface AlertContextProps {
@@ -49,13 +49,13 @@ export const AlertContextProvider = ({
   return (
     <AlertContext.Provider value={{ showAlert }}>
       {children}
-      <AlertContainer
+      <Alert
         open={open}
         setOpen={setOpen}
         alertMessage={alertMessage}
         alertSeverity={alertSeverity}
         autoHideDuration={autoHideDuration}
-      ></AlertContainer>
+      ></Alert>
     </AlertContext.Provider>
   );
 };
