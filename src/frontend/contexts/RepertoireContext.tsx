@@ -33,10 +33,12 @@ interface RepertoireContextProps {
   updateComment: (comment: string) => void;
   saveRepertory: () => void;
   getPgn: () => string;
-  updateRepertoire : () => void;
+  updateRepertoire: () => void;
 }
 
-const RepertoireContext = React.createContext<RepertoireContextProps | null>(null);
+const RepertoireContext = React.createContext<RepertoireContextProps | null>(
+  null
+);
 
 export const useRepertoireContext = () => {
   const context = React.useContext(RepertoireContext);
@@ -58,7 +60,9 @@ interface RepertoireContextProviderProps {
   initialMoves?: IMoveNode;
   updateRepertoire: () => void;
 }
-export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps> = ({
+export const RepertoireContextProvider: React.FC<
+  RepertoireContextProviderProps
+> = ({
   children,
   repertoireId,
   repertoireName,
@@ -67,25 +71,24 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
   updateRepertoire,
 }) => {
   const [chess, setChess] = useState<Chess>(new Chess());
-  const [orientation, setOrientation] = useState<BoardOrientation>(initialOrientation);
+  const [orientation, setOrientation] =
+    useState<BoardOrientation>(initialOrientation);
   const [hasChanges, setHasChanges] = useState<boolean>(false);
 
-  const {setIsSaving} = useHeaderContext();
+  const { setIsSaving } = useHeaderContext();
 
-  const {showSelectNextMoveDialog} = useDialogContext();
+  const { showSelectNextMoveDialog } = useDialogContext();
 
   useEffect(() => {
-    const intervalSave = setInterval(()=>{
-      if(hasChanges){
+    const intervalSave = setInterval(() => {
+      if (hasChanges) {
         saveRepertory();
         setHasChanges(false);
       }
-    }, 500)
+    }, 500);
 
     return () => clearInterval(intervalSave);
-  }, [hasChanges])
-
-   
+  }, [hasChanges]);
 
   const [moveHistory, setMoveHistory] = useState<MoveVariantNode>(
     initialMoves
@@ -103,30 +106,28 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
 
   const { showAlert } = useAlertContext();
 
-
-
   useEffect(() => {
-    setMoveHistory(initialMoves
-      ? MoveVariantNode.initMoveVariantNode(initialMoves)
-      : new MoveVariantNode());
+    setMoveHistory(
+      initialMoves
+        ? MoveVariantNode.initMoveVariantNode(initialMoves)
+        : new MoveVariantNode()
+    );
 
     chess.reset();
-    
-
-  }, [initialMoves])
+  }, [initialMoves]);
 
   useEffect(() => {
     setOrientation(initialOrientation);
-  }, [initialOrientation])
+  }, [initialOrientation]);
 
   useEffect(() => {
     setCurrentMove(moveHistory);
     updateVariants();
-  }, [moveHistory])
+  }, [moveHistory]);
 
   useEffect(() => {
     setComment(currentMove.comment ?? "");
-  }, [currentMove])
+  }, [currentMove]);
 
   const updateVariants = () => {
     setVariants(moveHistory.getVariants());
@@ -137,14 +138,14 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
     setCurrentMove(moveHistory);
     setChess(newChess);
   };
-  
+
   const rotateBoard = () => {
     setOrientation((prev) => (prev === "white" ? "black" : "white"));
   };
-    
+
   const next = () => {
     if (currentMove.children.length === 0) return;
-    if(currentMove.children.length === 1){
+    if (currentMove.children.length === 1) {
       const moveNode = currentMove.children[0];
       chess.move(moveNode.getMove());
       setCurrentMove(moveNode);
@@ -152,22 +153,22 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
       return;
     }
 
-    if(currentMove.children.length > 1){
+    if (currentMove.children.length > 1) {
       showSelectNextMoveDialog({
         title: "Select next move",
         contentText: "Select the movement to play",
         nextMovements: currentMove.children.map((child) => child.getMove().san),
         onNextMoveConfirm: (nextMove: string) => {
-          const nextMoveVarianteNode = currentMove.children.find((child) => child.getMove().san === nextMove)
-          if(!nextMoveVarianteNode) return;
+          const nextMoveVarianteNode = currentMove.children.find(
+            (child) => child.getMove().san === nextMove
+          );
+          if (!nextMoveVarianteNode) return;
           chess.move(nextMoveVarianteNode.getMove());
           setCurrentMove(nextMoveVarianteNode);
           updateVariants();
         },
-      })
+      });
     }
-
-    
   };
 
   const prev = () => {
@@ -177,7 +178,9 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
   };
 
   const addMove = (move: Move) => {
-    const newMove = currentMove.addMove(move, undefined, undefined, () => setHasChanges(true));
+    const newMove = currentMove.addMove(move, undefined, undefined, () =>
+      setHasChanges(true)
+    );
     setCurrentMove(newMove);
     updateVariants();
   };
@@ -210,7 +213,7 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
     moveNode.variantName = newName == "" ? undefined : newName;
     goToMove(moveNode);
     updateVariants();
-    setHasChanges(true)
+    setHasChanges(true);
   };
 
   const deleteMove = (moveNode: MoveVariantNode) => {
@@ -222,64 +225,85 @@ export const RepertoireContextProvider: React.FC<RepertoireContextProviderProps>
 
     goToMove(parentNode);
     updateVariants();
-    setHasChanges(true)
+    setHasChanges(true);
   };
 
   const updateComment = (comment: string) => {
     setComment(comment);
     currentMove.comment = comment;
-    setHasChanges(true)
+    setHasChanges(true);
   };
 
   const saveRepertory = React.useCallback(async () => {
     try {
-        setIsSaving(true);
+      setIsSaving(true);
       await putRepertoire(
-            repertoireId,
-            repertoireName,
-            moveHistory.getMoveNodeWithoutParent(),
-            orientation
-        );
-        setIsSaving(false);
+        repertoireId,
+        repertoireName,
+        moveHistory.getMoveNodeWithoutParent(),
+        orientation
+      );
+      setIsSaving(false);
     } catch (error) {
-        showAlert("Error saving repertoire.", "error");
-        setIsSaving(false);
+      showAlert("Error saving repertoire.", "error");
+      setIsSaving(false);
     }
-    }, [repertoireId, repertoireName, moveHistory, orientation, comment, showAlert]);
-
-    const getPgn = useCallback(() => {
-        const pgn = toPGN(repertoireName, new Date(), orientation, moveHistory);
-        return pgn;
-    }, [repertoireName, orientation, moveHistory])
-
-  const value: RepertoireContextProps = {
-    chess,
-    orientation,
-    initBoard,
-    rotateBoard,
-    setChess,
-    goToMove,
-    changeNameMove,
-    deleteMove,
-    next,
-    prev,
-    hasNext,
-    hasPrev,
-    addMove,
-    moveHistory,
+  }, [
     repertoireId,
     repertoireName,
-    variants,
+    moveHistory,
+    orientation,
     comment,
-    updateComment,
-    saveRepertory,
-    getPgn,
-    updateRepertoire,
-    currentMoveNode: currentMove,
+    showAlert,
+  ]);
 
-  };
+  const getPgn = useCallback(() => {
+    const pgn = toPGN(repertoireName, new Date(), orientation, moveHistory);
+    return pgn;
+  }, [repertoireName, orientation, moveHistory]);
+
+  const value: RepertoireContextProps = React.useMemo(
+    () => ({
+      chess,
+      orientation,
+      initBoard,
+      rotateBoard,
+      setChess,
+      goToMove,
+      changeNameMove,
+      deleteMove,
+      next,
+      prev,
+      hasNext,
+      hasPrev,
+      addMove,
+      moveHistory,
+      repertoireId,
+      repertoireName,
+      variants,
+      comment,
+      updateComment,
+      saveRepertory,
+      getPgn,
+      updateRepertoire,
+      currentMoveNode: currentMove,
+    }),
+    [
+      chess,
+      orientation,
+      moveHistory,
+      repertoireId,
+      repertoireName,
+      variants,
+      comment,
+      currentMove,
+      updateRepertoire,
+    ]
+  );
 
   return (
-    <RepertoireContext.Provider value={value}>{children}</RepertoireContext.Provider>
+    <RepertoireContext.Provider value={value}>
+      {children}
+    </RepertoireContext.Provider>
   );
 };

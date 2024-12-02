@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { Turn } from "../../common/types/Orientation";
 import { useRepertoireContext } from "./RepertoireContext";
 import { MoveVariantNode } from "../models/VariantNode";
@@ -48,7 +48,8 @@ export const TrainRepertoireContextProvider: React.FC<
   const [trainVariants, setTrainVariants] = React.useState<TrainVariant[]>(
     variants.map((v) => ({ variant: v, state: "inProgress" }))
   );
-  const [lastTrainVariant, setLastTrainVariant] = React.useState<TrainVariant>();
+  const [lastTrainVariant, setLastTrainVariant] =
+    React.useState<TrainVariant>();
 
   const playOpponentMove = async () => {
     await sleep(1000);
@@ -127,7 +128,9 @@ export const TrainRepertoireContextProvider: React.FC<
         trainVariant.variant.moves.length === lastMove.position &&
         trainVariant.variant.moves[lastMove.position - 1].id === lastMove.id
       ) {
-        setLastTrainVariant(trainVariant);
+        if (lastTrainVariant?.variant.fullName !== trainVariant.variant.fullName) {
+          setLastTrainVariant(trainVariant);
+        }
         return { ...trainVariant, state: "finished" } as TrainVariant;
       }
       return trainVariant;
@@ -138,20 +141,23 @@ export const TrainRepertoireContextProvider: React.FC<
 
   const isYourTurn = turn === orientation;
 
+  const value = useMemo(
+    () => ({
+      turn,
+      isYourTurn,
+      allowedMoves,
+      trainVariants,
+      finishedTrain: trainVariants.every(
+        (trainVariant) => trainVariant.state === "finished"
+      ),
+      lastTrainVariant,
+      chooseTrainVariantsToTrain,
+    }),
+    [turn, isYourTurn, allowedMoves, trainVariants, lastTrainVariant]
+  );
+
   return (
-    <TrainRepertoireContext.Provider
-      value={{
-        turn,
-        isYourTurn,
-        allowedMoves,
-        trainVariants,
-        finishedTrain: trainVariants.every(
-          (trainVariant) => trainVariant.state === "finished"
-        ),
-        lastTrainVariant,
-        chooseTrainVariantsToTrain,
-      }}
-    >
+    <TrainRepertoireContext.Provider value={value}>
       {children}
     </TrainRepertoireContext.Provider>
   );
