@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
 import { Turn } from "../../common/types/Orientation";
 import { useRepertoireContext } from "./RepertoireContext";
-import { MoveVariantNode } from "../components/chess/utils/VariantNode";
-import { TrainVariant } from "../components/chess/models/chess.models";
+import { MoveVariantNode } from "../models/VariantNode";
+import { TrainVariant } from "../models/chess.models";
 import { deepEqual } from "../utils/deepEqual";
 
 interface TrainRepertoireContextProps {

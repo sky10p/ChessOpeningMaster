@@ -1,10 +1,7 @@
 import React, { useCallback } from "react";
+import { HeaderIcon } from "../components/design/Header/models";
 
-interface HeaderIcon {
-    key: string;
-    icon: React.ReactNode;
-    onClick: (event: React.MouseEvent<HTMLElement>) => void;
-}
+
 
 export interface HeaderContextProps {
     icons: HeaderIcon[];

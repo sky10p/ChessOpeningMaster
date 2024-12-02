@@ -6,7 +6,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import Board from "../../../components/chess/board/Board";
+import BoardContainer from "../../../components/application/chess/board/BoardContainer";
 import InfoIcon from "@mui/icons-material/Info";
 import EditIcon from "@mui/icons-material/Edit";
 
@@ -14,24 +14,24 @@ import { useRepertoireContext } from "../../../contexts/RepertoireContext";
 import { useFooterContext } from "../../../contexts/FooterContext";
 
 import ChatIcon from "@mui/icons-material/Chat";
-import TrainInfo from "../../../components/chess/panels/train/TrainInfo";
-import HelpInfo from "../../../components/chess/panels/train/HelpInfo";
+import TrainInfo from "../../../components/design/chess/train/TrainInfo";
+import HelpInfo from "../../../components/design/chess/train/HelpInfo";
 import ChecklistIcon from "@mui/icons-material/Checklist";
 import { useTrainRepertoireContext } from "../../../contexts/TrainRepertoireContext";
 import { useHeaderContext } from "../../../contexts/HeaderContext";
 import { useNavigate } from "react-router-dom";
 import { useDialogContext } from "../../../contexts/DialogContext";
-import { TrainVariant } from "../../../components/chess/models/chess.models";
-import { HintInfo } from "../../../components/chess/panels/train/HintInfo";
+import { TrainVariant } from "../../../models/chess.models";
+import { HintInfo } from "../../../components/design/chess/train/HintInfo";
 
 const TrainRepertoireViewContainer: React.FC = () => {
   const theme = useTheme();
   const [panelSelected, setPanelSelected] = React.useState<"info" | "help" | "trainComments">("info");
   const navigate = useNavigate();
-  const { repertoireId, repertoireName } = useRepertoireContext();
+  const { repertoireId, repertoireName, currentMoveNode } = useRepertoireContext();
   const { showTrainVariantsDialog } = useDialogContext();
   const { addIcon: addIconHeader, removeIcon: removeIconHeader } = useHeaderContext();
-  const { trainVariants, chooseTrainVariantsToTrain } = useTrainRepertoireContext();
+  const { trainVariants, chooseTrainVariantsToTrain, allowedMoves, isYourTurn, turn, finishedTrain } = useTrainRepertoireContext();
   const { addIcon: addIconFooter, removeIcon: removeIconFooter, setIsVisible } = useFooterContext();
 
   const calcWidth = useCallback(
@@ -112,34 +112,34 @@ const TrainRepertoireViewContainer: React.FC = () => {
     if (isMobile) {
       return (
         <Grid item>
-          {panelSelected === "info" && <TrainInfo />}
-          {panelSelected === "help" && <HelpInfo />}
-          {panelSelected === "trainComments" && <HintInfo />}
+          {panelSelected === "info" && <TrainInfo currentMoveNode={currentMoveNode} turn={turn} isYourTurn={isYourTurn} finishedTrain={finishedTrain} trainVariants={trainVariants} />}
+          {panelSelected === "help" && <HelpInfo allowedMoves={allowedMoves} isYourTurn={isYourTurn} />}
+          {panelSelected === "trainComments" && <HintInfo currentMoveNode={currentMoveNode} />}
         </Grid>
       );
     } else {
       return (
         <>
           <Grid item style={{ marginTop: "24px" }}>
-            <HelpInfo />
+            <HelpInfo allowedMoves={allowedMoves} isYourTurn={isYourTurn} />
           </Grid>
           <Grid item style={{ marginTop: "36px" }}>
-            <HintInfo />
+            <HintInfo currentMoveNode={currentMoveNode} />
           </Grid>
           <Grid item style={{ marginTop: "36px" }}>
-            <TrainInfo />
+            <TrainInfo currentMoveNode={currentMoveNode} turn={turn} isYourTurn={isYourTurn} finishedTrain={finishedTrain} trainVariants={trainVariants} />
           </Grid>
         </>
       );
     }
-  }, [isMobile, panelSelected]);
+  }, [isMobile, allowedMoves,turn,finishedTrain,trainVariants, currentMoveNode, isYourTurn, panelSelected]);
 
   return (
     <Grid container spacing={2}>
       <Grid item container direction="column" alignItems="left" xs={12} sm={5}>
         {isMobile && (
           <Grid item container justifyContent="center" style={{ marginBottom: "16px" }}>
-            <HelpInfo />
+            <HelpInfo allowedMoves={allowedMoves} isYourTurn={isYourTurn} />
           </Grid>
         )}
         <Grid item container justifyContent={"center"}>
@@ -148,7 +148,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
           </Typography>
         </Grid>
         <Grid item container justifyContent={"center"}>
-          <Board calcWidth={calcWidth} isTraining={true} />
+          <BoardContainer calcWidth={calcWidth} isTraining={true} />
         </Grid>
       </Grid>
       <Grid item xs={12} sm={5} container direction="column" alignItems="left">

@@ -3,7 +3,7 @@ import { Select, MenuItem, Box } from "@mui/material";
 import { IRepertoire } from "../../../../common/types/Repertoire";
 import ManageVariant from "./ManageVariant";
 import { getRepertoire } from "../../../repository/repertoires/repertoires";
-import { Variant } from "../../../components/chess/models/chess.models";
+import { Variant } from "../../../models/chess.models";
 import { deleteVariant } from "../../../repository/repertoires/variants";
 import { useDialogContext } from "../../../contexts/DialogContext";
 

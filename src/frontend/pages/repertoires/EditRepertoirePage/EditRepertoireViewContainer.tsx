@@ -6,11 +6,11 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import Board from "../../../components/chess/board/Board";
-import BoardActions from "../../../components/chess/board/BoardActions";
-import VariantsInfo from "../../../components/chess/panels/Variants/VariantsInfo";
+import BoardContainer from "../../../components/application/chess/board/BoardContainer";
+import BoardActionsContainer from "../../../components/application/chess/board/BoardActionsContainer";
+import VariantsInfo from "../../../components/application/chess/board/VariantsInfo";
 import { useRepertoireContext } from "../../../contexts/RepertoireContext";
-import { BoardComment } from "../../../components/chess/panels/BoardComments";
+import { BoardCommentContainer } from "../../../components/application/chess/board/BoardCommentContainer";
 import { useFooterContext } from "../../../contexts/FooterContext";
 
 import ChatIcon from "@mui/icons-material/Chat";
@@ -160,10 +160,10 @@ const EditRepertoireViewContainer: React.FC = () => {
           </Typography>
         </Grid>
         <Grid item container justifyContent={"center"}>
-          <Board calcWidth={calcWidth} />
+          <BoardContainer calcWidth={calcWidth} />
         </Grid>
         <Grid item container justifyContent="center">
-          <BoardActions />
+          <BoardActionsContainer />
         </Grid>
       </Grid>
       <Grid item xs={12} sm={7} container direction="column" alignItems="left" display={"flex"} overflow={"auto"}>
@@ -177,7 +177,7 @@ const EditRepertoireViewContainer: React.FC = () => {
         {isMobile && panelSelected === "comments" && (
           <>
             <Grid item>
-              <BoardComment />
+              <BoardCommentContainer />
             </Grid>
           </>
         )}
@@ -187,7 +187,7 @@ const EditRepertoireViewContainer: React.FC = () => {
               <VariantsInfo />
             </Grid>
             <Grid item style={{ marginTop: "24px", overflowY: "auto" }}>
-              <BoardComment />
+              <BoardCommentContainer />
             </Grid>
           </>
         )}
