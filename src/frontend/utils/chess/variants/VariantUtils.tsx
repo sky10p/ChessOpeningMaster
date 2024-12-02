@@ -1,5 +1,5 @@
-import { Variant } from "../models/chess.models";
-import { MoveVariantNode } from "./VariantNode";
+import { Variant } from "../../../models/chess.models";
+import { MoveVariantNode } from "../../../models/VariantNode";
 
 export const variantsToMoves = (variants: Variant[]): MoveVariantNode => {
     const rootNode = new MoveVariantNode();

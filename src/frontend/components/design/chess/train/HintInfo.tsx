@@ -1,11 +1,15 @@
 import { Box, TextField, Typography } from "@mui/material";
 import React from "react"
-import { useRepertoireContext } from "../../../../contexts/RepertoireContext";
+import { MoveVariantNode } from "../../../../models/VariantNode";
+
+interface HintInfoProps {
+  currentMoveNode: MoveVariantNode;
+}
 
 
-export const HintInfo: React.FC = () => {
-    const {currentMoveNode} = useRepertoireContext();
-
+export const HintInfo: React.FC<HintInfoProps> = ({
+  currentMoveNode
+}) => {
     const getHints = (): string[] => {
       const comments: string[] = [];
       let node = currentMoveNode;

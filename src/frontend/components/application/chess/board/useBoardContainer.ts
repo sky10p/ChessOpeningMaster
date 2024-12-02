@@ -1,93 +1,25 @@
-import React, { CSSProperties, useEffect, useState } from "react";
+import { useState } from "react";
 import { Color, Move, Square, Chess } from "chess.js";
-import { Chessboard } from "react-chessboard";
-import { useRepertoireContext } from "../../../contexts/RepertoireContext";
-import { useTrainRepertoireContext } from "../../../contexts/TrainRepertoireContext";
-import { useAlertContext } from "../../../contexts/AlertContext";
+import { useRepertoireContext } from "../../../../contexts/RepertoireContext";
+import { useTrainRepertoireContext } from "../../../../contexts/TrainRepertoireContext";
+import { useAlertContext } from "../../../../contexts/AlertContext";
 
-interface BoardProps {
-  calcWidth: (dimensions: { screenWidth: number }) => number;
-  isTraining?: boolean;
-}
-
-const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
+export const useBoardContainer = (isTraining: boolean) => {
   const { chess, setChess, addMove, orientation, currentMoveNode } =
     useRepertoireContext();
   const { showAlert } = useAlertContext();
   const trainRepertoireContext = isTraining
     ? useTrainRepertoireContext()
     : null;
-  const [squareStyles, setSquareStyles] = useState({});
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
-  const [possibleMoves, setPossibleMoves] = useState<Move[]>([]);
+  const [squareStyles, setSquareStyles] = useState({});
   const [dragOverSquare, setDragOverSquare] = useState<Square | null>(null);
+  const [possibleMoves, setPossibleMoves] = useState<Move[]>([]);
   const [circleSquares, setCircleSquares] = useState<Set<Square>>(new Set());
-  const [arrows, setArrows] = useState<Square[][]>([]);
   const [pieceMoved, setPieceMoved] = useState(false);
-
-  const [boardWidth, setBoardWidth] = useState(
-    calcWidth({ screenWidth: window.innerWidth })
-  );
-
-  useEffect(() => {
-    const handleResize = () => {
-      setBoardWidth(calcWidth({ screenWidth: window.innerWidth }));
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
-  useEffect(() => {
-    setCircleSquares(
-      currentMoveNode.circles ? new Set(currentMoveNode.circles) : new Set()
-    );
-    setArrows(currentMoveNode.arrows ?? []);
-  }, [currentMoveNode]);
-
-  const dropSquareStyle: React.CSSProperties = {
-    background: "rgba(20, 85, 30, 0.4)",
-  };
-
-  useEffect(() => {
-    const styles: Record<string, CSSProperties> = {};
-
-    if (selectedSquare) {
-      styles[selectedSquare] = {
-        background: "rgba(20, 85, 30, 0.5)",
-      };
-    }
-
-    for (const circleSquare of Array.from(circleSquares)) {
-      styles[circleSquare] = {
-        borderRadius: "50%",
-        boxSizing: "border-box",
-        boxShadow: "inset 0 0 0 5px rgb(21, 120, 27)",
-      };
-    }
-
-    for (const move of possibleMoves) {
-      const piece = chess.get(move.to);
-      styles[move.to] = {
-        background: piece
-          ? "radial-gradient(transparent 0%, transparent 79%, rgba(20, 85, 0, 0.3) 80%)"
-          : "radial-gradient(rgba(20, 85, 30, 0.5) 19%, rgba(0, 0, 0, 0) 20%)",
-      };
-    }
-
-    if (dragOverSquare) {
-      styles[dragOverSquare] = dropSquareStyle;
-    }
-
-    setSquareStyles(styles);
-  }, [chess, selectedSquare, possibleMoves, dragOverSquare, circleSquares]);
 
   const isCorrectPieceSelected = (square: Square, turn: Color) => {
     const piece = chess.get(square);
-
     return piece && piece.color === turn;
   };
 
@@ -174,14 +106,6 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
     currentMoveNode.circles = Array.from(circleSquares);
   };
 
-  const updateArrows = (arrows: Square[][]) => {
-    if (pieceMoved) {
-      setPieceMoved(false);
-      return;
-    }
-    currentMoveNode.arrows = arrows;
-  };
-
   const onDrop = ({
     sourceSquare,
     targetSquare,
@@ -190,46 +114,30 @@ const Board: React.FC<BoardProps> = ({ calcWidth, isTraining = false }) => {
     targetSquare: Square;
   }) => {
     setDragOverSquare(null);
-
     const handleMoveResult = handleMove(sourceSquare, targetSquare);
     setPieceMoved(true);
-
     return handleMoveResult;
   };
 
-  const onDragOverSquare = (square: Square) => {
-    if (!selectedSquare) {
-      selectPiece(square);
-    }
-
-    if (possibleMoves.some((move) => move.to === square)) {
-      setDragOverSquare(square);
-    } else {
-      setDragOverSquare(null);
-    }
+  return {
+    chess,
+    setChess,
+    currentMoveNode,
+    orientation,
+    handleSquareClick,
+    handleSquareRightClick,
+    selectedSquare,
+    setSelectedSquare,
+    onDrop,
+    squareStyles,
+    setSquareStyles,
+    dragOverSquare,
+    setDragOverSquare,
+    pieceMoved,
+    setPieceMoved,
+    circleSquares,
+    setCircleSquares,
+    possibleMoves,
+    setPossibleMoves,
   };
-
-  return (
-    <div>
-      <Chessboard
-        id="game-board"
-        position={chess.fen()}
-        onSquareClick={handleSquareClick}
-        onSquareRightClick={handleSquareRightClick}
-        onPieceDrop={(sourceSquare, targetSquare) =>
-          onDrop({ sourceSquare, targetSquare })
-        }
-        customArrows={arrows}
-        onArrowsChange={(squares) => updateArrows(squares)}
-        customArrowColor="rgba(20, 85, 30, 0.5)"
-        onDragOverSquare={onDragOverSquare}
-        customSquareStyles={squareStyles}
-        customDropSquareStyle={{}}
-        boardOrientation={orientation}
-        boardWidth={boardWidth}
-      />
-    </div>
-  );
 };
-
-export default Board;

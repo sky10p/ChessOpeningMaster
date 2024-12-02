@@ -1,4 +1,4 @@
-import { Variant } from "../../models/chess.models";
+import { Variant } from "../chess.models";
 import { MoveVariantNode } from "../VariantNode";
 
 export const expectVariant = (variant: Variant, name: string, moves: MoveVariantNode[]) => {

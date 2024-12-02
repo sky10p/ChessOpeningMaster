@@ -1,6 +1,6 @@
 import { Move, Square } from "chess.js";
-import { Variant } from "../models/chess.models";
-import { IMoveNode } from "../../../../common/types/MoveNode";
+import { Variant } from "./chess.models";
+import { IMoveNode } from "../../common/types/MoveNode";
 
 export class MoveVariantNode implements IMoveNode {
   id: string;

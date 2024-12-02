@@ -1,16 +1,16 @@
 import React from "react";
 import { useRepertoireContext } from "../../../../contexts/RepertoireContext";
 import { Box } from "@mui/material";
-import VariantsTree from "./VariantTree";
-import { Variant } from "../../models/chess.models";
-import { variantsToMoves } from "../../utils/VariantUtils";
+import VariantsTree from "../../../design/chess/VariantTree";
+import { Variant } from "../../../../models/chess.models";
+import { variantsToMoves } from "../../../../utils/chess/variants/VariantUtils";
 import {
   getRepertoire,
   getRepertoires,
   putRepertoire,
 } from "../../../../repository/repertoires/repertoires";
 import { useDialogContext } from "../../../../contexts/DialogContext";
-import { MoveVariantNode } from "../../utils/VariantNode";
+import { MoveVariantNode } from "../../../../models/VariantNode";
 import { IRepertoire } from "../../../../../common/types/Repertoire";
 import { useAlertContext } from "../../../../contexts/AlertContext";
 

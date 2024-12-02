@@ -1,5 +1,5 @@
 import React from "react";
-import { Variant } from "../models/chess.models";
+import { Variant } from "../../models/chess.models";
 import {
   FormControl,
   InputLabel,

@@ -5,12 +5,12 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import { DeleteSweep, ContentPaste } from '@mui/icons-material';
-import { MoveVariantNode } from "../../utils/VariantNode";
-import { Variant } from "../../models/chess.models";
-import { SelectVariant } from "../../selects/SelectVariant";
-import { MovementAndTurnNodeButtonWithActions } from "../../buttons/MovementAndTurnNodeButtonWithActions";
-import { variantToPgn } from "../../utils/pgn.utils";
-import { BoardOrientation } from "../../../../../common/types/Orientation";
+import { MoveVariantNode } from "../../../models/VariantNode";
+import { Variant } from "../../../models/chess.models";
+import { SelectVariant } from "../SelectVariant";
+import { MovementAndTurnNodeButtonWithActions } from "../../application/chess/board/MovementAndTurnNodeButtonWithActions";
+import { variantToPgn } from "../../../utils/chess/pgn/pgn.utils";
+import { BoardOrientation } from "../../../../common/types/Orientation";
 
 interface VariantTreeProps {
   variants: Variant[];
@@ -27,8 +27,6 @@ const VariantTree: React.FC<VariantTreeProps> = ({ variants, currentNode, orient
   const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>(
     variants[0]
   );
-  const [selectedVariants, setSelectedVariants] = useState<Variant[]>([]);
-
   useEffect(() => {
     setSelectedVariant(
       variants.find((variant) =>

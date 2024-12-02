@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { Variant } from "../../chess/models/chess.models";
+import { Variant } from "../../../models/chess.models";
 import {
   Checkbox,
   FormControlLabel,

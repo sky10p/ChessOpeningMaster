@@ -3,7 +3,7 @@ import React from "react";
 import { TextDialog } from "../components/design/dialogs/TextDialog";
 import { ConfirmDialog } from "../components/design/dialogs/ConfirmDialog";
 import SelectTrainVariantsDialog from "../components/design/dialogs/SelectTrainVariantsDialog";
-import { TrainVariant, Variant } from "../components/chess/models/chess.models";
+import { TrainVariant, Variant } from "../models/chess.models";
 import SelectNextMoveDialog from "../components/design/dialogs/SelectNextMoveDialog";
 import RepertoireDialog from "../components/design/dialogs/RepertoireDialog"; // Import RepertoireDialog
 import { IRepertoire } from "../../common/types/Repertoire"; // Import IRepertoire

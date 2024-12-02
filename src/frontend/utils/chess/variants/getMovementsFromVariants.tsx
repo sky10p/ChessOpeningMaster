@@ -1,5 +1,5 @@
-import { TrainVariant } from "../../models/chess.models";
-import { MoveVariantNode } from "../../utils/VariantNode";
+import { TrainVariant } from "../../../models/chess.models";
+import { MoveVariantNode } from "../../../models/VariantNode";
 
 export const getMovementsFromVariant = (variant: TrainVariant, movement: MoveVariantNode): string[] => {
     const { moves } = variant.variant;

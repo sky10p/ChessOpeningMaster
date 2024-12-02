@@ -1,6 +1,6 @@
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
-import { MoveVariantNode } from "./VariantNode";
-import { Variant } from "../models/chess.models";
+import { MoveVariantNode } from "../../../models/VariantNode";
+import { Variant } from "../../../models/chess.models";
 
 export const toPGN = (
   nameRepertoire: string,

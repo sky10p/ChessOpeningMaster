@@ -11,15 +11,26 @@ import {
 } from "@mui/material";
 import whiteKing from "../../../../assets/white-king.svg";
 import blackKing from "../../../../assets/black-king.svg";
-import { useTrainRepertoireContext } from "../../../../contexts/TrainRepertoireContext";
-import { useRepertoireContext } from "../../../../contexts/RepertoireContext";
-import { getMovementsFromVariant } from "../Variants/getMovementsFromVariants";
+import { getMovementsFromVariant } from "../../../../utils/chess/variants/getMovementsFromVariants";
+import { Turn } from "../../../../../common/types/Orientation";
+import { TrainVariant } from "../../../../models/chess.models";
+import { MoveVariantNode } from "../../../../models/VariantNode";
 
-const TrainInfo: React.FC = () => {
-  const { turn, isYourTurn, trainVariants, finishedTrain } =
-    useTrainRepertoireContext();
+interface TrainInfoProps {
+  turn: Turn;
+  isYourTurn: boolean;
+  trainVariants: TrainVariant[];
+  finishedTrain: boolean;
+  currentMoveNode: MoveVariantNode;
+}
 
-  const {currentMoveNode} = useRepertoireContext();
+const TrainInfo: React.FC<TrainInfoProps> = ({
+  turn,
+  isYourTurn,
+  trainVariants,
+  finishedTrain,
+  currentMoveNode
+}) => {
 
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("sm")

@@ -4,11 +4,23 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import RotateLeftIcon from "@mui/icons-material/RotateLeft";
 
-import { useRepertoireContext } from "../../../contexts/RepertoireContext";
 
-const BoardActions: React.FC = () => {
+interface BoardActionsProps {
+    next: () => void;
+    prev: () => void;
+    hasNext: () => boolean;
+    hasPrev: () => boolean;
+    rotateBoard: () => void;
+}
 
-const {next, prev, hasNext, hasPrev, rotateBoard} = useRepertoireContext();
+const BoardActions: React.FC<BoardActionsProps> = ({
+    next,
+    prev,
+    hasNext,
+    hasPrev,
+    rotateBoard,
+}) => {
+
   return (
     <Box display="flex" justifyContent="center" alignItems="center" marginTop={1}>
       <IconButton color="primary" onClick={prev} disabled={!hasPrev()}>

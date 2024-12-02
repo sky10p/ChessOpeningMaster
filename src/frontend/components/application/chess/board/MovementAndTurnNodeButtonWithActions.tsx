@@ -1,8 +1,8 @@
 import { Button, ButtonProps, Menu, MenuItem, styled } from "@mui/material";
 import React, { useState } from "react";
-import { MoveVariantNode } from "../utils/VariantNode";
-import { useRepertoireContext } from "../../../contexts/RepertoireContext";
-import { TextDialog } from "../../design/dialogs/TextDialog";
+import { MoveVariantNode } from "../../../../models/VariantNode";
+import { useRepertoireContext } from "../../../../contexts/RepertoireContext";
+import { TextDialog } from "../../../design/dialogs/TextDialog";
 
 interface MoveNodeButtonProps {
   moveWhite: MoveVariantNode;

@@ -7,12 +7,19 @@ import {
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import { useTrainRepertoireContext } from "../../../../contexts/TrainRepertoireContext";
-import { MoveNodeButtonWithActions } from "../../buttons/MoveNodeButtonWithActions";
+import { MoveVariantNode } from "../../../../models/VariantNode";
+import { MoveNodeButtonWithActions } from "../../../application/chess/board/MoveNodeButtonWithActions";
 
-const HelpInfo: React.FC = () => {
+interface HelpInfoProps {
+ allowedMoves: MoveVariantNode[];
+  isYourTurn: boolean;
+}
+
+const HelpInfo: React.FC<HelpInfoProps> = ({
+  allowedMoves,
+  isYourTurn,
+}) => {
   const [iconVisible, setIconVisible] = useState(true);
-  const {allowedMoves, isYourTurn} = useTrainRepertoireContext();
 
   const toggleVisibility = () => {
     setIconVisible(!iconVisible);

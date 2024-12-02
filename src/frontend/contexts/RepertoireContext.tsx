@@ -1,18 +1,18 @@
 import { Chess, Move } from "chess.js";
 import React, { useCallback, useEffect, useState } from "react";
-import { MoveVariantNode } from "../components/chess/utils/VariantNode";
+import { MoveVariantNode } from "../models/VariantNode";
 import { IMoveNode } from "../../common/types/MoveNode";
-import { Variant } from "../components/chess/models/chess.models";
+import { Variant } from "../models/chess.models";
 import { BoardOrientation } from "../../common/types/Orientation";
 import { useAlertContext } from "./AlertContext";
 import { putRepertoire } from "../repository/repertoires/repertoires";
-import { toPGN } from "../components/chess/utils/pgn.utils";
+import { toPGN } from "../utils/chess/pgn/pgn.utils";
 import { useDialogContext } from "./DialogContext";
 import { useHeaderContext } from "./HeaderContext";
 
 interface RepertoireContextProps {
   chess: Chess;
-  orientation: "white" | "black";
+  orientation: BoardOrientation;
   initBoard: () => void;
   setChess: (chess: Chess) => void;
   rotateBoard: () => void;

@@ -1,8 +1,8 @@
 import React from "react";
 import { IRepertoire } from "../../../../common/types/Repertoire";
-import { MoveVariantNode } from "../../../components/chess/utils/VariantNode";
+import { MoveVariantNode } from "../../../models/VariantNode";
 import { Button, Box, List, ListItem, ListItemText, useTheme, useMediaQuery } from "@mui/material";
-import { Variant } from "../../../components/chess/models/chess.models";
+import { Variant } from "../../../models/chess.models";
 
 interface ManageVariantProps {
   repertoire: IRepertoire | undefined;

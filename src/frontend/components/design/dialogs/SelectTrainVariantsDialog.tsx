@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { TrainVariant } from "../../chess/models/chess.models";
+import { TrainVariant } from "../../../models/chess.models";
 import {
   Checkbox,
   FormControlLabel,
