@@ -11,6 +11,7 @@ interface TrainRepertoireContextProps {
   allowedMoves: MoveVariantNode[];
   finishedTrain: boolean;
   trainVariants: TrainVariant[];
+  lastTrainVariant?: TrainVariant;
   chooseTrainVariantsToTrain: (trainVariants: TrainVariant[]) => void;
 }
 
@@ -47,6 +48,7 @@ export const TrainRepertoireContextProvider: React.FC<
   const [trainVariants, setTrainVariants] = React.useState<TrainVariant[]>(
     variants.map((v) => ({ variant: v, state: "inProgress" }))
   );
+  const [lastTrainVariant, setLastTrainVariant] = React.useState<TrainVariant>();
 
   const playOpponentMove = async () => {
     await sleep(1000);
@@ -125,6 +127,7 @@ export const TrainRepertoireContextProvider: React.FC<
         trainVariant.variant.moves.length === lastMove.position &&
         trainVariant.variant.moves[lastMove.position - 1].id === lastMove.id
       ) {
+        setLastTrainVariant(trainVariant);
         return { ...trainVariant, state: "finished" } as TrainVariant;
       }
       return trainVariant;
@@ -145,6 +148,7 @@ export const TrainRepertoireContextProvider: React.FC<
         finishedTrain: trainVariants.every(
           (trainVariant) => trainVariant.state === "finished"
         ),
+        lastTrainVariant,
         chooseTrainVariantsToTrain,
       }}
     >

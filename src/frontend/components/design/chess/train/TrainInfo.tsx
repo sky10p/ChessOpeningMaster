@@ -8,6 +8,8 @@ import {
   Theme,
   useMediaQuery,
   LinearProgress,
+  Box,
+  Button,
 } from "@mui/material";
 import whiteKing from "../../../../assets/white-king.svg";
 import blackKing from "../../../../assets/black-king.svg";
@@ -15,12 +17,14 @@ import { getMovementsFromVariant } from "../../../../utils/chess/variants/getMov
 import { Turn } from "../../../../../common/types/Orientation";
 import { TrainVariant } from "../../../../models/chess.models";
 import { MoveVariantNode } from "../../../../models/VariantNode";
+import { variantToPgn } from "../../../../utils/chess/pgn/pgn.utils";
 
 interface TrainInfoProps {
   turn: Turn;
   isYourTurn: boolean;
   trainVariants: TrainVariant[];
   finishedTrain: boolean;
+  lastTrainVariant: TrainVariant | undefined;
   currentMoveNode: MoveVariantNode;
 }
 
@@ -29,6 +33,7 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
   isYourTurn,
   trainVariants,
   finishedTrain,
+  lastTrainVariant,
   currentMoveNode
 }) => {
 
@@ -51,9 +56,34 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
     setExpandedVariant(expandedVariant === index ? null : index);
   };
 
+  const handleCopyPgn = () => {
+    if (lastTrainVariant) {
+      const pgn = variantToPgn(lastTrainVariant.variant, turn, new Date());
+      const textArea = document.createElement("textarea");
+      textArea.value = pgn;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+    }
+  };
+
   return (
     <Card>
       <CardContent>
+        {lastTrainVariant && (
+          <Box display="flex" flexDirection="column" alignItems="flex-start" mb={2}>
+            <Typography variant="h6" gutterBottom>
+              Last Finished Variant
+            </Typography>
+            <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
+              <Typography variant="body1">{lastTrainVariant.variant.fullName}</Typography>
+              <Button variant="contained" color="primary" onClick={handleCopyPgn}>
+                Copy PGN
+              </Button>
+            </Box>
+          </Box>
+        )}
         <Grid container alignItems="center" spacing={2}>
           {!finishedTrain && (
             <Grid item>

@@ -31,7 +31,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
   const { repertoireId, repertoireName, currentMoveNode } = useRepertoireContext();
   const { showTrainVariantsDialog } = useDialogContext();
   const { addIcon: addIconHeader, removeIcon: removeIconHeader } = useHeaderContext();
-  const { trainVariants, chooseTrainVariantsToTrain, allowedMoves, isYourTurn, turn, finishedTrain } = useTrainRepertoireContext();
+  const { trainVariants, chooseTrainVariantsToTrain, allowedMoves, isYourTurn, turn, finishedTrain, lastTrainVariant } = useTrainRepertoireContext();
   const { addIcon: addIconFooter, removeIcon: removeIconFooter, setIsVisible } = useFooterContext();
 
   const calcWidth = useCallback(
@@ -112,7 +112,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
     if (isMobile) {
       return (
         <Grid item>
-          {panelSelected === "info" && <TrainInfo currentMoveNode={currentMoveNode} turn={turn} isYourTurn={isYourTurn} finishedTrain={finishedTrain} trainVariants={trainVariants} />}
+          {panelSelected === "info" && <TrainInfo currentMoveNode={currentMoveNode} turn={turn} isYourTurn={isYourTurn} finishedTrain={finishedTrain} trainVariants={trainVariants} lastTrainVariant={lastTrainVariant} />}
           {panelSelected === "help" && <HelpInfo allowedMoves={allowedMoves} isYourTurn={isYourTurn} />}
           {panelSelected === "trainComments" && <HintInfo currentMoveNode={currentMoveNode} />}
         </Grid>
@@ -127,12 +127,12 @@ const TrainRepertoireViewContainer: React.FC = () => {
             <HintInfo currentMoveNode={currentMoveNode} />
           </Grid>
           <Grid item style={{ marginTop: "36px" }}>
-            <TrainInfo currentMoveNode={currentMoveNode} turn={turn} isYourTurn={isYourTurn} finishedTrain={finishedTrain} trainVariants={trainVariants} />
+            <TrainInfo currentMoveNode={currentMoveNode} turn={turn} isYourTurn={isYourTurn} finishedTrain={finishedTrain} trainVariants={trainVariants} lastTrainVariant={lastTrainVariant}/>
           </Grid>
         </>
       );
     }
-  }, [isMobile, allowedMoves,turn,finishedTrain,trainVariants, currentMoveNode, isYourTurn, panelSelected]);
+  }, [isMobile, allowedMoves,turn,finishedTrain,trainVariants,lastTrainVariant, currentMoveNode, isYourTurn, panelSelected]);
 
   return (
     <Grid container spacing={2}>
