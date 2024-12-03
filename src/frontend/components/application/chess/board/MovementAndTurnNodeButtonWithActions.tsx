@@ -67,7 +67,7 @@ export const MovementAndTurnNodeButtonWithActions: React.FC<
     padding: "5px",
     border: "1px solid #ccc",
     borderRadius: "10px",
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#00000024",
     boxShadow: "2px 2px 10px rgba(0, 0, 0, 0.1)",
   });
 
