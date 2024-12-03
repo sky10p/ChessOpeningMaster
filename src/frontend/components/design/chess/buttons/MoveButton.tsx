@@ -35,10 +35,10 @@ const StyledButton = styled(Button, {
       }
     : {}),
   "&:hover": {
-    backgroundColor: isWhiteMove ? "#e0e0e0" : "#555555",
-    borderColor: isWhiteMove ? "#d0d0d0" : "#444444",
+    backgroundColor: "#5c6bc0",
+    borderColor: "#5c6bc0",
     boxShadow: "none",
-    color: isWhiteMove ? "#000000" : "#ffffff",
+    color: "white",
   },
 }));
 
