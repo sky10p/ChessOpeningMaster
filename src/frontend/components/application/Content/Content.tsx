@@ -5,7 +5,6 @@ import CreateRepertoire from "../../../pages/repertoires/CreateRepertoire";
 import EditRepertoirePage from "../../../pages/repertoires/EditRepertoirePage/EditRepertoirePage";
 import TrainRepertoirePage from "../../../pages/repertoires/TrainRepertoryPage/TrainRepertoirePage";
 
-
 const contentStyles: React.CSSProperties = {
   flexGrow: 1,
   padding: "1rem",
@@ -17,22 +16,19 @@ const contentStyles: React.CSSProperties = {
 
 const Content = () => {
   return (
-    <main style={contentStyles} >
+    <main style={contentStyles}>
       <Routes>
-        <Route
-          path="/create-repertoire"
-          element={<CreateRepertoire/>}
-        />
+        <Route path="/create-repertoire" element={<CreateRepertoire />} />
         <Route path="/edit-repertoire" element={<div>Edit repertoire</div>} />
-       {/*  <Route path="/manage-repertoires" element={<ManageRepertoirePage/>} /> */}
+        {/*  <Route path="/manage-repertoires" element={<ManageRepertoirePage/>} /> */}
         <Route
           path="/remove-repertoire"
           element={<div>Delete repertoire</div>}
         />
-        <Route path="/repertoire/:id" element={<EditRepertoirePage/>} />
-        <Route path="/repertoire/train/:id" element={<TrainRepertoirePage/>} />
+        <Route path="/repertoire/:id" element={<EditRepertoirePage />} />
+        <Route path="/repertoire/train/:id" element={<TrainRepertoirePage />} />
 
-        <Route path="/" element={<Home/>} />
+        <Route path="/" element={<Home />} />
       </Routes>
     </main>
   );

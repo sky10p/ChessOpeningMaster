@@ -9,10 +9,12 @@ const client = new MongoClient(uri);
 const app = express();
 const port = process.env.BACKEND_PORT || 3001;
 
-app.use(express.json({
-  limit: "100mb",
-  type: ["application/json", "text/plain"],
-}));
+app.use(
+  express.json({
+    limit: "100mb",
+    type: ["application/json", "text/plain"],
+  })
+);
 app.use(cors());
 app.get("/repertoires", async (req, res) => {
   await client.connect();
@@ -61,7 +63,7 @@ app.get("/repertoires/:id/download", async (req, res) => {
     .collection("repertoires")
     .findOne({ _id: new ObjectId(id) });
 
-  if(!repertoire) {
+  if (!repertoire) {
     return res.status(404).json({ message: "Repertoire not found" });
   }
   res.setHeader(
@@ -108,6 +110,37 @@ app.post("/repertoires/:id/duplicate", async (req, res) => {
     .collection("repertoires")
     .insertOne({ ...repertoireWithoutId, name, order });
   res.json(newRepertoire);
+});
+
+app.get("/repertoires/:id/variantsInfo", async (req, res) => {
+  await client.connect();
+  const { id } = req.params;
+  const db = client.db("chess-opening-master");
+  const variantsInfo = await db
+    .collection("variantsInfo")
+    .findOne({ _id: new ObjectId(id) });
+  res.json(variantsInfo);
+});
+
+app.post("/repertoires/:id/variantsInfo", async (req, res) => {
+  await client.connect();
+  const { id } = req.params;
+  const { variantsInfo } = req.body;
+  const db = client.db("chess-opening-master");
+  const repertoire = await db
+    .collection("variantsInfo")
+    .findOne({ _id: new ObjectId(id) });
+  if (!repertoire) {
+    return res.status(404).json({ message: "Repertoire not found" });
+  }
+  const updatedVariants = await db
+    .collection("variantsInfo")
+    .findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      { $set: { variantsInfo } },
+      { returnDocument: "after" }
+    );
+  res.json(updatedVariants);
 });
 
 app.put("/repertoires/:id", async (req, res) => {
@@ -181,9 +214,7 @@ app.delete("/repertoires/:id", async (req, res) => {
   await client.connect();
   const { id } = req.params;
   const db = client.db("chess-opening-master");
-  await db
-    .collection("repertoires")
-    .deleteOne({ _id: new ObjectId(id) });
+  await db.collection("repertoires").deleteOne({ _id: new ObjectId(id) });
   const repertoireToDelete = await db
     .collection("repertoires")
     .findOne({ _id: new ObjectId(id) });
@@ -206,7 +237,6 @@ app.delete("/repertoires/:id", async (req, res) => {
     res.json({ message: "Repertoire not found or already deleted" });
   }
 });
-
 
 app.listen(port, () => {
   console.log(process.env.MONGODB_URI);

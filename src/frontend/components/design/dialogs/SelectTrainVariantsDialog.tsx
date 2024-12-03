@@ -9,9 +9,9 @@ import {
   DialogActions,
   Button,
   DialogContentText,
-  Box,
   TextField,
 } from "@mui/material";
+import { SelectTrainVariants } from "../SelectTrainVariants/SelectTrainVariants";
 
 interface SelectTrainVariantsDialogProps {
   open: boolean;
@@ -166,23 +166,14 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
         /></div>
         {Object.keys(filteredGroupedTrainVariantsByName).map((groupName) => (
           <div key={groupName}>
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-
-            <Checkbox checked={isGroupSelected(groupName)} indeterminate={isSomeOfGroupSelected(groupName)} onChange={() => handleSelectAllGroup(groupName)} />
-            <h3>{groupName}</h3>
-            </Box>
-            {filteredGroupedTrainVariantsByName[groupName].length > 1 && filteredGroupedTrainVariantsByName[groupName].map((trainVariant) => (
-              <FormControlLabel
-                key={trainVariant.originalIndex}
-                control={
-                  <Checkbox
-                    checked={selectedTrainVariants.has(trainVariant.originalIndex)}
-                    onChange={() => handleToggleVariant(trainVariant.originalIndex)}
-                  />
-                }
-                label={trainVariant.variant.fullName}
-              />
-            ))}
+            <SelectTrainVariants
+              variantName={groupName}
+              subvariants={filteredGroupedTrainVariantsByName[groupName]}
+              isGroupSelected={isGroupSelected}
+              isSomeOfGroupSelected={isSomeOfGroupSelected}
+              isCheckedVariant={(variantIndex) => selectedTrainVariants.has(variantIndex)}
+              handleSelectAllGroup={handleSelectAllGroup}
+              handleToggleVariant={handleToggleVariant}/>
           </div>
         ))}
       </DialogContent>
