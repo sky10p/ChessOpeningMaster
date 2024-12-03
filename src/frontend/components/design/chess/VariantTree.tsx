@@ -1,16 +1,16 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Grid, IconButton } from "@mui/material";
-import DownloadIcon from '@mui/icons-material/Download';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import DeleteIcon from '@mui/icons-material/Delete';
-import FileCopyIcon from '@mui/icons-material/FileCopy';
-import { DeleteSweep, ContentPaste } from '@mui/icons-material';
+import DownloadIcon from "@mui/icons-material/Download";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import DeleteIcon from "@mui/icons-material/Delete";
+import FileCopyIcon from "@mui/icons-material/FileCopy";
+import { DeleteSweep, ContentPaste } from "@mui/icons-material";
 import { MoveVariantNode } from "../../../models/VariantNode";
 import { Variant } from "../../../models/chess.models";
 import { SelectVariant } from "../SelectVariant";
-import { MovementAndTurnNodeButtonWithActions } from "../../application/chess/board/MovementAndTurnNodeButtonWithActions";
 import { variantToPgn } from "../../../utils/chess/pgn/pgn.utils";
 import { BoardOrientation } from "../../../../common/types/Orientation";
+import { Movements } from "./edit/Movements";
 
 interface VariantTreeProps {
   variants: Variant[];
@@ -22,7 +22,15 @@ interface VariantTreeProps {
   copyVariantsToRepertoire: () => void;
 }
 
-const VariantTree: React.FC<VariantTreeProps> = ({ variants, currentNode, orientation, deleteVariant, copyVariantToRepertoire,copyVariantsToRepertoire,deleteVariants }) => {
+const VariantTree: React.FC<VariantTreeProps> = ({
+  variants,
+  currentNode,
+  orientation,
+  deleteVariant,
+  copyVariantToRepertoire,
+  copyVariantsToRepertoire,
+  deleteVariants,
+}) => {
   const isSelected = (node: MoveVariantNode) => node === currentNode;
   const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>(
     variants[0]
@@ -34,27 +42,6 @@ const VariantTree: React.FC<VariantTreeProps> = ({ variants, currentNode, orient
       ) ?? variants[0]
     );
   }, [variants]);
-
-  const moveNodesWithActions = useMemo(() => {
-    const moves = selectedVariant?.moves;
-    const moveComponents = [];
-
-    if (moves) {
-      for (let i = 0; i < moves.length; i += 2) {
-        const moveWhite = moves[i];
-        const moveBlack = moves[i + 1];
-        moveComponents.push(
-          <MovementAndTurnNodeButtonWithActions
-            key={moveWhite.getUniqueKey()}
-            moveWhite={moveWhite}
-            moveBlack={moveBlack}
-          />
-        );
-      }
-    }
-
-    return moveComponents;
-  }, [selectedVariant]);
 
   const downloadVariantPGN = () => {
     if (selectedVariant) {
@@ -84,29 +71,29 @@ const VariantTree: React.FC<VariantTreeProps> = ({ variants, currentNode, orient
       }
       document.body.removeChild(textarea);
     } else {
-      console.error('No variant selected');
+      console.error("No variant selected");
     }
   };
 
-
   return (
     <>
-      <Grid container spacing={2} alignItems="center" mb={2} justifyContent="flex-start" wrap="nowrap">
+      <Grid
+        container
+        spacing={2}
+        alignItems="center"
+        mb={2}
+        justifyContent="flex-start"
+        wrap="nowrap"
+      >
         {selectedVariant && (
           <>
             <Grid item>
-              <IconButton
-                onClick={downloadVariantPGN}
-                color="primary"
-              >
+              <IconButton onClick={downloadVariantPGN} color="primary">
                 <DownloadIcon />
               </IconButton>
             </Grid>
             <Grid item>
-              <IconButton
-                onClick={copyVariantPGN}
-                color="primary"
-              >
+              <IconButton onClick={copyVariantPGN} color="primary">
                 <ContentCopyIcon />
               </IconButton>
             </Grid>
@@ -119,10 +106,7 @@ const VariantTree: React.FC<VariantTreeProps> = ({ variants, currentNode, orient
               </IconButton>
             </Grid>
             <Grid item>
-              <IconButton
-                onClick={copyVariantsToRepertoire}
-                color="primary"
-              >
+              <IconButton onClick={copyVariantsToRepertoire} color="primary">
                 <ContentPaste />
               </IconButton>
             </Grid>
@@ -135,10 +119,7 @@ const VariantTree: React.FC<VariantTreeProps> = ({ variants, currentNode, orient
               </IconButton>
             </Grid>
             <Grid item>
-              <IconButton
-                onClick={deleteVariants}
-                color="primary"
-              >
+              <IconButton onClick={deleteVariants} color="primary">
                 <DeleteSweep />
               </IconButton>
             </Grid>
@@ -154,7 +135,9 @@ const VariantTree: React.FC<VariantTreeProps> = ({ variants, currentNode, orient
           />
         </Grid>
       )}
-      <Box>{moveNodesWithActions}</Box>
+      <Box>
+        <Movements moves={selectedVariant?.moves} />
+      </Box>
     </>
   );
 };

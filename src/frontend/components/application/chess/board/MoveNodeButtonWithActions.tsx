@@ -1,21 +1,23 @@
-import { Button, Menu, MenuItem, styled } from "@mui/material";
+import { Menu, MenuItem } from "@mui/material";
 import React, { useState } from "react";
 import { useRepertoireContext } from "../../../../contexts/RepertoireContext";
 import { MoveVariantNode } from "../../../../models/VariantNode";
 import { TextDialog } from "../../../design/dialogs/TextDialog";
+import { MoveButton } from "../../../design/chess/buttons/MoveButton";
 
 interface MoveNodeButtonProps {
   move: MoveVariantNode;
+  hasMenu?: boolean;
 }
 
 
 
 export const MoveNodeButtonWithActions: React.FC<MoveNodeButtonProps> = ({
   move,
+  hasMenu = false,
 }) => {
-  const { goToMove, changeNameMove, deleteMove, currentMoveNode } =
+  const { goToMove, changeNameMove, deleteMove } =
     useRepertoireContext();
-  const isSelected = (node: MoveVariantNode) => node === currentMoveNode;
 
   const [contextMenu, setContextMenu] = useState<{
     x: number;
@@ -31,6 +33,9 @@ export const MoveNodeButtonWithActions: React.FC<MoveNodeButtonProps> = ({
     event: React.MouseEvent,
     node: MoveVariantNode
   ) => {
+    if(!hasMenu) {
+      return;
+    }
     event.preventDefault();
     setContextMenu({ x: event.clientX, y: event.clientY, node });
   };
@@ -59,38 +64,17 @@ export const MoveNodeButtonWithActions: React.FC<MoveNodeButtonProps> = ({
     handleCloseRenameDialog();
   };
 
-  const MoveButton = styled(Button)({
-    minWidth: "40px",
-    minHeight: "30px",
-    margin: "2px",
-    padding: "2px 4px",
-    textTransform: "none",
-    fontSize: "0.9rem",
-    fontWeight: "normal",
-    ...(isSelected(move) ? {
-      backgroundColor: "#3f51b5",
-      color: "white",
-      borderColor: "#3f51b5",
-    } : {} ),
-    '&:hover':{
-      backgroundColor: '#0069d9',
-      borderColor: '#0062cc',
-      boxShadow: 'none',
-      color: "white"
-    },
-  });
 
   return (
     <>
       <MoveButton
         key={move.getUniqueKey()}
-        variant="outlined"
+        move={move}
         onClick={() => goToMove(move)}
         onContextMenu={(event) => handleContextMenu(event, move)}
-        color={isSelected(move) ? "primary" : "inherit"}
-      >
-        {move.getMove().san} {move.variantName ? "*" : ""}
-      </MoveButton>
+        isSelectedMove={false}
+        isWhiteMove={move.getMove().color === "w"}
+      />
       <Menu
         open={contextMenu.node !== null}
         onClose={handleCloseContextMenu}

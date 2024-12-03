@@ -1,21 +1,19 @@
-import { Button, ButtonProps, Menu, MenuItem, styled } from "@mui/material";
+import { Menu, MenuItem, styled } from "@mui/material";
 import React, { useState } from "react";
 import { MoveVariantNode } from "../../../../models/VariantNode";
 import { useRepertoireContext } from "../../../../contexts/RepertoireContext";
 import { TextDialog } from "../../../design/dialogs/TextDialog";
+import { MoveButton } from "../../../design/chess/buttons/MoveButton";
 
 interface MoveNodeButtonProps {
   moveWhite: MoveVariantNode;
   moveBlack?: MoveVariantNode;
 }
 
-interface MoveButtonProps extends ButtonProps {
-  isSelectedMove: boolean;
-}
 
-export const MovementAndTurnNodeButtonWithActions: React.FC<MoveNodeButtonProps> = ({
-  moveWhite, moveBlack,
-}) => {
+export const MovementAndTurnNodeButtonWithActions: React.FC<
+  MoveNodeButtonProps
+> = ({ moveWhite, moveBlack }) => {
   const { goToMove, changeNameMove, deleteMove, currentMoveNode } =
     useRepertoireContext();
   const isSelected = (node: MoveVariantNode) => node === currentMoveNode;
@@ -69,60 +67,34 @@ export const MovementAndTurnNodeButtonWithActions: React.FC<MoveNodeButtonProps>
     padding: "5px",
     border: "1px solid #ccc",
     borderRadius: "10px",
-    backgroundColor: "#f9f9f9",
-    boxShadow: "2px 2px 5px rgba(0, 0, 0, 0.1)",
+    backgroundColor: "#f0f0f0",
+    boxShadow: "2px 2px 10px rgba(0, 0, 0, 0.1)",
   });
-
-   const MoveButton = styled(Button, {
-    shouldForwardProp: (prop) => prop !== "isSelectedMove",
-  })<MoveButtonProps>(({isSelectedMove}) => ({
-    minWidth: "40px",
-    minHeight: "30px",
-    margin: "2px",
-    padding: "2px 4px",
-    textTransform: "none",
-    fontSize: "0.9rem",
-    fontWeight: "normal",
-    ...(isSelectedMove ? {
-      backgroundColor: "#3f51b5",
-      color: "white",
-      borderColor: "#3f51b5",
-    } : {} ),
-    '&:hover':{
-      backgroundColor: '#0069d9',
-      borderColor: '#0062cc',
-      boxShadow: 'none',
-      color: "white"
-    },
-  }));
 
   return (
     <>
-    <MovementContainer>
-      <span>{moveWhite.turn}</span>
-      <MoveButton
-        key={moveWhite.getUniqueKey()}
-        variant="outlined"
-        onClick={() => goToMove(moveWhite)}
-        onContextMenu={(event) => handleContextMenu(event, moveWhite)}
-        color={isSelected(moveWhite) ? "primary" : "inherit"}
-        isSelectedMove={isSelected(moveWhite)}
-      >
-        {moveWhite.getMove().san} {moveWhite.variantName ? "*" : ""}
-      </MoveButton>
-      {moveBlack && <MoveButton
-        key={moveBlack.getUniqueKey()}
-        variant="outlined"
-        onClick={() => goToMove(moveBlack)}
-        onContextMenu={(event) => handleContextMenu(event, moveBlack)}
-        color={isSelected(moveBlack) ? "primary" : "inherit"}
-        isSelectedMove={isSelected(moveBlack)}
-      >
-        {moveBlack.getMove().san}  {moveBlack.variantName ? "*" : ""}
-      </MoveButton>}
-    </MovementContainer>
-     
-     
+      <MovementContainer>
+        <span>{moveWhite.turn}</span>
+        <MoveButton
+          key={moveWhite.getUniqueKey()}
+          move={moveWhite}
+          onClick={(move) => goToMove(move)}
+          onContextMenu={(event) => handleContextMenu(event, moveWhite)}
+          isSelectedMove={isSelected(moveWhite)}
+          isWhiteMove={true}
+        />
+        {moveBlack && (
+          <MoveButton
+            key={moveBlack.getUniqueKey()}
+            move={moveBlack}
+            onClick={() => goToMove(moveBlack)}
+            onContextMenu={(event) => handleContextMenu(event, moveBlack)}
+            isSelectedMove={isSelected(moveBlack)}
+            isWhiteMove={false}
+          />
+        )}
+      </MovementContainer>
+
       <Menu
         open={contextMenu.node !== null}
         onClose={handleCloseContextMenu}

@@ -7,6 +7,7 @@ export type NavbarContextProps = {
     setOpen: (open: boolean) => void;
     repertoires: IRepertoire[];
     updateRepertoires: () => void;
+    updatedRepertoires: boolean;
 };
 export const NavbarContext = React.createContext<NavbarContextProps | null>(null);
 
@@ -23,12 +24,20 @@ export const useNavbarContext = (): NavbarContextProps => {
 export const NavbarContextProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
     const [open, setOpen] = React.useState(false);
     const [repertoires, setRepertoires] = React.useState<IRepertoire[]>([]);
+    const [updatedRepertoires, setUpdatedRepertoires] = React.useState(false);
 
-    const updateRepertoires = () => {
-        getRepertoires().then((repertoires) => setRepertoires(repertoires));
+    const updateRepertoires = async () => {
+        const repertoires = await getRepertoires();
+        setRepertoires(repertoires);
+        setUpdatedRepertoires(true);
     };
+
+    React.useEffect(() => {
+        updateRepertoires();
+    }, []);
+
     return (
-        <NavbarContext.Provider value={{ open, setOpen, repertoires, updateRepertoires }}>
+        <NavbarContext.Provider value={{ open, setOpen, repertoires, updateRepertoires, updatedRepertoires }}>
             {children}
         </NavbarContext.Provider>
     );
