@@ -118,28 +118,50 @@ app.get("/repertoires/:id/variantsInfo", async (req, res) => {
   const db = client.db("chess-opening-master");
   const variantsInfo = await db
     .collection("variantsInfo")
-    .findOne({ _id: new ObjectId(id) });
+    .find({ repertoireId: id })
+    .toArray();
   res.json(variantsInfo);
 });
 
 app.post("/repertoires/:id/variantsInfo", async (req, res) => {
   await client.connect();
   const { id } = req.params;
-  const { variantsInfo } = req.body;
+  const { variantName, errors } = req.body;
   const db = client.db("chess-opening-master");
-  const repertoire = await db
+  const trainVariantsInfo = await db
     .collection("variantsInfo")
-    .findOne({ _id: new ObjectId(id) });
-  if (!repertoire) {
-    return res.status(404).json({ message: "Repertoire not found" });
+    .findOne({ repertoireId: id, variantName });
+
+  if (!trainVariantsInfo) {
+    const newVariantInfo = {
+      repertoireId: id,
+      variantName,
+      errors,
+      lastDate: new Date(),
+    };
+    await db.collection("variantsInfo").insertOne(newVariantInfo);
+    return res.status(201).json(newVariantInfo);
   }
+
+  const currentDate = new Date();
+  const lastDate = new Date(trainVariantsInfo.lastDate);
+
+  const shouldUpdate =
+    errors > trainVariantsInfo.errors ||
+    (errors < trainVariantsInfo.errors && currentDate > lastDate);
+
+  if (!shouldUpdate) {
+    return res.status(200).json({ message: "No update needed" });
+  }
+
   const updatedVariants = await db
     .collection("variantsInfo")
     .findOneAndUpdate(
       { _id: new ObjectId(id) },
-      { $set: { variantsInfo } },
+      { $set: { repertoireId: id, variantName, errors, lastDate: currentDate } },
       { returnDocument: "after" }
     );
+
   res.json(updatedVariants);
 });
 

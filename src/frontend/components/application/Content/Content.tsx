@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Home from "../../../pages/Home";
 import CreateRepertoire from "../../../pages/repertoires/CreateRepertoire";
 import EditRepertoirePage from "../../../pages/repertoires/EditRepertoirePage/EditRepertoirePage";
-import TrainRepertoirePage from "../../../pages/repertoires/TrainRepertoryPage/TrainRepertoirePage";
+import TrainRepertoirePage from "../../../pages/repertoires/TrainRepertoirePage/TrainRepertoirePage";
 
 const contentStyles: React.CSSProperties = {
   flexGrow: 1,

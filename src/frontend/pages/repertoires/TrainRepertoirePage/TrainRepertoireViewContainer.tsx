@@ -72,6 +72,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
             title: "Select train variants",
             contentText: "Select the variants you want to train",
             trainVariants: variants.map((v) => ({ variant: v, state: "inProgress" })),
+            repertoireId,
             onTrainVariantsConfirm: (selectedTrainVariants: TrainVariant[]) => {
               chooseTrainVariantsToTrain(selectedTrainVariants);
             },

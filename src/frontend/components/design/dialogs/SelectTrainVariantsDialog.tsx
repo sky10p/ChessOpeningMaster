@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { TrainVariant } from "../../../models/chess.models";
+import { TrainVariant, TrainVariantInfo } from "../../../models/chess.models";
 import {
   Checkbox,
   FormControlLabel,
@@ -12,12 +12,14 @@ import {
   TextField,
 } from "@mui/material";
 import { SelectTrainVariants } from "../SelectTrainVariants/SelectTrainVariants";
+import { getTrainVariantInfo } from "../../../repository/repertoires/trainVariants";
 
 interface SelectTrainVariantsDialogProps {
   open: boolean;
   title: string;
   contentText: string;
   trainVariants: TrainVariant[];
+  repertoireId: string;
   onConfirm: (trainVariants: TrainVariant[]) => void;
   onClose: () => void;
 }
@@ -31,6 +33,7 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
   title,
   contentText,
   trainVariants,
+  repertoireId,
   onConfirm,
   onClose,
 }) => {
@@ -38,6 +41,7 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
     Set<number>
   >(new Set());
   const [filterText, setFilterText] = useState("");
+  const [trainVariantsInfo, setTrainVariantsInfo] = useState<Record<string, TrainVariantInfo>>({});
 
   const handleFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFilterText(event.target.value);
@@ -72,8 +76,18 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
     );
   }, [groupedTrainVariantsByName, filterText]);
 
+  const updateTrainVariantsInfo = async () => {
+    const variantsInfo = await getTrainVariantInfo(repertoireId);
+    const variantsInfoMap = variantsInfo.reduce((acc: Record<string, TrainVariantInfo>, variantInfo) => {
+      acc[variantInfo.variantName] = variantInfo;
+      return acc;
+    }, {});
+    setTrainVariantsInfo(variantsInfoMap);
+  }
+
   useEffect(() => {
     if (open) {
+      updateTrainVariantsInfo();
       setSelectedTrainVariants(
         new Set(
           trainVariants
@@ -173,7 +187,8 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
               isSomeOfGroupSelected={isSomeOfGroupSelected}
               isCheckedVariant={(variantIndex) => selectedTrainVariants.has(variantIndex)}
               handleSelectAllGroup={handleSelectAllGroup}
-              handleToggleVariant={handleToggleVariant}/>
+              handleToggleVariant={handleToggleVariant}
+              variantsInfo={trainVariantsInfo}/>
           </div>
         ))}
       </DialogContent>

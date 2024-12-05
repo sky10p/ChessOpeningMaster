@@ -68,6 +68,7 @@ export const useBoardContainer = (isTraining: boolean) => {
       }
       if (isTraining && !isMoveAllowed) {
         alert("La jugada no es válida según el repertorio.");
+        trainRepertoireContext?.setLastErrors(trainRepertoireContext.lastErrors + 1);
         unselectPiece();
         return false;
       } else {

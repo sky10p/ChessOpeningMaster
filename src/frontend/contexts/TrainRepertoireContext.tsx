@@ -4,6 +4,7 @@ import { useRepertoireContext } from "./RepertoireContext";
 import { MoveVariantNode } from "../models/VariantNode";
 import { TrainVariant } from "../models/chess.models";
 import { deepEqual } from "../utils/deepEqual";
+import { saveTrainVariantInfo } from "../repository/repertoires/trainVariants";
 
 interface TrainRepertoireContextProps {
   turn: Turn;
@@ -13,6 +14,8 @@ interface TrainRepertoireContextProps {
   trainVariants: TrainVariant[];
   lastTrainVariant?: TrainVariant;
   chooseTrainVariantsToTrain: (trainVariants: TrainVariant[]) => void;
+  lastErrors: number;
+  setLastErrors: (errors: number) => void;
 }
 
 export const TrainRepertoireContext =
@@ -42,14 +45,22 @@ export const TrainRepertoireContextProvider: React.FC<
   TrainRepertoireContextProviderProps
 > = ({ children }) => {
   const [turn, setTurn] = React.useState<Turn>("white");
-  const { orientation, currentMoveNode, goToMove, initBoard, variants } =
-    useRepertoireContext();
+  const {
+    repertoireId,
+    orientation,
+    currentMoveNode,
+    goToMove,
+    initBoard,
+    variants,
+  } = useRepertoireContext();
   const [allowedMoves, setAllowedMoves] = React.useState<MoveVariantNode[]>([]);
   const [trainVariants, setTrainVariants] = React.useState<TrainVariant[]>(
     variants.map((v) => ({ variant: v, state: "inProgress" }))
   );
   const [lastTrainVariant, setLastTrainVariant] =
     React.useState<TrainVariant>();
+
+  const [lastErrors, setLastErrors] = React.useState<number>(0);
 
   const playOpponentMove = async () => {
     await sleep(1000);
@@ -128,9 +139,17 @@ export const TrainRepertoireContextProvider: React.FC<
         trainVariant.variant.moves.length === lastMove.position &&
         trainVariant.variant.moves[lastMove.position - 1].id === lastMove.id
       ) {
-        if (lastTrainVariant?.variant.fullName !== trainVariant.variant.fullName) {
+        if (
+          lastTrainVariant?.variant.fullName !== trainVariant.variant.fullName
+        ) {
           setLastTrainVariant(trainVariant);
         }
+        saveTrainVariantInfo({
+          repertoireId,
+          variantName: trainVariant.variant.fullName,
+          errors: lastErrors,
+        });
+        setLastErrors(0);
         return { ...trainVariant, state: "finished" } as TrainVariant;
       }
       return trainVariant;
@@ -152,8 +171,18 @@ export const TrainRepertoireContextProvider: React.FC<
       ),
       lastTrainVariant,
       chooseTrainVariantsToTrain,
+      lastErrors,
+      setLastErrors,
     }),
-    [turn, isYourTurn, allowedMoves, trainVariants, lastTrainVariant]
+    [
+      turn,
+      isYourTurn,
+      allowedMoves,
+      trainVariants,
+      lastTrainVariant,
+      lastErrors,
+      setLastErrors,
+    ]
   );
 
   return (

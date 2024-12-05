@@ -27,6 +27,7 @@ interface SelectTrainVariantsConfirmDialog {
     title?: string;
     contentText?: string;
     trainVariants: TrainVariant[];
+    repertoireId: string; // Add repertoireId
     onTrainVariantsConfirm: (trainVariants: TrainVariant[]) => void;
     onDialogClose?: () => void;
 }
@@ -96,8 +97,9 @@ export const DialogContextProvider = ({ children }: { children: React.ReactNode 
 
     const [trainVariants, setTrainVariants] = React.useState<TrainVariant[]>([]);
     const [nextMovements, setNextMovements] = React.useState<string[]>([]);
-    const [repertoires, setRepertoires] = React.useState<IRepertoire[]>([]); // Add state for repertoires
-    const [variants, setVariants] = React.useState<Variant[]>([]); // Add state for variants
+    const [repertoires, setRepertoires] = React.useState<IRepertoire[]>([]);
+    const [variants, setVariants] = React.useState<Variant[]>([]); 
+    const [repertoireId, setRepertoireId] = React.useState<string>(""); 
 
     const [contentText, setContentText] = React.useState<string>("");
 
@@ -117,11 +119,12 @@ export const DialogContextProvider = ({ children }: { children: React.ReactNode 
         setOpenConfirmDialog(true);
     };
 
-    const showTrainVariantsDialog = ({title, contentText, trainVariants, onTrainVariantsConfirm, onDialogClose}: SelectTrainVariantsConfirmDialog) => {
+    const showTrainVariantsDialog = ({title, contentText, trainVariants, repertoireId, onTrainVariantsConfirm, onDialogClose}: SelectTrainVariantsConfirmDialog) => {
         setTitle(title ?? "Select train variants");
         setContentText(contentText ?? "Select variants to train or disable to ignore");
         setOnTrainVariantsConfirm(() => onTrainVariantsConfirm);
         setTrainVariants(trainVariants);
+        setRepertoireId(repertoireId); // Set repertoireId
         setOnDialogClose(() => onDialogClose);
         setOpenTrainVariantsDialog(true);
     };
@@ -199,7 +202,7 @@ export const DialogContextProvider = ({ children }: { children: React.ReactNode 
             {children}
            <TextDialog open={openTextDialog} initialValue="" onClose={handleDialogClose} contentText={contentText} onTextConfirm={handleTextConfirm} title={title}></TextDialog>
            <ConfirmDialog open={openConfirmDialog} onClose={handleDialogClose} contentText={contentText} onConfirm={handleConfirm} title={title}></ConfirmDialog>
-           <SelectTrainVariantsDialog open={openTrainVariantsDialog} contentText={contentText} trainVariants={trainVariants} onClose={handleDialogClose} onConfirm={handleTrainVariantsConfirm} title={title}></SelectTrainVariantsDialog>
+           <SelectTrainVariantsDialog open={openTrainVariantsDialog} contentText={contentText} trainVariants={trainVariants} onClose={handleDialogClose} onConfirm={handleTrainVariantsConfirm} title={title} repertoireId={repertoireId}></SelectTrainVariantsDialog>
            <SelectNextMoveDialog open={openSelectNextMoveDialog} contentText={contentText} nextMovements={nextMovements} onClose={handleDialogClose} onConfirm={handleNextMoveConfirm} title={title}></SelectNextMoveDialog>
            <RepertoireDialog open={openRepertoireDialog} contentText={contentText} repertoires={repertoires} onClose={handleDialogClose} onConfirm={handleRepertoireConfirm} title={title}></RepertoireDialog>
            <SelectVariantsDialog open={openSelectVariantsDialog} contentText={contentText} variants={variants} onClose={handleDialogClose} onConfirm={handleVariantsConfirm} title={title}></SelectVariantsDialog>

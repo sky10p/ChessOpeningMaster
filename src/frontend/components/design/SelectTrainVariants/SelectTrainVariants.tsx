@@ -12,10 +12,12 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { GroupedVariant } from "./models";
 import { VariantsProgressBar } from './VariantsProgressBar';
 import { getTextColor } from "./utils";
+import { TrainVariantInfo } from "../../../models/chess.models";
 
 interface SelectTrainVariantProps {
   variantName: string;
   subvariants: GroupedVariant[];
+  variantsInfo: Record<string, TrainVariantInfo>;
   isGroupSelected: (groupName: string) => boolean;
   isSomeOfGroupSelected: (groupName: string) => boolean;
   handleSelectAllGroup: (groupName: string) => void;
@@ -31,6 +33,7 @@ export const SelectTrainVariants: React.FC<SelectTrainVariantProps> = ({
   handleSelectAllGroup,
   isCheckedVariant,
   handleToggleVariant,
+  variantsInfo,
 }) => {
  
   return (
@@ -58,7 +61,7 @@ export const SelectTrainVariants: React.FC<SelectTrainVariantProps> = ({
             }
             label={<Typography>{variantName}</Typography>}
           />
-          <VariantsProgressBar variants={subvariants} variantInfo={{}} />
+          <VariantsProgressBar variants={subvariants} variantInfo={variantsInfo} />
         </Box>
       </AccordionSummary>
       {subvariants.length > 1 && (
