@@ -5,7 +5,6 @@ import { MoveVariantNode } from "../../../../models/VariantNode";
 interface UseBoardStyleProps {
   chess: Chess;
   currentMoveNode: MoveVariantNode;
-  calcWidth: (dimensions: { screenWidth: number }) => number;
   setSquareStyles: (styles: Record<string, CSSProperties>) => void;
   setSelectedSquare: (square: Square | null) => void;
   setPossibleMoves: (moves: Move[]) => void;
@@ -22,7 +21,6 @@ interface UseBoardStyleProps {
 const useBoardStyle = ({
   chess,
   currentMoveNode,
-  calcWidth,
   setSquareStyles,
   setSelectedSquare,
   setPossibleMoves,
@@ -36,21 +34,6 @@ const useBoardStyle = ({
   pieceMoved,
 }: UseBoardStyleProps) => {
   const [arrows, setArrows] = useState<Square[][]>([]);
-  const [boardWidth, setBoardWidth] = useState(
-    calcWidth({ screenWidth: window.innerWidth })
-  );
-
-  useEffect(() => {
-    const handleResize = () => {
-      setBoardWidth(calcWidth({ screenWidth: window.innerWidth }));
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
 
   useEffect(() => {
     setCircleSquares(
@@ -140,7 +123,6 @@ const useBoardStyle = ({
 
   return {
     arrows,
-    boardWidth,
     updateArrows,
     onDragOverSquare,
   };

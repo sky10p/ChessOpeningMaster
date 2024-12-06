@@ -16,7 +16,6 @@ interface MoveNodeProps {
 
 interface BoardConfigProps {
   orientation: BoardOrientation;
-  calcWidth: (dimensions: { screenWidth: number }) => number;
 }
 
 interface EventHandlersProps {
@@ -51,7 +50,6 @@ const Board: React.FC<BoardProps> = ({
   chess,
   currentMoveNode,
   orientation,
-  calcWidth,
   squareStyles,
   setSquareStyles,
   dragOverSquare,
@@ -68,10 +66,9 @@ const Board: React.FC<BoardProps> = ({
   setCircleSquares,
   onDrop,
 }) => {
-  const { arrows, boardWidth, updateArrows, onDragOverSquare } = useBoardStyle({
+  const { arrows, updateArrows, onDragOverSquare } = useBoardStyle({
     chess,
     currentMoveNode,
-    calcWidth,
     setSquareStyles,
     setSelectedSquare,
     setPossibleMoves,
@@ -85,8 +82,9 @@ const Board: React.FC<BoardProps> = ({
     pieceMoved,
   });
 
+
   return (
-    <div>
+    <div style={{ width: "100%", height: "100%" }}>
       <Chessboard
         id="game-board"
         position={chess.fen()}
@@ -102,7 +100,6 @@ const Board: React.FC<BoardProps> = ({
         customSquareStyles={squareStyles}
         customDropSquareStyle={{}}
         boardOrientation={orientation}
-        boardWidth={boardWidth}
       />
     </div>
   );
