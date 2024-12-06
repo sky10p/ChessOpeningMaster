@@ -29,7 +29,7 @@ export const BoardResponsive: Story = () => {
   };
 
   return (
-    <div style={{ width: "30px"}}>
+    <div style={{ width: "500px"}}>
       <Board
         chess={chess}
         setChess={(newChess) => console.log(newChess)}
