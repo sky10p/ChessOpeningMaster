@@ -3,11 +3,10 @@ import { useBoardContainer } from "./useBoardContainer";
 import Board from "../../../design/chess/board/Board";
 
 interface BoardContainerProps {
-  calcWidth: (dimensions: { screenWidth: number }) => number;
   isTraining?: boolean;
 }
 
-const BoardContainer: React.FC<BoardContainerProps> = ({ calcWidth, isTraining = false }) => {
+const BoardContainer: React.FC<BoardContainerProps> = ({ isTraining = false }) => {
   const {
     chess,
     setChess,
@@ -36,7 +35,6 @@ const BoardContainer: React.FC<BoardContainerProps> = ({ calcWidth, isTraining =
       setChess={setChess}
       currentMoveNode={currentMoveNode}
       orientation={orientation}
-      calcWidth={calcWidth}
       handleSquareClick={handleSquareClick}
       handleSquareRightClick={handleSquareRightClick}
       selectedSquare={selectedSquare}

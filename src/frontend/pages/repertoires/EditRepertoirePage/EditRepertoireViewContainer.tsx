@@ -48,17 +48,6 @@ const EditRepertoireViewContainer: React.FC = () => {
     setIsVisible,
   } = useFooterContext();
 
-  const calcWidth = useCallback(
-    ({ screenWidth }: { screenWidth: number }): number => {
-      if (screenWidth >= theme.breakpoints.values.sm) {
-        return (screenWidth * 35) / 100;
-      } else {
-        return (screenWidth * 90) / 100;
-      }
-    },
-    [theme.breakpoints.values.sm]
-  );
-
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("sm")
   );
@@ -160,7 +149,7 @@ const EditRepertoireViewContainer: React.FC = () => {
           </Typography>
         </Grid>
         <Grid item container justifyContent={"center"}>
-          <BoardContainer calcWidth={calcWidth} />
+          <BoardContainer />
         </Grid>
         <Grid item container justifyContent="center">
           <BoardActionsContainer />

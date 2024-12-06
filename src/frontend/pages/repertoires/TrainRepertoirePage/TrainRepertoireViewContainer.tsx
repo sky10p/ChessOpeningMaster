@@ -50,14 +50,6 @@ const TrainRepertoireViewContainer: React.FC = () => {
     setIsVisible,
   } = useFooterContext();
 
-  const calcWidth = useCallback(
-    ({ screenWidth }: { screenWidth: number }): number =>
-      screenWidth >= theme.breakpoints.values.sm
-        ? (screenWidth * 35) / 100
-        : (screenWidth * 90) / 100,
-    [theme.breakpoints.values.sm]
-  );
-
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("sm")
   );
@@ -217,7 +209,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
           </Typography>
         </Grid>
         <Grid item container justifyContent={"center"}>
-          <BoardContainer calcWidth={calcWidth} isTraining={true} />
+          <BoardContainer isTraining={true} />
         </Grid>
       </Grid>
       <Grid item xs={12} sm={5} container direction="column" alignItems="left">
