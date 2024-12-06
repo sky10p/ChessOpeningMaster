@@ -2,19 +2,19 @@ import { TrainVariant } from "../../../models/chess.models";
 import { TrainVariantInfo } from "./models";
 
 export const VARIANT_COLORS = {
-    noErrors: "#008000", // Verde
-    oneError: "#FFA07A", // Naranja claro
-    twoErrors: "#FFA500", // Naranja
-    moreThanTwoErrors: "#FF4500", // Rojo anaranjado
-    unresolved: "#FFFFFF", // Blanco
+  noErrors: "#008000", // Verde
+  oneError: "#FFA07A", // Naranja claro
+  twoErrors: "#FFA500", // Naranja
+  moreThanTwoErrors: "#FF4500", // Rojo anaranjado
+  unresolved: "#FFFFFF", // Blanco
 };
 
 export const VARIANT_TEXT_COLORS = {
-    noErrors: "#FFFFFF", // Blanco
-    oneError: "#000000",
-    twoErrors: "#000000",
-    moreThanTwoErrors: "#FFFFFF", // Blanco
-    unresolved: "#000000",
+  noErrors: "#FFFFFF", // Blanco
+  oneError: "#000000",
+  twoErrors: "#000000",
+  moreThanTwoErrors: "#FFFFFF", // Blanco
+  unresolved: "#000000",
 };
 
 export const getColor = (
@@ -41,8 +41,9 @@ export const getTextColor = (
   variant: TrainVariant,
   variantInfo: Record<string, TrainVariantInfo>
 ) => {
-   const color  = getColor(variant, variantInfo);
-   if(color === VARIANT_COLORS.unresolved){
-        return VARIANT_TEXT_COLORS.unresolved;
-   }
+  const color = getColor(variant, variantInfo);
+  if (color === VARIANT_COLORS.unresolved) {
+    return VARIANT_TEXT_COLORS.unresolved;
+  }
+  return color;
 };

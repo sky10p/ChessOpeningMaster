@@ -67,17 +67,22 @@ export const SelectTrainVariants: React.FC<SelectTrainVariantProps> = ({
       {subvariants.length > 1 && (
         <AccordionDetails>
           <Box sx={{ display: 'flex', flexDirection: 'column', ml: 3 }}>
-            {subvariants.map((variant) => (
+            {subvariants.map((subvariant) => (
               <FormControlLabel
-                key={variant.originalIndex}
+                key={subvariant.originalIndex}
                 control={
                   <Checkbox
-                    checked={isCheckedVariant(variant.originalIndex)}
-                    onChange={() => handleToggleVariant(variant.originalIndex)}
+                    checked={isCheckedVariant(subvariant.originalIndex)}
+                    onChange={() => handleToggleVariant(subvariant.originalIndex)}
                   />
                 }
-                label={<Typography style={{ color: getTextColor(variant, {}) }}>{variant.variant.fullName}</Typography>}
+                label={
+                  <Typography style={{ color: getTextColor(subvariant, variantsInfo) }}>
+                    {subvariant.variant.fullName}
+                  </Typography>
+                }
               />
+              
             ))}
           </Box>
         </AccordionDetails>
