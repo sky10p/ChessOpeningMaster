@@ -1,10 +1,9 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   Grid,
   Theme,
   Typography,
   useMediaQuery,
-  useTheme,
 } from "@mui/material";
 import BoardContainer from "../../../components/application/chess/board/BoardContainer";
 import BoardActionsContainer from "../../../components/application/chess/board/BoardActionsContainer";
@@ -25,7 +24,6 @@ import { useMenuContext } from "../../../contexts/MenuContext";
 import { API_URL } from "../../../repository/constants";
 
 const EditRepertoireViewContainer: React.FC = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
 
   const [panelSelected, setPanelSelected] = React.useState<

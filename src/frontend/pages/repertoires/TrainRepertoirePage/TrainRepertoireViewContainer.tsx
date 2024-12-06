@@ -1,10 +1,9 @@
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
   Grid,
   Theme,
   Typography,
   useMediaQuery,
-  useTheme,
 } from "@mui/material";
 import BoardContainer from "../../../components/application/chess/board/BoardContainer";
 import InfoIcon from "@mui/icons-material/Info";
@@ -25,7 +24,6 @@ import { TrainVariant } from "../../../models/chess.models";
 import { HintInfo } from "../../../components/design/chess/train/HintInfo";
 
 const TrainRepertoireViewContainer: React.FC = () => {
-  const theme = useTheme();
   const [panelSelected, setPanelSelected] = React.useState<
     "info" | "help" | "trainComments"
   >("info");
