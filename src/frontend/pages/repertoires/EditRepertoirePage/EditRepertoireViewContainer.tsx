@@ -136,7 +136,7 @@ const EditRepertoireViewContainer: React.FC = () => {
 
   return (
     <Grid container spacing={2} >
-      <Grid item container direction="column" alignItems="left" xs={12} sm={5}>
+      <Grid item container direction="column" alignItems="left" xs={12} sm={4}>
         <Grid item container justifyContent={"center"}>
           <Typography
             variant="h5"
