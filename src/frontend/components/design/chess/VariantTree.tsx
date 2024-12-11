@@ -10,7 +10,8 @@ import { Variant } from "../../../models/chess.models";
 import { SelectVariant } from "../SelectVariant";
 import { variantToPgn } from "../../../utils/chess/pgn/pgn.utils";
 import { BoardOrientation } from "../../../../common/types/Orientation";
-import { Movements } from "./edit/Movements";
+import { VariantMovementsPanel } from "../../application/chess/board/VariantMovementsPanel/VariantMovementsPanel";
+import { useRepertoireContext } from "../../../contexts/RepertoireContext";
 
 interface VariantTreeProps {
   variants: Variant[];
@@ -31,6 +32,9 @@ const VariantTree: React.FC<VariantTreeProps> = ({
   copyVariantsToRepertoire,
   deleteVariants,
 }) => {
+  const { goToMove, changeNameMove, deleteMove, currentMoveNode } =
+    useRepertoireContext();
+  useRepertoireContext();
   const isSelected = (node: MoveVariantNode) => node === currentNode;
   const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>(
     variants[0]
@@ -136,7 +140,16 @@ const VariantTree: React.FC<VariantTreeProps> = ({
         </Grid>
       )}
       <Box>
-        <Movements moves={selectedVariant?.moves} />
+        {/* <Movements moves={selectedVariant?.moves} /> */}
+        {selectedVariant?.moves && (
+          <VariantMovementsPanel moves={selectedVariant?.moves}
+          changeNameMove={changeNameMove}
+          currentMoveNode={currentMoveNode}
+          deleteMove={deleteMove}
+          goToMove={goToMove}
+          maxHeight="300px"
+          />
+        )}
       </Box>
     </>
   );
