@@ -49,22 +49,22 @@ const theme = createTheme({
     h1: {
       fontSize: "2.5rem",
       fontWeight: 700,
-      color: "#2F3337",
+      
     },
     h5: {
       fontSize: "1.5rem",
       fontWeight: 600,
-      color: "#2F3337",
+      
     },
     h6: {
       fontSize: "1.25rem",
       fontWeight: 500,
-      color: "#2F3337",
+      
     },
     body1: {
       fontSize: "1rem",
       lineHeight: 1.5,
-      color: "#4A4A4A",
+      
     },
   },
   spacing: 8, // Added spacing unit
