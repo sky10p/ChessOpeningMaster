@@ -2,7 +2,7 @@ import { TrainVariantInfo } from "../../models/chess.models";
 import { API_URL } from "../constants";
 
 export const saveTrainVariantInfo = async (
-  trainVariantInfo: TrainVariantInfo
+  trainVariantInfo: Omit<TrainVariantInfo, "lastDate">
 ) => {
   const response = await fetch(
     `${API_URL}/repertoires/${trainVariantInfo.repertoireId}/variantsInfo`,
