@@ -36,8 +36,9 @@ export const SelectVariant: React.FC<SelectVariantProps> = ({
   };
 
   return (
-    <FormControl variant="outlined" sx={{ minWidth: "100%" }}>
+    <FormControl variant="outlined" sx={{ width: "100%" }}>
       <InputLabel id="select-variant-label">Variant</InputLabel>
+
       <Select
         native
         labelId="select-variant-label"

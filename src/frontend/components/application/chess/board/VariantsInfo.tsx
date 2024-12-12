@@ -1,6 +1,5 @@
 import React from "react";
 import { useRepertoireContext } from "../../../../contexts/RepertoireContext";
-import { Box } from "@mui/material";
 import VariantsTree from "../../../design/chess/VariantTree/VariantTree";
 import { Variant } from "../../../../models/chess.models";
 import { variantsToMoves } from "../../../../utils/chess/variants/VariantUtils";
@@ -158,7 +157,7 @@ const VariantsInfo: React.FC = () => {
   };
 
   return (
-    <Box>
+
       <VariantsTree
         variants={variants}
         currentNode={currentMoveNode}
@@ -172,7 +171,7 @@ const VariantsInfo: React.FC = () => {
         goToMove={goToMove}
         currentMoveNode={currentMoveNode}
       ></VariantsTree>
-    </Box>
+
   );
 };
 

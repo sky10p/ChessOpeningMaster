@@ -121,10 +121,12 @@ const VariantTree: React.FC<VariantTreeProps> = ({
   ], [selectedVariant, copyVariantToRepertoire, copyVariantsToRepertoire, deleteVariant, deleteVariants, downloadVariantPGN]);
 
   return (
-    <>
-      <Box>
+
+      <Box style={{width: "100%"}}>
         {selectedVariant && (
-          <VariantActionButtons actions={variantActions()} />
+          <Box display="flex" justifyContent="center">
+            <VariantActionButtons actions={variantActions()} />
+          </Box>
         )}
         <Box>
           {selectedVariant && (
@@ -151,7 +153,7 @@ const VariantTree: React.FC<VariantTreeProps> = ({
           </Box>
         </Box>
       </Box>
-    </>
+
   );
 };
 

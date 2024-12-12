@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Grid } from "@mui/material";
+import { Box } from "@mui/material";
 import VariantActionButton from "./VariantActionButton";
 
 interface VariantActionButtonsProps {
@@ -15,36 +15,19 @@ const VariantActionButtons: React.FC<VariantActionButtonsProps> = ({ actions }) 
     <Box
       style={{ overflowX: "auto", maxWidth: "100%", marginBottom: "20px" }}
       sx={{
-        '&::-webkit-scrollbar': {
-          height: '8px',
-        },
-        '&::-webkit-scrollbar-thumb': {
-          backgroundColor: 'black',
-          borderRadius: '4px',
-        },
-        '&::-webkit-scrollbar-thumb:hover': {
-          backgroundColor: 'darkgray',
-        },
+        display: 'flex',
+        gap: 2,
+        alignItems: 'center',
       }}
     >
-      <Grid
-        container
-        spacing={2}
-        alignItems="center"
-        mb={2}
-        justifyContent="flex-start"
-        wrap="nowrap"
-      >
-        {actions.map((action, index) => (
-          <Grid item key={index}>
-            <VariantActionButton
-              onClick={action.onClick}
-              icon={action.icon}
-              label={action.label}
-            />
-          </Grid>
-        ))}
-      </Grid>
+      {actions.map((action, index) => (
+        <VariantActionButton
+          key={index}
+          onClick={action.onClick}
+          icon={action.icon}
+          label={action.label}
+        />
+      ))}
     </Box>
   );
 };

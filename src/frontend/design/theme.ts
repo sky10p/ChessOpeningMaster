@@ -18,6 +18,17 @@ const theme = createTheme({
             body: {
               backgroundColor: 'transparent',
             },
+            '*::-webkit-scrollbar': {
+              width: '8px',
+              height: '8px',
+            },
+            '*::-webkit-scrollbar-thumb': {
+              backgroundColor: 'black',
+              borderRadius: '4px',
+            },
+            '*::-webkit-scrollbar-thumb:hover': {
+              backgroundColor: 'darkgray',
+            },
           },
         },
       },

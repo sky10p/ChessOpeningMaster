@@ -92,16 +92,6 @@ export const VariantMovementsPanel: React.FC<VariantMovementsPanelProps> = ({ mo
             sx={{
                 maxHeight,
                 overflowY: 'auto',
-                '&::-webkit-scrollbar': {
-                    width: '8px',
-                },
-                '&::-webkit-scrollbar-thumb': {
-                    backgroundColor: 'black',
-                    borderRadius: '4px',
-                },
-                '&::-webkit-scrollbar-thumb:hover': {
-                    backgroundColor: 'darkgray',
-                },
             }}
         >
             {turns.map((turn, index) => (

@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import {
+  Box,
   Grid,
   Theme,
   Typography,
@@ -136,7 +137,7 @@ const EditRepertoireViewContainer: React.FC = () => {
 
   return (
     <Grid container spacing={2} >
-      <Grid item container direction="column" alignItems="left" xs={12} sm={4}>
+      <Grid item container direction="column" alignItems="left" xs={12} sm={4} >
         <Grid item container justifyContent={"center"}>
           <Typography
             variant="h5"
@@ -153,29 +154,29 @@ const EditRepertoireViewContainer: React.FC = () => {
           <BoardActionsContainer />
         </Grid>
       </Grid>
-      <Grid item xs={12} sm={7} container direction="column" alignItems="left" display={"flex"} overflow={"auto"}>
+      <Grid item xs={12} sm={7} container direction="column" alignItems="left" display={"flex"} overflow={"auto"} >
         {isMobile && panelSelected === "variants" && (
-          <>
-            <Grid item>
+      
+
               <VariantsInfo />
-            </Grid>
-          </>
+   
+      
         )}
         {isMobile && panelSelected === "comments" && (
-          <>
-            <Grid item>
+ 
+           
               <BoardCommentContainer />
-            </Grid>
-          </>
+       
+       
         )}
         {!isMobile && (
           <>
-            <Grid item style={{ marginTop: "36px", overflowY: "auto" }}>
+            <Box style={{ marginTop: "36px", overflowY: "auto" }}>
               <VariantsInfo />
-            </Grid>
-            <Grid item style={{ marginTop: "24px", overflowY: "auto" }}>
+            </Box>
+            <Box style={{ marginTop: "24px", overflowY: "auto" }}>
               <BoardCommentContainer />
-            </Grid>
+            </Box>
           </>
         )}
       </Grid>
