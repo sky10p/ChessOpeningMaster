@@ -1,5 +1,18 @@
 import { createTheme, responsiveFontSizes } from "@mui/material";
 
+declare module '@mui/material/styles' {
+  interface Palette {
+    custom: {
+      black: string;
+    };
+  }
+  interface PaletteOptions {
+    custom?: {
+      black?: string;
+    };
+  }
+}
+
 const theme = createTheme({
     palette: {
         background: {
@@ -10,6 +23,9 @@ const theme = createTheme({
         },
         secondary: {
             main: "#FFFFFF"
+        },
+        custom: {
+            black: "#2F3337"
         }
     },
     components: {

@@ -5,6 +5,10 @@ import {
   InputLabel,
   Select,
   SelectChangeEvent,
+  MenuItem,
+  ListSubheader,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 
 interface SelectVariantProps {
@@ -18,6 +22,9 @@ export const SelectVariant: React.FC<SelectVariantProps> = ({
   selectedVariant,
   onSelectVariant,
 }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const groupedVariants = variants.reduce((acc, variant) => {
     if (!acc[variant.name]) {
       acc[variant.name] = [];
@@ -35,28 +42,41 @@ export const SelectVariant: React.FC<SelectVariantProps> = ({
     }
   };
 
+  const MenuProps = {
+    PaperProps: {
+      style: {
+        maxHeight: isMobile ? 400 : 500, // Adjust the height as needed
+      },
+    },
+  };
+
+  const validVariant = variants.find(
+    (variant) => variant.fullName === selectedVariant.fullName
+  );
+  const selectedValue = validVariant ? selectedVariant.fullName : "";
+
   return (
     <FormControl variant="outlined" sx={{ width: "100%" }}>
       <InputLabel id="select-variant-label">Variant</InputLabel>
-
       <Select
-        native
         labelId="select-variant-label"
         id="select-variant"
-        value={selectedVariant.fullName}
+        value={selectedValue}
         label="Variant"
         onChange={handleChange}
+        MenuProps={MenuProps}
       >
         {Object.keys(groupedVariants)
           .sort()
           .flatMap((name) => [
-            <optgroup key={name} label={name}>
-              {groupedVariants[name].map((variant) => (
-                <option key={variant.fullName} value={variant.fullName}>
-                  {variant.fullName}
-                </option>
-              ))}
-            </optgroup>,
+            <ListSubheader key={`header-${name}`} style={{ backgroundColor: theme.palette.custom.black, color: "white", fontSize: "1.2rem", fontWeight: "bold" }}>
+              {name}
+            </ListSubheader>,
+            ...groupedVariants[name].map((variant) => (
+              <MenuItem key={`item-${variant.fullName}`} value={variant.fullName} style={{ backgroundColor: "white", color: "black", fontSize: "1rem" }}>
+                {variant.fullName}
+              </MenuItem>
+            )),
           ])}
       </Select>
     </FormControl>
