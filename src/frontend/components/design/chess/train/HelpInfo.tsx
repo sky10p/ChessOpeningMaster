@@ -1,5 +1,5 @@
 // HelpInfo.tsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Grid,
   Typography,
@@ -20,6 +20,12 @@ const HelpInfo: React.FC<HelpInfoProps> = ({
   isYourTurn,
 }) => {
   const [iconVisible, setIconVisible] = useState(true);
+
+  useEffect(() => {
+    if(!isYourTurn) {
+      setIconVisible(true);
+    }
+  }, [isYourTurn]);
 
   const toggleVisibility = () => {
     setIconVisible(!iconVisible);
