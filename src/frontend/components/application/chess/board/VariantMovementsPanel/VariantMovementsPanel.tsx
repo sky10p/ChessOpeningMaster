@@ -111,7 +111,7 @@ export const VariantMovementsPanel: React.FC<VariantMovementsPanelProps> = ({ mo
                             {`${turn.turnNumber}.`}
                         </Typography>
                     </Grid>
-                    <Grid item xs={5}>
+                    <Grid item xs={5} onClick={() => goToMove(turn.whiteMove)} style={{cursor: "pointer"}}>
                         <MoveItem
                             move={turn.whiteMove}
                             currentMoveNode={currentMoveNode}
@@ -124,7 +124,7 @@ export const VariantMovementsPanel: React.FC<VariantMovementsPanelProps> = ({ mo
                             </Typography>
                         )}
                     </Grid>
-                    <Grid item xs={5}>
+                    <Grid item xs={5} onClick={() => turn.blackMove && goToMove(turn.blackMove)} style={{cursor: "pointer"}}>
                         {turn.blackMove && (
                             <>
                                 <MoveItem

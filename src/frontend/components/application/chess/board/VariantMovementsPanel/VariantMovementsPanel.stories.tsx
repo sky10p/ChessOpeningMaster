@@ -1,15 +1,18 @@
 import { Story } from "@ladle/react";
 import { VariantMovementsPanel } from "./VariantMovementsPanel";
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { MoveVariantNode } from "../../../../../models/VariantNode";
 import { testRepertoireMock } from "../../../../../utils/chess/pgn/tests/mocks/repertoire-with-variants.mock";
 import { testRepertoireWithSubvariantsMock } from "../../../../../utils/chess/pgn/tests/mocks/repertoire-with-subvariants.mock";
 
 export const VariantMovementsPanelWithVariantsStory: Story = () => {
-  const move = MoveVariantNode.initMoveVariantNode(testRepertoireMock);
-  const variantMoves = move.getVariants();
+
+  const variantMoves = useMemo(() => {
+    const move = MoveVariantNode.initMoveVariantNode(testRepertoireMock);
+    return move.getVariants();
+  }, []);
   const moveFromVariant = variantMoves[0].moves;
-  const [currentMoveNode, setCurrentMoveNode] = React.useState(
+  const [currentMoveNode, setCurrentMoveNode] = useState(
     moveFromVariant[0]
   );
   return (
@@ -27,12 +30,14 @@ export const VariantMovementsPanelWithVariantsStory: Story = () => {
 
 export const VariantMovementsPanelWithVariantsWithMoreHeightStory: Story =
   () => {
-    const move = MoveVariantNode.initMoveVariantNode(
-      testRepertoireWithSubvariantsMock
-    );
-    const variantMoves = move.getVariants();
+    const variantMoves = useMemo(() => {
+      const move = MoveVariantNode.initMoveVariantNode(
+        testRepertoireWithSubvariantsMock
+      );
+      return move.getVariants();
+    }, []);
     const moveFromVariant = variantMoves[3].moves;
-    const [currentMoveNode, setCurrentMoveNode] = React.useState(
+    const [currentMoveNode, setCurrentMoveNode] = useState(
       moveFromVariant[0]
     );
     return (
