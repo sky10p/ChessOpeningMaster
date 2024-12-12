@@ -1,16 +1,18 @@
-import React, { useEffect, useState } from "react";
-import { Box, Grid, IconButton } from "@mui/material";
-import DownloadIcon from "@mui/icons-material/Download";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import DeleteIcon from "@mui/icons-material/Delete";
-import FileCopyIcon from "@mui/icons-material/FileCopy";
-import { DeleteSweep, ContentPaste } from "@mui/icons-material";
+import React, { useEffect, useMemo, useState } from "react";
+import { Box, Grid } from "@mui/material";
 import { MoveVariantNode } from "../../../../models/VariantNode";
 import { Variant } from "../../../../models/chess.models";
 import { SelectVariant } from "../../SelectVariant";
 import { variantToPgn } from "../../../../utils/chess/pgn/pgn.utils";
 import { BoardOrientation } from "../../../../../common/types/Orientation";
 import { VariantMovementsPanel } from "./VariantMovementsPanel";
+import VariantActionButtons from "./VariantActionButtons";
+
+import DownloadIcon from "@mui/icons-material/Download";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import DeleteIcon from "@mui/icons-material/Delete";
+import FileCopyIcon from "@mui/icons-material/FileCopy";
+import { DeleteSweep, ContentPaste } from "@mui/icons-material";
 
 interface VariantTreeProps {
   variants: Variant[];
@@ -83,77 +85,71 @@ const VariantTree: React.FC<VariantTreeProps> = ({
     }
   };
 
+ 
+
+  const variantActions = useMemo(() => () => [
+    {
+      onClick: downloadVariantPGN,
+      icon: <DownloadIcon />,
+      label: "Download",
+    },
+    {
+      onClick: copyVariantPGN,
+      icon: <ContentCopyIcon />,
+      label: "Copy",
+    },
+    {
+      onClick: () => selectedVariant && copyVariantToRepertoire(selectedVariant),
+      icon: <FileCopyIcon />,
+      label: "Copy to Repertoire",
+    },
+    {
+      onClick: copyVariantsToRepertoire,
+      icon: <ContentPaste />,
+      label: "Paste Variants",
+    },
+    {
+      onClick: () => selectedVariant && deleteVariant(selectedVariant),
+      icon: <DeleteIcon />,
+      label: "Delete",
+    },
+    {
+      onClick: deleteVariants,
+      icon: <DeleteSweep />,
+      label: "Delete All",
+    },
+  ], [selectedVariant, copyVariantToRepertoire, copyVariantsToRepertoire, deleteVariant, deleteVariants, downloadVariantPGN]);
+
   return (
     <>
-      <Grid
-        container
-        spacing={2}
-        alignItems="center"
-        mb={2}
-        justifyContent="flex-start"
-        wrap="nowrap"
-      >
-        {selectedVariant && (
-          <>
-            <Grid item>
-              <IconButton onClick={downloadVariantPGN} color="primary">
-                <DownloadIcon />
-              </IconButton>
-            </Grid>
-            <Grid item>
-              <IconButton onClick={copyVariantPGN} color="primary">
-                <ContentCopyIcon />
-              </IconButton>
-            </Grid>
-            <Grid item>
-              <IconButton
-                onClick={() => copyVariantToRepertoire(selectedVariant)}
-                color="primary"
-              >
-                <FileCopyIcon />
-              </IconButton>
-            </Grid>
-            <Grid item>
-              <IconButton onClick={copyVariantsToRepertoire} color="primary">
-                <ContentPaste />
-              </IconButton>
-            </Grid>
-            <Grid item>
-              <IconButton
-                onClick={() => deleteVariant(selectedVariant)}
-                color="primary"
-              >
-                <DeleteIcon />
-              </IconButton>
-            </Grid>
-            <Grid item>
-              <IconButton onClick={deleteVariants} color="primary">
-                <DeleteSweep />
-              </IconButton>
-            </Grid>
-          </>
-        )}
-      </Grid>
-      {selectedVariant && (
-        <Grid item xs>
-          <SelectVariant
-            variants={variants}
-            selectedVariant={selectedVariant}
-            onSelectVariant={setSelectedVariant}
-          />
-        </Grid>
-      )}
       <Box>
-        {/* <Movements moves={selectedVariant?.moves} /> */}
-        {selectedVariant?.moves && (
-          <VariantMovementsPanel moves={selectedVariant?.moves}
-          changeNameMove={changeNameMove}
-          currentMoveNode={currentMoveNode}
-          deleteMove={deleteMove}
-          goToMove={goToMove}
-          maxHeight="300px"
-          />
+        {selectedVariant && (
+          <VariantActionButtons actions={variantActions()} />
         )}
+        <Box>
+          {selectedVariant && (
+            <Grid item xs>
+              <SelectVariant
+                variants={variants}
+                selectedVariant={selectedVariant}
+                onSelectVariant={setSelectedVariant}
+              />
+            </Grid>
+          )}
+          <Box>
+            {/* <Movements moves={selectedVariant?.moves} /> */}
+            {selectedVariant?.moves && (
+              <VariantMovementsPanel
+                moves={selectedVariant?.moves}
+                changeNameMove={changeNameMove}
+                currentMoveNode={currentMoveNode}
+                deleteMove={deleteMove}
+                goToMove={goToMove}
+                maxHeight="300px"
+              />
+            )}
+          </Box>
+        </Box>
       </Box>
     </>
   );
