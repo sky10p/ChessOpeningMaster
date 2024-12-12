@@ -22,6 +22,9 @@ const VariantsInfo: React.FC = () => {
     repertoireId,
     repertoireName,
     updateRepertoire,
+    changeNameMove,
+    goToMove,
+    deleteMove,
   } = useRepertoireContext();
 
   const { showConfirmDialog, showRepertoireDialog, showSelectVariantsDialog } =
@@ -164,6 +167,10 @@ const VariantsInfo: React.FC = () => {
         copyVariantToRepertoire={copyVariantToRepertoire}
         copyVariantsToRepertoire={copyVariantsToRepertoire}
         deleteVariants={deleteVariants}
+        changeNameMove={changeNameMove}
+        deleteMove={deleteMove}
+        goToMove={goToMove}
+        currentMoveNode={currentMoveNode}
       ></VariantsTree>
     </Box>
   );

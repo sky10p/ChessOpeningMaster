@@ -11,7 +11,6 @@ import { SelectVariant } from "../SelectVariant";
 import { variantToPgn } from "../../../utils/chess/pgn/pgn.utils";
 import { BoardOrientation } from "../../../../common/types/Orientation";
 import { VariantMovementsPanel } from "../../application/chess/board/VariantMovementsPanel/VariantMovementsPanel";
-import { useRepertoireContext } from "../../../contexts/RepertoireContext";
 
 interface VariantTreeProps {
   variants: Variant[];
@@ -21,6 +20,10 @@ interface VariantTreeProps {
   copyVariantToRepertoire: (variant: Variant) => void;
   deleteVariants: () => void;
   copyVariantsToRepertoire: () => void;
+  changeNameMove: (move: MoveVariantNode, newName: string) => void;
+  deleteMove: (move: MoveVariantNode) => void;
+  goToMove: (move: MoveVariantNode) => void;
+  currentMoveNode: MoveVariantNode;
 }
 
 const VariantTree: React.FC<VariantTreeProps> = ({
@@ -31,10 +34,11 @@ const VariantTree: React.FC<VariantTreeProps> = ({
   copyVariantToRepertoire,
   copyVariantsToRepertoire,
   deleteVariants,
+  changeNameMove,
+  deleteMove,
+  goToMove,
+  currentMoveNode,
 }) => {
-  const { goToMove, changeNameMove, deleteMove, currentMoveNode } =
-    useRepertoireContext();
-  useRepertoireContext();
   const isSelected = (node: MoveVariantNode) => node === currentNode;
   const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>(
     variants[0]
