@@ -1,9 +1,9 @@
 import { Story } from "@ladle/react";
 import { VariantMovementsPanel } from "./VariantMovementsPanel";
 import React, { useMemo, useState } from "react";
-import { MoveVariantNode } from "../../../../../models/VariantNode";
-import { testRepertoireMock } from "../../../../../utils/chess/pgn/tests/mocks/repertoire-with-variants.mock";
-import { testRepertoireWithSubvariantsMock } from "../../../../../utils/chess/pgn/tests/mocks/repertoire-with-subvariants.mock";
+import { MoveVariantNode } from "../../../../models/VariantNode";
+import { testRepertoireMock } from "../../../../utils/chess/pgn/tests/mocks/repertoire-with-variants.mock";
+import { testRepertoireWithSubvariantsMock } from "../../../../utils/chess/pgn/tests/mocks/repertoire-with-subvariants.mock";
 
 export const VariantMovementsPanelWithVariantsStory: Story = () => {
 

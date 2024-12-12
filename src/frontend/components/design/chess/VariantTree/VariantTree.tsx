@@ -5,12 +5,12 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileCopyIcon from "@mui/icons-material/FileCopy";
 import { DeleteSweep, ContentPaste } from "@mui/icons-material";
-import { MoveVariantNode } from "../../../models/VariantNode";
-import { Variant } from "../../../models/chess.models";
-import { SelectVariant } from "../SelectVariant";
-import { variantToPgn } from "../../../utils/chess/pgn/pgn.utils";
-import { BoardOrientation } from "../../../../common/types/Orientation";
-import { VariantMovementsPanel } from "../../application/chess/board/VariantMovementsPanel/VariantMovementsPanel";
+import { MoveVariantNode } from "../../../../models/VariantNode";
+import { Variant } from "../../../../models/chess.models";
+import { SelectVariant } from "../../SelectVariant";
+import { variantToPgn } from "../../../../utils/chess/pgn/pgn.utils";
+import { BoardOrientation } from "../../../../../common/types/Orientation";
+import { VariantMovementsPanel } from "./VariantMovementsPanel";
 
 interface VariantTreeProps {
   variants: Variant[];

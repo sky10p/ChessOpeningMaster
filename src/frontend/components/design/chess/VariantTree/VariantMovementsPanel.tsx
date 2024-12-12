@@ -1,9 +1,9 @@
 import React from "react"
 import ImportContactsIcon from '@mui/icons-material/ImportContacts';
-import { MoveVariantNode } from "../../../../../models/VariantNode"
+import { MoveVariantNode } from "../../../../models/VariantNode"
 import { Box, Grid, Typography, Menu, MenuItem } from '@mui/material';
 import { useState } from 'react';
-import { TextDialog } from "../../../../design/dialogs/TextDialog";
+import { TextDialog } from "../../dialogs/TextDialog";
 
 interface VariantMovementsPanelProps {
     moves: MoveVariantNode[];
