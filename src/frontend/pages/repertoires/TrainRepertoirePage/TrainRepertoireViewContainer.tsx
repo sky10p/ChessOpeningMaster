@@ -1,3 +1,4 @@
+
 import React, { useEffect, useMemo } from "react";
 import {
   Grid,
@@ -8,6 +9,7 @@ import {
 import BoardContainer from "../../../components/application/chess/board/BoardContainer";
 import InfoIcon from "@mui/icons-material/Info";
 import EditIcon from "@mui/icons-material/Edit";
+import ExamIcon from "@mui/icons-material/AssignmentTurnedIn"; // Import a suitable icon
 
 import { useRepertoireContext } from "../../../contexts/RepertoireContext";
 import { useFooterContext } from "../../../contexts/FooterContext";
@@ -30,7 +32,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
   const navigate = useNavigate();
   const { repertoireId, repertoireName, currentMoveNode, variants } =
     useRepertoireContext();
-  const { showTrainVariantsDialog } = useDialogContext();
+  const { showTrainVariantsDialog, showNumberDialog } = useDialogContext();
   const { addIcon: addIconHeader, removeIcon: removeIconHeader } =
     useHeaderContext();
   const {
@@ -55,6 +57,23 @@ const TrainRepertoireViewContainer: React.FC = () => {
   useEffect(() => {
     const headerIcons = [
       {
+        key: "examMode",
+        icon: <ExamIcon />,
+        onClick: () => {
+          showNumberDialog({
+            title: "Exam Mode",
+            contentText: "Enter the number of variants to train:",
+            min: 1,
+            max: variants.length,
+            initialValue: 5,
+            onNumberConfirm: (number) => {
+              const randomVariants = getRandomVariants(number);
+              chooseTrainVariantsToTrain(randomVariants);
+            },
+          });
+        },
+      },
+      {
         key: "selectTrainVariants",
         icon: <ChecklistIcon />,
         onClick: () => {
@@ -76,6 +95,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
           navigate(`/repertoire/${repertoireId}`);
         },
       },
+     
     ];
 
     headerIcons.forEach(({ key, icon, onClick }) => {
@@ -91,10 +111,12 @@ const TrainRepertoireViewContainer: React.FC = () => {
     addIconHeader,
     removeIconHeader,
     showTrainVariantsDialog,
+    showNumberDialog,
     trainVariants,
     chooseTrainVariantsToTrain,
     navigate,
     repertoireId,
+    variants,
   ]);
 
   useEffect(() => {
@@ -183,6 +205,12 @@ const TrainRepertoireViewContainer: React.FC = () => {
     isYourTurn,
     panelSelected,
   ]);
+
+  // Function to get random variants
+  const getRandomVariants = (count: number): TrainVariant[] => {
+    const shuffled = [...variants].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count).map(v => ({ variant: v, state: "inProgress" }));
+  };
 
   return (
     <Grid container spacing={2}>
