@@ -23,27 +23,31 @@ const MoveItem: React.FC<{
   <Box
     component="span"
     sx={{
-      backgroundColor: move === currentMoveNode ? 'gray' : 'transparent',
-      borderRadius: '4px',
+      backgroundColor: move === currentMoveNode ? 'primary.main' : 'transparent',
+      borderRadius: '0.25rem',
       display: 'inline-block',
-      padding: '2px 4px',
+      padding: '0.125rem 0.25rem',
       cursor: 'pointer',
-      '&:hover': { backgroundColor: 'lightgray' },
+      '&:hover': { backgroundColor: 'grey.300' },
       verticalAlign: 'middle',
     }}
     onContextMenu={(event) => onContextMenu(event, move)}
     onClick={onClick}
   >
-    <Typography component="span">
+    <Typography
+      component="span"
+      fontSize="1rem"
+      sx={{ color: move === currentMoveNode ? 'primary.contrastText' : 'text.primary' }}
+    >
       {move.getMove().san}
     </Typography>
     {move.variantName && (
-      <ImportContactsIcon fontSize="inherit" sx={{ verticalAlign: 'text-top', marginLeft: '4px' }} />
+      <ImportContactsIcon fontSize="inherit" sx={{ verticalAlign: 'text-top', marginLeft: '0.25rem' }} />
     )}
   </Box>
 );
 
-export const VariantMovementsPanel: React.FC<VariantMovementsPanelProps> = ({ moves, currentMoveNode, maxHeight = '400px', goToMove, deleteMove, changeNameMove }) => {
+export const VariantMovementsPanel: React.FC<VariantMovementsPanelProps> = ({ moves, currentMoveNode, maxHeight = '25rem', goToMove, deleteMove, changeNameMove }) => {
     const [contextMenu, setContextMenu] = useState<{ x: number; y: number; node: MoveVariantNode | null }>({ x: 0, y: 0, node: null });
     const [contextRenameDialog, setContextRenameDialog] = useState<{ open: boolean; node: MoveVariantNode | null }>({ open: false, node: null });
 
@@ -92,12 +96,13 @@ export const VariantMovementsPanel: React.FC<VariantMovementsPanelProps> = ({ mo
             sx={{
                 maxHeight,
                 overflowY: 'auto',
+                padding: '1rem', // Use rem units for consistency
             }}
         >
             {turns.map((turn, index) => (
-                <Grid container key={index} sx={{ padding: '8px 16px' }}>
+                <Grid container key={index} sx={{ padding: '0.5rem 1rem' }}>
                     <Grid item xs={1}>
-                        <Typography variant="body2">
+                        <Typography variant="body2" fontSize="0.875rem">
                             {`${turn.turnNumber}.`}
                         </Typography>
                     </Grid>
@@ -109,7 +114,7 @@ export const VariantMovementsPanel: React.FC<VariantMovementsPanelProps> = ({ mo
                             onClick={() => goToMove(turn.whiteMove)}
                         />
                         {turn.whiteMove.variantName && (
-                            <Typography variant="body2" sx={{ marginLeft: '8px', display: 'inline' }}>
+                            <Typography variant="body2" sx={{ marginLeft: '0.5rem', display: 'inline', fontSize: '0.875rem' }}>
                                 {turn.whiteMove.variantName}
                             </Typography>
                         )}
@@ -124,7 +129,7 @@ export const VariantMovementsPanel: React.FC<VariantMovementsPanelProps> = ({ mo
                                     onClick={() => turn.blackMove && goToMove(turn.blackMove)}
                                 />
                                 {turn.blackMove.variantName && (
-                                    <Typography variant="body2" sx={{ marginLeft: '8px', display: 'inline' }}>
+                                    <Typography variant="body2" sx={{ marginLeft: '0.5rem', display: 'inline', fontSize: '0.875rem' }}>
                                         {turn.blackMove.variantName}
                                     </Typography>
                                 )}

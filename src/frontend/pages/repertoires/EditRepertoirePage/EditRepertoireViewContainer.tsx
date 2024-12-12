@@ -23,6 +23,7 @@ import { useHeaderContext } from "../../../contexts/HeaderContext";
 import { useNavigate } from "react-router-dom";
 import { useMenuContext } from "../../../contexts/MenuContext";
 import { API_URL } from "../../../repository/constants";
+import theme from "../../../design/theme";
 
 const EditRepertoireViewContainer: React.FC = () => {
   const navigate = useNavigate();
@@ -138,11 +139,11 @@ const EditRepertoireViewContainer: React.FC = () => {
   return (
     <Grid container spacing={2} >
       <Grid item container direction="column" alignItems="left" xs={12} sm={4} >
-        <Grid item container justifyContent={"center"}>
+        <Grid item container justifyContent={"center"} spacing={2} sx={{ marginBottom: '1rem', marginTop: '1rem' }}>
           <Typography
             variant="h5"
             gutterBottom
-            style={{ marginBottom: "16px" }}
+            sx={{ marginBottom: '1rem', color: 'primary.main' }}
           >
             {repertoireName}
           </Typography>
@@ -154,27 +155,20 @@ const EditRepertoireViewContainer: React.FC = () => {
           <BoardActionsContainer />
         </Grid>
       </Grid>
-      <Grid item xs={12} sm={7} container direction="column" alignItems="left" display={"flex"} overflow={"auto"} >
+      <Grid item xs={false} sm={1} />
+      <Grid item xs={12} sm={7} container direction="column" alignItems="left" display={"flex"} overflow={"auto"}>
         {isMobile && panelSelected === "variants" && (
-      
-
-              <VariantsInfo />
-   
-      
+          <VariantsInfo />
         )}
         {isMobile && panelSelected === "comments" && (
- 
-           
-              <BoardCommentContainer />
-       
-       
+          <BoardCommentContainer />
         )}
         {!isMobile && (
           <>
-            <Box style={{ marginTop: "36px", overflowY: "auto" }}>
+            <Box style={{ marginTop: "2.25rem", overflowY: "auto", padding: "1rem" }}>
               <VariantsInfo />
             </Box>
-            <Box style={{ marginTop: "24px", overflowY: "auto" }}>
+            <Box style={{ marginTop: "1.5rem", overflowY: "auto", padding: "1rem" }}>
               <BoardCommentContainer />
             </Box>
           </>
