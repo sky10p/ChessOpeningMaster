@@ -26,5 +26,9 @@ export const getTrainVariantInfo = async (
   if (!response.ok) {
     throw new Error("Failed to get train variant info");
   }
-  return response.json();
+  const data = await response.json();
+  return data.map((info: TrainVariantInfo) => ({
+    ...info,
+    lastDate: new Date(info.lastDate)
+  }));
 };

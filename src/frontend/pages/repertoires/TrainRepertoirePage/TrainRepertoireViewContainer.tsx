@@ -24,6 +24,7 @@ import { useNavigate } from "react-router-dom";
 import { useDialogContext } from "../../../contexts/DialogContext";
 import { TrainVariant } from "../../../models/chess.models";
 import { HintInfo } from "../../../components/design/chess/train/HintInfo";
+import { getSpacedRepetitionVariants } from "../../../utils/chess/spacedRepetition/spacedRepetition";
 
 const TrainRepertoireViewContainer: React.FC = () => {
   const [panelSelected, setPanelSelected] = React.useState<
@@ -66,9 +67,9 @@ const TrainRepertoireViewContainer: React.FC = () => {
             min: 1,
             max: variants.length,
             initialValue: 5,
-            onNumberConfirm: (number) => {
-              const randomVariants = getRandomVariants(number);
-              chooseTrainVariantsToTrain(randomVariants);
+            onNumberConfirm: async (number) => {
+              const variantsToStudy = await getSpacedRepetitionVariants(number, repertoireId, trainVariants);
+              chooseTrainVariantsToTrain(variantsToStudy);
             },
           });
         },
