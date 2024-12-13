@@ -5,6 +5,8 @@ import DownloadIcon from "@mui/icons-material/Download";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import FileCopyIcon from "@mui/icons-material/FileCopy";
 import { ContentPaste } from "@mui/icons-material";
+import { CssBaseline, ThemeProvider } from "@mui/material";
+import theme from "../../../../design/theme";
 
 const actionsExample = [
   {
@@ -46,13 +48,19 @@ const Container: React.FC<{ width: string, children: React.ReactNode }> = ({ wid
 );
 
 export const VariantActionButtonsStorySmall: Story = () => (
-  <Container width="200px">
-    <VariantActionButtons actions={actionsExample} />
-  </Container>
+  <ThemeProvider theme={theme}>
+    <CssBaseline />
+    <Container width="200px">
+      <VariantActionButtons actions={actionsExample} />
+    </Container>
+  </ThemeProvider>
 );
 
 export const VariantActionButtonsStoryLarge: Story = () => (
-  <Container width="700px">
-    <VariantActionButtons actions={actionsExample} />
-  </Container>
+  <ThemeProvider theme={theme}>
+    <CssBaseline />
+    <Container width="700px">
+      <VariantActionButtons actions={actionsExample} />
+    </Container>
+  </ThemeProvider>
 );
