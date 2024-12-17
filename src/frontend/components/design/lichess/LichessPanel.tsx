@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { getLichessMoves, MoveLichess } from '../../../repository/lichess/lichessRepository';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import ResultBar from './ResultBar';
+import './ResultBar.css';
 
 interface LichessPanelProps {
   fen: string;
@@ -57,22 +59,27 @@ const LichessPanel: React.FC<LichessPanelProps> = ({ fen }) => {
                 <TableCell>Move</TableCell>
                 <TableCell>Percentage of Games</TableCell>
                 <TableCell>Number of Games</TableCell>
-                <TableCell>Win %</TableCell>
-                <TableCell>Draw %</TableCell>
-                <TableCell>Loss %</TableCell>
+                <TableCell>Results</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {moves.map((move, index) => {
                 const moveTotal = move.white + move.draws + move.black;
+                const winPercentage = (move.white / moveTotal) * 100;
+                const drawPercentage = (move.draws / moveTotal) * 100;
+                const lossPercentage = (move.black / moveTotal) * 100;
                 return (
                   <TableRow key={index}>
                     <TableCell>{move.san}</TableCell>
                     <TableCell>{((moveTotal / totalGames) * 100).toFixed(1)}%</TableCell>
                     <TableCell>{moveTotal}</TableCell>
-                    <TableCell>{((move.white / moveTotal) * 100).toFixed(1)}%</TableCell>
-                    <TableCell>{((move.draws / moveTotal) * 100).toFixed(1)}%</TableCell>
-                    <TableCell>{((move.black / moveTotal) * 100).toFixed(1)}%</TableCell>
+                    <TableCell width={"500px"}>
+                      <ResultBar
+                        winPercentage={winPercentage}
+                        drawPercentage={drawPercentage}
+                        lossPercentage={lossPercentage}
+                      />
+                    </TableCell>
                   </TableRow>
                 );
               })}

@@ -14,6 +14,21 @@ interface VariantMovementsPanelProps {
     changeNameMove: (move: MoveVariantNode, newName: string) => void;
 }
 
+const pieceIcons: { [key: string]: string } = {
+    'P': '♙',
+    'N': '♘',
+    'B': '♗',
+    'R': '♖',
+    'Q': '♕',
+    'K': '♔',
+    'p': '♟',
+    'n': '♞',
+    'b': '♝',
+    'r': '♜',
+    'q': '♛',
+    'k': '♚'
+};
+
 const MoveItem: React.FC<{
   move: MoveVariantNode;
   currentMoveNode: MoveVariantNode;
@@ -34,6 +49,9 @@ const MoveItem: React.FC<{
     onContextMenu={(event) => onContextMenu(event, move)}
     onClick={onClick}
   >
+    <Typography component="span" fontSize="1rem" sx={{ marginRight: '0.25rem' }}>
+      {pieceIcons[move.getMove().piece] || ''}
+    </Typography>
     <Typography
       component="span"
       fontSize="1rem"
