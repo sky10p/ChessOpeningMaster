@@ -1,10 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Grid,
   Theme,
   Typography,
   useMediaQuery,
+  Collapse,
+  IconButton,
+  Paper,
 } from "@mui/material";
 import BoardContainer from "../../../components/application/chess/board/BoardContainer";
 import BoardActionsContainer from "../../../components/application/chess/board/BoardActionsContainer";
@@ -18,12 +21,14 @@ import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import SaveIcon from "@mui/icons-material/Save";
 import PlayLessonIcon from "@mui/icons-material/PlayLesson";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 import { useHeaderContext } from "../../../contexts/HeaderContext";
 import { useNavigate } from "react-router-dom";
 import { useMenuContext } from "../../../contexts/MenuContext";
 import { API_URL } from "../../../repository/constants";
 import theme from "../../../design/theme";
+import LichessPanel from "../../../components/design/lichess/LichessPanel";
 
 const EditRepertoireViewContainer: React.FC = () => {
   const navigate = useNavigate();
@@ -32,7 +37,7 @@ const EditRepertoireViewContainer: React.FC = () => {
     "variants" | "comments"
   >("variants");
 
-  const { repertoireId, repertoireName, saveRepertory, getPgn } =
+  const { repertoireId, repertoireName, saveRepertory, getPgn, chess } =
     useRepertoireContext();
 
   const { showMenu } = useMenuContext();
@@ -51,6 +56,8 @@ const EditRepertoireViewContainer: React.FC = () => {
   const isMobile = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down("sm")
   );
+
+  const [openPanel, setOpenPanel] = useState<"variants" | "comments" | "lichess" | null>("variants");
 
   const showMenuHeader = (event: React.MouseEvent<HTMLElement>) => {
     showMenu((event.currentTarget) || null, [
@@ -74,6 +81,10 @@ const EditRepertoireViewContainer: React.FC = () => {
       },
     ])
   }
+
+  const handlePanelClick = (panel: "variants" | "comments" | "lichess") => {
+    setOpenPanel(openPanel === panel ? null : panel);
+  };
 
   useEffect(() => {
     
@@ -166,10 +177,43 @@ const EditRepertoireViewContainer: React.FC = () => {
         {!isMobile && (
           <>
             <Box style={{ marginTop: "2.25rem", overflowY: "auto", padding: "1rem" }}>
-              <VariantsInfo />
+              <Paper style={{ backgroundColor: "#f5f5f5", padding: "0.5rem", marginBottom: "0.5rem" }}>
+                <Typography variant="h6" onClick={() => handlePanelClick("variants")} sx={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  Variants
+                  <IconButton>
+                    <ExpandMoreIcon />
+                  </IconButton>
+                </Typography>
+              </Paper>
+              <Collapse in={openPanel === "variants"}>
+                <VariantsInfo />
+              </Collapse>
             </Box>
             <Box style={{ marginTop: "1.5rem", overflowY: "auto", padding: "1rem" }}>
-              <BoardCommentContainer />
+              <Paper style={{ backgroundColor: "#f5f5f5", padding: "0.5rem", marginBottom: "0.5rem" }}>
+                <Typography variant="h6" onClick={() => handlePanelClick("comments")} sx={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  Comments
+                  <IconButton>
+                    <ExpandMoreIcon />
+                  </IconButton>
+                </Typography>
+              </Paper>
+              <Collapse in={openPanel === "comments"}>
+                <BoardCommentContainer />
+              </Collapse>
+            </Box>
+            <Box style={{ marginTop: "1.5rem", overflowY: "auto", padding: "1rem" }}>
+              <Paper style={{ backgroundColor: "#f5f5f5", padding: "0.5rem", marginBottom: "0.5rem" }}>
+                <Typography variant="h6" onClick={() => handlePanelClick("lichess")} sx={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  Lichess
+                  <IconButton>
+                    <ExpandMoreIcon />
+                  </IconButton>
+                </Typography>
+              </Paper>
+              <Collapse in={openPanel === "lichess"}>
+                <LichessPanel fen={chess.fen()} />
+              </Collapse>
             </Box>
           </>
         )}
