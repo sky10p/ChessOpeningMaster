@@ -20,7 +20,7 @@ const customPositionArgs = {
 export const LichessPanelStoryDefault: Story = () => (
   <ThemeProvider theme={theme}>
     <CssBaseline />
-    <Container width="400px">
+    <Container width="600px">
       <LichessPanel {...defaultArgs} />
     </Container>
   </ThemeProvider>
@@ -29,7 +29,7 @@ export const LichessPanelStoryDefault: Story = () => (
 export const LichessPanelStoryCustomPosition: Story = () => (
   <ThemeProvider theme={theme}>
     <CssBaseline />
-    <Container width="400px">
+    <Container width="600px">
       <LichessPanel {...customPositionArgs} />
     </Container>
   </ThemeProvider>
