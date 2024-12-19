@@ -11,12 +11,12 @@
   ],
   "scripts": {
     "build": "lerna run build --stream",
-    "start:front:dev": "lerna run start:dev --scope frontend --stream",
-    "start:backend:dev": "lerna run start:dev --scope backend --stream",
-    "start:backend:prod": "lerna run start:prod --scope backend --stream",
+    "start:front:dev": "lerna run start:dev --scope @chess-opening-master/frontend --stream",
+    "start:backend:dev": "lerna run start:dev --scope @chess-opening-master/backend --stream",
+    "start:backend:prod": "lerna run start:prod --scope @chess-opening-master/backend --stream",
     "start:dev": "concurrently \"yarn start:front:dev\" \"yarn start:backend:dev\"",
     "start:prod": "concurrently \"yarn start:front:prod\" \"yarn start:backend:prod\"",
-    "develop:components": "lerna run develop:components --scope frontend --stream",
+    "develop:components": "lerna run develop:components --scope @chess-opening-master/frontend --stream",
     "test": "lerna run test --stream",
     "lint": "lerna exec -- eslint . --ext .ts,.tsx --ignore-path .eslintignore"
   },
