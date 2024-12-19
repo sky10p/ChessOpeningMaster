@@ -1,0 +1,14 @@
+{
+    "name": "common",
+    "version": "1.0.0",
+    "private": true,
+    "main": "dist/index.js",
+    "scripts": {
+      "build": "tsc",
+      "lint": "eslint"
+    },
+    "dependencies": {},
+    "devDependencies": {
+      "typescript": "^5.0.4"
+    }
+  }

@@ -5,19 +5,20 @@
   "repository": "git@bitbucket.org:sky10p/chessopeningmaster.git",
   "author": "Pablo Guijarro <sky10pg@gmail.com>",
   "license": "MIT",
-  "private": false,
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "build": "cross-env NODE_ENV=production tsc && npm run build:front:prod",
-    "build:backend:dev": "cross-env NODE_ENV=production tsc",
-    "start:front:dev": "cross-env NODE_ENV=development FRONT_PORT=3002 webpack serve --mode development --open",
-    "build:front:prod": "cross-env NODE_ENV=production FRONT_PORT=3002 webpack --mode production",
-    "start:backend:dev": "cross-env NODE_ENV=development ts-node-dev -r dotenv/config --respawn --ignore-watch node_modules src/backend/server.ts",
-    "start:backend:prod": "cross-env NODE_ENV=production node dist/backend/server.js",
-    "start:dev": "concurrently \"npm run start:backend:dev\" \"npm run start:front:dev\"",
-    "start:prod": "concurrently \"npm run start:backend:prod\" \"npm run build:front:prod\"",
-    "develop:components": "ladle serve",
-    "test": "jest",
-    "lint": "eslint 'src/**/*.{js,ts,tsx}'"
+    "build": "lerna run build --stream",
+    "start:front:dev": "lerna run start:dev --scope frontend --stream",
+    "start:backend:dev": "lerna run start:dev --scope backend --stream",
+    "start:backend:prod": "lerna run start:prod --scope backend --stream",
+    "start:dev": "concurrently \"yarn start:front:dev\" \"yarn start:backend:dev\"",
+    "start:prod": "concurrently \"yarn start:front:prod\" \"yarn start:backend:prod\"",
+    "develop:components": "lerna run develop:components --scope frontend --stream",
+    "test": "lerna run test --stream",
+    "lint": "lerna exec -- eslint . --ext .ts,.tsx --ignore-path .eslintignore"
   },
   "devDependencies": {
     "@babel/core": "^7.21.4",
@@ -40,6 +41,7 @@
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.5.1",
     "jest": "^29.5.0",
+    "lerna": "^8.1.9",
     "mini-css-extract-plugin": "^2.7.5",
     "mongodb-memory-server": "^8.12.2",
     "style-loader": "^3.3.2",
