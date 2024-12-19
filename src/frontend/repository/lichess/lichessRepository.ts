@@ -38,9 +38,19 @@ interface Player {
   rating: number;
 }
 
-export async function getLichessMoves(fen: string, type: 'players' | 'masters'): Promise<LichessResponse> {
+export enum LichessMovesTypes {
+  MASTERS = 'masters',
+  LICHESS = 'lichess'
+}
+  
+
+export async function getLichessMoves(fen: string, type: LichessMovesTypes, ratings: number[] = [400, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2500]): Promise<LichessResponse> {
   try {
-    const response = await fetch(`https://explorer.lichess.ovh/${type}?fen=${fen}`);
+    let url = `https://explorer.lichess.ovh/${type}?fen=${fen}`;
+    if (type === LichessMovesTypes.LICHESS) {
+      url += `&ratings=${ratings.join(',')}`;
+    }
+    const response = await fetch(url);
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
