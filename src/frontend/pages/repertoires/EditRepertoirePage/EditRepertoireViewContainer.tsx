@@ -22,20 +22,20 @@ import SaveIcon from "@mui/icons-material/Save";
 import PlayLessonIcon from "@mui/icons-material/PlayLesson";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import SportsEsportsIcon from "@mui/icons-material/SportsEsports"; // Add this import for the new icon
 
 import { useHeaderContext } from "../../../contexts/HeaderContext";
 import { useNavigate } from "react-router-dom";
 import { useMenuContext } from "../../../contexts/MenuContext";
 import { API_URL } from "../../../repository/constants";
-import theme from "../../../design/theme";
 import LichessPanel from "../../../components/design/lichess/LichessPanel";
+
+type FooterSection = "variants" | "comments" | "lichess";
 
 const EditRepertoireViewContainer: React.FC = () => {
   const navigate = useNavigate();
 
-  const [panelSelected, setPanelSelected] = React.useState<
-    "variants" | "comments"
-  >("variants");
+  const [panelSelected, setPanelSelected] = React.useState<FooterSection>("variants");
 
   const { repertoireId, repertoireName, saveRepertory, getPgn, chess } =
     useRepertoireContext();
@@ -57,7 +57,7 @@ const EditRepertoireViewContainer: React.FC = () => {
     theme.breakpoints.down("sm")
   );
 
-  const [openPanel, setOpenPanel] = useState<"variants" | "comments" | "lichess" | null>("variants");
+  const [openPanel, setOpenPanel] = useState<FooterSection | null>("variants");
 
   const showMenuHeader = (event: React.MouseEvent<HTMLElement>) => {
     showMenu((event.currentTarget) || null, [
@@ -82,8 +82,8 @@ const EditRepertoireViewContainer: React.FC = () => {
     ])
   }
 
-  const handlePanelClick = (panel: "variants" | "comments" | "lichess") => {
-    setOpenPanel(openPanel === panel ? null : panel);
+  const handlePanelClick = (panel: FooterSection) => {
+    setOpenPanel(panel);
   };
 
   useEffect(() => {
@@ -138,12 +138,19 @@ const EditRepertoireViewContainer: React.FC = () => {
         icon: <ChatIcon />,
         onClick: () => setPanelSelected("comments"),
       });
+      addIconFooter({
+        key: "lichess",
+        label: "Lichess",
+        icon: <SportsEsportsIcon />,
+        onClick: () => setPanelSelected("lichess"),
+      });
     }
 
     return () => {
       setIsVisible(false);
       removeIconFooter("variants");
       removeIconFooter("comments");
+      removeIconFooter("lichess");
     };
   }, [isMobile]);
 
@@ -174,47 +181,32 @@ const EditRepertoireViewContainer: React.FC = () => {
         {isMobile && panelSelected === "comments" && (
           <BoardCommentContainer />
         )}
+        {isMobile && panelSelected === "lichess" && (
+          <LichessPanel fen={chess.fen()} />
+        )}
         {!isMobile && (
           <>
-            <Box style={{ marginTop: "2.25rem", overflowY: "auto", padding: "1rem" }}>
-              <Paper style={{ backgroundColor: "#f5f5f5", padding: "0.5rem", marginBottom: "0.5rem" }}>
-                <Typography variant="h6" onClick={() => handlePanelClick("variants")} sx={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  Variants
-                  <IconButton>
-                    <ExpandMoreIcon />
-                  </IconButton>
-                </Typography>
-              </Paper>
-              <Collapse in={openPanel === "variants"}>
-                <VariantsInfo />
-              </Collapse>
-            </Box>
-            <Box style={{ marginTop: "1.5rem", overflowY: "auto", padding: "1rem" }}>
-              <Paper style={{ backgroundColor: "#f5f5f5", padding: "0.5rem", marginBottom: "0.5rem" }}>
-                <Typography variant="h6" onClick={() => handlePanelClick("comments")} sx={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  Comments
-                  <IconButton>
-                    <ExpandMoreIcon />
-                  </IconButton>
-                </Typography>
-              </Paper>
-              <Collapse in={openPanel === "comments"}>
-                <BoardCommentContainer />
-              </Collapse>
-            </Box>
-            <Box style={{ marginTop: "1.5rem", overflowY: "auto", padding: "1rem" }}>
-              <Paper style={{ backgroundColor: "#f5f5f5", padding: "0.5rem", marginBottom: "0.5rem" }}>
-                <Typography variant="h6" onClick={() => handlePanelClick("lichess")} sx={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  Lichess
-                  <IconButton>
-                    <ExpandMoreIcon />
-                  </IconButton>
-                </Typography>
-              </Paper>
-              <Collapse in={openPanel === "lichess"}>
-                <LichessPanel fen={chess.fen()} />
-              </Collapse>
-            </Box>
+            {(["variants", "comments", "lichess"] as Array<FooterSection>).map((panel) => (
+              <Box key={panel} style={{ marginTop: "1.5rem", overflowY: "auto", padding: "1rem" }}>
+                <Paper style={{ backgroundColor: openPanel === panel ? "#333" : "#f5f5f5", padding: "0.5rem", marginBottom: "0.5rem", borderRadius: openPanel === panel ? "0.5rem 0.5rem 0 0" : "0.5rem" }}>
+                  <Typography variant="h6" onClick={() => handlePanelClick(panel)} sx={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: openPanel === panel ? "#fff" : "#000" }}>
+                    {panel.charAt(0).toUpperCase() + panel.slice(1)}
+                    {openPanel !== panel && (
+                      <IconButton>
+                        <ExpandMoreIcon sx={{ transform: openPanel === panel ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s", color: openPanel === panel ? "#fff" : "#000" }} />
+                      </IconButton>
+                    )}
+                  </Typography>
+                </Paper>
+                <Collapse in={openPanel === panel} timeout="auto" unmountOnExit>
+                  <Box style={{ padding: "1rem", backgroundColor: "#fff", border: "1px solid #ccc", borderRadius: "0 0 0.5rem 0.5rem" }}>
+                    {panel === "variants" && <VariantsInfo />}
+                    {panel === "comments" && <BoardCommentContainer />}
+                    {panel === "lichess" && <LichessPanel fen={chess.fen()} />}
+                  </Box>
+                </Collapse>
+              </Box>
+            ))}
           </>
         )}
       </Grid>
