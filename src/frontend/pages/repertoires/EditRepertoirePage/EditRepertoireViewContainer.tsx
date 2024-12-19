@@ -83,7 +83,7 @@ const EditRepertoireViewContainer: React.FC = () => {
   }
 
   const handlePanelClick = (panel: FooterSection) => {
-    setOpenPanel(panel);
+    setOpenPanel((prevPanel) => (prevPanel === panel ? null : panel));
   };
 
   useEffect(() => {
@@ -191,11 +191,11 @@ const EditRepertoireViewContainer: React.FC = () => {
                 <Paper style={{ backgroundColor: openPanel === panel ? "#333" : "#f5f5f5", padding: "0.5rem", marginBottom: "0.5rem", borderRadius: openPanel === panel ? "0.5rem 0.5rem 0 0" : "0.5rem" }}>
                   <Typography variant="h6" onClick={() => handlePanelClick(panel)} sx={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: openPanel === panel ? "#fff" : "#000" }}>
                     {panel.charAt(0).toUpperCase() + panel.slice(1)}
-                    {openPanel !== panel && (
+                
                       <IconButton>
                         <ExpandMoreIcon sx={{ transform: openPanel === panel ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s", color: openPanel === panel ? "#fff" : "#000" }} />
                       </IconButton>
-                    )}
+                  
                   </Typography>
                 </Paper>
                 <Collapse in={openPanel === panel} timeout="auto" unmountOnExit>
