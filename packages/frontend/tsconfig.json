@@ -4,5 +4,8 @@
     "outDir": "./build/frontend",
     "rootDir": "./src"
   },
-  "include": ["src/**/*"]
+  "include": [
+    "src/**/*",
+    "../../common/src/types/**/*"
+  ]
 }

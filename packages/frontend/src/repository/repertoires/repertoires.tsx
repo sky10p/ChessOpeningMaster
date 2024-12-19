@@ -1,5 +1,5 @@
 import { IMoveNode } from "../../../../common/src/types/MoveNode";
-import { BoardOrientation } from "../../../../common/src/types/Orientation";
+import { BoardOrientation } from "@chess-opening-master/common";
 import { API_URL } from "../constants";
 
 export const getRepertoires = async () => {
