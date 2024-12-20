@@ -1,5 +1,13 @@
 import React from "react";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+} from "@mui/material";
 import useStockfish from "../../../libs/useStockfish";
 
 interface StockfishPanelProps {
@@ -7,12 +15,18 @@ interface StockfishPanelProps {
   numLines: number;
 }
 
-export  const StockfishPanel: React.FC<StockfishPanelProps> = ({ fen, numLines }) => {
+export const StockfishPanel: React.FC<StockfishPanelProps> = ({
+  fen,
+  numLines,
+}) => {
   const lines = useStockfish(fen, numLines);
 
   return (
     <div>
-      <TableContainer component={Paper} style={{ width: "100%", maxHeight: "300px", overflowY: "auto" }}>
+      <TableContainer
+        component={Paper}
+        style={{ width: "100%", maxHeight: "300px", overflowY: "auto" }}
+      >
         <Table>
           <TableHead>
             <TableRow>

@@ -52,9 +52,15 @@ module.exports = {
     }),
   ].filter(Boolean),
   devServer: {
-    static: {
-      directory: path.join(__dirname, 'build', 'frontend'),
-    },
+    static: [
+      {
+        directory: path.join(__dirname, 'public'),
+      },
+      {
+        directory: path.join(__dirname, 'build', 'frontend'),
+      },
+      
+    ],
     historyApiFallback: {
       index: '/index.html',
       rewrites: [

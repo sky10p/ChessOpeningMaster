@@ -1,27 +1,25 @@
 import { useState, useEffect } from "react";
+import { onStockfishMessage, postMessageToStockfish, removeStockfishMessage } from "../workers/stockfishWorker";
 
 interface Line {
   evaluation: number;
   moves: string[];
 }
 
-const useStockfish = (fen: string, numLines: number): Line[] => {
+export type StockfishModel = "stockfish-single" | "stockfish";
+
+const useStockfish = (
+  fen: string,
+  numLines: number,
+): Line[] => {
   const [lines, setLines] = useState<Line[]>([]);
 
   useEffect(() => {
-    const stockfishWorker = new Worker("/stockfish/stockfish-single.js");
-    stockfishWorker.onmessage = function (event) {
-      console.log("Mensaje de Stockfish:", event.data);
-    };
-
-    stockfishWorker.postMessage("uci");
-    stockfishWorker.postMessage("ucinewgame");
-    stockfishWorker.postMessage(`position fen ${fen}`);
-    stockfishWorker.postMessage(`setoption name MultiPV value ${numLines}`);
-    stockfishWorker.postMessage("go depth 20");
-
     const handleMessage = (event: MessageEvent) => {
+
       const message = event.data;
+
+      const sideToMove = fen.split(" ")[1];
 
       if (message.startsWith("info")) {
         const match = message.match(
@@ -33,21 +31,27 @@ const useStockfish = (fen: string, numLines: number): Line[] => {
             scoreType === "cp"
               ? parseInt(scoreValue, 10) / 100
               : parseInt(scoreValue, 10) * 100;
+          const adjustedEval = sideToMove === "b" ? -evaluation : evaluation;
           const moves = pvMoves.split(" ");
 
           setLines((prevLines) => {
             const newLines = [...prevLines];
-            newLines[parseInt(pvNumber, 10) - 1] = { evaluation, moves };
+            newLines[parseInt(pvNumber, 10) - 1] = { evaluation: adjustedEval, moves };
             return newLines;
           });
         }
       }
     };
 
-    stockfishWorker.onmessage = handleMessage;
+    onStockfishMessage(handleMessage);
+    postMessageToStockfish("uci");
+    postMessageToStockfish("ucinewgame");
+    postMessageToStockfish(`position fen ${fen}`);
+    postMessageToStockfish(`setoption name MultiPV value ${numLines}`);
+    postMessageToStockfish("go depth 20");
 
     return () => {
-      stockfishWorker.terminate();
+      removeStockfishMessage();
     };
   }, [fen, numLines]);
 

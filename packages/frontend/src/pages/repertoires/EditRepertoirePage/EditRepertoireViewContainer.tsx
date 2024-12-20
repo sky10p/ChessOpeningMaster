@@ -22,15 +22,18 @@ import SaveIcon from "@mui/icons-material/Save";
 import PlayLessonIcon from "@mui/icons-material/PlayLesson";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import SportsEsportsIcon from "@mui/icons-material/SportsEsports"; // Add this import for the new icon
+import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
+import ComputerIcon from "@mui/icons-material/Computer";
 
 import { useHeaderContext } from "../../../contexts/HeaderContext";
 import { useNavigate } from "react-router-dom";
 import { useMenuContext } from "../../../contexts/MenuContext";
 import { API_URL } from "../../../repository/constants";
 import LichessPanel from "../../../components/design/lichess/LichessPanel";
+import { StockfishPanel } from "../../../components/design/stockfish/StockfishPanel";
 
-type FooterSection = "variants" | "comments" | "lichess";
+type FooterSection = "variants" | "comments" | "lichess" | "stockfish";
+
 
 const EditRepertoireViewContainer: React.FC = () => {
   const navigate = useNavigate();
@@ -144,6 +147,12 @@ const EditRepertoireViewContainer: React.FC = () => {
         icon: <SportsEsportsIcon />,
         onClick: () => setPanelSelected("lichess"),
       });
+      addIconFooter({
+        key: "stockfish",
+        label: "Stockfish",
+        icon: <ComputerIcon />,
+        onClick: () => setPanelSelected("stockfish"),
+      });
     }
 
     return () => {
@@ -151,8 +160,10 @@ const EditRepertoireViewContainer: React.FC = () => {
       removeIconFooter("variants");
       removeIconFooter("comments");
       removeIconFooter("lichess");
+      removeIconFooter("stockfish");
     };
   }, [isMobile]);
+  
 
   return (
     <Grid container spacing={2} >
@@ -184,18 +195,19 @@ const EditRepertoireViewContainer: React.FC = () => {
         {isMobile && panelSelected === "lichess" && (
           <LichessPanel fen={chess.fen()} />
         )}
+        {isMobile && panelSelected === "stockfish" && (
+          <StockfishPanel fen={chess.fen()} numLines={3} />
+        )}
         {!isMobile && (
           <>
-            {(["variants", "comments", "lichess"] as Array<FooterSection>).map((panel) => (
+            {(["variants", "comments", "lichess", "stockfish"] as Array<FooterSection>).map((panel) => (
               <Box key={panel} style={{ marginTop: "1.5rem", overflowY: "auto", padding: "1rem" }}>
                 <Paper style={{ backgroundColor: openPanel === panel ? "#333" : "#f5f5f5", padding: "0.5rem", marginBottom: "0.5rem", borderRadius: openPanel === panel ? "0.5rem 0.5rem 0 0" : "0.5rem" }}>
                   <Typography variant="h6" onClick={() => handlePanelClick(panel)} sx={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: openPanel === panel ? "#fff" : "#000" }}>
                     {panel.charAt(0).toUpperCase() + panel.slice(1)}
-                
-                      <IconButton>
-                        <ExpandMoreIcon sx={{ transform: openPanel === panel ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s", color: openPanel === panel ? "#fff" : "#000" }} />
-                      </IconButton>
-                  
+                    <IconButton>
+                      <ExpandMoreIcon sx={{ transform: openPanel === panel ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s", color: openPanel === panel ? "#fff" : "#000" }} />
+                    </IconButton>
                   </Typography>
                 </Paper>
                 <Collapse in={openPanel === panel} timeout="auto" unmountOnExit>
@@ -203,6 +215,7 @@ const EditRepertoireViewContainer: React.FC = () => {
                     {panel === "variants" && <VariantsInfo />}
                     {panel === "comments" && <BoardCommentContainer />}
                     {panel === "lichess" && <LichessPanel fen={chess.fen()} />}
+                    {panel === "stockfish" && <StockfishPanel fen={chess.fen()} numLines={3}/>}
                   </Box>
                 </Collapse>
               </Box>

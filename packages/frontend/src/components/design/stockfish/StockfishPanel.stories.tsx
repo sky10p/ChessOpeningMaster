@@ -19,6 +19,8 @@ const customPositionArgs = {
   numLines: 3,
 };
 
+const stockfishWorker = new Worker("/stockfish/stockfish.js");
+
 export const StockfishPanelStoryDefault: Story = () => (
   <ThemeProvider theme={theme}>
     <CssBaseline />
