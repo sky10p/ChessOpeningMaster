@@ -19,10 +19,13 @@ export const StockfishPanel: React.FC<StockfishPanelProps> = ({
   fen,
   numLines,
 }) => {
-  const lines = useStockfish(fen, numLines);
+  const {lines, depth, time, maxDepth} = useStockfish(fen, numLines);
 
   return (
     <div>
+      <div>
+        <strong>Depth:</strong> {depth}/{maxDepth} <strong>Time:</strong> {time}s
+      </div>
       <TableContainer
         component={Paper}
         style={{ width: "100%", maxHeight: "300px", overflowY: "auto" }}

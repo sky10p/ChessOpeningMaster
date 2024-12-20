@@ -1,9 +1,9 @@
-const stockfishWorker = new Worker("/stockfish/stockfish.js");
+let stockfishWorker = new Worker("/stockfish/stockfish.js");
 
 export const initializeStockfish = () => {
     stockfishWorker.postMessage("uci");
 
-    }
+}
 
 export const postMessageToStockfish = (message: string) => {
     stockfishWorker.postMessage(message);
@@ -16,5 +16,6 @@ export const onStockfishMessage = (handleMessage: (event: MessageEvent) => void)
 }
 
 export const removeStockfishMessage = () => {
-    stockfishWorker.onmessage = null;
+    stockfishWorker.terminate();
+    stockfishWorker = new Worker("/stockfish/stockfish.js");
 }
