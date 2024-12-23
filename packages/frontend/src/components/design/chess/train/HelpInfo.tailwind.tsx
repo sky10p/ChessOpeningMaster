@@ -25,11 +25,11 @@ const HelpInfo: React.FC<HelpInfoProps> = ({
   };
 
   return (
-    <div className="mb-4 p-4 rounded-lg shadow">
+    <div className="mb-4 p-4 rounded-lg">
       <div className="flex items-center justify-center space-x-2 mb-4">
         <button
           onClick={toggleVisibility}
-          className="p-2 bg-accent text-buttonText rounded-full hover:bg-yellow-500 transition-colors focus:outline-none"
+          className="p-2 bg-accent text-primary rounded-full hover:bg-yellow-500 transition-colors focus:outline-none"
           aria-label="Toggle Available Moves"
         >
           {iconVisible ? (

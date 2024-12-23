@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --tw-scrollbar-thumb: #475569; /* Gris medio */
+  --tw-scrollbar-track: #1e293b; /* Fondo principal oscuro */
+  --tw-scrollbar-thumb-hover: #64748b; /* Color del pulgar al pasar el ratón */
+}

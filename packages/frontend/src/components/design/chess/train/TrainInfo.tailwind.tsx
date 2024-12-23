@@ -58,7 +58,7 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
             <span className="text-md text-gray-400 dark:text-gray-500">{lastTrainVariant.variant.fullName}</span>
             <button
               onClick={handleCopyPgn}
-              className="bg-accent text-buttonText px-3 py-1 rounded hover:bg-yellow-500 transition-colors"
+              className="bg-accent text-primary px-3 py-1 rounded hover:bg-yellow-500 transition-colors"
             >
               Copy PGN
             </button>

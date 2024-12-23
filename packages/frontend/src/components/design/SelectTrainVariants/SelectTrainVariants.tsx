@@ -1,14 +1,6 @@
-import React from "react";
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Checkbox,
-  FormControlLabel,
-  Typography,
-  Box,
-} from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import React, { useRef, useEffect } from "react";
+import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react';
+import { ChevronUpIcon } from '@heroicons/react/24/solid';
 import { GroupedVariant } from "./models";
 import { VariantsProgressBar } from './VariantsProgressBar';
 import { getTextColor } from "./utils";
@@ -35,58 +27,61 @@ export const SelectTrainVariants: React.FC<SelectTrainVariantProps> = ({
   handleToggleVariant,
   variantsInfo,
 }) => {
- 
+  const parentCheckboxRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (parentCheckboxRef.current) {
+      parentCheckboxRef.current.indeterminate =
+        isSomeOfGroupSelected(variantName) && !isGroupSelected(variantName);
+    }
+  }, [variantName, isSomeOfGroupSelected, isGroupSelected]);
+
   return (
-    <Accordion>
-      <AccordionSummary
-        expandIcon={subvariants.length > 1 ? <ExpandMoreIcon /> : null}
-        aria-controls={`${variantName}-content`}
-        id={`${variantName}-header`}
+    <Disclosure>
+      <DisclosureButton
+        as="div"
+        className="w-full flex items-center justify-between p-3 border rounded-md bg-primary text-textLight"
         onClick={(event) => {
           if (subvariants.length <= 1) {
             event.stopPropagation();
           }
         }}
       >
-        <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-          <FormControlLabel
-            onClick={(event) => event.stopPropagation()}
-            onFocus={(event) => event.stopPropagation()}
-            control={
-              <Checkbox
-                checked={isGroupSelected(variantName)}
-                indeterminate={isSomeOfGroupSelected(variantName)}
-                onChange={() => handleSelectAllGroup(variantName)}
-              />
-            }
-            label={<Typography>{variantName}</Typography>}
-          />
+        <div onClick={(e) => e.stopPropagation()}>
+          <label className="inline-flex items-center cursor-pointer">
+            <input
+              ref={parentCheckboxRef}
+              type="checkbox"
+              checked={isGroupSelected(variantName)}
+              onChange={() => handleSelectAllGroup(variantName)}
+              className="mr-2"
+            />
+            <span>{variantName}</span>
+          </label>
           <VariantsProgressBar variants={subvariants} variantInfo={variantsInfo} />
-        </Box>
-      </AccordionSummary>
+        </div>
+        {subvariants.length > 1 && (<ChevronUpIcon className="w-5 h-5 text-accent transition-transform ui-open:rotate-180" />
+        )}
+      </DisclosureButton>
       {subvariants.length > 1 && (
-        <AccordionDetails>
-          <Box sx={{ display: 'flex', flexDirection: 'column', ml: 3 }}>
+        <DisclosurePanel className="mt-2">
+          <div className="flex flex-col ml-3 bg-background p-2 text-textLight">
             {subvariants.map((subvariant) => (
-              <FormControlLabel
-                key={subvariant.originalIndex}
-                control={
-                  <Checkbox
-                    checked={isCheckedVariant(subvariant.originalIndex)}
-                    onChange={() => handleToggleVariant(subvariant.originalIndex)}
-                  />
-                }
-                label={
-                  <Typography style={{ color: getTextColor(subvariant, variantsInfo) }}>
-                    {subvariant.variant.fullName}
-                  </Typography>
-                }
-              />
-              
+              <label key={subvariant.originalIndex} className="inline-flex items-center mb-1">
+                <input
+                  type="checkbox"
+                  checked={isCheckedVariant(subvariant.originalIndex)}
+                  onChange={() => handleToggleVariant(subvariant.originalIndex)}
+                  className="mr-2"
+                />
+                <span style={{ color: getTextColor(subvariant, variantsInfo) }}>
+                  {subvariant.variant.fullName}
+                </span>
+              </label>
             ))}
-          </Box>
-        </AccordionDetails>
+          </div>
+        </DisclosurePanel>
       )}
-    </Accordion>
+    </Disclosure>
   );
 };

@@ -3,16 +3,12 @@ import { TrainVariant, TrainVariantInfo } from "../../../models/chess.models";
 import {
   Checkbox,
   FormControlLabel,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Button,
-  DialogContentText,
   TextField,
 } from "@mui/material";
 import { SelectTrainVariants } from "../SelectTrainVariants/SelectTrainVariants";
 import { getTrainVariantInfo } from "../../../repository/repertoires/trainVariants";
+import { Dialog, DialogBackdrop, DialogPanel, DialogTitle, Description } from '@headlessui/react';
 
 interface SelectTrainVariantsDialogProps {
   open: boolean;
@@ -156,46 +152,56 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
   const isSomeSelected = selectedTrainVariants.size > 0 && !isAllSelected;
 
   return (
-    <Dialog open={open} onClose={handleClose}>
-      <DialogTitle>{title}</DialogTitle>
-      <DialogContent>
-        <DialogContentText sx={{ mb: 2 }}>{contentText}</DialogContentText>
-        <TextField
-          label="Filter Variants"
-          variant="outlined"
-          fullWidth
-          value={filterText}
-          onChange={handleFilterChange}
-          sx={{ mb: 2 }}
-        />
-        <div><FormControlLabel
-          control={
-            <Checkbox
-              checked={isAllSelected}
-              indeterminate={isSomeSelected}
-              onChange={handleSelectAll}
-            />
-          }
-          label="Select All"
-        /></div>
-        {Object.keys(filteredGroupedTrainVariantsByName).map((groupName) => (
-          <div key={groupName}>
-            <SelectTrainVariants
-              variantName={groupName}
-              subvariants={filteredGroupedTrainVariantsByName[groupName]}
-              isGroupSelected={isGroupSelected}
-              isSomeOfGroupSelected={isSomeOfGroupSelected}
-              isCheckedVariant={(variantIndex) => selectedTrainVariants.has(variantIndex)}
-              handleSelectAllGroup={handleSelectAllGroup}
-              handleToggleVariant={handleToggleVariant}
-              variantsInfo={trainVariantsInfo}/>
+    <Dialog open={open} onClose={handleClose} className="fixed z-10 inset-0 overflow-y-auto">
+      <DialogBackdrop className="fixed inset-0 bg-black opacity-30" />
+      <div className="fixed inset-0 flex items-center justify-center p-4">
+        <DialogPanel className="bg-background rounded max-w-3xl mx-auto p-6 z-20 max-h-screen overflow-auto">
+          <DialogTitle className="text-xl font-bold text-textLight">{title}</DialogTitle>
+          <Description className="mt-4 text-textLight mb-4">
+            {contentText}
+          </Description>
+          <input
+            type="text"
+            className="mb-4 w-full px-3 py-2 border border-secondary rounded focus:outline-none focus:ring-2 focus:ring-accent"
+            placeholder="Filter Train Variants"
+            value={filterText}
+            onChange={handleFilterChange}
+          />
+          <div className="mb-4">
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                checked={isAllSelected}
+                className="form-checkbox h-4 w-4 text-accent"
+                onChange={handleSelectAll}
+              />
+              <span className="ml-2 text-textLight">Select All</span>
+            </label>
           </div>
-        ))}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleConfirm}>Confirm</Button>
-      </DialogActions>
+          {Object.keys(filteredGroupedTrainVariantsByName).map((groupName) => (
+            <div key={groupName} className="mb-4">
+              <SelectTrainVariants
+                variantName={groupName}
+                subvariants={filteredGroupedTrainVariantsByName[groupName]}
+                isGroupSelected={isGroupSelected}
+                isSomeOfGroupSelected={isSomeOfGroupSelected}
+                isCheckedVariant={(variantIndex) => selectedTrainVariants.has(variantIndex)}
+                handleSelectAllGroup={handleSelectAllGroup}
+                handleToggleVariant={handleToggleVariant}
+                variantsInfo={trainVariantsInfo}
+              />
+            </div>
+          ))}
+          <div className="mt-4 flex justify-end space-x-2">
+            <button onClick={onClose} className="px-4 py-2 bg-secondary text-textLight rounded hover:bg-scrollbarThumbHover">
+              Cancel
+            </button>
+            <button onClick={handleConfirm} className="px-4 py-2 bg-accent text-black rounded hover:bg-accent">
+              Confirm
+            </button>
+          </div>
+        </DialogPanel>
+      </div>
     </Dialog>
   );
 };

@@ -114,7 +114,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
   }, [addIconFooter, removeIconFooter, setIsVisible]);
 
   const renderPanelContent = useMemo(() => (
-    <div className="bg-gray-800 p-4 rounded shadow-md">
+    <div className="bg-gray-800 p-4 rounded shadow-md w-full h-full">
       {panelSelected === "info" && (
         <TrainInfo
           currentMoveNode={currentMoveNode}
@@ -135,8 +135,8 @@ const TrainRepertoireViewContainer: React.FC = () => {
   ), [panelSelected, currentMoveNode, turn, isYourTurn, finishedTrain, trainVariants, lastTrainVariant, allowedMoves]);
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div className="container mx-auto p-4 h-full bg-background text-textLight">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full">
         <div className="flex flex-col items-start">
           <div className="flex justify-center mb-4">
             <h5 className="text-xl font-bold text-textLight">Training {repertoireName}</h5>
@@ -145,7 +145,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
             <BoardContainer isTraining={true} />
           </div>
         </div>
-        <div className="flex flex-col items-start">
+        <div className="flex flex-col items-start h-full overflow-auto border border-secondary rounded bg-gray-800">
           {renderPanelContent}
         </div>
       </div>

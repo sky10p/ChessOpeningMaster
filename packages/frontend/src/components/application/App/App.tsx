@@ -1,4 +1,3 @@
-import { Box } from "@mui/material";
 import React, { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import Content from "../Content/Content";
@@ -15,19 +14,14 @@ const App: React.FC = (): React.ReactElement => {
   return (
     <BrowserRouter>
       <AppContext>
-        <Box display="flex" flexDirection="column" height="100dvh">
+        <div className="flex flex-col h-screen">
           <HeaderContainer />
-          <Box
-            display="flex"
-            flexDirection="column"
-            flexGrow={1}
-            overflow={"auto"}
-          >
+          <div className="flex flex-col flex-grow overflow-auto h-full">
             <NavbarContainer />
             <Content />
-          </Box>
+          </div>
           <FooterContainer />
-        </Box>
+        </div>
       </AppContext>
     </BrowserRouter>
   );
