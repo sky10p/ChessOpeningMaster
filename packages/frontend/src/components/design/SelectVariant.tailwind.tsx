@@ -43,14 +43,14 @@ export const SelectVariant: React.FC<SelectVariantProps> = ({
         id="select-variant"
         value={selectedValue}
         onChange={handleChange}
-        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-secondary bg-gray-800 text-textLight focus:outline-none focus:ring-accent focus:border-accent sm:text-sm rounded-md"
+        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-secondary bg-gray-500 text-textLight focus:outline-none focus:ring-accent focus:border-accent sm:text-sm rounded-md"
       >
         {Object.keys(groupedVariants)
           .sort()
           .flatMap((name) => [
             <optgroup key={`header-${name}`} label={name} className="bg-secondary text-textLight font-bold text-lg">
               {groupedVariants[name].map((variant) => (
-                <option key={`item-${variant.fullName}`} value={variant.fullName} className="bg-gray-800 text-textLight text-base">
+                <option key={`item-${variant.fullName}`} value={variant.fullName} className="bg-gray-900 text-textLight text-base">
                   {variant.fullName}
                 </option>
               ))}

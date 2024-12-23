@@ -13,7 +13,7 @@ export const StockfishPanel: React.FC<StockfishPanelProps> = ({
   const { lines, depth, time, maxDepth } = useStockfish(fen, numLines);
 
   return (
-    <div className="p-4 bg-gray-800 rounded shadow-md w-full h-full">
+    <div className="p-4 rounded shadow-md w-full h-full">
       <div className="mb-2 text-sm text-gray-400">
         <strong>Depth:</strong> {depth}/{maxDepth} <strong>Time:</strong> {time}s
       </div>

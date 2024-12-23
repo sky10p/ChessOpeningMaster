@@ -56,19 +56,19 @@ const EditRepertoireViewContainer: React.FC = () => {
   useEffect(() => {
     addIconHeader({
       key: "trainRepertoire",
-      icon: <BookOpenIcon className="h-6 w-6" />,
+      icon: <BookOpenIcon />,
       onClick: () => {
         navigate(`/repertoire/train/${repertoireId}`);
       },
     });
     addIconHeader({
       key: "saveRepertoire",
-      icon: <SaveIcon className="h-6 w-6" />,
+      icon: <SaveIcon />,
       onClick: saveRepertory,
     });
     addIconHeader({
       key: "moreOptions",
-      icon: <EllipsisVerticalIcon className="h-6 w-6" />,
+      icon: <EllipsisVerticalIcon />,
       onClick: showMenuHeader,
     });
 
@@ -139,7 +139,7 @@ const EditRepertoireViewContainer: React.FC = () => {
         </div>
       </div>
       <div className="hidden sm:block sm:col-span-1"></div>
-      <div className="col-span-12 sm:col-span-7 flex flex-col items-start overflow-auto scrollbar-custom border border-secondary rounded bg-background">
+      <div className="col-span-12 sm:col-span-7 flex flex-col items-start overflow-auto scrollbar-custom border border-secondary rounded bg-gray-800">
         {panelSelected === "variants" && <VariantsInfo />}
         {panelSelected === "comments" && <BoardCommentContainer />}
         {panelSelected === "lichess" && <LichessPanel fen={chess.fen()} />}

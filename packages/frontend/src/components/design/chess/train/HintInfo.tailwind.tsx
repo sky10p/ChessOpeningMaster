@@ -31,12 +31,12 @@ export const HintInfo: React.FC<HintInfoProps> = ({
     }
    
     return (
-      <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
-        <h6 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">
+      <div className="p-4 rounded-lg shadow">
+        <h6 className="text-lg font-semibold mb-2">
           Comments
         </h6>
         <textarea
-          className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 resize-none"
+          className="w-full p-2 border border-gray-600 dark:border-gray-500 rounded-md bg-gray-700 dark:bg-gray-600 text-gray-200 dark:text-gray-300 resize-none"
           rows={10}
           value={getHints().join("\n")}
           disabled

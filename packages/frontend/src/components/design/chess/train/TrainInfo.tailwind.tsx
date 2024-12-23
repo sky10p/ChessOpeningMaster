@@ -50,15 +50,15 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+    <div className="shadow rounded-lg p-6 bg-gray-800">
       {lastTrainVariant && (
         <div className="mb-4">
-          <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-200">Last Finished Variant</h2>
+          <h2 className="text-lg font-semibold text-gray-200 dark:text-gray-300">Last Finished Variant</h2>
           <div className="flex justify-between items-center mt-2">
-            <span className="text-md text-gray-600 dark:text-gray-400">{lastTrainVariant.variant.fullName}</span>
+            <span className="text-md text-gray-400 dark:text-gray-500">{lastTrainVariant.variant.fullName}</span>
             <button
               onClick={handleCopyPgn}
-              className="bg-accent text-buttonText px-3 py-1 rounded hover:bg-yellow-400 transition-colors"
+              className="bg-accent text-buttonText px-3 py-1 rounded hover:bg-yellow-500 transition-colors"
             >
               Copy PGN
             </button>
@@ -73,7 +73,7 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
             className="w-8 h-8 mr-2"
           />
         )}
-        <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">
+        <h3 className="text-xl font-bold text-gray-100 dark:text-gray-50">
           {finishedTrain
             ? "Finished Training"
             : isYourTurn
@@ -82,7 +82,7 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
         </h3>
       </div>
       {!finishedTrain && (
-        <p className="text-gray-600 dark:text-gray-300 mb-4">
+        <p className="text-gray-400 dark:text-gray-300 mb-4">
           {isYourTurn
             ? "Play one of your allowed moves according to your repertoire."
             : "Wait for your opponent to play."}
@@ -92,7 +92,7 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
         <span className="text-sm text-gray-500 dark:text-gray-400">
           {`${currentVariant} of ${totalVariants} variants`}
         </span>
-        <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-1">
+        <div className="w-full bg-gray-700 rounded-full h-2.5 dark:bg-gray-600 mt-1">
           <div
             className="bg-accent h-2.5 rounded-full"
             style={{ width: `${(currentVariant / totalVariants) * 100}%` }}
@@ -100,7 +100,7 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
         </div>
       </div>
       <div>
-        <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">
+        <h4 className="text-lg font-semibold text-gray-200 dark:text-gray-300 mb-2">
           Available Variants to Play
         </h4>
         <ul className="space-y-2">
@@ -108,7 +108,7 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
             <Disclosure key={index}>
               {({ open }) => (
                 <>
-                  <Disclosure.Button className="flex justify-between w-full px-4 py-2 text-left text-sm font-medium text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75">
+                  <Disclosure.Button className="flex justify-between w-full px-4 py-2 text-left text-sm font-medium text-gray-100 dark:text-gray-200 bg-gray-700 dark:bg-gray-600 rounded-lg hover:bg-gray-600 dark:hover:bg-gray-500 focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75">
                     <span>{variant.variant.fullName}</span>
                     <ChevronUpIcon
                       className={`${
@@ -116,7 +116,7 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
                       } w-5 h-5 text-accent`}
                     />
                   </Disclosure.Button>
-                  <Disclosure.Panel className="px-4 pt-4 pb-2 text-sm text-gray-500 dark:text-gray-300">
+                  <Disclosure.Panel className="px-4 pt-4 pb-2 text-sm text-gray-400 dark:text-gray-300">
                     <div className="flex flex-wrap gap-2">
                       {getMovementsFromVariant(variant, currentMoveNode).map((move, moveIndex) => (
                         <span key={moveIndex} className="px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded">

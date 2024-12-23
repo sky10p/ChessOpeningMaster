@@ -38,7 +38,7 @@ const Header: React.FC<HeaderProps> = ({ setOpenNavbar, isSaving, icons }) => {
             <button
               key={i}
               onClick={icon.onClick}
-              className="text-gray-300 hover:text-white"
+              className="text-gray-300 hover:text-accent h-6 w-6"
             >
               {icon.icon}
             </button>

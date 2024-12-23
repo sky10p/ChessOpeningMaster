@@ -76,7 +76,7 @@ const LichessPanel: React.FC<LichessPanelProps> = ({ fen }) => {
   );
 
   return (
-    <div className="p-4 bg-gray-800 rounded shadow-md w-full h-full">
+    <div className="p-4 rounded shadow-md w-full h-full">
       <div className="flex justify-center mb-2">
         <button
           className={`px-4 py-2 mr-2 text-sm font-medium rounded ${source === LichessMovesTypes.MASTERS ? "bg-accent text-black" : "bg-gray-700 text-white"}`}

@@ -28,7 +28,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
     const headerIcons = [
       {
         key: "examMode",
-        icon: <ExamIcon className="h-6 w-6 text-accent" />,
+        icon: <ExamIcon />,
         onClick: () => {
           showNumberDialog({
             title: "Exam Mode",
@@ -45,7 +45,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
       },
       {
         key: "selectTrainVariants",
-        icon: <CheckListIcon className="h-6 w-6 text-accent" />,
+        icon: <CheckListIcon />,
         onClick: () => {
           showTrainVariantsDialog({
             title: "Select train variants",
@@ -60,7 +60,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
       },
       {
         key: "goToEditRepertoire",
-        icon: <PencilIcon className="h-6 w-6 text-accent" />,
+        icon: <PencilIcon />,
         onClick: () => {
           navigate(`/repertoire/${repertoireId}`);
         },
@@ -114,7 +114,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
   }, [addIconFooter, removeIconFooter, setIsVisible]);
 
   const renderPanelContent = useMemo(() => (
-    <div>
+    <div className="bg-gray-800 p-4 rounded shadow-md">
       {panelSelected === "info" && (
         <TrainInfo
           currentMoveNode={currentMoveNode}
