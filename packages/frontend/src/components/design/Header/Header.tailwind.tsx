@@ -25,7 +25,7 @@ const Header: React.FC<HeaderProps> = ({ setOpenNavbar, isSaving, icons }) => {
         <div className="flex items-center flex-grow">
           <h1 className="text-xl font-semibold text-accent">ChessKeep</h1>
           <div className="flex items-center ml-4">
-            <p className="text-sm text-gray-300">
+            <p className="text-sm text-gray-300 hidden md:block">
               {isSaving ? "Saving repertoire..." : "Last repertoire saved"}
             </p>
             <div className="ml-2 text-gray-300">
@@ -38,7 +38,7 @@ const Header: React.FC<HeaderProps> = ({ setOpenNavbar, isSaving, icons }) => {
             <button
               key={i}
               onClick={icon.onClick}
-              className="p-2 text-gray-300 hover:text-white"
+              className="text-gray-300 hover:text-white"
             >
               {icon.icon}
             </button>
