@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavbarContext } from "../../../contexts/NavbarContext";
 import { useHeaderContext } from "../../../contexts/HeaderContext";
-import Header from "../../design/Header/Header";
+import Header from "../../design/Header/Header.tailwind";
 
 const HeaderContainer: React.FC = () => {
   const { setOpen } = useNavbarContext();
