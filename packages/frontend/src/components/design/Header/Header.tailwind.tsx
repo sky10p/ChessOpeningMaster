@@ -3,7 +3,7 @@ import { Bars3Icon, CloudArrowUpIcon } from "@heroicons/react/24/outline";
 import { HeaderIcon } from "./models";
 
 import "../../../index.css";
-import { CloudDoneIcon } from "./icons/CloudDoneIcon";
+import { CloudDoneIcon } from "../../icons/CloudDoneIcon";
 
 interface HeaderProps {
   setOpenNavbar: (open: boolean) => void;
@@ -25,7 +25,7 @@ const Header: React.FC<HeaderProps> = ({ setOpenNavbar, isSaving, icons }) => {
         <div className="flex items-center flex-grow">
           <h1 className="text-xl font-semibold text-accent">ChessKeep</h1>
           <div className="flex items-center ml-4">
-            <p className="text-sm text-gray-300 hidden md:block">
+            <p className="text-sm text-gray-300 hidden md:block mt-1">
               {isSaving ? "Saving repertoire..." : "Last repertoire saved"}
             </p>
             <div className="ml-2 text-gray-300">
