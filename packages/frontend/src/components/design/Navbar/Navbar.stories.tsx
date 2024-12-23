@@ -2,8 +2,7 @@ import { Story } from "@ladle/react";
 import React, { useState } from "react";
 import { ThemeProvider } from "@emotion/react";
 import { CssBaseline } from "@mui/material";
-import {Navbar} from "./Navbar";
-import { Navbar as NavbarTailwind } from "./Navbar";
+import { Navbar } from "./Navbar";
 import theme from "../../../design/theme";
 import { BrowserRouter as Router } from "react-router-dom";
 import '../../../index.css';
@@ -34,22 +33,6 @@ export const NavbarStory: Story = () => {
                     {open ? "Close Navbar" : "Open Navbar"}
                 </button>
                 <Navbar open={open} setOpen={setOpen} secondaryActions={links} mainActions={mainActions} />
-            </Router>
-        </ThemeProvider>
-    );
-};
-
-export const NavbarTailwindStory: Story = () => {
-    const [open, setOpen] = useState(false);
-
-    return (
-        <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <Router>
-                <button onClick={() => setOpen(!open)}>
-                    {open ? "Close Navbar" : "Open Navbar"}
-                </button>
-                <NavbarTailwind open={open} setOpen={setOpen} secondaryActions={links} mainActions={mainActions} />
             </Router>
         </ThemeProvider>
     );
