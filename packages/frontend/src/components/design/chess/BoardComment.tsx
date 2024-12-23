@@ -1,6 +1,5 @@
-import { TextField, Typography, Paper } from "@mui/material";
 import React from "react";
-import { styled } from "@mui/system";
+import { Textarea } from "@headlessui/react";
 
 interface BoardCommentProps {
   comment: string;
@@ -8,67 +7,29 @@ interface BoardCommentProps {
   editable?: boolean;
 }
 
-// Definir un TextField personalizado con fondo blanco y texto negro
-const CustomTextField = styled(TextField)(({ theme }) => ({
-  "& .MuiOutlinedInput-root": {
-    "& fieldset": {
-      borderColor: theme.palette.primary.main,
-    },
-    "&:hover fieldset": {
-      borderColor: theme.palette.primary.dark,
-    },
-    "&.Mui-focused fieldset": {
-      borderColor: theme.palette.primary.dark,
-    },
-    backgroundColor: "#FFFFFF", // Fondo blanco
-  },
-  "& .MuiInputBase-input": {
-    color: "#000000", // Texto negro
-  },
-  "& .MuiInputLabel-root": {
-    color: theme.palette.text.secondary,
-    "&.Mui-focused": {
-      color: theme.palette.primary.main,
-    },
-  },
-  "& .Mui-disabled .MuiOutlinedInput-notchedOutline": {
-    borderColor: theme.palette.grey[400],
-  },
-  "& .Mui-disabled": {
-    backgroundColor: theme.palette.grey[200],
-    color: "#000000",
-  },
-}));
-
 export const BoardComment: React.FC<BoardCommentProps> = ({
   editable = true,
   comment,
   updateComment,
 }) => {
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     updateComment(event.target.value);
   };
+
   return (
-    <Paper
-      elevation={3}
-      sx={{ padding: "1rem", backgroundColor: "background.paper" }}
-    >
+    <div className="p-4 bg-gray-800 rounded shadow-md h-full w-full">
       {!editable && (!comment || comment === "") ? (
-        <Typography variant="body2" color="text.secondary">
-          No comments
-        </Typography>
+        <p className="text-sm text-gray-400">No comments</p>
       ) : (
-        <CustomTextField
-          label="Add a comment to the current position"
-          multiline
-          disabled={!editable}
+        <Textarea
+          className="w-full h-full p-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-accent"
+          placeholder="Add a comment to the current position"
           rows={10}
+          disabled={!editable}
           value={comment}
           onChange={handleChange}
-          variant="outlined" // Mantener 'outlined'
-          fullWidth
         />
       )}
-    </Paper>
+    </div>
   );
 };

@@ -14,7 +14,7 @@ import {
 import { useDialogContext } from "../../../contexts/DialogContext";
 
 import { useMenuContext } from "../../../contexts/MenuContext";
-import { Navbar } from "../../design/Navbar/Navbar.tailwind";
+import { Navbar } from "../../design/Navbar/Navbar";
 import { API_URL } from "../../../repository/constants";
 
 

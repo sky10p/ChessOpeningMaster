@@ -11,6 +11,9 @@ export const theme = {
       textLight: "#e2e8f0", /* Texto claro */
       textDark: "#94a3b8", /* Texto gris oscuro */
       danger: "#f87171", /* Rojo para eliminar repertorios */
+      scrollbarThumb: "#475569", /* Color del pulgar de la barra de desplazamiento */
+      scrollbarTrack: "#1e293b", /* Color de la pista de la barra de desplazamiento */
+      scrollbarThumbHover: "#64748b", /* Color del pulgar de la barra de desplazamiento al pasar el ratón */
     },
   },
 };

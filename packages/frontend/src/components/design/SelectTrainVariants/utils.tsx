@@ -14,7 +14,7 @@ export const VARIANT_TEXT_COLORS = {
   oneError: "#000000",
   twoErrors: "#000000",
   moreThanTwoErrors: "#FFFFFF", // Blanco
-  unresolved: "#000000",
+  unresolved: "#FFF",
 };
 
 export const getColor = (

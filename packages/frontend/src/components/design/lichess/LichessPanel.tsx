@@ -4,22 +4,7 @@ import {
   LichessMovesTypes,
   MoveLichess,
 } from "../../../repository/lichess/lichessRepository";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Box,
-  Checkbox,
-  Button,
-  FormGroup,
-  FormControlLabel,
-} from "@mui/material";
 import ResultBar from "./ResultBar";
-import "./ResultBar.css";
 
 interface LichessPanelProps {
   fen: string;
@@ -90,96 +75,84 @@ const LichessPanel: React.FC<LichessPanelProps> = ({ fen }) => {
   );
 
   return (
-    <div>
-      <Box display="flex" justifyContent="center" mb={2}>
-        <Button
-          variant={source === LichessMovesTypes.MASTERS ? "contained" : "outlined"}
+    <div className="p-4 rounded shadow-md w-full h-full">
+      <div className="flex justify-center mb-2">
+        <button
+          className={`px-4 py-2 mr-2 text-sm font-medium rounded ${source === LichessMovesTypes.MASTERS ? "bg-accent text-black" : "bg-gray-700 text-white"}`}
           onClick={() => handleSourceChange(LichessMovesTypes.MASTERS)}
-          size="small"
-          style={{ marginRight: "8px", fontSize: "0.8rem" }}
         >
           Masters
-        </Button>
-        <Button
-          variant={source === LichessMovesTypes.LICHESS ? "contained" : "outlined"}
+        </button>
+        <button
+          className={`px-4 py-2 text-sm font-medium rounded ${source === LichessMovesTypes.LICHESS ? "bg-accent text-black" : "bg-gray-700 text-white"}`}
           onClick={() => handleSourceChange(LichessMovesTypes.LICHESS)}
-          size="small"
-          style={{ fontSize: "0.8rem" }}
         >
           Lichess
-        </Button>
-      </Box>
+        </button>
+      </div>
       {source === LichessMovesTypes.LICHESS && (
-        <FormGroup row style={{ justifyContent: "center" }}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={ratings.length === ratingOptions.length}
-                indeterminate={ratings.length > 0 && ratings.length < ratingOptions.length}
-                onChange={handleToggleAll}
-                size="small"
-              />
-            }
-            label="Select All"
-            style={{ marginRight: "8px", fontSize: "0.8rem" }}
-          />
-          {ratingOptions.map((rating) => (
-            <FormControlLabel
-              key={rating}
-              control={
-                <Checkbox
-                  checked={ratings.includes(rating)}
-                  onChange={() => handleRatingsChange(rating)}
-                  size="small"
-                />
-              }
-              label={rating.toString()}
-              style={{ marginRight: "8px", fontSize: "0.8rem" }}
+        <div className="flex justify-center mb-2">
+          <label className="flex items-center mr-2 text-sm">
+            <input
+              type="checkbox"
+              checked={ratings.length === ratingOptions.length}
+              onChange={handleToggleAll}
+              className="mr-1"
             />
+            Select All
+          </label>
+          {ratingOptions.map((rating) => (
+            <label key={rating} className="flex items-center mr-2 text-sm">
+              <input
+                type="checkbox"
+                checked={ratings.includes(rating)}
+                onChange={() => handleRatingsChange(rating)}
+                className="mr-1"
+              />
+              {rating}
+            </label>
           ))}
-        </FormGroup>
+        </div>
       )}
-      {loading && <p>Loading...</p>}
-      {error && <p>{error}</p>}
+      {loading && <p className="text-sm text-gray-400">Loading...</p>}
+      {error && <p className="text-sm text-red-500">{error}</p>}
       {!loading && !error && (
-        <TableContainer component={Paper} style={{ width: "100%", maxHeight: "300px", overflowY: "auto" }}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Move</TableCell>
-                <TableCell>Games</TableCell>
-                <TableCell>Number games</TableCell>
-                <TableCell>Results</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
+        <div className="overflow-y-auto h-full">
+          <table className="w-full text-left text-sm text-gray-400">
+            <thead className="bg-gray-700 text-gray-300">
+              <tr>
+                <th className="py-2 px-4">Move</th>
+                <th className="py-2 px-4">Games</th>
+                <th className="py-2 px-4">Number games</th>
+                <th className="py-2 px-4 w-full">Results</th>
+              </tr>
+            </thead>
+            <tbody>
               {moves.map((move, index) => {
                 const moveTotal = move.white + move.draws + move.black;
                 const winPercentage = (move.white / moveTotal) * 100;
                 const drawPercentage = (move.draws / moveTotal) * 100;
                 const lossPercentage = (move.black / moveTotal) * 100;
                 return (
-                  <TableRow key={index}>
-                    <TableCell>{move.san}</TableCell>
-                    <TableCell>
-                      {((moveTotal / totalGames) * 100).toFixed(1)}%
-                    </TableCell>
-                    <TableCell>{moveTotal}</TableCell>
-                    <TableCell width={600}>
-                      <Box style={{ width: "100%" }}>
+                  <tr key={index} className="border-b border-gray-700">
+                    <td className="py-2 px-4">{move.san}</td>
+                    <td className="py-2 px-4">{((moveTotal / totalGames) * 100).toFixed(1)}%</td>
+                    <td className="py-2 px-4">{moveTotal}</td>
+                    <td className="py-2 px-4 w-full">
+                      <div className="w-full">
                         <ResultBar
                           winPercentage={winPercentage}
                           drawPercentage={drawPercentage}
                           lossPercentage={lossPercentage}
                         />
-                      </Box>
-                    </TableCell>
-                  </TableRow>
+                      </div>
+                    </td>
+                  </tr>
                 );
               })}
-            </TableBody>
-          </Table>
-        </TableContainer>
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

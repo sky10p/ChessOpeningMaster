@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { ThemeProvider } from "@emotion/react";
 import { CssBaseline } from "@mui/material";
 import {Navbar} from "./Navbar";
-import { Navbar as NavbarTailwind } from "./Navbar.tailwind";
+import { Navbar as NavbarTailwind } from "./Navbar";
 import theme from "../../../design/theme";
 import { BrowserRouter as Router } from "react-router-dom";
 import '../../../index.css';

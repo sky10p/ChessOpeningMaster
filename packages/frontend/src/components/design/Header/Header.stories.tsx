@@ -1,6 +1,6 @@
 import { Story } from "@ladle/react";
 import Header from "./Header";
-import HeaderTailwind from "./Header.tailwind";
+import HeaderTailwind from "./Header";
 import React from "react";
 import { ThemeProvider } from "@emotion/react";
 import { CssBaseline } from "@mui/material";

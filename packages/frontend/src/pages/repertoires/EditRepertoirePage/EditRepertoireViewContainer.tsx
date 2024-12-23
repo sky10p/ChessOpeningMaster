@@ -1,69 +1,33 @@
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Grid,
-  Theme,
-  Typography,
-  useMediaQuery,
-  Collapse,
-  IconButton,
-  Paper,
-} from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { useRepertoireContext } from "../../../contexts/RepertoireContext";
+import { useFooterContext } from "../../../contexts/FooterContext";
+import { useHeaderContext } from "../../../contexts/HeaderContext";
+import { useMenuContext } from "../../../contexts/MenuContext";
+import { API_URL } from "../../../repository/constants";
 import BoardContainer from "../../../components/application/chess/board/BoardContainer";
 import BoardActionsContainer from "../../../components/application/chess/board/BoardActionsContainer";
 import VariantsInfo from "../../../components/application/chess/board/VariantsInfo";
-import { useRepertoireContext } from "../../../contexts/RepertoireContext";
 import { BoardCommentContainer } from "../../../components/application/chess/board/BoardCommentContainer";
-import { useFooterContext } from "../../../contexts/FooterContext";
-
-import ChatIcon from "@mui/icons-material/Chat";
-import AccountTreeIcon from "@mui/icons-material/AccountTree";
-import SaveIcon from "@mui/icons-material/Save";
-import PlayLessonIcon from "@mui/icons-material/PlayLesson";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
-import ComputerIcon from "@mui/icons-material/Computer";
-
-import { useHeaderContext } from "../../../contexts/HeaderContext";
-import { useNavigate } from "react-router-dom";
-import { useMenuContext } from "../../../contexts/MenuContext";
-import { API_URL } from "../../../repository/constants";
 import LichessPanel from "../../../components/design/lichess/LichessPanel";
 import { StockfishPanel } from "../../../components/design/stockfish/StockfishPanel";
+import { ComputerDesktopIcon, EllipsisVerticalIcon, ChatBubbleBottomCenterTextIcon, PresentationChartLineIcon, BookOpenIcon } from "@heroicons/react/24/outline";
+import SaveIcon from "../../../components/icons/SaveIcon";
+import VariantsIcon from "../../../components/icons/VariantsIcon";
 
 type FooterSection = "variants" | "comments" | "lichess" | "stockfish";
 
-
 const EditRepertoireViewContainer: React.FC = () => {
   const navigate = useNavigate();
-
-  const [panelSelected, setPanelSelected] = React.useState<FooterSection>("variants");
-
-  const { repertoireId, repertoireName, saveRepertory, getPgn, chess } =
-    useRepertoireContext();
-
+  const [panelSelected, setPanelSelected] = useState<FooterSection>("variants");
+  const { repertoireId, repertoireName, saveRepertory, getPgn, chess } = useRepertoireContext();
   const { showMenu } = useMenuContext();
-
-  const {
-    addIcon: addIconHeader,
-    removeIcon: removeIconHeader,
-    changeIconCallback,
-  } = useHeaderContext();
-  const {
-    addIcon: addIconFooter,
-    removeIcon: removeIconFooter,
-    setIsVisible,
-  } = useFooterContext();
-
-  const isMobile = useMediaQuery((theme: Theme) =>
-    theme.breakpoints.down("sm")
-  );
-
+  const { addIcon: addIconHeader, removeIcon: removeIconHeader, changeIconCallback } = useHeaderContext();
+  const { addIcon: addIconFooter, removeIcon: removeIconFooter, setIsVisible } = useFooterContext();
   const [openPanel, setOpenPanel] = useState<FooterSection | null>("variants");
 
   const showMenuHeader = (event: React.MouseEvent<HTMLElement>) => {
-    showMenu((event.currentTarget) || null, [
+    showMenu(event.currentTarget || null, [
       {
         name: "Download PGN",
         action: () => {
@@ -82,30 +46,29 @@ const EditRepertoireViewContainer: React.FC = () => {
           window.open(`${API_URL}/repertoires/${repertoireId}/download`);
         },
       },
-    ])
-  }
+    ]);
+  };
 
   const handlePanelClick = (panel: FooterSection) => {
     setOpenPanel((prevPanel) => (prevPanel === panel ? null : panel));
   };
 
   useEffect(() => {
-    
     addIconHeader({
       key: "trainRepertoire",
-      icon: <PlayLessonIcon />,
+      icon: <BookOpenIcon />,
       onClick: () => {
-           navigate(`/repertoire/train/${repertoireId}`);
+        navigate(`/repertoire/train/${repertoireId}`);
       },
-    }),
-      addIconHeader({
-        key: "saveRepertoire",
-        icon: <SaveIcon />,
-        onClick: saveRepertory,
-      });
+    });
+    addIconHeader({
+      key: "saveRepertoire",
+      icon: <SaveIcon />,
+      onClick: saveRepertory,
+    });
     addIconHeader({
       key: "moreOptions",
-      icon: <MoreVertIcon />,
+      icon: <EllipsisVerticalIcon />,
       onClick: showMenuHeader,
     });
 
@@ -127,33 +90,31 @@ const EditRepertoireViewContainer: React.FC = () => {
   }, [getPgn]);
 
   useEffect(() => {
-    if (isMobile) {
-      setIsVisible(true);
-      addIconFooter({
-        key: "variants",
-        label: "Variants",
-        icon: <AccountTreeIcon />,
-        onClick: () => setPanelSelected("variants"),
-      });
-      addIconFooter({
-        key: "comments",
-        label: "Comments",
-        icon: <ChatIcon />,
-        onClick: () => setPanelSelected("comments"),
-      });
-      addIconFooter({
-        key: "lichess",
-        label: "Lichess",
-        icon: <SportsEsportsIcon />,
-        onClick: () => setPanelSelected("lichess"),
-      });
-      addIconFooter({
-        key: "stockfish",
-        label: "Stockfish",
-        icon: <ComputerIcon />,
-        onClick: () => setPanelSelected("stockfish"),
-      });
-    }
+    setIsVisible(true);
+    addIconFooter({
+      key: "variants",
+      label: "Variants",
+      icon: <VariantsIcon className="h-6 w-6" />,
+      onClick: () => setPanelSelected("variants"),
+    });
+    addIconFooter({
+      key: "comments",
+      label: "Comments",
+      icon: <ChatBubbleBottomCenterTextIcon className="h-6 w-6" />,
+      onClick: () => setPanelSelected("comments"),
+    });
+    addIconFooter({
+      key: "lichess",
+      label: "Lichess",
+      icon: <PresentationChartLineIcon className="h-6 w-6" />,
+      onClick: () => setPanelSelected("lichess"),
+    });
+    addIconFooter({
+      key: "stockfish",
+      label: "Stockfish",
+      icon: <ComputerDesktopIcon className="h-6 w-6" />,
+      onClick: () => setPanelSelected("stockfish"),
+    });
 
     return () => {
       setIsVisible(false);
@@ -162,68 +123,59 @@ const EditRepertoireViewContainer: React.FC = () => {
       removeIconFooter("lichess");
       removeIconFooter("stockfish");
     };
-  }, [isMobile]);
-  
+  }, []);
 
   return (
-    <Grid container spacing={2} >
-      <Grid item container direction="column" alignItems="left" xs={12} sm={4} >
-        <Grid item container justifyContent={"center"} spacing={2} sx={{ marginBottom: '1rem', marginTop: '1rem' }}>
-          <Typography
-            variant="h5"
-            gutterBottom
-            sx={{ marginBottom: '1rem', color: 'primary.main' }}
-          >
-            {repertoireName}
-          </Typography>
-        </Grid>
-        <Grid item container justifyContent={"center"}>
+    <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 p-4 bg-background text-textLight h-full">
+      <div className="col-span-12 sm:col-span-4 flex flex-col items-start">
+        <div className="flex justify-center w-full mb-4 mt-4">
+          <h1 className="text-2xl font-bold">{repertoireName}</h1>
+        </div>
+        <div className="flex justify-center w-full">
           <BoardContainer />
-        </Grid>
-        <Grid item container justifyContent="center">
+        </div>
+        <div className="flex justify-center w-full">
           <BoardActionsContainer />
-        </Grid>
-      </Grid>
-      <Grid item xs={false} sm={1} />
-      <Grid item xs={12} sm={7} container direction="column" alignItems="left" display={"flex"} overflow={"auto"}>
-        {isMobile && panelSelected === "variants" && (
-          <VariantsInfo />
-        )}
-        {isMobile && panelSelected === "comments" && (
-          <BoardCommentContainer />
-        )}
-        {isMobile && panelSelected === "lichess" && (
-          <LichessPanel fen={chess.fen()} />
-        )}
-        {isMobile && panelSelected === "stockfish" && (
-          <StockfishPanel fen={chess.fen()} numLines={3} />
-        )}
-        {!isMobile && (
-          <>
-            {(["variants", "comments", "lichess", "stockfish"] as Array<FooterSection>).map((panel) => (
-              <Box key={panel} style={{ marginTop: "1.5rem", overflowY: "auto", padding: "1rem" }}>
-                <Paper style={{ backgroundColor: openPanel === panel ? "#333" : "#f5f5f5", padding: "0.5rem", marginBottom: "0.5rem", borderRadius: openPanel === panel ? "0.5rem 0.5rem 0 0" : "0.5rem" }}>
-                  <Typography variant="h6" onClick={() => handlePanelClick(panel)} sx={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: openPanel === panel ? "#fff" : "#000" }}>
-                    {panel.charAt(0).toUpperCase() + panel.slice(1)}
-                    <IconButton>
-                      <ExpandMoreIcon sx={{ transform: openPanel === panel ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s", color: openPanel === panel ? "#fff" : "#000" }} />
-                    </IconButton>
-                  </Typography>
-                </Paper>
-                <Collapse in={openPanel === panel} timeout="auto" unmountOnExit>
-                  <Box style={{ padding: "1rem", backgroundColor: "#fff", border: "1px solid #ccc", borderRadius: "0 0 0.5rem 0.5rem" }}>
-                    {panel === "variants" && <VariantsInfo />}
-                    {panel === "comments" && <BoardCommentContainer />}
-                    {panel === "lichess" && <LichessPanel fen={chess.fen()} />}
-                    {panel === "stockfish" && <StockfishPanel fen={chess.fen()} numLines={3}/>}
-                  </Box>
-                </Collapse>
-              </Box>
-            ))}
-          </>
-        )}
-      </Grid>
-    </Grid>
+        </div>
+      </div>
+      <div className="hidden sm:block sm:col-span-1"></div>
+      <div className="col-span-12 sm:col-span-7 flex flex-col items-start overflow-auto scrollbar-custom border border-secondary rounded bg-gray-800">
+        {panelSelected === "variants" && <VariantsInfo />}
+        {panelSelected === "comments" && <BoardCommentContainer />}
+        {panelSelected === "lichess" && <LichessPanel fen={chess.fen()} />}
+        {panelSelected === "stockfish" && <StockfishPanel fen={chess.fen()} numLines={3} />}
+        {/* <div className="space-y-4 w-full">
+          {(["variants", "comments", "lichess", "stockfish"] as Array<FooterSection>).map((panel) => (
+        <div key={panel} className="mt-6 overflow-y-auto p-4">
+          <div className={`p-2 mb-2 rounded-t ${openPanel === panel ? "bg-secondary" : "bg-background"}`}>
+            <h6 className={`flex items-center justify-between cursor-pointer ${openPanel === panel ? "text-textLight" : "text-textDark"}`} onClick={() => handlePanelClick(panel)}>
+          {panel.charAt(0).toUpperCase() + panel.slice(1)}
+          <span className={`transform transition-transform ${openPanel === panel ? "rotate-180" : "rotate-0"}`}>
+            <EllipsisVerticalIcon className={`h-6 w-6 ${openPanel === panel ? "text-textLight" : "text-textDark"}`} />
+          </span>
+            </h6>
+          </div>
+          <Transition
+            show={openPanel === panel}
+            enter="transition-opacity duration-200"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="transition-opacity duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="p-4 bg-background border border-secondary rounded-b">
+          {panel === "variants" && <VariantsInfo />}
+          {panel === "comments" && <BoardCommentContainer />}
+          {panel === "lichess" && <LichessPanel fen={chess.fen()} />}
+          {panel === "stockfish" && <StockfishPanel fen={chess.fen()} numLines={3} />}
+            </div>
+          </Transition>
+        </div>
+          ))}
+        </div> */}
+      </div>
+    </div>
   );
 };
 
