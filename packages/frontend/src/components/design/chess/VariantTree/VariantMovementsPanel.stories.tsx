@@ -1,11 +1,11 @@
 import { Story } from "@ladle/react";
-import { VariantMovementsPanel } from "./VariantMovementsPanel";
 import React, { useMemo, useState } from "react";
 import { MoveVariantNode } from "../../../../models/VariantNode";
 import { testRepertoireMock } from "../../../../utils/chess/pgn/tests/mocks/repertoire-with-variants.mock";
 import { testRepertoireWithSubvariantsMock } from "../../../../utils/chess/pgn/tests/mocks/repertoire-with-subvariants.mock";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import theme from "../../../../design/theme";
+import { VariantMovementsPanel } from "./VariantMovementsPanel";
 
 export const VariantMovementsPanelWithVariantsStory: Story = () => {
 

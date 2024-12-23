@@ -1,10 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Variant } from "../../../models/chess.models";
-import {
-  FormControlLabel,
-  Button,
-  Box,
-} from "@mui/material";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle, Description } from '@headlessui/react';
 
 interface SelectVariantsDialogProps {

@@ -1,11 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { TrainVariant, TrainVariantInfo } from "../../../models/chess.models";
-import {
-  Checkbox,
-  FormControlLabel,
-  Button,
-  TextField,
-} from "@mui/material";
 import { SelectTrainVariants } from "../SelectTrainVariants/SelectTrainVariants";
 import { getTrainVariantInfo } from "../../../repository/repertoires/trainVariants";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle, Description } from '@headlessui/react';

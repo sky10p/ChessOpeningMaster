@@ -1,4 +1,4 @@
-import { Menu, MenuItem } from "@mui/material";
+import { Menu, MenuItem, MenuItems } from "@headlessui/react";
 import React, { useState } from "react";
 import { useRepertoireContext } from "../../../../contexts/RepertoireContext";
 import { MoveVariantNode } from "../../../../models/VariantNode";
@@ -9,8 +9,6 @@ interface MoveNodeButtonProps {
   move: MoveVariantNode;
   hasMenu?: boolean;
 }
-
-
 
 export const MoveNodeButtonWithActions: React.FC<MoveNodeButtonProps> = ({
   move,
@@ -64,7 +62,6 @@ export const MoveNodeButtonWithActions: React.FC<MoveNodeButtonProps> = ({
     handleCloseRenameDialog();
   };
 
-
   return (
     <>
       <MoveButton
@@ -75,28 +72,48 @@ export const MoveNodeButtonWithActions: React.FC<MoveNodeButtonProps> = ({
         isSelectedMove={false}
         isWhiteMove={move.getMove().color === "w"}
       />
-      <Menu
-        open={contextMenu.node !== null}
-        onClose={handleCloseContextMenu}
-        anchorReference="anchorPosition"
-        anchorPosition={
-          contextMenu.node !== null
-            ? { top: contextMenu.y, left: contextMenu.x }
-            : undefined
-        }
-      >
-        <MenuItem
-          onClick={() => {
-            if (contextMenu.node !== null) {
-              deleteMove(contextMenu.node);
-            }
-            handleCloseContextMenu();
-          }}
-        >
-          Delete
-        </MenuItem>
-        <MenuItem onClick={handleRenameDialog}>Rename</MenuItem>
-      </Menu>
+      {contextMenu.node && (
+        <Menu as="div" className="relative inline-block text-left">
+          <div>
+            <MenuItems
+              className="absolute z-10 mt-2 w-56 origin-top-right bg-white border border-gray-200 divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+              style={{ top: contextMenu.y, left: contextMenu.x }}
+            >
+              <div className="py-1">
+                <MenuItem>
+                  {({ active }) => (
+                    <button
+                      onClick={() => {
+                        if (contextMenu.node !== null) {
+                          deleteMove(contextMenu.node);
+                        }
+                        handleCloseContextMenu();
+                      }}
+                      className={`${
+                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
+                      } group flex items-center px-4 py-2 text-sm`}
+                    >
+                      Delete
+                    </button>
+                  )}
+                </MenuItem>
+                <MenuItem>
+                  {({ active }) => (
+                    <button
+                      onClick={handleRenameDialog}
+                      className={`${
+                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
+                      } group flex items-center px-4 py-2 text-sm`}
+                    >
+                      Rename
+                    </button>
+                  )}
+                </MenuItem>
+              </div>
+            </MenuItems>
+          </div>
+        </Menu>
+      )}
       <TextDialog
         open={contextRenameDialog.open}
         initialValue={contextRenameDialog.node?.variantName || ""}

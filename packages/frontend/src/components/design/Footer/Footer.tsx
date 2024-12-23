@@ -1,41 +1,41 @@
 import React, { useState } from 'react';
-import { BottomNavigation, BottomNavigationAction, useTheme } from '@mui/material';
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 import { FooterIcon } from './models';
 
 interface FooterProps {
-    isVisible: boolean;
-    icons: FooterIcon[];
+  isVisible: boolean;
+  icons: FooterIcon[];
 }
 
 const Footer: React.FC<FooterProps> = ({
-    isVisible,
-    icons,
+  isVisible,
+  icons,
 }) => {
-  const theme = useTheme();
-  const [value, setValue] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    icons[newValue].onClick();
-    setValue(newValue);
+  const handleChange = (index: number) => {
+    icons[index].onClick();
+    setSelectedIndex(index);
   };
 
   return (
     <footer>
-      {isVisible && icons.length > 0 && <BottomNavigation
-      value={value}
-      onChange={handleChange}
-      showLabels
-      sx={{backgroundColor: 'background.default' }}
-    >
-      {icons.map((icon) => (
-      <BottomNavigationAction key={icon.key} label={icon.label} icon={icon.icon} sx={{
-          '&.Mui-selected': {
-            color: theme.palette.secondary.main,
-          },
-        }}  />
-      ))}
-    </BottomNavigation> }
-     
+      {isVisible && icons.length > 0 && (
+        <TabGroup selectedIndex={selectedIndex} onChange={handleChange}>
+          <TabList className="flex justify-around bg-gray-800 p-2">
+            {icons.map((icon) => (
+              <Tab key={icon.key} className={({ selected }) =>
+                selected ? 'text-accent' : 'text-white'
+              }>
+                <div className="flex flex-col items-center">
+                  {icon.icon}
+                  <span>{icon.label}</span>
+                </div>
+              </Tab>
+            ))}
+          </TabList>
+        </TabGroup>
+      )}
     </footer>
   );
 };

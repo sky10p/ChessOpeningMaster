@@ -1,9 +1,4 @@
-import { Dialog, DialogBackdrop, DialogPanel, DialogTitle, Description } from '@headlessui/react';
-import {
-  FormControlLabel,
-  Radio,
-  RadioGroup,
-} from "@mui/material";
+import { Dialog, DialogPanel, DialogTitle, RadioGroup, Radio, Field, Label, Description } from '@headlessui/react';
 import React from "react";
 import { useState } from "react";
 
@@ -24,7 +19,7 @@ const SelectNextMoveDialog: React.FC<SelectNextMoveDialogProps> = ({
   onConfirm,
   onClose,
 }) => {
-  const [selectedNextMove, setSelectedNextMove] = useState<string >(nextMovements[0]);
+  const [selectedNextMove, setSelectedNextMove] = useState<string>(nextMovements[0]);
 
   const handleNextMoveConfirm = () => {
     onConfirm(selectedNextMove);
@@ -33,26 +28,26 @@ const SelectNextMoveDialog: React.FC<SelectNextMoveDialogProps> = ({
 
   return (
     <Dialog open={open} onClose={onClose} className="fixed z-10 inset-0 overflow-y-auto">
-      <DialogBackdrop className="fixed inset-0 bg-black opacity-30" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel className="bg-background rounded max-w-md mx-auto p-6 z-20 max-h-screen overflow-auto">
           <DialogTitle className="text-lg font-bold text-textLight">{title}</DialogTitle>
-          <Description className="mt-2 text-textLight mb-4">
+          <div className="mt-2 text-textLight mb-4">
             {contentText}
-          </Description>
+          </div>
           <div className="space-y-2">
-            <RadioGroup value={selectedNextMove} onChange={(event) => setSelectedNextMove(event.target.value)}>
+            <RadioGroup value={selectedNextMove} onChange={setSelectedNextMove} aria-label="Next Move">
               {nextMovements.map((nextMove) => (
-                <label key={nextMove} className="flex items-center">
-                  <input
-                    type="radio"
+                <Field key={nextMove} className="flex items-baseline gap-2">
+                  <Radio
                     value={nextMove}
-                    checked={selectedNextMove === nextMove}
-                    onChange={(e) => setSelectedNextMove(e.target.value)}
-                    className="form-radio h-4 w-4 text-accent"
-                  />
-                  <span className="ml-2 text-textLight">{nextMove}</span>
-                </label>
+                    className="group flex size-5 items-center justify-center rounded-full border bg-white data-[checked]:bg-blue-400"
+                  >
+                    <span className="invisible size-2 rounded-full bg-white group-data-[checked]:visible" />
+                  </Radio>
+                  <div>
+                    <Label className="text-white">{nextMove}</Label>
+                  </div>
+                </Field>
               ))}
             </RadioGroup>
           </div>
