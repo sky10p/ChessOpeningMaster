@@ -1,16 +1,9 @@
 import React from "react";
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  IconButton,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import CloudDoneIcon from "@mui/icons-material/CloudDone";
-import CloudOffIcon from "@mui/icons-material/CloudOff";
+import { Bars3Icon, CloudArrowUpIcon } from "@heroicons/react/24/outline";
 import { HeaderIcon } from "./models";
+
+import "../../../index.css";
+import { CloudDoneIcon } from "../../icons/CloudDoneIcon";
 
 interface HeaderProps {
   setOpenNavbar: (open: boolean) => void;
@@ -19,61 +12,40 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ setOpenNavbar, isSaving, icons }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   return (
-    <AppBar position="relative">
-      <Toolbar>
-        <IconButton
-          edge="start"
-          color="inherit"
+    <header className="relative bg-gray-800 shadow">
+      <div className="flex items-center justify-between p-4">
+        <button
           aria-label="menu"
+          className="p-2 text-gray-300 hover:text-white"
           onClick={() => setOpenNavbar(true)}
         >
-          <MenuIcon></MenuIcon>
-        </IconButton>
-        <div style={{ display: "flex", alignItems: "center", flexGrow: 1 }}>
-          <Typography variant="h6" noWrap>
-            ChessKeep
-          </Typography>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              marginLeft: isMobile ? 0 : "12px",
-            }}
-          >
-            {!isMobile ? (
-              <div
-                style={{ display: "flex", alignItems: "center", marginLeft: 2 }}
-              >
-                <Typography
-                  variant="body2"
-                  noWrap
-                  sx={{ lineHeight: "normal" }}
-                >
-                  {isSaving ? "Saving repertoire..." : "Last repertoire saved"}
-                </Typography>
-                <IconButton color="inherit" sx={{ marginLeft: 1 }}>
-                  {isSaving ? <CloudOffIcon /> : <CloudDoneIcon />}
-                </IconButton>
-              </div>
-            ) : (
-              <IconButton color="inherit" sx={{ marginLeft: 2 }}>
-                {isSaving ? <CloudOffIcon /> : <CloudDoneIcon />}
-              </IconButton>
-            )}
+          <Bars3Icon className="h-6 w-6" />
+        </button>
+        <div className="flex items-center flex-grow">
+          <h1 className="text-xl font-semibold text-accent">ChessKeep</h1>
+          <div className="flex items-center ml-4">
+            <p className="text-sm text-gray-300 hidden md:block mt-1">
+              {isSaving ? "Saving repertoire..." : "Last repertoire saved"}
+            </p>
+            <div className="ml-2 text-gray-300">
+              {isSaving ? <CloudArrowUpIcon className="h-6 w-6" /> : <CloudDoneIcon className="h-6 w-6" />}
+            </div>
           </div>
         </div>
-        {icons.map((icon) => {
-          return (
-            <IconButton key={icon.key} color="inherit" onClick={icon.onClick}>
+        <div className="flex items-center space-x-4">
+          {icons.map((icon, i) => (
+            <button
+              key={i}
+              onClick={icon.onClick}
+              className="text-gray-300 hover:text-accent h-6 w-6"
+            >
               {icon.icon}
-            </IconButton>
-          );
-        })}
-      </Toolbar>
-    </AppBar>
+            </button>
+          ))}
+        </div>
+      </div>
+    </header>
   );
 };
 

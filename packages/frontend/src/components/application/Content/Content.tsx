@@ -1,10 +1,10 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Home from "../../../pages/Home";
-import CreateRepertoire from "../../../pages/repertoires/CreateRepertoire.tailwind";
+import CreateRepertoire from "../../../pages/repertoires/CreateRepertoire";
 import EditRepertoirePage from "../../../pages/repertoires/EditRepertoirePage/EditRepertoirePage";
 import TrainRepertoirePage from "../../../pages/repertoires/TrainRepertoirePage/TrainRepertoirePage";
-import { MainContainer } from "../../design/layouts/MainContainer.tailwind";
+import { MainContainer } from "../../design/layouts/MainContainer";
 
 
 

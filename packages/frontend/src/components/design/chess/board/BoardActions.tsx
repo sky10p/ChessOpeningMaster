@@ -1,38 +1,41 @@
 import React from "react";
-import { Box, IconButton } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import RotateLeftIcon from "@mui/icons-material/RotateLeft";
-
+import { ArrowPathIcon, ArrowRightIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 
 interface BoardActionsProps {
-    next: () => void;
-    prev: () => void;
-    hasNext: () => boolean;
-    hasPrev: () => boolean;
-    rotateBoard: () => void;
+  next: () => void;
+  prev: () => void;
+  hasNext: () => boolean;
+  hasPrev: () => boolean;
+  rotateBoard: () => void;
 }
 
 const BoardActions: React.FC<BoardActionsProps> = ({
-    next,
-    prev,
-    hasNext,
-    hasPrev,
-    rotateBoard,
+  next,
+  prev,
+  hasNext,
+  hasPrev,
+  rotateBoard,
 }) => {
-
   return (
-    <Box display="flex" justifyContent="center" alignItems="center" marginTop={1}>
-      <IconButton color="primary" onClick={prev} disabled={!hasPrev()}>
-        <ArrowBackIcon />
-      </IconButton>
-      <IconButton color="primary" onClick={next} disabled={!hasNext()}>
-        <ArrowForwardIcon />
-      </IconButton>
-      <IconButton color="primary" onClick={rotateBoard}>
-        <RotateLeftIcon />
-      </IconButton>
-    </Box>
+    <div className="flex justify-center items-center mt-1">
+      <button
+        className="text-textLight disabled:opacity-50"
+        onClick={prev}
+        disabled={!hasPrev()}
+      >
+        <ArrowLeftIcon className="h-6 w-6" />
+      </button>
+      <button
+        className="text-textLight disabled:opacity-50 mx-2"
+        onClick={next}
+        disabled={!hasNext()}
+      >
+        <ArrowRightIcon className="h-6 w-6" />
+      </button>
+      <button className="text-textLight" onClick={rotateBoard}>
+        <ArrowPathIcon className="h-6 w-6" />
+      </button>
+    </div>
   );
 };
 

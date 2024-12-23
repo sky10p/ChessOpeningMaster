@@ -1,15 +1,5 @@
 import React from "react";
 import { Variant } from "../../models/chess.models";
-import {
-  FormControl,
-  InputLabel,
-  Select,
-  SelectChangeEvent,
-  MenuItem,
-  ListSubheader,
-  useTheme,
-  useMediaQuery,
-} from "@mui/material";
 
 interface SelectVariantProps {
   variants: Variant[];
@@ -22,9 +12,6 @@ export const SelectVariant: React.FC<SelectVariantProps> = ({
   selectedVariant,
   onSelectVariant,
 }) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
   const groupedVariants = variants.reduce((acc, variant) => {
     if (!acc[variant.name]) {
       acc[variant.name] = [];
@@ -33,7 +20,7 @@ export const SelectVariant: React.FC<SelectVariantProps> = ({
     return acc;
   }, {} as Record<string, Variant[]>);
 
-  const handleChange = (event: SelectChangeEvent<string>) => {
+  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const variant = variants.find(
       (variant) => variant.fullName === event.target.value
     );
@@ -42,43 +29,34 @@ export const SelectVariant: React.FC<SelectVariantProps> = ({
     }
   };
 
-  const MenuProps = {
-    PaperProps: {
-      style: {
-        maxHeight: isMobile ? 400 : 500, // Adjust the height as needed
-      },
-    },
-  };
-
   const validVariant = variants.find(
     (variant) => variant.fullName === selectedVariant.fullName
   );
   const selectedValue = validVariant ? selectedVariant.fullName : "";
 
   return (
-    <FormControl variant="outlined" sx={{ width: "100%" }}>
-      <InputLabel id="select-variant-label">Variant</InputLabel>
-      <Select
-        labelId="select-variant-label"
+    <div className="w-full">
+      <label htmlFor="select-variant" className="block text-sm font-medium text-textLight">
+        Variant
+      </label>
+      <select
         id="select-variant"
         value={selectedValue}
-        label="Variant"
         onChange={handleChange}
-        MenuProps={MenuProps}
+        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-secondary bg-gray-500 text-textLight focus:outline-none focus:ring-accent focus:border-accent sm:text-sm rounded-md"
       >
         {Object.keys(groupedVariants)
           .sort()
           .flatMap((name) => [
-            <ListSubheader key={`header-${name}`} style={{ backgroundColor: theme.palette.custom.black, color: "white", fontSize: "1.2rem", fontWeight: "bold" }}>
-              {name}
-            </ListSubheader>,
-            ...groupedVariants[name].map((variant) => (
-              <MenuItem key={`item-${variant.fullName}`} value={variant.fullName} style={{ backgroundColor: "white", color: "black", fontSize: "1rem" }}>
-                {variant.fullName}
-              </MenuItem>
-            )),
+            <optgroup key={`header-${name}`} label={name} className="bg-secondary text-textLight font-bold text-lg">
+              {groupedVariants[name].map((variant) => (
+                <option key={`item-${variant.fullName}`} value={variant.fullName} className="bg-gray-900 text-textLight text-base">
+                  {variant.fullName}
+                </option>
+              ))}
+            </optgroup>,
           ])}
-      </Select>
-    </FormControl>
+      </select>
+    </div>
   );
 };

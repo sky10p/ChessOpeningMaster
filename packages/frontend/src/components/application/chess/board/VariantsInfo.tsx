@@ -1,6 +1,6 @@
 import React from "react";
 import { useRepertoireContext } from "../../../../contexts/RepertoireContext";
-import VariantsTree from "../../../design/chess/VariantTree/VariantTree.tailwind";
+import VariantsTree from "../../../design/chess/VariantTree/VariantTree";
 import { Variant } from "../../../../models/chess.models";
 import { variantsToMoves } from "../../../../utils/chess/variants/VariantUtils";
 import {

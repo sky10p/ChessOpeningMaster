@@ -1,7 +1,7 @@
 import React from "react";
 
 import { useRepertoireContext } from "../../../../contexts/RepertoireContext";
-import BoardActions from "../../../design/chess/board/BoardActions.tailwind";
+import BoardActions from "../../../design/chess/board/BoardActions";
 
 const BoardActionsContainer: React.FC = () => {
 

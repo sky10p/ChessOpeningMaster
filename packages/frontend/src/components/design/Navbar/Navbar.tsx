@@ -1,33 +1,10 @@
 import React from "react";
-import {
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
-  ButtonBase,
-  ListItemSecondaryAction,
-  IconButton,
-  ListItemIcon,
-} from "@mui/material";
+import { Dialog, DialogPanel, DialogBackdrop } from "@headlessui/react";
 import { Link } from "react-router-dom";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-
+import { XMarkIcon, EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import chessNavbarBackground from "../../../assets/chess-navbar-background.jpg";
 import { NavbarLink } from "./model";
 
-const drawerWidth = 350;
-
-const drawerStyles = {
-  width: drawerWidth,
-  flexShrink: 0,
-  "& .MuiDrawer-paper": {
-    width: drawerWidth,
-    boxSizing: "border-box",
-    zIndex: 1,
-    top: "64px",
-  },
-};
 
 interface NavbarProps {
   open: boolean;
@@ -38,48 +15,57 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, secondaryActions }) => {
   return (
-    <Drawer sx={drawerStyles} open={open} onClose={() => setOpen(false)}>
-      <img
-        src={chessNavbarBackground}
-        alt="Chess Navbar Background"
-        style={{
-          width: "100%",
-          height: "81px",
-          objectFit: "cover",
-          marginBottom: "16px",
-        }}
-      />
-      <List>
-        {mainActions.map((link) => (
-            <ButtonBase key={link.id} component={Link} to={`${link.url}`} onClick={() => setOpen(false)}>
-                <ListItem>
-                    <ListItemIcon>{link.icon}</ListItemIcon>
-                    <ListItemText primary={link.name} />
-                </ListItem>
-            </ButtonBase>
-        ))}
-        <Divider />
-        {secondaryActions.map((link) => (
-          <ListItem key={link.id}>
-            <ButtonBase
-              component={Link}
-              to={`${link.url}`}
-              onClick={() => setOpen(false)}
-            >
-              <ListItemText primary={link.name} />
-            </ButtonBase>
-            <ListItemSecondaryAction>
-              <IconButton
-                edge="end"
-                aria-label="up-order"
-                onClick={link.onActionClick}
+    <Dialog className="fixed inset-0 z-40 flex" open={open} onClose={() => setOpen(false)}>
+      <DialogBackdrop className="fixed inset-0 bg-black bg-opacity-50" />
+      <DialogPanel className="relative flex-1 flex flex-col max-w-xs w-full bg-gray-800">
+        <div className="absolute top-2 right-2">
+          <button
+            className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+            onClick={() => setOpen(false)}
+          >
+            <span className="sr-only">Close sidebar</span>
+            <XMarkIcon className="h-6 w-6 text-white" aria-hidden="true" />
+          </button>
+        </div>
+        <div className="flex-1 pb-4 overflow-y-auto">
+          <img
+            src={chessNavbarBackground}
+            alt="Chess Navbar Background"
+            className="w-full h-20 object-cover mb-4"
+          />
+          <nav className="mt-5 px-2 space-y-1">
+            {mainActions.map((link) => (
+              <Link
+                key={link.id}
+                to={link.url}
+                className="group flex items-center px-2 py-2 text-base font-medium text-white rounded-md hover:bg-gray-700"
+                onClick={() => setOpen(false)}
               >
-                <MoreVertIcon />
-              </IconButton>
-            </ListItemSecondaryAction>
-          </ListItem>
-        ))}
-      </List>
-    </Drawer>
+                {link.icon}
+                {link.name}
+              </Link>
+            ))}
+            <div className="border-t border-gray-700 mt-5"></div>
+            {secondaryActions.map((link) => (
+              <div key={link.id} className="flex items-center justify-between px-2 py-2 text-base font-medium text-white rounded-md hover:bg-gray-700">
+                <Link
+                  to={link.url}
+                  className="flex items-center"
+                  onClick={() => setOpen(false)}
+                >
+                  {link.name}
+                </Link>
+                <button
+                  className="ml-4 flex-shrink-0 h-6 w-6 text-gray-400 hover:text-gray-300"
+                  onClick={link.onActionClick}
+                >
+                  <EllipsisVerticalIcon className="h-6 w-6" aria-hidden="true" />
+                </button>
+              </div>
+            ))}
+          </nav>
+        </div>
+      </DialogPanel>
+    </Dialog>
   );
 };

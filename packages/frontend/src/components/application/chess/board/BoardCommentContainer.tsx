@@ -1,6 +1,6 @@
 import React from "react"
 import { useRepertoireContext } from "../../../../contexts/RepertoireContext";
-import { BoardComment } from "../../../design/chess/BoardComment.tailwind";
+import { BoardComment } from "../../../design/chess/BoardComment";
 
 interface BoardCommentContainerProps {
   editable?: boolean;

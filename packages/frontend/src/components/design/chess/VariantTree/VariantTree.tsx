@@ -1,18 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Box, Grid } from "@mui/material";
 import { MoveVariantNode } from "../../../../models/VariantNode";
 import { Variant } from "../../../../models/chess.models";
 import { SelectVariant } from "../../SelectVariant";
 import { variantToPgn } from "../../../../utils/chess/pgn/pgn.utils";
-import { BoardOrientation } from "../../../../../../common/src/types/Orientation";
+import { BoardOrientation } from "@chess-opening-master/common/src/types/Orientation";
 import { VariantMovementsPanel } from "./VariantMovementsPanel";
 import VariantActionButtons from "./VariantActionButtons";
 
-import DownloadIcon from "@mui/icons-material/Download";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import DeleteIcon from "@mui/icons-material/Delete";
-import FileCopyIcon from "@mui/icons-material/FileCopy";
-import { DeleteSweep, ContentPaste } from "@mui/icons-material";
+import { TrashIcon, ClipboardIcon, ArrowDownTrayIcon, ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
 
 interface VariantTreeProps {
   variants: Variant[];
@@ -85,75 +80,71 @@ const VariantTree: React.FC<VariantTreeProps> = ({
     }
   };
 
- 
-
   const variantActions = useMemo(() => () => [
     {
       onClick: downloadVariantPGN,
-      icon: <DownloadIcon />,
+      icon: <ArrowDownTrayIcon className="h-5 w-5 text-accent" />,
       label: "Download",
     },
     {
       onClick: copyVariantPGN,
-      icon: <ContentCopyIcon />,
+      icon: <ClipboardIcon className="h-5 w-5 text-accent" />,
       label: "Copy",
     },
     {
       onClick: () => selectedVariant && copyVariantToRepertoire(selectedVariant),
-      icon: <FileCopyIcon />,
+      icon: <ClipboardDocumentListIcon className="h-5 w-5 text-accent" />,
       label: "Copy to Repertoire",
     },
     {
       onClick: copyVariantsToRepertoire,
-      icon: <ContentPaste />,
+      icon: <ClipboardIcon className="h-5 w-5 text-accent" />,
       label: "Paste Variants",
     },
     {
       onClick: () => selectedVariant && deleteVariant(selectedVariant),
-      icon: <DeleteIcon />,
+      icon: <TrashIcon className="h-5 w-5 text-danger" />,
       label: "Delete",
     },
     {
       onClick: deleteVariants,
-      icon: <DeleteSweep />,
+      icon: <TrashIcon className="h-5 w-5 text-danger" />,
       label: "Delete All",
     },
   ], [selectedVariant, copyVariantToRepertoire, copyVariantsToRepertoire, deleteVariant, deleteVariants, downloadVariantPGN]);
 
   return (
-
-      <Box style={{width: "100%"}}>
+    <div className="w-full text-textLight">
+      {selectedVariant && (
+        <div className="flex justify-center">
+          <VariantActionButtons actions={variantActions()} />
+        </div>
+      )}
+      <div>
         {selectedVariant && (
-          <Box display="flex" justifyContent="center">
-            <VariantActionButtons actions={variantActions()} />
-          </Box>
+          <div className="grid grid-cols-1">
+            <SelectVariant
+              variants={variants}
+              selectedVariant={selectedVariant}
+              onSelectVariant={setSelectedVariant}
+            />
+          </div>
         )}
-        <Box>
-          {selectedVariant && (
-            <Grid item xs>
-              <SelectVariant
-                variants={variants}
-                selectedVariant={selectedVariant}
-                onSelectVariant={setSelectedVariant}
-              />
-            </Grid>
+        <div>
+          {/* <Movements moves={selectedVariant?.moves} /> */}
+          {selectedVariant?.moves && (
+            <VariantMovementsPanel
+              moves={selectedVariant?.moves}
+              changeNameMove={changeNameMove}
+              currentMoveNode={currentMoveNode}
+              deleteMove={deleteMove}
+              goToMove={goToMove}
+              maxHeight="300px"
+            />
           )}
-          <Box>
-            {/* <Movements moves={selectedVariant?.moves} /> */}
-            {selectedVariant?.moves && (
-              <VariantMovementsPanel
-                moves={selectedVariant?.moves}
-                changeNameMove={changeNameMove}
-                currentMoveNode={currentMoveNode}
-                deleteMove={deleteMove}
-                goToMove={goToMove}
-                maxHeight="300px"
-              />
-            )}
-          </Box>
-        </Box>
-      </Box>
-
+        </div>
+      </div>
+    </div>
   );
 };
 

@@ -1,59 +1,28 @@
-
 import React, { useEffect, useMemo } from "react";
-import {
-  Grid,
-  Theme,
-  Typography,
-  useMediaQuery,
-} from "@mui/material";
-import BoardContainer from "../../../components/application/chess/board/BoardContainer";
-import InfoIcon from "@mui/icons-material/Info";
-import EditIcon from "@mui/icons-material/Edit";
-import ExamIcon from "@mui/icons-material/AssignmentTurnedIn"; // Import a suitable icon
-
+import { useNavigate } from "react-router-dom";
 import { useRepertoireContext } from "../../../contexts/RepertoireContext";
 import { useFooterContext } from "../../../contexts/FooterContext";
-
-import ChatIcon from "@mui/icons-material/Chat";
-import TrainInfo from "../../../components/design/chess/train/TrainInfo";
-import HelpInfo from "../../../components/design/chess/train/HelpInfo";
-import ChecklistIcon from "@mui/icons-material/Checklist";
 import { useTrainRepertoireContext } from "../../../contexts/TrainRepertoireContext";
 import { useHeaderContext } from "../../../contexts/HeaderContext";
-import { useNavigate } from "react-router-dom";
 import { useDialogContext } from "../../../contexts/DialogContext";
 import { TrainVariant } from "../../../models/chess.models";
-import { HintInfo } from "../../../components/design/chess/train/HintInfo";
 import { getSpacedRepetitionVariants } from "../../../utils/chess/spacedRepetition/spacedRepetition";
+import { HintInfo } from "../../../components/design/chess/train/HintInfo";
+import BoardContainer from "../../../components/application/chess/board/BoardContainer";
+import { InformationCircleIcon, PencilIcon, ChatBubbleLeftIcon, ClipboardDocumentIcon } from "@heroicons/react/24/outline";
+import TrainInfo from "../../../components/design/chess/train/TrainInfo";
+import HelpInfo from "../../../components/design/chess/train/HelpInfo";
+import { CheckListIcon } from "../../../components/icons/CheckListIcon";
+import { ExamIcon } from "../../../components/icons/ExamIcon";
 
 const TrainRepertoireViewContainer: React.FC = () => {
-  const [panelSelected, setPanelSelected] = React.useState<
-    "info" | "help" | "trainComments"
-  >("info");
+  const [panelSelected, setPanelSelected] = React.useState<"info" | "help" | "trainComments">("info");
   const navigate = useNavigate();
-  const { repertoireId, repertoireName, currentMoveNode, variants } =
-    useRepertoireContext();
+  const { repertoireId, repertoireName, currentMoveNode, variants } = useRepertoireContext();
   const { showTrainVariantsDialog, showNumberDialog } = useDialogContext();
-  const { addIcon: addIconHeader, removeIcon: removeIconHeader } =
-    useHeaderContext();
-  const {
-    trainVariants,
-    chooseTrainVariantsToTrain,
-    allowedMoves,
-    isYourTurn,
-    turn,
-    finishedTrain,
-    lastTrainVariant,
-  } = useTrainRepertoireContext();
-  const {
-    addIcon: addIconFooter,
-    removeIcon: removeIconFooter,
-    setIsVisible,
-  } = useFooterContext();
-
-  const isMobile = useMediaQuery((theme: Theme) =>
-    theme.breakpoints.down("sm")
-  );
+  const { addIcon: addIconHeader, removeIcon: removeIconHeader } = useHeaderContext();
+  const { trainVariants, chooseTrainVariantsToTrain, allowedMoves, isYourTurn, turn, finishedTrain, lastTrainVariant } = useTrainRepertoireContext();
+  const { addIcon: addIconFooter, removeIcon: removeIconFooter, setIsVisible } = useFooterContext();
 
   useEffect(() => {
     const headerIcons = [
@@ -76,7 +45,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
       },
       {
         key: "selectTrainVariants",
-        icon: <ChecklistIcon />,
+        icon: <CheckListIcon />,
         onClick: () => {
           showTrainVariantsDialog({
             title: "Select train variants",
@@ -91,12 +60,11 @@ const TrainRepertoireViewContainer: React.FC = () => {
       },
       {
         key: "goToEditRepertoire",
-        icon: <EditIcon />,
+        icon: <PencilIcon />,
         onClick: () => {
           navigate(`/repertoire/${repertoireId}`);
         },
       },
-     
     ];
 
     headerIcons.forEach(({ key, icon, onClick }) => {
@@ -108,135 +76,80 @@ const TrainRepertoireViewContainer: React.FC = () => {
         removeIconHeader(key);
       });
     };
-  }, [
-    addIconHeader,
-    removeIconHeader,
-    showTrainVariantsDialog,
-    showNumberDialog,
-    trainVariants,
-    chooseTrainVariantsToTrain,
-    navigate,
-    repertoireId,
-    variants,
-  ]);
+  }, [addIconHeader, removeIconHeader, showTrainVariantsDialog, showNumberDialog, trainVariants, chooseTrainVariantsToTrain, navigate, repertoireId, variants]);
 
   useEffect(() => {
-    if (isMobile) {
-      setIsVisible(true);
-      const footerIcons = [
-        {
-          key: "info",
-          label: "Train info",
-          icon: <InfoIcon />,
-          onClick: () => setPanelSelected("info"),
-        },
-        {
-          key: "trainComments",
-          label: "Comments",
-          icon: <ChatIcon />,
-          onClick: () => setPanelSelected("trainComments"),
-        },
-      ];
+    setIsVisible(true);
+    const footerIcons = [
+      {
+        key: "info",
+        label: "Train info",
+        icon: <InformationCircleIcon className="h-6 w-6 text-accent" />,
+        onClick: () => setPanelSelected("info"),
+      },
+      {
+        key: "trainComments",
+        label: "Comments",
+        icon: <ChatBubbleLeftIcon className="h-6 w-6 text-accent" />,
+        onClick: () => setPanelSelected("trainComments"),
+      },
+      {
+        key: "help",
+        label: "Help",
+        icon: <ClipboardDocumentIcon className="h-6 w-6 text-accent" />,
+        onClick: () => setPanelSelected("help"),
+      },
+    ];
 
-      footerIcons.forEach(({ key, label, icon, onClick }) => {
-        addIconFooter({ key, label, icon, onClick });
+    footerIcons.forEach(({ key, label, icon, onClick }) => {
+      addIconFooter({ key, label, icon, onClick });
+    });
+
+    return () => {
+      setIsVisible(false);
+      footerIcons.forEach(({ key }) => {
+        removeIconFooter(key);
       });
+    };
+  }, [addIconFooter, removeIconFooter, setIsVisible]);
 
-      return () => {
-        setIsVisible(false);
-        footerIcons.forEach(({ key }) => {
-          removeIconFooter(key);
-        });
-      };
-    }
-  }, [isMobile, addIconFooter, removeIconFooter, setIsVisible]);
-
-  const renderPanelContent = useMemo(() => {
-    if (isMobile) {
-      return (
-        <Grid item>
-          {panelSelected === "info" && (
-            <TrainInfo
-              currentMoveNode={currentMoveNode}
-              turn={turn}
-              isYourTurn={isYourTurn}
-              finishedTrain={finishedTrain}
-              trainVariants={trainVariants}
-              lastTrainVariant={lastTrainVariant}
-            />
-          )}
-          {panelSelected === "help" && (
-            <HelpInfo allowedMoves={allowedMoves} isYourTurn={isYourTurn} />
-          )}
-          {panelSelected === "trainComments" && (
-            <HintInfo currentMoveNode={currentMoveNode} />
-          )}
-        </Grid>
-      );
-    } else {
-      return (
-        <>
-          <Grid item style={{ marginTop: "24px" }}>
-            <HelpInfo allowedMoves={allowedMoves} isYourTurn={isYourTurn} />
-          </Grid>
-          <Grid item style={{ marginTop: "36px" }}>
-            <HintInfo currentMoveNode={currentMoveNode} />
-          </Grid>
-          <Grid item style={{ marginTop: "36px" }}>
-            <TrainInfo
-              currentMoveNode={currentMoveNode}
-              turn={turn}
-              isYourTurn={isYourTurn}
-              finishedTrain={finishedTrain}
-              trainVariants={trainVariants}
-              lastTrainVariant={lastTrainVariant}
-            />
-          </Grid>
-        </>
-      );
-    }
-  }, [
-    isMobile,
-    allowedMoves,
-    turn,
-    finishedTrain,
-    trainVariants,
-    lastTrainVariant,
-    currentMoveNode,
-    isYourTurn,
-    panelSelected,
-  ]);
+  const renderPanelContent = useMemo(() => (
+    <div className="bg-gray-800 p-4 rounded shadow-md w-full h-full">
+      {panelSelected === "info" && (
+        <TrainInfo
+          currentMoveNode={currentMoveNode}
+          turn={turn}
+          isYourTurn={isYourTurn}
+          finishedTrain={finishedTrain}
+          trainVariants={trainVariants}
+          lastTrainVariant={lastTrainVariant}
+        />
+      )}
+      {panelSelected === "help" && (
+        <HelpInfo allowedMoves={allowedMoves} isYourTurn={isYourTurn} />
+      )}
+      {panelSelected === "trainComments" && (
+        <HintInfo currentMoveNode={currentMoveNode} />
+      )}
+    </div>
+  ), [panelSelected, currentMoveNode, turn, isYourTurn, finishedTrain, trainVariants, lastTrainVariant, allowedMoves]);
 
   return (
-    <Grid container spacing={2}>
-      <Grid item container direction="column" alignItems="left" xs={12} sm={5}>
-        {isMobile && (
-          <Grid
-            item
-            container
-            justifyContent="center"
-            style={{ marginBottom: "16px" }}
-          >
-            <HelpInfo allowedMoves={allowedMoves} isYourTurn={isYourTurn} />
-          </Grid>
-        )}
-        <Grid item container justifyContent={"center"}>
-          <Typography
-            variant="h5"
-            gutterBottom
-            style={{ marginBottom: "16px" }}
-          >
-            Training {repertoireName}
-          </Typography>
-        </Grid>
-        <Grid item container justifyContent={"center"}>
-          <BoardContainer isTraining={true} />
-        </Grid>
-      </Grid>
-      <Grid item xs={12} sm={5} container direction="column" alignItems="left">
-        {renderPanelContent}
-      </Grid>
-    </Grid>
+    <div className="container mx-auto p-4 h-full bg-background text-textLight">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full">
+        <div className="flex flex-col items-start">
+          <div className="flex justify-center mb-4">
+            <h5 className="text-xl font-bold text-textLight">Training {repertoireName}</h5>
+          </div>
+          <div className="flex justify-center w-full max-w-md">
+            <BoardContainer isTraining={true} />
+          </div>
+        </div>
+        <div className="flex flex-col items-start h-full overflow-auto border border-secondary rounded bg-gray-800">
+          {renderPanelContent}
+        </div>
+      </div>
+    </div>
   );
 };
 

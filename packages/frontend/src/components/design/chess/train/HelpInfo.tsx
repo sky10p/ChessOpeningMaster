@@ -1,17 +1,10 @@
-// HelpInfo.tsx
 import React, { useEffect, useState } from "react";
-import {
-  Grid,
-  Typography,
-  IconButton,
-} from "@mui/material";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid";
 import { MoveVariantNode } from "../../../../models/VariantNode";
 import { MoveNodeButtonWithActions } from "../../../application/chess/board/MoveNodeButtonWithActions";
 
 interface HelpInfoProps {
- allowedMoves: MoveVariantNode[];
+  allowedMoves: MoveVariantNode[];
   isYourTurn: boolean;
 }
 
@@ -22,7 +15,7 @@ const HelpInfo: React.FC<HelpInfoProps> = ({
   const [iconVisible, setIconVisible] = useState(true);
 
   useEffect(() => {
-    if(!isYourTurn) {
+    if (!isYourTurn) {
       setIconVisible(true);
     }
   }, [isYourTurn]);
@@ -32,33 +25,31 @@ const HelpInfo: React.FC<HelpInfoProps> = ({
   };
 
   return (
-    <Grid container direction="column" alignItems="center" spacing={2} style={{ marginBottom: "16px" }}>
-      <Grid item container alignItems="center" justifyContent="center" spacing={1}>
-        <Grid item>
-          <IconButton onClick={toggleVisibility}>
-            {iconVisible ? (
-              <VisibilityIcon />
-            ) : (
-              <VisibilityOffIcon />
-            )}
-          </IconButton>
-        </Grid>
-        <Grid item>
-          <Typography variant="body1" fontWeight="bold">
-            Available Moves
-          </Typography>
-        </Grid>
-      </Grid>
+    <div className="mb-4 p-4 rounded-lg">
+      <div className="flex items-center justify-center space-x-2 mb-4">
+        <button
+          onClick={toggleVisibility}
+          className="p-2 bg-accent text-primary rounded-full hover:bg-yellow-500 transition-colors focus:outline-none"
+          aria-label="Toggle Available Moves"
+        >
+          {iconVisible ? (
+            <ChevronUpIcon className="w-5 h-5" />
+          ) : (
+            <ChevronDownIcon className="w-5 h-5" />
+          )}
+        </button>
+        <span className="text-base font-bold text-gray-200 dark:text-gray-300">
+          Available Moves
+        </span>
+      </div>
       {!iconVisible && isYourTurn && (
-        <Grid item container direction="row" justifyContent="center" wrap="wrap" spacing={1}>
+        <div className="flex flex-wrap justify-center gap-2">
           {allowedMoves.map((move, index) => (
-            <Grid item key={index}>
-              <MoveNodeButtonWithActions move={move} />
-            </Grid>
+            <MoveNodeButtonWithActions key={index} move={move} />
           ))}
-        </Grid>
+        </div>
       )}
-    </Grid>
+    </div>
   );
 };
 

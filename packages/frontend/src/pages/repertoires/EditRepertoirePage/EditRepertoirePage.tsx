@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
-import EditRepertoireViewContainer from "./EditRepertoireViewContainer.tailwind";
+import EditRepertoireViewContainer from "./EditRepertoireViewContainer";
 import { IRepertoire } from "../../../../../common/src/types/Repertoire";
 import { getRepertoire } from "../../../repository/repertoires/repertoires";
 import { useNavbarContext } from "../../../contexts/NavbarContext";

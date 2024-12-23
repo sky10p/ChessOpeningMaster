@@ -4,7 +4,7 @@ import { IRepertoire } from "../../../../../common/src/types/Repertoire";
 import { getRepertoire } from "../../../repository/repertoires/repertoires";
 import { useNavbarContext } from "../../../contexts/NavbarContext";
 import { RepertoireContextProvider } from "../../../contexts/RepertoireContext";
-import TrainRepertoireViewContainer from "./TrainRepertoireViewContainer.tailwind";
+import TrainRepertoireViewContainer from "./TrainRepertoireViewContainer";
 import { TrainRepertoireContextProvider } from "../../../contexts/TrainRepertoireContext";
 
 const TrainRepertoirePage = () => {
