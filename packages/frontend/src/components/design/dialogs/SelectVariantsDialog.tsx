@@ -194,7 +194,7 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
                     {groupName}
                   </h3>
                 </div>
-                <div className={multiple ? "ml-6 mt-2" : "mt-2"}>
+                <div className={`mt-2 flex flex-col ${multiple ? "ml-6" : ""}`}>
                   {filteredGroupedVariantsByName[groupName].map((variant) => (
                     <UiCheckbox
                       key={variant.originalIndex}
