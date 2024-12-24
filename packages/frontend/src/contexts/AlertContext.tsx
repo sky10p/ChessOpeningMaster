@@ -1,6 +1,6 @@
 import React from "react";
 import { Alert } from "../components/design/Alert/Alert";
-import { AlertColor } from "@mui/material";
+import { AlertColor } from "../components/design/Alert/models";
 
 interface AlertContextProps {
   showAlert: (

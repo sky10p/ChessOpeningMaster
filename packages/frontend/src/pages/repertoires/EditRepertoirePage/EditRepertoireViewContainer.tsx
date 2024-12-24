@@ -122,7 +122,7 @@ const EditRepertoireViewContainer: React.FC = () => {
   }, []);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 bg-background text-textLight h-full">
+    <div className="grid grid-cols-1 sm:grid-cols-12 w-full gap-4 bg-background text-textLight h-full">
       <div className="col-span-12 sm:col-span-6  flex flex-col justify-center items-center">
         <div className="flex justify-center w-full p-1 sm:p-4">
           <h1 className="text-base sm:text-2xl font-bold">{repertoireName}</h1>

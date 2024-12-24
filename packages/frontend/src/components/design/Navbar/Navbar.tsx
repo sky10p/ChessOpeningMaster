@@ -1,10 +1,8 @@
 import React from "react";
-import { Dialog, DialogPanel, DialogBackdrop } from "@headlessui/react";
 import { Link } from "react-router-dom";
 import { XMarkIcon, EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import chessNavbarBackground from "../../../assets/chess-navbar-background.jpg";
 import { NavbarLink } from "./model";
-
 
 interface NavbarProps {
   open: boolean;
@@ -15,9 +13,12 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, secondaryActions }) => {
   return (
-    <Dialog className="fixed inset-0 z-40 flex" open={open} onClose={() => setOpen(false)}>
-      <DialogBackdrop className="fixed inset-0 bg-black bg-opacity-50" />
-      <DialogPanel className="relative flex-1 flex flex-col max-w-xs w-full bg-gray-800">
+    <div className={`fixed inset-0 z-40 flex ${open ? 'block' : 'hidden'}`}>
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50"
+        onClick={() => setOpen(false)}
+      />
+      <div className="relative flex-1 flex flex-col max-w-xs w-full bg-gray-800">
         <div className="absolute top-2 right-2">
           <button
             className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
@@ -65,7 +66,7 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
             ))}
           </nav>
         </div>
-      </DialogPanel>
-    </Dialog>
+      </div>
+    </div>
   );
 };

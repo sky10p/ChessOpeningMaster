@@ -1,5 +1,4 @@
 import React from "react";
-import { Box } from "@mui/material";
 import VariantActionButton from "./VariantActionButton";
 
 interface VariantActionButtonsProps {
@@ -12,14 +11,7 @@ interface VariantActionButtonsProps {
 
 const VariantActionButtons: React.FC<VariantActionButtonsProps> = ({ actions }) => {
   return (
-    <Box
-      style={{ overflowX: "auto", maxWidth: "100%", marginBottom: "20px" }}
-      sx={{
-        display: 'flex',
-        gap: 2,
-        alignItems: 'center',
-      }}
-    >
+    <div className="overflow-x-auto max-w-full mb-5 flex gap-2 items-center pb-2 px-2">
       {actions.map((action, index) => (
         <VariantActionButton
           key={index}
@@ -28,7 +20,7 @@ const VariantActionButtons: React.FC<VariantActionButtonsProps> = ({ actions }) 
           label={action.label}
         />
       ))}
-    </Box>
+    </div>
   );
 };
 

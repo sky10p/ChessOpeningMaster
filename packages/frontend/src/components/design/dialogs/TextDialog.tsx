@@ -21,10 +21,10 @@ export const TextDialog: React.FC<TextDialogProps> = ({open, initialValue, onTex
     }, [initialValue])
 
     return (
-        <Dialog open={open} onClose={() => onClose(true)} className="fixed z-10 inset-0 overflow-y-auto">
+        <Dialog open={open} onClose={() => onClose(true)} className="fixed z-50 inset-0 overflow-y-auto">
           <DialogBackdrop className="fixed inset-0 bg-black opacity-30" />
           <div className="fixed inset-0 flex items-center justify-center p-4">
-            <DialogPanel className="bg-background rounded max-w-md mx-auto p-6 z-20 max-h-screen overflow-auto">
+            <DialogPanel className="bg-background rounded max-w-md mx-auto p-6 z-50 max-h-screen overflow-auto">
               <DialogTitle className="text-lg font-bold text-textLight">{title}</DialogTitle>
               <Description className="mt-2 text-textLight">
                 {contextText}

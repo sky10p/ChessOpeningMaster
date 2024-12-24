@@ -1,5 +1,4 @@
 import React from "react";
-import { Box, IconButton, Typography } from "@mui/material";
 
 interface VariantActionButtonProps {
   onClick: () => void;
@@ -12,18 +11,14 @@ const VariantActionButton: React.FC<VariantActionButtonProps> = ({
   icon,
   label,
 }) => (
-  <Box display="flex" flexDirection="column" alignItems="center">
-    <IconButton onClick={onClick} sx={{ color: "rgb(47, 51, 55)" }}>
+  <div className="flex flex-col items-center">
+    <button onClick={onClick} className="text-gray-700 my-2">
       {icon}
-    </IconButton>
-    <Typography
-      variant="caption"
-      align="center"
-      style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
-    >
+    </button>
+    <span className="text-xs text-center truncate">
       {label}
-    </Typography>
-  </Box>
+    </span>
+  </div>
 );
 
 export default VariantActionButton;

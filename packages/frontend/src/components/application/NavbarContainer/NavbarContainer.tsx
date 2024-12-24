@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import AddIcon from "@mui/icons-material/Add";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import { PlusIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 
 import { IRepertoire } from "../../../../../common/src/types/Repertoire";
 import { useNavbarContext } from "../../../contexts/NavbarContext";
@@ -74,8 +73,8 @@ const NavbarContainer: React.FC = () => {
 
   return <Navbar open={open} setOpen={setOpen}
   mainActions={[
-    {id: "download_repertoires", name: "Download Repertoires", url: `${API_URL}/repertoires/download`, icon: <FileDownloadIcon />},
-    { id: "create_repertoire", name: "Create Repertoire", url: "/create-repertoire", icon: <AddIcon /> },
+    {id: "download_repertoires", name: "Download Repertoires", url: `${API_URL}/repertoires/download`, icon: <ArrowDownTrayIcon className="h-6 w-6 mr-2" />},
+    { id: "create_repertoire", name: "Create Repertoire", url: "/create-repertoire", icon: <PlusIcon className="h-6 w-6 mr-2" /> },
   ]}
   secondaryActions={repertoires.map((repertoire) => ({
     id: repertoire._id,
