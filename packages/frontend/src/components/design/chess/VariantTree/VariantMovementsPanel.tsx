@@ -34,7 +34,7 @@ const MoveItem: React.FC<{
 }> = ({ move, currentMoveNode, onContextMenu, onClick }) => (
   <span
     className={`inline-block p-1 cursor-pointer rounded ${
-      move === currentMoveNode ? "bg-primary text-textLight" : "hover:bg-gray-700"
+      move === currentMoveNode ? "bg-secondary text-textLight" : "hover:bg-gray-700"
     }`}
     onContextMenu={(event) => onContextMenu(event, move)}
     onClick={onClick}
