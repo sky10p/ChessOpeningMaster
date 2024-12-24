@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 
 interface ActionsMenuProps {
     anchorEl: HTMLElement | null;
@@ -21,15 +21,28 @@ export const ActionsMenu: React.FC<ActionsMenuProps> = ({anchorEl, setAnchorEl, 
 
     const [position, setPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
-    useEffect(() => {
-        if (anchorEl) {
+    useLayoutEffect(() => {
+        if (anchorEl && menuRef.current) {
             const rect = anchorEl.getBoundingClientRect();
+            const menuRect = menuRef.current.getBoundingClientRect();
+
+            let newLeft = rect.left;
+            let newTop = rect.bottom;
+
+            if (rect.left + menuRect.width > window.innerWidth) {
+                newLeft = window.innerWidth - menuRect.width - 10; // 10px padding from edge
+            }
+
+            if (rect.bottom + menuRect.height > window.innerHeight) {
+                newTop = rect.top - menuRect.height;
+            }
+
             setPosition({
-                top: rect.bottom,
-                left: rect.left,
+                top: newTop,
+                left: newLeft,
             });
         }
-    }, [anchorEl]);
+    }, [anchorEl, items]);
 
     const menuRef = useRef<HTMLDivElement>(null);
 
