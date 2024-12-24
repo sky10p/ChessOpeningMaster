@@ -1,13 +1,14 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { MoveVariantNode } from "../../../../models/VariantNode";
 import { Variant } from "../../../../models/chess.models";
-import { SelectVariant } from "../../SelectVariant";
 import { variantToPgn } from "../../../../utils/chess/pgn/pgn.utils";
 import { BoardOrientation } from "@chess-opening-master/common/src/types/Orientation";
 import { VariantMovementsPanel } from "./VariantMovementsPanel";
 import VariantActionButtons from "./VariantActionButtons";
+import SelectVariantsDialog from "../../dialogs/SelectVariantsDialog";
 
 import { TrashIcon, ClipboardIcon, ArrowDownTrayIcon, ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
+import { TrashListIcon } from "../../../icons/TrashListIcon";
 
 interface VariantTreeProps {
   variants: Variant[];
@@ -40,6 +41,7 @@ const VariantTree: React.FC<VariantTreeProps> = ({
   const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>(
     variants[0]
   );
+  const [showSelectVariantDialog, setShowSelectVariantDialog] = useState(false);
   useEffect(() => {
     setSelectedVariant(
       variants.find((variant) =>
@@ -93,23 +95,23 @@ const VariantTree: React.FC<VariantTreeProps> = ({
     },
     {
       onClick: () => selectedVariant && copyVariantToRepertoire(selectedVariant),
-      icon: <ClipboardDocumentListIcon className="h-5 w-5 text-accent" />,
-      label: "Copy to Repertoire",
+      icon: <ClipboardIcon className="h-5 w-5 text-accent" />,
+      label: "Copy variant",
     },
     {
       onClick: copyVariantsToRepertoire,
-      icon: <ClipboardIcon className="h-5 w-5 text-accent" />,
-      label: "Paste Variants",
+      icon: <ClipboardDocumentListIcon className="h-5 w-5 text-accent" />,
+      label: "Copy variants",
     },
     {
       onClick: () => selectedVariant && deleteVariant(selectedVariant),
       icon: <TrashIcon className="h-5 w-5 text-danger" />,
-      label: "Delete",
+      label: "Delete variant",
     },
     {
       onClick: deleteVariants,
-      icon: <TrashIcon className="h-5 w-5 text-danger" />,
-      label: "Delete All",
+      icon: <TrashListIcon className="h-5 w-5 text-danger" />,
+      label: "Delete variants",
     },
   ], [selectedVariant, copyVariantToRepertoire, copyVariantsToRepertoire, deleteVariant, deleteVariants, downloadVariantPGN]);
 
@@ -123,15 +125,15 @@ const VariantTree: React.FC<VariantTreeProps> = ({
       <div>
         {selectedVariant && (
           <div className="grid grid-cols-1">
-            <SelectVariant
-              variants={variants}
-              selectedVariant={selectedVariant}
-              onSelectVariant={setSelectedVariant}
-            />
+            <button
+              onClick={() => setShowSelectVariantDialog(true)}
+              className="px-4 py-2 bg-accent text-black rounded hover:opacity-75"
+            >
+              {selectedVariant ? selectedVariant.name : "Change Variant"}
+            </button>
           </div>
         )}
         <div>
-          {/* <Movements moves={selectedVariant?.moves} /> */}
           {selectedVariant?.moves && (
             <VariantMovementsPanel
               moves={selectedVariant?.moves}
@@ -144,6 +146,20 @@ const VariantTree: React.FC<VariantTreeProps> = ({
           )}
         </div>
       </div>
+      <SelectVariantsDialog
+        open={showSelectVariantDialog}
+        multiple={false}
+        title="Select Variant"
+        contentText="Choose a single variant"
+        variants={variants}
+        onConfirm={(selected) => {
+          if (selected.length > 0) {
+            setSelectedVariant(selected[0]);
+          }
+          setShowSelectVariantDialog(false);
+        }}
+        onClose={() => setShowSelectVariantDialog(false)}
+      />
     </div>
   );
 };

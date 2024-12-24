@@ -8,7 +8,7 @@ interface SelectNextMoveDialogProps {
   contentText: string;
   nextMovements: string[];
   onConfirm: (nextMove: string) => void;
-  onClose: () => void;
+  onClose: (isCancelled: boolean) => void; // changed
 }
 
 const SelectNextMoveDialog: React.FC<SelectNextMoveDialogProps> = ({
@@ -23,11 +23,11 @@ const SelectNextMoveDialog: React.FC<SelectNextMoveDialogProps> = ({
 
   const handleNextMoveConfirm = () => {
     onConfirm(selectedNextMove);
-    onClose();
+    onClose(false); // changed
   };
 
   return (
-    <Dialog open={open} onClose={onClose} className="fixed z-10 inset-0 overflow-y-auto">
+    <Dialog open={open} onClose={() => onClose(true)} className="fixed z-10 inset-0 overflow-y-auto"> {/* changed */}
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel className="bg-background rounded max-w-md mx-auto p-6 z-20 max-h-screen overflow-auto">
           <DialogTitle className="text-lg font-bold text-textLight">{title}</DialogTitle>
@@ -52,7 +52,7 @@ const SelectNextMoveDialog: React.FC<SelectNextMoveDialogProps> = ({
             </RadioGroup>
           </div>
           <div className="mt-4 flex justify-end space-x-2">
-            <button onClick={onClose} className="px-4 py-2 bg-secondary text-textLight rounded hover:bg-scrollbarThumbHover">
+            <button onClick={() => onClose(true)} className="px-4 py-2 bg-secondary text-textLight rounded hover:bg-scrollbarThumbHover"> {/* changed */}
               Cancel
             </button>
             <button onClick={handleNextMoveConfirm} className="px-4 py-2 bg-accent text-black rounded hover:bg-accent">

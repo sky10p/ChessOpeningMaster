@@ -5,7 +5,7 @@ interface TextDialogProps {
     open: boolean;
     initialValue: string;
     onTextConfirm: (text: string) => void;
-    onClose: () => void;
+    onClose: (isCancelled: boolean) => void;
     title: string;
     contentText: string;
 }
@@ -21,7 +21,7 @@ export const TextDialog: React.FC<TextDialogProps> = ({open, initialValue, onTex
     }, [initialValue])
 
     return (
-        <Dialog open={open} onClose={onClose} className="fixed z-10 inset-0 overflow-y-auto">
+        <Dialog open={open} onClose={() => onClose(true)} className="fixed z-10 inset-0 overflow-y-auto">
           <DialogBackdrop className="fixed inset-0 bg-black opacity-30" />
           <div className="fixed inset-0 flex items-center justify-center p-4">
             <DialogPanel className="bg-background rounded max-w-md mx-auto p-6 z-20 max-h-screen overflow-auto">
@@ -36,7 +36,7 @@ export const TextDialog: React.FC<TextDialogProps> = ({open, initialValue, onTex
                 onChange={(event) => setValue(event.target.value)}
               />
               <div className="mt-4 flex justify-end space-x-2">
-                <button onClick={onClose} className="px-4 py-2 bg-secondary text-textLight rounded hover:bg-scrollbarThumbHover">
+                <button onClick={() => onClose(true)} className="px-4 py-2 bg-secondary text-textLight rounded hover:bg-scrollbarThumbHover">
                   Cancel
                 </button>
                 <button onClick={() => onTextConfirm(value)} className="px-4 py-2 bg-accent text-black rounded hover:bg-accent hover:text-black">

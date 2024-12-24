@@ -24,7 +24,6 @@ const EditRepertoireViewContainer: React.FC = () => {
   const { showMenu } = useMenuContext();
   const { addIcon: addIconHeader, removeIcon: removeIconHeader, changeIconCallback } = useHeaderContext();
   const { addIcon: addIconFooter, removeIcon: removeIconFooter, setIsVisible } = useFooterContext();
-  const [openPanel, setOpenPanel] = useState<FooterSection | null>("variants");
 
   const showMenuHeader = (event: React.MouseEvent<HTMLElement>) => {
     showMenu(event.currentTarget || null, [
@@ -49,9 +48,6 @@ const EditRepertoireViewContainer: React.FC = () => {
     ]);
   };
 
-  const handlePanelClick = (panel: FooterSection) => {
-    setOpenPanel((prevPanel) => (prevPanel === panel ? null : panel));
-  };
 
   useEffect(() => {
     addIconHeader({
@@ -126,54 +122,25 @@ const EditRepertoireViewContainer: React.FC = () => {
   }, []);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 p-4 bg-background text-textLight h-full">
-      <div className="col-span-12 sm:col-span-4 flex flex-col items-start">
-        <div className="flex justify-center w-full mb-4 mt-4">
-          <h1 className="text-2xl font-bold">{repertoireName}</h1>
+    <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 bg-background text-textLight h-full">
+      <div className="col-span-12 sm:col-span-6  flex flex-col justify-center items-center">
+        <div className="flex justify-center w-full p-1 sm:p-4">
+          <h1 className="text-base sm:text-2xl font-bold">{repertoireName}</h1>
         </div>
-        <div className="flex justify-center w-full">
+        <div className="flex justify-center w-full sm:p-4 lg:max-h-[60vh] lg:max-w-[60vh]">
           <BoardContainer />
         </div>
-        <div className="flex justify-center w-full">
+        <div className="flex justify-center w-full p-1 sm:p-4">
           <BoardActionsContainer />
         </div>
       </div>
-      <div className="hidden sm:block sm:col-span-1"></div>
-      <div className="col-span-12 sm:col-span-7 flex flex-col items-start overflow-auto scrollbar-custom border border-secondary rounded bg-gray-800">
+      
+      <div className="col-span-12 sm:col-span-6 flex flex-col items-start overflow-auto scrollbar-custom border border-secondary rounded bg-gray-800">
         {panelSelected === "variants" && <VariantsInfo />}
         {panelSelected === "comments" && <BoardCommentContainer />}
         {panelSelected === "lichess" && <LichessPanel fen={chess.fen()} />}
         {panelSelected === "stockfish" && <StockfishPanel fen={chess.fen()} numLines={3} />}
-        {/* <div className="space-y-4 w-full">
-          {(["variants", "comments", "lichess", "stockfish"] as Array<FooterSection>).map((panel) => (
-        <div key={panel} className="mt-6 overflow-y-auto p-4">
-          <div className={`p-2 mb-2 rounded-t ${openPanel === panel ? "bg-secondary" : "bg-background"}`}>
-            <h6 className={`flex items-center justify-between cursor-pointer ${openPanel === panel ? "text-textLight" : "text-textDark"}`} onClick={() => handlePanelClick(panel)}>
-          {panel.charAt(0).toUpperCase() + panel.slice(1)}
-          <span className={`transform transition-transform ${openPanel === panel ? "rotate-180" : "rotate-0"}`}>
-            <EllipsisVerticalIcon className={`h-6 w-6 ${openPanel === panel ? "text-textLight" : "text-textDark"}`} />
-          </span>
-            </h6>
-          </div>
-          <Transition
-            show={openPanel === panel}
-            enter="transition-opacity duration-200"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="transition-opacity duration-200"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="p-4 bg-background border border-secondary rounded-b">
-          {panel === "variants" && <VariantsInfo />}
-          {panel === "comments" && <BoardCommentContainer />}
-          {panel === "lichess" && <LichessPanel fen={chess.fen()} />}
-          {panel === "stockfish" && <StockfishPanel fen={chess.fen()} numLines={3} />}
-            </div>
-          </Transition>
-        </div>
-          ))}
-        </div> */}
+  
       </div>
     </div>
   );

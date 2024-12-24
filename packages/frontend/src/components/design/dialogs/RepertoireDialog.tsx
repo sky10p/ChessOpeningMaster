@@ -8,7 +8,7 @@ interface RepertoireDialogProps {
   contentText: string;
   repertoires: IRepertoire[];
   onConfirm: (repertoire: IRepertoire) => void;
-  onClose: () => void;
+  onClose: (isCancelled: boolean) => void; // changed
 }
 
 const RepertoireDialog: React.FC<RepertoireDialogProps> = ({ open, title, contentText, repertoires, onConfirm, onClose }) => {
@@ -18,7 +18,7 @@ const RepertoireDialog: React.FC<RepertoireDialogProps> = ({ open, title, conten
     if (selectedRepertoire) {
       onConfirm(selectedRepertoire);
     }
-    onClose();
+    onClose(false); // changed
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -29,7 +29,7 @@ const RepertoireDialog: React.FC<RepertoireDialogProps> = ({ open, title, conten
   };
 
   return (
-    <Dialog open={open} onClose={onClose} className="fixed z-10 inset-0 overflow-y-auto">
+    <Dialog open={open} onClose={() => onClose(true)} className="fixed z-10 inset-0 overflow-y-auto"> {/* changed */}
       <DialogBackdrop className="fixed inset-0 bg-black opacity-30" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel className="bg-background rounded max-w-md mx-auto p-6 z-20 max-h-screen overflow-auto">
@@ -52,7 +52,7 @@ const RepertoireDialog: React.FC<RepertoireDialogProps> = ({ open, title, conten
             </select>
           </div>
           <div className="mt-4 flex justify-end space-x-2">
-            <button onClick={onClose} className="px-4 py-2 bg-secondary text-textLight rounded hover:bg-scrollbarThumbHover">
+            <button onClick={() => onClose(true)} className="px-4 py-2 bg-secondary text-textLight rounded hover:bg-scrollbarThumbHover"> {/* changed */}
               Cancel
             </button>
             <button onClick={handleRepertoireConfirm} disabled={!selectedRepertoire} className={`px-4 py-2 rounded ${selectedRepertoire ? 'bg-accent text-black hover:bg-accent' : 'bg-secondary text-textDark cursor-not-allowed'}`}>

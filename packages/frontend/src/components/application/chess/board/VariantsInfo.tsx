@@ -90,8 +90,8 @@ const VariantsInfo: React.FC = () => {
       onVariantsConfirm: async (selectedVariants) => {
         selectedVariantsToCopy = selectedVariants;
       },
-      onDialogClose: async () => {
-        showRepertoireDialog({
+      onDialogClose: async (isCancelled: boolean) => {
+        !isCancelled && showRepertoireDialog({
           title: "Copy variants",
           contentText: `Select the repertoire to copy the variants:`,
           repertoires,
@@ -131,8 +131,8 @@ const VariantsInfo: React.FC = () => {
         selectedVariantsToDelete = selectedVariants;
         
       },
-      onDialogClose: async () => {
-        showConfirmDialog({
+      onDialogClose: async (isCancelled: boolean) => {
+        !isCancelled && showConfirmDialog({
           title: "Delete variants",
           contentText: "Are you sure you want to delete the selected variants?",
           onConfirm: async () => {

@@ -7,7 +7,7 @@ interface NumberDialogProps {
     max: number;
     initialValue: number;
     onNumberConfirm: (number: number) => void;
-    onClose: () => void;
+    onClose: (isCancelled: boolean) => void; // changed
     title: string;
     contentText: string;
 }
@@ -25,13 +25,14 @@ export const NumberDialog: React.FC<NumberDialogProps> = ({ open, min, max, init
         const numericValue = Number(value);
         if (numericValue >= min && numericValue <= max) {
             onNumberConfirm(numericValue);
+            onClose(false); // changed
         }
     };
 
     const isValidNumber = (num: number) => num >= min && num <= max;
 
     return (
-        <Dialog open={open} onClose={onClose} className="fixed z-10 inset-0 overflow-y-auto">
+        <Dialog open={open} onClose={() => onClose(true)} className="fixed z-10 inset-0 overflow-y-auto"> {/* changed */}
             <DialogBackdrop className="fixed inset-0 bg-black opacity-30" />
             <div className="fixed inset-0 flex items-center justify-center p-4">
                 <DialogPanel className="bg-background rounded max-w-md mx-auto p-6 z-20 max-h-screen overflow-auto">
@@ -48,7 +49,7 @@ export const NumberDialog: React.FC<NumberDialogProps> = ({ open, min, max, init
                         onChange={(e) => setValue(e.target.value === '' ? 0 : Number(e.target.value))}
                     />
                     <div className="mt-4 flex justify-end space-x-2">
-                        <button onClick={onClose} className="px-4 py-2 bg-secondary text-textLight rounded hover:bg-scrollbarThumbHover">
+                        <button onClick={() => onClose(true)} className="px-4 py-2 bg-secondary text-textLight rounded hover:bg-scrollbarThumbHover"> {/* changed */}
                             Cancel
                         </button>
                         <button onClick={handleConfirm} disabled={!isValidNumber(Number(value))} className={`px-4 py-2 rounded ${isValidNumber(Number(value)) ? 'bg-accent text-black hover:bg-accent' : 'bg-secondary text-textDark cursor-not-allowed'}`}>

@@ -2,7 +2,14 @@ import React, { useEffect, useState, useMemo } from "react";
 import { TrainVariant, TrainVariantInfo } from "../../../models/chess.models";
 import { SelectTrainVariants } from "../SelectTrainVariants/SelectTrainVariants";
 import { getTrainVariantInfo } from "../../../repository/repertoires/trainVariants";
-import { Dialog, DialogBackdrop, DialogPanel, DialogTitle, Description } from '@headlessui/react';
+import {
+  Dialog,
+  DialogBackdrop,
+  DialogPanel,
+  DialogTitle,
+  Description,
+} from "@headlessui/react";
+import { UiCheckbox } from "../../basic/UiCheckbox";
 
 interface SelectTrainVariantsDialogProps {
   open: boolean;
@@ -11,7 +18,7 @@ interface SelectTrainVariantsDialogProps {
   trainVariants: TrainVariant[];
   repertoireId: string;
   onConfirm: (trainVariants: TrainVariant[]) => void;
-  onClose: () => void;
+  onClose: (isCancelled: boolean) => void; // changed
 }
 
 interface GroupedTrainVariant extends TrainVariant {
@@ -31,31 +38,36 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
     Set<number>
   >(new Set());
   const [filterText, setFilterText] = useState("");
-  const [trainVariantsInfo, setTrainVariantsInfo] = useState<Record<string, TrainVariantInfo>>({});
+  const [trainVariantsInfo, setTrainVariantsInfo] = useState<
+    Record<string, TrainVariantInfo>
+  >({});
 
   const handleFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFilterText(event.target.value);
   };
 
   const groupedTrainVariantsByName = useMemo(() => {
-    return trainVariants.reduce(
-      (groupedTrainVariants, trainVariant, index) => {
-        const groupName = trainVariant.variant.name;
-        if (!groupedTrainVariants[groupName]) {
-          groupedTrainVariants[groupName] = [];
-        }
-        groupedTrainVariants[groupName].push({...trainVariant, originalIndex: index});
-        return groupedTrainVariants;
-      },
-      {} as Record<string, GroupedTrainVariant[]>
-    );
+    return trainVariants.reduce((groupedTrainVariants, trainVariant, index) => {
+      const groupName = trainVariant.variant.name;
+      if (!groupedTrainVariants[groupName]) {
+        groupedTrainVariants[groupName] = [];
+      }
+      groupedTrainVariants[groupName].push({
+        ...trainVariant,
+        originalIndex: index,
+      });
+      return groupedTrainVariants;
+    }, {} as Record<string, GroupedTrainVariant[]>);
   }, [trainVariants]);
 
   const filteredGroupedTrainVariantsByName = useMemo(() => {
     return Object.keys(groupedTrainVariantsByName).reduce(
       (filteredGroups, groupName) => {
-        const filteredVariants = groupedTrainVariantsByName[groupName].filter((trainVariant) =>
-          trainVariant.variant.fullName.toLowerCase().includes(filterText.toLowerCase())
+        const filteredVariants = groupedTrainVariantsByName[groupName].filter(
+          (trainVariant) =>
+            trainVariant.variant.fullName
+              .toLowerCase()
+              .includes(filterText.toLowerCase())
         );
         if (filteredVariants.length > 0) {
           filteredGroups[groupName] = filteredVariants;
@@ -68,12 +80,15 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
 
   const updateTrainVariantsInfo = async () => {
     const variantsInfo = await getTrainVariantInfo(repertoireId);
-    const variantsInfoMap = variantsInfo.reduce((acc: Record<string, TrainVariantInfo>, variantInfo) => {
-      acc[variantInfo.variantName] = variantInfo;
-      return acc;
-    }, {});
+    const variantsInfoMap = variantsInfo.reduce(
+      (acc: Record<string, TrainVariantInfo>, variantInfo) => {
+        acc[variantInfo.variantName] = variantInfo;
+        return acc;
+      },
+      {}
+    );
     setTrainVariantsInfo(variantsInfoMap);
-  }
+  };
 
   useEffect(() => {
     if (open) {
@@ -115,42 +130,60 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
     const group = groupedTrainVariantsByName[groupName];
     const newSelectedVariants = new Set(selectedTrainVariants);
     if (isGroupSelected(groupName)) {
-      group.forEach((trainVariant) => newSelectedVariants.delete(trainVariant.originalIndex));
+      group.forEach((trainVariant) =>
+        newSelectedVariants.delete(trainVariant.originalIndex)
+      );
     } else {
-      group.forEach((trainVariant) => newSelectedVariants.add(trainVariant.originalIndex));
+      group.forEach((trainVariant) =>
+        newSelectedVariants.add(trainVariant.originalIndex)
+      );
     }
     setSelectedTrainVariants(newSelectedVariants);
   };
 
-  const handleClose = () => {
+  const handleClose = (isCancelled: boolean) => {
     setSelectedTrainVariants(new Set());
     setFilterText("");
-    onClose();
+    onClose(isCancelled); // changed
   };
 
   const handleConfirm = () => {
-      const updatedTrainVariants = trainVariants.filter((trainVariant, index) => selectedTrainVariants.has(index));
+    const updatedTrainVariants = trainVariants.filter((trainVariant, index) =>
+      selectedTrainVariants.has(index)
+    );
     onConfirm(updatedTrainVariants);
-    handleClose();
+    handleClose(false);
   };
 
   const isAllSelected = selectedTrainVariants.size === trainVariants.length;
   const isGroupSelected = (groupName: string) => {
     const group = groupedTrainVariantsByName[groupName];
-    return group.every((trainVariant) => selectedTrainVariants.has(trainVariant.originalIndex));
+    return group.every((trainVariant) =>
+      selectedTrainVariants.has(trainVariant.originalIndex)
+    );
   };
   const isSomeOfGroupSelected = (groupName: string) => {
     const group = groupedTrainVariantsByName[groupName];
-    return group.some((trainVariant) => selectedTrainVariants.has(trainVariant.originalIndex)) && !isGroupSelected(groupName);
+    return (
+      group.some((trainVariant) =>
+        selectedTrainVariants.has(trainVariant.originalIndex)
+      ) && !isGroupSelected(groupName)
+    );
   };
   const isSomeSelected = selectedTrainVariants.size > 0 && !isAllSelected;
 
   return (
-    <Dialog open={open} onClose={handleClose} className="fixed z-10 inset-0 overflow-y-auto">
+    <Dialog
+      open={open}
+      onClose={() => handleClose(true)} // changed
+      className="fixed z-10 inset-0 overflow-y-auto"
+    >
       <DialogBackdrop className="fixed inset-0 bg-black opacity-30" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="bg-background rounded max-w-3xl mx-auto p-6 z-20 max-h-screen overflow-auto">
-          <DialogTitle className="text-xl font-bold text-textLight">{title}</DialogTitle>
+        <DialogPanel className="bg-background rounded w-screen md:w-auto xl:max-w-5xl mx-auto p-6 z-20 max-h-screen overflow-auto">
+          <DialogTitle className="text-xl font-bold text-textLight">
+            {title}
+          </DialogTitle>
           <Description className="mt-4 text-textLight mb-4">
             {contentText}
           </Description>
@@ -162,35 +195,46 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
             onChange={handleFilterChange}
           />
           <div className="mb-4">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={isAllSelected}
-                className="form-checkbox h-4 w-4 text-accent"
-                onChange={handleSelectAll}
-              />
-              <span className="ml-2 text-textLight">Select All</span>
-            </label>
+
+            <UiCheckbox
+              label="Select All"
+              checked={isAllSelected}
+              indeterminate={isSomeSelected}
+              onChange={handleSelectAll}
+              className="ml-2 text-textLight"
+            />
           </div>
-          {Object.keys(filteredGroupedTrainVariantsByName).map((groupName) => (
-            <div key={groupName} className="mb-4">
-              <SelectTrainVariants
-                variantName={groupName}
-                subvariants={filteredGroupedTrainVariantsByName[groupName]}
-                isGroupSelected={isGroupSelected}
-                isSomeOfGroupSelected={isSomeOfGroupSelected}
-                isCheckedVariant={(variantIndex) => selectedTrainVariants.has(variantIndex)}
-                handleSelectAllGroup={handleSelectAllGroup}
-                handleToggleVariant={handleToggleVariant}
-                variantsInfo={trainVariantsInfo}
-              />
-            </div>
-          ))}
+          <div className="h-96 overflow-y-auto p-4">
+            {Object.keys(filteredGroupedTrainVariantsByName).map(
+              (groupName) => (
+                <div key={groupName} className="mb-4">
+                  <SelectTrainVariants
+                    variantName={groupName}
+                    subvariants={filteredGroupedTrainVariantsByName[groupName]}
+                    isGroupSelected={isGroupSelected}
+                    isSomeOfGroupSelected={isSomeOfGroupSelected}
+                    isCheckedVariant={(variantIndex) =>
+                      selectedTrainVariants.has(variantIndex)
+                    }
+                    handleSelectAllGroup={handleSelectAllGroup}
+                    handleToggleVariant={handleToggleVariant}
+                    variantsInfo={trainVariantsInfo}
+                  />
+                </div>
+              )
+            )}
+          </div>
           <div className="mt-4 flex justify-end space-x-2">
-            <button onClick={onClose} className="px-4 py-2 bg-secondary text-textLight rounded hover:bg-scrollbarThumbHover">
+            <button
+              onClick={() => handleClose(true)} // changed
+              className="px-4 py-2 bg-secondary text-textLight rounded hover:bg-scrollbarThumbHover"
+            >
               Cancel
             </button>
-            <button onClick={handleConfirm} className="px-4 py-2 bg-accent text-black rounded hover:bg-accent">
+            <button
+              onClick={handleConfirm}
+              className="px-4 py-2 bg-accent text-black rounded hover:bg-accent"
+            >
               Confirm
             </button>
           </div>

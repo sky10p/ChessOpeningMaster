@@ -38,7 +38,7 @@ interface SelectVariantsConfirmDialog {
   contentText?: string;
   variants: Variant[];
   onVariantsConfirm: (variants: Variant[]) => void;
-  onDialogClose?: () => void;
+  onDialogClose?: (isCancelled: boolean) => void;
 }
 
 interface SelectNextMoveDialog {
@@ -64,7 +64,7 @@ interface NumberDialogProps {
   max: number;
   initialValue: number;
   onNumberConfirm: (number: number) => void;
-  onDialogClose?: () => void;
+  onDialogClose?: (isCancelled: boolean) => void;
 }
 
 interface DialogContextProps {
@@ -129,7 +129,7 @@ export const DialogContextProvider = ({
     (variants: Variant[]) => void
   >(() => {}); // Add state for onVariantsConfirm
   const [onDialogClose, setOnDialogClose] = React.useState<
-    (() => void) | undefined
+    ((isCancelled: boolean) => void) | undefined
   >(() => {});
 
   const [trainVariants, setTrainVariants] = React.useState<TrainVariant[]>([]);
@@ -251,7 +251,7 @@ export const DialogContextProvider = ({
     setOpenNumberDialog(true);
   };
 
-  const handleDialogClose = () => {
+  const handleDialogClose = (isCancelled: boolean) => {
     setOpenConfirmDialog(false);
     setOpenTextDialog(false);
     setOpenTrainVariantsDialog(false);
@@ -259,8 +259,8 @@ export const DialogContextProvider = ({
     setOpenRepertoireDialog(false); // Close RepertoireDialog
     setOpenSelectVariantsDialog(false);
     setOpenNumberDialog(false);
-    numberDialogProps?.onDialogClose?.();
-    onDialogClose && onDialogClose();
+    numberDialogProps?.onDialogClose?.(isCancelled);
+    onDialogClose && onDialogClose(isCancelled);
   };
 
   const handleTextConfirm = (text: string) => {

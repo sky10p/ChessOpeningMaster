@@ -135,11 +135,11 @@ const TrainRepertoireViewContainer: React.FC = () => {
   ), [panelSelected, currentMoveNode, turn, isYourTurn, finishedTrain, trainVariants, lastTrainVariant, allowedMoves]);
 
   return (
-    <div className="container mx-auto p-4 h-full bg-background text-textLight">
+    <div className="container mx-auto p-1 sm:p-4 h-full bg-background text-textLight">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full">
-        <div className="flex flex-col items-start">
-          <div className="flex justify-center mb-4">
-            <h5 className="text-xl font-bold text-textLight">Training {repertoireName}</h5>
+        <div className="flex flex-col items-center justify-center h-full">
+          <div className="flex justify-center mb-1 sm:mb-4">
+            <h5 className="text-base sm:text-xl font-bold text-textLight">Training {repertoireName}</h5>
           </div>
           <div className="flex justify-center w-full max-w-md">
             <BoardContainer isTraining={true} />
