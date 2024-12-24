@@ -1,13 +1,6 @@
 import React from "react";
 import { Story } from "@ladle/react";
-import theme from "../../../design/theme";
-import { CssBaseline, ThemeProvider } from "@mui/material";
 import { StockfishPanel } from "./StockfishPanel";
-
-const Container: React.FC<{ width: string; children: React.ReactNode }> = ({
-  width,
-  children,
-}) => <div style={{ width }}>{children}</div>;
 
 const defaultArgs = {
   fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", // Initial chess position
@@ -22,19 +15,14 @@ const customPositionArgs = {
 const stockfishWorker = new Worker("/stockfish/stockfish.js");
 
 export const StockfishPanelStoryDefault: Story = () => (
-  <ThemeProvider theme={theme}>
-    <CssBaseline />
-    <Container width="600px">
+
+    <div className="w-1/2 bg-background">
       <StockfishPanel {...defaultArgs} />
-    </Container>
-  </ThemeProvider>
+    </div>
 );
 
 export const StockfishPanelStoryCustomPosition: Story = () => (
-  <ThemeProvider theme={theme}>
-    <CssBaseline />
-    <Container width="600px">
+    <div className="w-1/2 bg-background">
       <StockfishPanel {...customPositionArgs} />
-    </Container>
-  </ThemeProvider>
+    </div>
 );

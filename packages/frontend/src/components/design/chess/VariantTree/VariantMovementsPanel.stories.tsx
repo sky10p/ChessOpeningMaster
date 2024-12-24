@@ -3,8 +3,7 @@ import React, { useMemo, useState } from "react";
 import { MoveVariantNode } from "../../../../models/VariantNode";
 import { testRepertoireMock } from "../../../../utils/chess/pgn/tests/mocks/repertoire-with-variants.mock";
 import { testRepertoireWithSubvariantsMock } from "../../../../utils/chess/pgn/tests/mocks/repertoire-with-subvariants.mock";
-import { CssBaseline, ThemeProvider } from "@mui/material";
-import theme from "../../../../design/theme";
+
 import { VariantMovementsPanel } from "./VariantMovementsPanel";
 
 export const VariantMovementsPanelWithVariantsStory: Story = () => {
@@ -18,8 +17,7 @@ export const VariantMovementsPanelWithVariantsStory: Story = () => {
     moveFromVariant[0]
   );
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+   
       <VariantMovementsPanel
         moves={moveFromVariant}
         currentMoveNode={currentMoveNode}
@@ -29,7 +27,6 @@ export const VariantMovementsPanelWithVariantsStory: Story = () => {
           console.log("Change name move");
         }}
       />
-    </ThemeProvider>
   );
 };
 
@@ -46,8 +43,7 @@ export const VariantMovementsPanelWithVariantsWithMoreHeightStory: Story =
       moveFromVariant[0]
     );
     return (
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
+      <div className="w-1/2 bg-gray-800 text-white">
         <VariantMovementsPanel
           moves={moveFromVariant}
           currentMoveNode={currentMoveNode}
@@ -58,6 +54,7 @@ export const VariantMovementsPanelWithVariantsWithMoreHeightStory: Story =
             console.log("Change name move");
           }}
         />
-      </ThemeProvider>
+      </div>
+  
     );
   };

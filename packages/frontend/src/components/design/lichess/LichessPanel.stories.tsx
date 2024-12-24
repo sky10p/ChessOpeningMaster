@@ -1,13 +1,9 @@
 import React from "react";
 import { Story } from "@ladle/react";
 import LichessPanel from "./LichessPanel";
-import theme from "../../../design/theme";
-import { CssBaseline, ThemeProvider } from "@mui/material";
 
-const Container: React.FC<{ width: string; children: React.ReactNode }> = ({
-  width,
-  children,
-}) => <div style={{ width }}>{children}</div>;
+import "../../../index.css"
+
 
 const defaultArgs = {
   fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", // Initial chess position
@@ -18,19 +14,17 @@ const customPositionArgs = {
 };
 
 export const LichessPanelStoryDefault: Story = () => (
-  <ThemeProvider theme={theme}>
-    <CssBaseline />
-    <Container width="600px">
+
+    <div className="w-1/2 bg-background">
       <LichessPanel {...defaultArgs} />
-    </Container>
-  </ThemeProvider>
+    </div>
+
 );
 
 export const LichessPanelStoryCustomPosition: Story = () => (
-  <ThemeProvider theme={theme}>
-    <CssBaseline />
-    <Container width="600px">
+
+    <div className="w-1/2 bg-background">
       <LichessPanel {...customPositionArgs} />
-    </Container>
-  </ThemeProvider>
+    </div>
+
 );

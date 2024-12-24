@@ -2,7 +2,6 @@ import React from "react";
 import { Bars3Icon, CloudArrowUpIcon } from "@heroicons/react/24/outline";
 import { HeaderIcon } from "./models";
 
-import "../../../index.css";
 import { CloudDoneIcon } from "../../icons/CloudDoneIcon";
 
 interface HeaderProps {

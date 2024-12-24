@@ -1,17 +1,13 @@
 import { Story } from "@ladle/react";
 import React, { useState } from "react";
-import { ThemeProvider } from "@emotion/react";
-import { CssBaseline } from "@mui/material";
 import { Navbar } from "./Navbar";
-import theme from "../../../design/theme";
 import { BrowserRouter as Router } from "react-router-dom";
-import '../../../index.css';
 import { NavbarLink } from "./model";
 import { ArrowDownTrayIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 const mainActions: NavbarLink[] = [
-    { id: '1', name: "Download Repertoires", url: "/", onActionClick: () => alert("Home action clicked"), icon: <ArrowDownTrayIcon /> },
-    { id: '2', name: "Create repertoire", url: "/create", onActionClick: () => alert("About action clicked"), icon: <PlusIcon /> },
+    { id: '1', name: "Download Repertoires", url: "/", onActionClick: () => alert("Home action clicked"), icon: <ArrowDownTrayIcon className="w-6 h-6 mr-2" /> },
+    { id: '2', name: "Create repertoire", url: "/create", onActionClick: () => alert("About action clicked"), icon: <PlusIcon className="w-6 h-6 mr-2" /> },
 ];
 
 const links: NavbarLink[] = [
@@ -26,14 +22,12 @@ export const NavbarStory: Story = () => {
     const [open, setOpen] = useState(false);
 
     return (
-        <ThemeProvider theme={theme}>
-            <CssBaseline />
+
             <Router>
                 <button onClick={() => setOpen(!open)}>
                     {open ? "Close Navbar" : "Open Navbar"}
                 </button>
                 <Navbar open={open} setOpen={setOpen} secondaryActions={links} mainActions={mainActions} />
             </Router>
-        </ThemeProvider>
     );
 };

@@ -1,66 +1,54 @@
 import React from "react";
 import { Story } from "@ladle/react";
 import VariantActionButtons from "./VariantActionButtons";
-import DownloadIcon from "@mui/icons-material/Download";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import FileCopyIcon from "@mui/icons-material/FileCopy";
-import { ContentPaste } from "@mui/icons-material";
-import { CssBaseline, ThemeProvider } from "@mui/material";
-import theme from "../../../../design/theme";
+import { PlusIcon, ArrowDownTrayIcon, AcademicCapIcon,AdjustmentsHorizontalIcon,AdjustmentsVerticalIcon,ArchiveBoxArrowDownIcon } from "@heroicons/react/24/outline";
 
 const actionsExample = [
   {
     onClick: () => console.log("Download clicked"),
-    icon: <DownloadIcon />,
+    icon: <ArrowDownTrayIcon className="h-5 w-5 text-accent" />,
     label: "Download",
   },
   {
     onClick: () => console.log("Copy clicked"),
-    icon: <ContentCopyIcon />,
+    icon: <AcademicCapIcon className="h-5 w-5 text-accent" />,
     label: "Copy",
   },
   {
     onClick: () => console.log("Extra Action 1 clicked"),
-    icon: <DownloadIcon />,
+    icon: <AdjustmentsHorizontalIcon className="h-5 w-5 text-accent" />,
     label: "Extra Action 1",
   },
   {
     onClick: () => console.log("Extra Action 2 clicked"),
-    icon: <ContentCopyIcon />,
+    icon: <AdjustmentsVerticalIcon className="h-5 w-5 text-accent" />,
     label: "Extra Action 2",
   },
   {
     onClick: () => console.log("Extra Action 3 clicked"),
-    icon: <FileCopyIcon />,
+    icon: <ArchiveBoxArrowDownIcon className="h-5 w-5 text-accent" />,
     label: "Extra Action 3",
   },
   {
     onClick: () => console.log("Extra Action 4 clicked"),
-    icon: <ContentPaste />,
+    icon: <PlusIcon className="h-5 w-5 text-accent" />,
     label: "Extra Action 4",
   },
 ];
 
-const Container: React.FC<{ width: string, children: React.ReactNode }> = ({ width, children }) => (
-  <div style={{ width}}>
-    {children}
-  </div>
-);
 
 export const VariantActionButtonsStorySmall: Story = () => (
-  <ThemeProvider theme={theme}>
-    <CssBaseline />
-    <Container width="200px">
+
+    <div className="w-1/4 bg-gray-800 text-white">
       <VariantActionButtons actions={actionsExample} />
-    </Container>
-  </ThemeProvider>
+    </div>
+
 );
 
 export const VariantActionButtonsStoryLarge: Story = () => (
-  <ThemeProvider theme={theme}>
-    <CssBaseline />
-    <Container width="700px">
+ 
+    <div className="w-1/2 bg-gray-800 text-white">
       <VariantActionButtons actions={actionsExample} />
-    </Container>
-  </ThemeProvider>
+    </div>
+  
 );
