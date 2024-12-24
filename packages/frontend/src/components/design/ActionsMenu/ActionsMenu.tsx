@@ -28,13 +28,23 @@ export const ActionsMenu: React.FC<ActionsMenuProps> = ({anchorEl, setAnchorEl, 
 
             let newLeft = rect.left;
             let newTop = rect.bottom;
+            const padding = 10; // 10px padding from edges
+
 
             if (rect.left + menuRect.width > window.innerWidth) {
-                newLeft = window.innerWidth - menuRect.width - 10; // 10px padding from edge
+                newLeft = window.innerWidth - menuRect.width - padding;
+            }
+
+            if (newLeft < padding) {
+                newLeft = padding;
             }
 
             if (rect.bottom + menuRect.height > window.innerHeight) {
                 newTop = rect.top - menuRect.height;
+            }
+
+            if (newTop < padding) {
+                newTop = padding;
             }
 
             setPosition({
