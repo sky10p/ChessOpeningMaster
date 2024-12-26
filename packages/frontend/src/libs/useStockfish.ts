@@ -1,17 +1,8 @@
 import { useState, useEffect } from "react";
 import { onStockfishMessage, postMessageToStockfish, removeStockfishMessage } from "../workers/stockfishWorker";
+import { StockfishData, Line } from "./stockfish.models";
 
-interface Line {
-  evaluation: number;
-  moves: string[];
-}
 
-interface StockfishData {
-  lines: Line[];
-  depth: number;
-  time: number;
-  maxDepth: number;
-}
 
 export type StockfishModel = "stockfish-single" | "stockfish";
 
@@ -19,13 +10,18 @@ const MAX_DEPTH = 31;
 
 const useStockfish = (
   fen: string,
-  numLines: number
+  numLines: number,
+  enabled = true
 ): StockfishData => {
   const [lines, setLines] = useState<Line[]>([]);
   const [depth, setDepth] = useState<number>(0);
   const [time, setTime] = useState<number>(0);
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     // Reset state variables
     setLines([]);
     setDepth(0);
@@ -72,7 +68,7 @@ const useStockfish = (
     return () => {
       removeStockfishMessage();
     };
-  }, [fen, numLines]);
+  }, [fen, numLines, enabled]);
 
   return { lines, depth, time, maxDepth: MAX_DEPTH };
 };

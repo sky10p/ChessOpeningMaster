@@ -1,29 +1,43 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRepertoireContext } from "../../../contexts/RepertoireContext";
-import { useFooterContext } from "../../../contexts/FooterContext";
 import { useHeaderContext } from "../../../contexts/HeaderContext";
 import { useMenuContext } from "../../../contexts/MenuContext";
 import { API_URL } from "../../../repository/constants";
 import BoardContainer from "../../../components/application/chess/board/BoardContainer";
 import BoardActionsContainer from "../../../components/application/chess/board/BoardActionsContainer";
-import VariantsInfo from "../../../components/application/chess/board/VariantsInfo";
+import {
+  EllipsisVerticalIcon,
+  BookOpenIcon,
+  ChatBubbleBottomCenterTextIcon,
+  ComputerDesktopIcon,
+  PresentationChartLineIcon,
+} from "@heroicons/react/24/outline";
+import SaveIcon from "../../../components/icons/SaveIcon";
+import { RepertoireInfo } from "../../../components/application/chess/board/RepertoireInfo";
+import VariantsIcon from "../../../components/icons/VariantsIcon";
+import { useFooterContext } from "../../../contexts/FooterContext";
 import { BoardCommentContainer } from "../../../components/application/chess/board/BoardCommentContainer";
+import VariantsInfo from "../../../components/application/chess/board/VariantsInfo";
 import StatisticsPanel from "../../../components/design/statistics/StatisticsPanel";
 import { StockfishPanel } from "../../../components/design/stockfish/StockfishPanel";
-import { ComputerDesktopIcon, EllipsisVerticalIcon, ChatBubbleBottomCenterTextIcon, PresentationChartLineIcon, BookOpenIcon } from "@heroicons/react/24/outline";
-import SaveIcon from "../../../components/icons/SaveIcon";
-import VariantsIcon from "../../../components/icons/VariantsIcon";
 
 type FooterSection = "variants" | "comments" | "statistics" | "stockfish";
 
 const EditRepertoireViewContainer: React.FC = () => {
   const navigate = useNavigate();
   const [panelSelected, setPanelSelected] = useState<FooterSection>("variants");
-  const { repertoireId, repertoireName, saveRepertory, getPgn, chess } = useRepertoireContext();
+
+  const { repertoireId, repertoireName, saveRepertory, getPgn, chess } =
+    useRepertoireContext();
   const { toggleMenu } = useMenuContext();
-  const { addIcon: addIconHeader, removeIcon: removeIconHeader } = useHeaderContext();
-  const { addIcon: addIconFooter, removeIcon: removeIconFooter, setIsVisible } = useFooterContext();
+  const { addIcon: addIconHeader, removeIcon: removeIconHeader } =
+    useHeaderContext();
+  const {
+    addIcon: addIconFooter,
+    removeIcon: removeIconFooter,
+    setIsVisible,
+  } = useFooterContext();
 
   const toggleMenuHeader = (event: React.MouseEvent<HTMLElement>) => {
     toggleMenu(event.currentTarget || null, [
@@ -46,7 +60,7 @@ const EditRepertoireViewContainer: React.FC = () => {
         },
       },
     ]);
-  }
+  };
 
   useEffect(() => {
     addIconHeader({
@@ -123,13 +137,16 @@ const EditRepertoireViewContainer: React.FC = () => {
           <BoardActionsContainer />
         </div>
       </div>
-      
+
       <div className="col-span-12 sm:col-span-6 flex flex-col items-start overflow-auto scrollbar-custom border border-secondary rounded bg-gray-800">
         {panelSelected === "variants" && <VariantsInfo />}
         {panelSelected === "comments" && <BoardCommentContainer />}
-        {panelSelected === "statistics" && <StatisticsPanel fen={chess.fen()} />}
-        {panelSelected === "stockfish" && <StockfishPanel fen={chess.fen()} numLines={3} />}
-  
+        {panelSelected === "statistics" && (
+          <StatisticsPanel fen={chess.fen()} />
+        )}
+        {panelSelected === "stockfish" && (
+          <StockfishPanel fen={chess.fen()} numLines={3} />
+        )}
       </div>
     </div>
   );

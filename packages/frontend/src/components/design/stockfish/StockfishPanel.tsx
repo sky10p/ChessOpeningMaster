@@ -1,5 +1,6 @@
 import React from "react";
 import useStockfish from "../../../libs/useStockfish";
+import { uciToSan } from "../../../utils/chess/uciToSan";
 
 interface StockfishPanelProps {
   fen: string;
@@ -17,7 +18,7 @@ export const StockfishPanel: React.FC<StockfishPanelProps> = ({
       <div className="mb-2 text-sm text-gray-400">
         <strong>Depth:</strong> {depth}/{maxDepth} <strong>Time:</strong> {time}s
       </div>
-      <div className="overflow-y-auto max-h-72">
+      <div className="overflow-y-auto max-h-full">
         <table className="w-full text-left text-sm text-gray-400">
           <thead className="bg-gray-700 text-gray-300">
             <tr>
@@ -31,7 +32,7 @@ export const StockfishPanel: React.FC<StockfishPanelProps> = ({
               <tr key={index} className="border-b border-gray-700">
                 <td className="py-2 px-4">{index + 1}</td>
                 <td className="py-2 px-4">{line.evaluation}</td>
-                <td className="py-2 px-4">{line.moves.join(" ")}</td>
+                <td className="py-2 px-4">{uciToSan(line.moves, fen).join(" ")}</td>
               </tr>
             ))}
           </tbody>
