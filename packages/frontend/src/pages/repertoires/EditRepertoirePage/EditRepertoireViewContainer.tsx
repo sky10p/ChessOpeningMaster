@@ -9,13 +9,13 @@ import BoardContainer from "../../../components/application/chess/board/BoardCon
 import BoardActionsContainer from "../../../components/application/chess/board/BoardActionsContainer";
 import VariantsInfo from "../../../components/application/chess/board/VariantsInfo";
 import { BoardCommentContainer } from "../../../components/application/chess/board/BoardCommentContainer";
-import LichessPanel from "../../../components/design/lichess/LichessPanel";
+import StatisticsPanel from "../../../components/design/statistics/StatisticsPanel";
 import { StockfishPanel } from "../../../components/design/stockfish/StockfishPanel";
 import { ComputerDesktopIcon, EllipsisVerticalIcon, ChatBubbleBottomCenterTextIcon, PresentationChartLineIcon, BookOpenIcon } from "@heroicons/react/24/outline";
 import SaveIcon from "../../../components/icons/SaveIcon";
 import VariantsIcon from "../../../components/icons/VariantsIcon";
 
-type FooterSection = "variants" | "comments" | "lichess" | "stockfish";
+type FooterSection = "variants" | "comments" | "statistics" | "stockfish";
 
 const EditRepertoireViewContainer: React.FC = () => {
   const navigate = useNavigate();
@@ -89,10 +89,10 @@ const EditRepertoireViewContainer: React.FC = () => {
       onClick: () => setPanelSelected("comments"),
     });
     addIconFooter({
-      key: "lichess",
-      label: "Lichess",
+      key: "statistics",
+      label: "Statistics",
       icon: <PresentationChartLineIcon className="h-6 w-6" />,
-      onClick: () => setPanelSelected("lichess"),
+      onClick: () => setPanelSelected("statistics"),
     });
     addIconFooter({
       key: "stockfish",
@@ -105,7 +105,7 @@ const EditRepertoireViewContainer: React.FC = () => {
       setIsVisible(false);
       removeIconFooter("variants");
       removeIconFooter("comments");
-      removeIconFooter("lichess");
+      removeIconFooter("statistics");
       removeIconFooter("stockfish");
     };
   }, []);
@@ -127,7 +127,7 @@ const EditRepertoireViewContainer: React.FC = () => {
       <div className="col-span-12 sm:col-span-6 flex flex-col items-start overflow-auto scrollbar-custom border border-secondary rounded bg-gray-800">
         {panelSelected === "variants" && <VariantsInfo />}
         {panelSelected === "comments" && <BoardCommentContainer />}
-        {panelSelected === "lichess" && <LichessPanel fen={chess.fen()} />}
+        {panelSelected === "statistics" && <StatisticsPanel fen={chess.fen()} />}
         {panelSelected === "stockfish" && <StockfishPanel fen={chess.fen()} numLines={3} />}
   
       </div>

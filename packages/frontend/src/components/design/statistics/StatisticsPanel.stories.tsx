@@ -1,6 +1,6 @@
 import React from "react";
 import { Story } from "@ladle/react";
-import LichessPanel from "./LichessPanel";
+import StatisticsPanel from "./StatisticsPanel";
 
 import "../../../index.css"
 
@@ -13,18 +13,18 @@ const customPositionArgs = {
   fen: "r1bqkbnr/pppppppp/n7/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 2 2", // Custom position
 };
 
-export const LichessPanelStoryDefault: Story = () => (
+export const StatisticsPanelStoryDefault: Story = () => (
 
     <div className="w-1/2 bg-background">
-      <LichessPanel {...defaultArgs} />
+      <StatisticsPanel {...defaultArgs} />
     </div>
 
 );
 
-export const LichessPanelStoryCustomPosition: Story = () => (
+export const StatisticsPanelStoryCustomPosition: Story = () => (
 
     <div className="w-1/2 bg-background">
-      <LichessPanel {...customPositionArgs} />
+      <StatisticsPanel {...customPositionArgs} />
     </div>
 
 );

@@ -6,7 +6,7 @@ import {
 } from "../../../repository/lichess/lichessRepository";
 import ResultBar from "./ResultBar";
 
-interface LichessPanelProps {
+interface StatisticsPanelProps {
   fen: string;
 }
 
@@ -24,7 +24,7 @@ export interface Move {
   };
 }
 
-const LichessPanel: React.FC<LichessPanelProps> = ({ fen }) => {
+const StatisticsPanel: React.FC<StatisticsPanelProps> = ({ fen }) => {
   const ratingOptions = [400, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2500];
   const [moves, setMoves] = useState<MoveLichess[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -158,4 +158,4 @@ const LichessPanel: React.FC<LichessPanelProps> = ({ fen }) => {
   );
 };
 
-export default LichessPanel;
+export default StatisticsPanel;
