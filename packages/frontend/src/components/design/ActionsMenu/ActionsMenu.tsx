@@ -2,15 +2,15 @@ import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 
 interface ActionsMenuProps {
     anchorEl: HTMLElement | null;
-    setAnchorEl: React.Dispatch<React.SetStateAction<HTMLElement | null>>;
+    closeMenu: () => void;
     items: {name: string, action: () => void}[];
 }
 
 
-export const ActionsMenu: React.FC<ActionsMenuProps> = ({anchorEl, setAnchorEl, items}) => {
+export const ActionsMenu: React.FC<ActionsMenuProps> = ({anchorEl, closeMenu, items}) => {
     const open = Boolean(anchorEl);
     const handleClose = () => {
-        setAnchorEl(null);
+        closeMenu();
     };
 
     const handleClick = (event: React.MouseEvent<HTMLElement>, action: () => void) => {
@@ -58,7 +58,12 @@ export const ActionsMenu: React.FC<ActionsMenuProps> = ({anchorEl, setAnchorEl, 
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+            if (
+                menuRef.current &&
+                !menuRef.current.contains(event.target as Node) &&
+                anchorEl &&
+                !anchorEl.contains(event.target as Node)
+            ) {
                 handleClose();
             }
         };

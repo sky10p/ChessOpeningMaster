@@ -313,54 +313,66 @@ export const DialogContextProvider = ({
       }}
     >
       {children}
-      <TextDialog
-        open={openTextDialog}
-        initialValue=""
-        onClose={handleDialogClose}
-        contentText={contentText}
-        onTextConfirm={handleTextConfirm}
-        title={title}
-      ></TextDialog>
-      <ConfirmDialog
-        open={openConfirmDialog}
-        onClose={handleDialogClose}
-        contentText={contentText}
-        onConfirm={handleConfirm}
-        title={title}
-      ></ConfirmDialog>
-      <SelectTrainVariantsDialog
-        open={openTrainVariantsDialog}
-        contentText={contentText}
-        trainVariants={trainVariants}
-        onClose={handleDialogClose}
-        onConfirm={handleTrainVariantsConfirm}
-        title={title}
-        repertoireId={repertoireId}
-      ></SelectTrainVariantsDialog>
-      <SelectNextMoveDialog
-        open={openSelectNextMoveDialog}
-        contentText={contentText}
-        nextMovements={nextMovements}
-        onClose={handleDialogClose}
-        onConfirm={handleNextMoveConfirm}
-        title={title}
-      ></SelectNextMoveDialog>
-      <RepertoireDialog
-        open={openRepertoireDialog}
-        contentText={contentText}
-        repertoires={repertoires}
-        onClose={handleDialogClose}
-        onConfirm={handleRepertoireConfirm}
-        title={title}
-      ></RepertoireDialog>
-      <SelectVariantsDialog
-        open={openSelectVariantsDialog}
-        contentText={contentText}
-        variants={variants}
-        onClose={handleDialogClose}
-        onConfirm={handleVariantsConfirm}
-        title={title}
-      ></SelectVariantsDialog>
+      {openTextDialog && (
+        <TextDialog
+          open={openTextDialog}
+          initialValue=""
+          onClose={handleDialogClose}
+          contentText={contentText}
+          onTextConfirm={handleTextConfirm}
+          title={title}
+        />
+      )}
+      {openConfirmDialog && (
+        <ConfirmDialog
+          open={openConfirmDialog}
+          onClose={handleDialogClose}
+          contentText={contentText}
+          onConfirm={handleConfirm}
+          title={title}
+        />
+      )}
+      {openTrainVariantsDialog && (
+        <SelectTrainVariantsDialog
+          open={openTrainVariantsDialog}
+          contentText={contentText}
+          trainVariants={trainVariants}
+          onClose={handleDialogClose}
+          onConfirm={handleTrainVariantsConfirm}
+          title={title}
+          repertoireId={repertoireId}
+        />
+      )}
+      {openSelectNextMoveDialog && (
+        <SelectNextMoveDialog
+          open={openSelectNextMoveDialog}
+          contentText={contentText}
+          nextMovements={nextMovements}
+          onClose={handleDialogClose}
+          onConfirm={handleNextMoveConfirm}
+          title={title}
+        />
+      )}
+      {openRepertoireDialog && (
+        <RepertoireDialog
+          open={openRepertoireDialog}
+          contentText={contentText}
+          repertoires={repertoires}
+          onClose={handleDialogClose}
+          onConfirm={handleRepertoireConfirm}
+          title={title}
+        />
+      )}
+      {openSelectVariantsDialog && (
+        <SelectVariantsDialog
+          open={openSelectVariantsDialog}
+          contentText={contentText}
+          variants={variants}
+          onClose={handleDialogClose}
+          onConfirm={handleVariantsConfirm}
+          title={title}
+        />
+      )}
       {numberDialogProps && (
         <NumberDialog
           open={openNumberDialog}

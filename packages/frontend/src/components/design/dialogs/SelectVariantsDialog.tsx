@@ -152,11 +152,11 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
     <Dialog
       open={open}
       onClose={() => handleClose(true)}
-      className="fixed z-10 inset-0 overflow-y-auto"
+      className="fixed z-50 inset-0 overflow-y-auto"
     >
       <DialogBackdrop className="fixed inset-0 bg-black opacity-30" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="bg-background rounded max-w-2xl mx-auto p-6 z-20 max-h-screen overflow-auto">
+        <DialogPanel className="bg-background rounded max-w-2xl mx-auto p-6 z-50 max-h-screen overflow-auto">
           <DialogTitle className="text-xl font-bold text-textLight">
             {title}
           </DialogTitle>
@@ -172,7 +172,6 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
           />
           {multiple && (
             <div className="mb-4">
-             
               <UiCheckbox
                 label="Select All"
                 checked={isAllSelected}
@@ -187,8 +186,12 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
               <div key={groupName} className="mb-4">
                 <div className="flex items-center">
                   {multiple && (
-                    
-                    <UiCheckbox checked={isGroupSelected(groupName)} indeterminate={isSomeOfGroupSelected(groupName)} onChange={() => handleSelectAllGroup(groupName)} className="ml-2 text-textLight" />
+                    <UiCheckbox
+                      checked={isGroupSelected(groupName)}
+                      indeterminate={isSomeOfGroupSelected(groupName)}
+                      onChange={() => handleSelectAllGroup(groupName)}
+                      className="ml-2 text-textLight"
+                    />
                   )}
                   <h3 className="ml-2 text-lg font-semibold text-textLight">
                     {groupName}

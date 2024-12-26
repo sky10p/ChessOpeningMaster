@@ -13,11 +13,11 @@ export const AppContext: React.FC<{ children: React.ReactNode }> = ({
     <AlertContextProvider>
       <DialogContextProvider>
         <MenuContextProvider>
-        <NavbarContextProvider>
-          <HeaderContextProvider>
-            <FooterContextProvider>{children}</FooterContextProvider>
-          </HeaderContextProvider>
-        </NavbarContextProvider>
+          <NavbarContextProvider>
+            <HeaderContextProvider>
+              <FooterContextProvider>{children}</FooterContextProvider>
+            </HeaderContextProvider>
+          </NavbarContextProvider>
         </MenuContextProvider>
       </DialogContextProvider>
     </AlertContextProvider>

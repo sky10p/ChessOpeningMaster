@@ -21,7 +21,7 @@ import { API_URL } from "../../../repository/constants";
 const NavbarContainer: React.FC = () => {
   const { open, setOpen, repertoires, updateRepertoires } = useNavbarContext();
   const { showConfirmDialog, showTextDialog } = useDialogContext();
-  const { showMenu } = useMenuContext();
+  const { toggleMenu } = useMenuContext();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   useEffect(() => {
@@ -81,7 +81,7 @@ const NavbarContainer: React.FC = () => {
     name: repertoire.name,
     url: `/repertoire/${repertoire._id}`,
     onActionClick: (event) =>
-      showMenu(event.currentTarget, [
+      toggleMenu(event.currentTarget, [
         {
           name: "Move to Up",
           action: () => handleOrderUp(repertoire),

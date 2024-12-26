@@ -176,11 +176,11 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
     <Dialog
       open={open}
       onClose={() => handleClose(true)} // changed
-      className="fixed z-10 inset-0 overflow-y-auto"
+      className="fixed z-50 inset-0 overflow-y-auto"
     >
       <DialogBackdrop className="fixed inset-0 bg-black opacity-30" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="bg-background rounded w-screen md:w-auto xl:max-w-5xl mx-auto p-6 z-20 max-h-screen overflow-auto">
+        <DialogPanel className="bg-background rounded w-screen md:w-auto xl:max-w-5xl mx-auto p-6 z-50 max-h-screen overflow-auto">
           <DialogTitle className="text-xl font-bold text-textLight">
             {title}
           </DialogTitle>

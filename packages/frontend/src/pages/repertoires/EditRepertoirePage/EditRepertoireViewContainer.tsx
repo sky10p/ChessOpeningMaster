@@ -21,12 +21,12 @@ const EditRepertoireViewContainer: React.FC = () => {
   const navigate = useNavigate();
   const [panelSelected, setPanelSelected] = useState<FooterSection>("variants");
   const { repertoireId, repertoireName, saveRepertory, getPgn, chess } = useRepertoireContext();
-  const { showMenu } = useMenuContext();
-  const { addIcon: addIconHeader, removeIcon: removeIconHeader, changeIconCallback } = useHeaderContext();
+  const { toggleMenu } = useMenuContext();
+  const { addIcon: addIconHeader, removeIcon: removeIconHeader } = useHeaderContext();
   const { addIcon: addIconFooter, removeIcon: removeIconFooter, setIsVisible } = useFooterContext();
 
-  const showMenuHeader = (event: React.MouseEvent<HTMLElement>) => {
-    showMenu(event.currentTarget || null, [
+  const toggleMenuHeader = (event: React.MouseEvent<HTMLElement>) => {
+    toggleMenu(event.currentTarget || null, [
       {
         name: "Download PGN",
         action: () => {
@@ -46,8 +46,7 @@ const EditRepertoireViewContainer: React.FC = () => {
         },
       },
     ]);
-  };
-
+  }
 
   useEffect(() => {
     addIconHeader({
@@ -65,7 +64,7 @@ const EditRepertoireViewContainer: React.FC = () => {
     addIconHeader({
       key: "moreOptions",
       icon: <EllipsisVerticalIcon />,
-      onClick: showMenuHeader,
+      onClick: toggleMenuHeader,
     });
 
     return () => {
@@ -73,17 +72,7 @@ const EditRepertoireViewContainer: React.FC = () => {
       removeIconHeader("saveRepertoire");
       removeIconHeader("moreOptions");
     };
-  }, []);
-
-  useEffect(() => {
-    changeIconCallback("saveRepertoire", saveRepertory);
-  }, [saveRepertory]);
-
-  useEffect(() => {
-    changeIconCallback("moreOptions", (event: React.MouseEvent<HTMLElement>) => {
-      showMenuHeader(event);
-    });
-  }, [getPgn]);
+  }, [navigate, repertoireId, saveRepertory, getPgn, toggleMenu]);
 
   useEffect(() => {
     setIsVisible(true);
