@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo } from "react";
-import { Turn } from "../../../common/src/types/Orientation";
 import { useRepertoireContext } from "./RepertoireContext";
 import { MoveVariantNode } from "../models/VariantNode";
 import { TrainVariant } from "../models/chess.models";
 import { deepEqual } from "../utils/deepEqual";
 import { saveTrainVariantInfo } from "../repository/repertoires/trainVariants";
+import { Turn } from "@chess-opening-master/common";
 
 interface TrainRepertoireContextProps {
   turn: Turn;
