@@ -14,10 +14,14 @@ export const theme = {
       scrollbarThumb: "#475569", /* Color del pulgar de la barra de desplazamiento */
       scrollbarTrack: "#1e293b", /* Color de la pista de la barra de desplazamiento */
       scrollbarThumbHover: "#64748b", /* Color del pulgar de la barra de desplazamiento al pasar el ratón */
+      success: "#10B981", /* Verde para entrenar */
     },
     spacing: {
       'safe-bottom': 'env(safe-area-inset-bottom)',
       'screen-dynamic': 'calc(var(--vh, 1vh) * 100)',
+    },
+    boxShadow: {
+      'lg': '0 10px 15px rgba(0, 0, 0, 0.1)',
     },
   },
 };
