@@ -5,10 +5,9 @@ import {
   DisclosurePanel,
 } from "@headlessui/react";
 import { ChevronUpIcon } from "@heroicons/react/24/solid";
-import { GroupedVariant } from "./models";
+import { GroupedVariant, TrainVariantInfo } from "./models";
 import { VariantsProgressBar } from "./VariantsProgressBar";
 import { getTextColor } from "./utils";
-import { TrainVariantInfo } from "../../../models/chess.models";
 import { UiCheckbox } from "../../basic/UiCheckbox";
 
 interface SelectTrainVariantProps {

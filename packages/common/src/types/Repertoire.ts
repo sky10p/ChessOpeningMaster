@@ -1,4 +1,5 @@
 import { IMoveNode } from "./MoveNode";
+import { TrainVariantInfo } from "./Variants";
 
 export interface IRepertoire {
     _id: string;
@@ -6,4 +7,8 @@ export interface IRepertoire {
     moveNodes: IMoveNode;
     orientation: "white" | "black";
     order: number;
+}
+
+export interface IRepertoireDashboard  extends IRepertoire {
+    variantsInfo:TrainVariantInfo[];
 }

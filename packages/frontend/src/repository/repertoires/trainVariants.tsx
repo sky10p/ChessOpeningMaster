@@ -1,4 +1,4 @@
-import { TrainVariantInfo } from "../../models/chess.models";
+import { TrainVariantInfo } from "@chess-opening-master/common";
 import { API_URL } from "../constants";
 
 export const saveTrainVariantInfo = async (

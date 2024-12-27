@@ -1,4 +1,4 @@
-import { BoardOrientation, IMoveNode } from "@chess-opening-master/common";
+import { BoardOrientation, IMoveNode, IRepertoireDashboard } from "@chess-opening-master/common";
 import { API_URL } from "../constants";
 
 export const getRepertoires = async () => {
@@ -6,6 +6,12 @@ export const getRepertoires = async () => {
   const data = await response.json();
   return data;
 };
+
+export const getFullInfoRepertoires = async (): Promise<IRepertoireDashboard[]> => {
+  const response = await fetch(`${API_URL}/repertoires/full`);
+  const data = await response.json();
+  return data;
+}
 
 export const getRepertoire = async (id: string) => {
   const response = await fetch(`${API_URL}/repertoires/${id}`);

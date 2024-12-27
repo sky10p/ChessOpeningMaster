@@ -23,10 +23,33 @@ app.get("/repertoires", async (req, res) => {
     .collection("repertoires")
     .find({})
     .sort({ order: 1 })
-    .project({
-      name: 1,
-      _id: 1,
-    })
+    .project({ name: 1, _id: 1 })
+    .toArray();
+  res.json(repertoires);
+});
+
+app.get("/repertoires/full", async (req, res) => {
+  await client.connect();
+  const db = client.db("chess-opening-master");
+  const repertoires = await db
+    .collection("repertoires")
+    .aggregate([
+      { $sort: { order: 1 } },
+      {
+        $lookup: {
+          from: "variantsInfo",
+          let: { repertoireId: { $toString: "$_id" } },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$repertoireId", "$$repertoireId"] },
+              },
+            },
+          ],
+          as: "variantsInfo",
+        },
+      },
+    ])
     .toArray();
   res.json(repertoires);
 });
@@ -158,7 +181,9 @@ app.post("/repertoires/:id/variantsInfo", async (req, res) => {
     .collection("variantsInfo")
     .findOneAndUpdate(
       { _id: new ObjectId(id) },
-      { $set: { repertoireId: id, variantName, errors, lastDate: currentDate } },
+      {
+        $set: { repertoireId: id, variantName, errors, lastDate: currentDate },
+      },
       { returnDocument: "after" }
     );
 

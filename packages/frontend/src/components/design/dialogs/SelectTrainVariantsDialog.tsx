@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { TrainVariant, TrainVariantInfo } from "../../../models/chess.models";
+import { TrainVariant } from "../../../models/chess.models";
 import { SelectTrainVariants } from "../SelectTrainVariants/SelectTrainVariants";
 import { getTrainVariantInfo } from "../../../repository/repertoires/trainVariants";
 import {
@@ -10,6 +10,7 @@ import {
   Description,
 } from "@headlessui/react";
 import { UiCheckbox } from "../../basic/UiCheckbox";
+import { TrainVariantInfo } from "../SelectTrainVariants/models";
 
 interface SelectTrainVariantsDialogProps {
   open: boolean;
