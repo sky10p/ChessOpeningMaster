@@ -1,44 +1,76 @@
-import React from "react";
-import { IRepertoire } from "../../../common/src/types/Repertoire";
+import React, { useCallback, useReducer } from "react";
 import { getRepertoires } from "../repository/repertoires/repertoires";
+import { IRepertoire } from "@chess-opening-master/common";
 
-export type NavbarContextProps = {
-    open: boolean;
-    setOpen: (open: boolean) => void;
-    repertoires: IRepertoire[];
-    updateRepertoires: () => void;
-    updatedRepertoires: boolean;
+// Define initial state and reducer
+const initialState = {
+    open: false,
+    repertoires: [] as IRepertoire[],
+    updatedRepertoires: false,
 };
-export const NavbarContext = React.createContext<NavbarContextProps | null>(null);
 
-export const useNavbarContext = (): NavbarContextProps => {
-    const context = React.useContext(NavbarContext);
+type Action =
+    | { type: 'SET_OPEN'; payload: boolean }
+    | { type: 'SET_REPERTOIRES'; payload: IRepertoire[] }
+    | { type: 'SET_UPDATED_REPERTOIRES'; payload: boolean };
 
-    if (context === null) {
-        throw new Error("useNavbarContext must be used within a NavbarContextProvider");
+const reducer = (state: typeof initialState, action: Action) => {
+    switch (action.type) {
+        case 'SET_OPEN':
+            return { ...state, open: action.payload };
+        case 'SET_REPERTOIRES':
+            return { ...state, repertoires: action.payload, updatedRepertoires: true };
+        case 'SET_UPDATED_REPERTOIRES':
+            return { ...state, updatedRepertoires: action.payload };
+        default:
+            return state;
     }
+};
 
+// Create separate contexts for state and dispatch
+export const NavbarStateContext = React.createContext<typeof initialState | null>(null);
+export const NavbarDispatchContext = React.createContext<{
+    setOpen: (open: boolean) => void;
+    updateRepertoires: () => void;
+} | null>(null);
+
+export const useNavbarState = (): typeof initialState => {
+    const state = React.useContext(NavbarStateContext);
+    if (state === null) {
+        throw new Error("useNavbarState must be used within a NavbarContextProvider");
+    }
+    return state;
+}
+
+export const useNavbarDispatch = () => {
+    const context = React.useContext(NavbarDispatchContext);
+    if (context === null) {
+        throw new Error("useNavbarDispatch must be used within a NavbarContextProvider");
+    }
     return context;
 }
 
 export const NavbarContextProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
-    const [open, setOpen] = React.useState(false);
-    const [repertoires, setRepertoires] = React.useState<IRepertoire[]>([]);
-    const [updatedRepertoires, setUpdatedRepertoires] = React.useState(false);
+    const [state, dispatch] = useReducer(reducer, initialState);
 
     const updateRepertoires = async () => {
         const repertoires = await getRepertoires();
-        setRepertoires(repertoires);
-        setUpdatedRepertoires(true);
+        dispatch({ type: 'SET_REPERTOIRES', payload: repertoires });
     };
+
+    const setOpen = useCallback((open: boolean) => {
+        dispatch({ type: 'SET_OPEN', payload: open });
+    }, []);
 
     React.useEffect(() => {
         updateRepertoires();
     }, []);
 
     return (
-        <NavbarContext.Provider value={{ open, setOpen, repertoires, updateRepertoires, updatedRepertoires }}>
-            {children}
-        </NavbarContext.Provider>
+        <NavbarStateContext.Provider value={state}>
+            <NavbarDispatchContext.Provider value={{ setOpen, updateRepertoires}}>
+                {children}
+            </NavbarDispatchContext.Provider>
+        </NavbarStateContext.Provider>
     );
 };

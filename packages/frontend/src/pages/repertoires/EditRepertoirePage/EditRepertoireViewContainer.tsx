@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRepertoireContext } from "../../../contexts/RepertoireContext";
-import { useHeaderContext } from "../../../contexts/HeaderContext";
+import { useHeaderDispatch } from "../../../contexts/HeaderContext";
 import { useMenuContext } from "../../../contexts/MenuContext";
 import { API_URL } from "../../../repository/constants";
 import BoardContainer from "../../../components/application/chess/board/BoardContainer";
@@ -15,12 +15,12 @@ import {
 } from "@heroicons/react/24/outline";
 import SaveIcon from "../../../components/icons/SaveIcon";
 import VariantsIcon from "../../../components/icons/VariantsIcon";
-import { useFooterContext } from "../../../contexts/FooterContext";
 import { BoardCommentContainer } from "../../../components/application/chess/board/BoardCommentContainer";
 import VariantsInfo from "../../../components/application/chess/board/VariantsInfo";
 import StatisticsPanel from "../../../components/design/statistics/StatisticsPanel";
 import { StockfishPanel } from "../../../components/design/stockfish/StockfishPanel";
 import { RepertoireInfo } from "../../../components/application/chess/board/RepertoireInfo";
+import { useFooterDispatch } from "../../../contexts/FooterContext";
 
 type FooterSection = "variants" | "comments" | "statistics" | "stockfish";
 
@@ -32,12 +32,12 @@ const EditRepertoireViewContainer: React.FC = () => {
     useRepertoireContext();
   const { toggleMenu } = useMenuContext();
   const { addIcon: addIconHeader, removeIcon: removeIconHeader } =
-    useHeaderContext();
+    useHeaderDispatch();
   const {
     addIcon: addIconFooter,
     removeIcon: removeIconFooter,
     setIsVisible,
-  } = useFooterContext();
+  } = useFooterDispatch();
 
   const toggleMenuHeader = (event: React.MouseEvent<HTMLElement>) => {
     toggleMenu(event.currentTarget || null, [

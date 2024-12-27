@@ -1,9 +1,9 @@
 import React from 'react';
-import { useFooterContext } from '../../../contexts/FooterContext';
 import Footer from '../../design/Footer/Footer';
+import { useFooterState } from '../../../contexts/FooterContext';
 
 const FooterContainer = () => {
-  const {isVisible, icons} = useFooterContext();
+  const {isVisible, icons} = useFooterState();
 
   return (
     <Footer isVisible={isVisible} icons={icons} />

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { Alert } from "../components/design/Alert/Alert";
 import { AlertColor } from "../components/design/Alert/models";
 
@@ -29,32 +29,38 @@ export const AlertContextProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [open, setOpen] = React.useState(false);
-  const [alertMessage, setAlertMessage] = React.useState("");
-  const [alertSeverity, setAlertSeverity] =
-    React.useState<AlertColor>("success");
-  const [autoHideDuration, setAutoHideDuration] = React.useState(6000);
+  const [alertState, setAlertState] = React.useState({
+    open: false,
+    alertMessage: "",
+    alertSeverity: "success" as AlertColor,
+    autoHideDuration: 6000,
+  });
 
-  const showAlert = (
-    message: string,
-    severity: AlertColor,
-    autoHideDuration?: number
-  ) => {
-    setAlertMessage(message);
-    setAlertSeverity(severity);
-    setAutoHideDuration(autoHideDuration ?? 6000);
-    setOpen(true);
-  };
+  const showAlert = useCallback(
+    (
+      message: string,
+      severity: AlertColor,
+      autoHideDuration?: number
+    ) => {
+      setAlertState({
+        open: true,
+        alertMessage: message,
+        alertSeverity: severity,
+        autoHideDuration: autoHideDuration ?? 6000,
+      });
+    },
+    []
+  );
 
   return (
     <AlertContext.Provider value={{ showAlert }}>
       {children}
       <Alert
-        open={open}
-        setOpen={setOpen}
-        alertMessage={alertMessage}
-        alertSeverity={alertSeverity}
-        autoHideDuration={autoHideDuration}
+        open={alertState.open}
+        setOpen={() => setAlertState({ ...alertState, open: false })}
+        alertMessage={alertState.alertMessage}
+        alertSeverity={alertState.alertSeverity}
+        autoHideDuration={alertState.autoHideDuration}
       ></Alert>
     </AlertContext.Provider>
   );

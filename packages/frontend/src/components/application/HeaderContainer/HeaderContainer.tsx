@@ -1,11 +1,11 @@
 import React from "react";
-import { useNavbarContext } from "../../../contexts/NavbarContext";
-import { useHeaderContext } from "../../../contexts/HeaderContext";
 import Header from "../../design/Header/Header";
+import { useHeaderState } from "../../../contexts/HeaderContext";
+import { useNavbarDispatch } from "../../../contexts/NavbarContext";
 
 const HeaderContainer: React.FC = () => {
-  const { setOpen } = useNavbarContext();
-  const { icons, isSaving } = useHeaderContext();
+  const { setOpen } = useNavbarDispatch();
+  const { icons, isSaving } = useHeaderState();
 
   return (
     <Header setOpenNavbar={setOpen} isSaving={isSaving} icons={icons} />

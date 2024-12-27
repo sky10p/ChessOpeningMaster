@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRepertoireContext } from "../../../contexts/RepertoireContext";
-import { useFooterContext } from "../../../contexts/FooterContext";
 import { useTrainRepertoireContext } from "../../../contexts/TrainRepertoireContext";
-import { useHeaderContext } from "../../../contexts/HeaderContext";
+import { useHeaderDispatch } from "../../../contexts/HeaderContext";
 import { useDialogContext } from "../../../contexts/DialogContext";
 import { TrainVariant } from "../../../models/chess.models";
 import { getSpacedRepetitionVariants } from "../../../utils/chess/spacedRepetition/spacedRepetition";
@@ -14,15 +13,16 @@ import TrainInfo from "../../../components/design/chess/train/TrainInfo";
 import HelpInfo from "../../../components/design/chess/train/HelpInfo";
 import { CheckListIcon } from "../../../components/icons/CheckListIcon";
 import { ExamIcon } from "../../../components/icons/ExamIcon";
+import { useFooterDispatch } from "../../../contexts/FooterContext";
 
 const TrainRepertoireViewContainer: React.FC = () => {
   const [panelSelected, setPanelSelected] = React.useState<"info" | "help" | "trainComments">("info");
   const navigate = useNavigate();
   const { repertoireId, repertoireName, currentMoveNode, variants } = useRepertoireContext();
   const { showTrainVariantsDialog, showNumberDialog } = useDialogContext();
-  const { addIcon: addIconHeader, removeIcon: removeIconHeader } = useHeaderContext();
+  const { addIcon: addIconHeader, removeIcon: removeIconHeader } = useHeaderDispatch();
   const { trainVariants, chooseTrainVariantsToTrain, allowedMoves, isYourTurn, turn, finishedTrain, lastTrainVariant } = useTrainRepertoireContext();
-  const { addIcon: addIconFooter, removeIcon: removeIconFooter, setIsVisible } = useFooterContext();
+  const { addIcon: addIconFooter, removeIcon: removeIconFooter, setIsVisible } = useFooterDispatch();
 
   useEffect(() => {
     const headerIcons = [

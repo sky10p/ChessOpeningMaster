@@ -3,12 +3,12 @@ import React, { useCallback, useEffect, useState } from "react";
 import { MoveVariantNode } from "../models/VariantNode";
 import { IMoveNode } from "../../../common/src/types/MoveNode";
 import { Variant } from "../models/chess.models";
-import { BoardOrientation } from "../../../common/src/types/Orientation";
 import { useAlertContext } from "./AlertContext";
 import { putRepertoire } from "../repository/repertoires/repertoires";
 import { toPGN } from "../utils/chess/pgn/pgn.utils";
 import { useDialogContext } from "./DialogContext";
-import { useHeaderContext } from "./HeaderContext";
+import { useHeaderDispatch } from "./HeaderContext";
+import { BoardOrientation } from "@chess-opening-master/common";
 
 interface RepertoireContextProps {
   chess: Chess;
@@ -75,7 +75,7 @@ export const RepertoireContextProvider: React.FC<
     useState<BoardOrientation>(initialOrientation);
   const [hasChanges, setHasChanges] = useState<boolean>(false);
 
-  const { setIsSaving } = useHeaderContext();
+  const { setIsSaving } = useHeaderDispatch();
 
   const { showSelectNextMoveDialog } = useDialogContext();
 

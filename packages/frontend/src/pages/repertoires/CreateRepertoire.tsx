@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { createRepertoire } from "../../repository/repertoires/repertoires";
-import { useNavbarContext } from "../../contexts/NavbarContext";
 import { useNavigate } from "react-router-dom";
+import { useNavbarDispatch } from "../../contexts/NavbarContext";
 
 const CreateRepertoire: React.FC = () => {
   const [repertoireName, setRepertoireName] = useState("");
-  const { setOpen, updateRepertoires } = useNavbarContext();
+  const { setOpen, updateRepertoires } = useNavbarDispatch();
   const navigate = useNavigate();
   useEffect(() => {
     setOpen(false);

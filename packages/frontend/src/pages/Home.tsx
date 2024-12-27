@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
-import { useNavbarContext } from "../contexts/NavbarContext";
 import { useNavigate } from "react-router-dom";
+import { useNavbarState } from "../contexts/NavbarContext";
 
 const Home = () => {
-  const { repertoires, updatedRepertoires } = useNavbarContext();
+  const { repertoires, updatedRepertoires } = useNavbarState();
   const navigate = useNavigate();
 
   useEffect(() => {

@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { PlusIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 
 import { IRepertoire } from "../../../../../common/src/types/Repertoire";
-import { useNavbarContext } from "../../../contexts/NavbarContext";
 import {
   deleteRepertoire,
   duplicateRepertoire,
@@ -15,11 +14,13 @@ import { useDialogContext } from "../../../contexts/DialogContext";
 import { useMenuContext } from "../../../contexts/MenuContext";
 import { Navbar } from "../../design/Navbar/Navbar";
 import { API_URL } from "../../../repository/constants";
+import { useNavbarDispatch, useNavbarState } from "../../../contexts/NavbarContext";
 
 
 
 const NavbarContainer: React.FC = () => {
-  const { open, setOpen, repertoires, updateRepertoires } = useNavbarContext();
+  const { open, repertoires } = useNavbarState();
+  const {setOpen, updateRepertoires} = useNavbarDispatch();
   const { showConfirmDialog, showTextDialog } = useDialogContext();
   const { toggleMenu } = useMenuContext();
   const navigate = useNavigate();

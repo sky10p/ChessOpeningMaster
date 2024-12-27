@@ -1,23 +1,16 @@
 import React, { useCallback } from "react";
 import { FooterIcon } from "../components/design/Footer/models";
 
-export interface FooterContextProps {
+export const FooterStateContext = React.createContext<{
     icons: FooterIcon[];
+    isVisible: boolean;
+} | null>(null);
+
+export const FooterDispatchContext = React.createContext<{
     addIcon: (icon: FooterIcon) => void;
     removeIcon: (iconKey: string) => void;
-    isVisible: boolean;
     setIsVisible: (isVisible: boolean) => void;
-}
-
-export const FooterContext = React.createContext<FooterContextProps | null>(null);
-
-export const useFooterContext = () => {
-    const context = React.useContext(FooterContext);
-    if (!context) {
-        throw new Error("FooterContext must be used within a FooterContextProvider");
-    }
-    return context;
-}
+} | null>(null);
 
 export const FooterContextProvider = ({ children }: { children: React.ReactNode }) => {
     const [icons, setIcons] = React.useState<FooterIcon[]>([]);
@@ -37,8 +30,26 @@ export const FooterContextProvider = ({ children }: { children: React.ReactNode 
     }, []);
 
     return (
-        <FooterContext.Provider value={{icons, addIcon, removeIcon, isVisible, setIsVisible }}>
-            {children}
-        </FooterContext.Provider>
+        <FooterStateContext.Provider value={{ icons, isVisible }}>
+            <FooterDispatchContext.Provider value={{ addIcon, removeIcon, setIsVisible }}>
+                {children}
+            </FooterDispatchContext.Provider>
+        </FooterStateContext.Provider>
     );
 };
+
+export const useFooterState = () => {
+    const context = React.useContext(FooterStateContext);
+    if (!context) {
+        throw new Error("useFooterState must be used within a FooterContextProvider");
+    }
+    return context;
+}
+
+export const useFooterDispatch = () => {
+    const context = React.useContext(FooterDispatchContext);
+    if (!context) {
+        throw new Error("useFooterDispatch must be used within a FooterContextProvider");
+    }
+    return context;
+}

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import React from "react";
+import React, { useReducer, useCallback } from "react";
 import { TextDialog } from "../components/design/dialogs/TextDialog";
 import { ConfirmDialog } from "../components/design/dialogs/ConfirmDialog";
 import SelectTrainVariantsDialog from "../components/design/dialogs/SelectTrainVariantsDialog";
@@ -93,212 +93,244 @@ export const useDialogContext = (): DialogContextProps => {
   return context;
 };
 
+interface State {
+  openTextDialog: boolean;
+  openConfirmDialog: boolean;
+  openTrainVariantsDialog: boolean;
+  openSelectNextMoveDialog: boolean;
+  openRepertoireDialog: boolean;
+  openSelectVariantsDialog: boolean;
+  openNumberDialog: boolean;
+  numberDialogProps: NumberDialogProps | null;
+  title: string;
+  contentText: string;
+  onDialogClose?: (isCancelled: boolean) => void;
+  onTextConfirm: (text: string) => void;
+  onConfirm: () => void;
+  onTrainVariantsConfirm: (trainVariants: TrainVariant[]) => void;
+  onNextMoveConfirm: (nextMove: string) => void;
+  onRepertoireConfirm: (repertoire: IRepertoire) => void;
+  onVariantsConfirm: (variants: Variant[]) => void;
+  trainVariants: TrainVariant[];
+  nextMovements: string[];
+  repertoires: IRepertoire[];
+  variants: Variant[];
+  repertoireId: string;
+}
+
+const initialState: State = {
+  openTextDialog: false,
+  openConfirmDialog: false,
+  openTrainVariantsDialog: false,
+  openSelectNextMoveDialog: false,
+  openRepertoireDialog: false,
+  openSelectVariantsDialog: false,
+  openNumberDialog: false,
+  numberDialogProps: null,
+  title: "",
+  contentText: "",
+  onDialogClose: undefined,
+  onTextConfirm: () => {},
+  onConfirm: () => {},
+  onTrainVariantsConfirm: () => {},
+  onNextMoveConfirm: () => {},
+  onRepertoireConfirm: () => {},
+  onVariantsConfirm: () => {},
+  trainVariants: [],
+  nextMovements: [],
+  repertoires: [],
+  variants: [],
+  repertoireId: "",
+};
+
+type Action =
+  | { type: "SHOW_TEXT_DIALOG"; payload: TextDialogProps }
+  | { type: "SHOW_CONFIRM_DIALOG"; payload: ConfirmDialog }
+  | {
+      type: "SHOW_TRAIN_VARIANTS_DIALOG";
+      payload: SelectTrainVariantsConfirmDialog;
+    }
+  | { type: "SHOW_SELECT_NEXT_MOVE_DIALOG"; payload: SelectNextMoveDialog }
+  | { type: "SHOW_REPERTOIRE_DIALOG"; payload: RepertoireDialogProps }
+  | {
+      type: "SHOW_SELECT_VARIANTS_DIALOG";
+      payload: SelectVariantsConfirmDialog;
+    }
+  | { type: "SHOW_NUMBER_DIALOG"; payload: NumberDialogProps }
+  | { type: "CLOSE_DIALOGS" };
+
+function reducer(state: typeof initialState, action: Action): State {
+  switch (action.type) {
+    case "SHOW_TEXT_DIALOG":
+      return {
+        ...state,
+        openTextDialog: true,
+        title: action.payload.title,
+        contentText: action.payload.contentText,
+        onTextConfirm: action.payload.onTextConfirm,
+        onDialogClose: action.payload.onDialogClose,
+      };
+    case "SHOW_CONFIRM_DIALOG":
+      return {
+        ...state,
+        openConfirmDialog: true,
+        title: action.payload.title ?? "Confirm operation",
+        contentText: action.payload.contentText ?? "Are you sure?",
+        onConfirm: action.payload.onConfirm,
+        onDialogClose: action.payload.onDialogClose,
+      };
+    case "SHOW_TRAIN_VARIANTS_DIALOG":
+      return {
+        ...state,
+        openTrainVariantsDialog: true,
+        title: action.payload.title ?? "Select train variants",
+        contentText:
+          action.payload.contentText ??
+          "Select variants to train or disable to ignore",
+        trainVariants: action.payload.trainVariants,
+        repertoireId: action.payload.repertoireId,
+        onTrainVariantsConfirm: action.payload.onTrainVariantsConfirm,
+        onDialogClose: action.payload.onDialogClose,
+      };
+    case "SHOW_SELECT_NEXT_MOVE_DIALOG":
+      return {
+        ...state,
+        openSelectNextMoveDialog: true,
+        title: action.payload.title ?? "Select next move",
+        contentText:
+          action.payload.contentText ?? "Select the movement to play",
+        nextMovements: action.payload.nextMovements,
+        onNextMoveConfirm: action.payload.onNextMoveConfirm,
+        onDialogClose: action.payload.onDialogClose,
+      };
+    case "SHOW_REPERTOIRE_DIALOG":
+      return {
+        ...state,
+        openRepertoireDialog: true,
+        title: action.payload.title,
+        contentText: action.payload.contentText,
+        repertoires: action.payload.repertoires,
+        onRepertoireConfirm: action.payload.onConfirm,
+        onDialogClose: action.payload.onDialogClose,
+      };
+    case "SHOW_SELECT_VARIANTS_DIALOG":
+      return {
+        ...state,
+        openSelectVariantsDialog: true,
+        title: action.payload.title ?? "Select variants",
+        contentText:
+          action.payload.contentText ?? "Select the variants to confirm",
+        variants: action.payload.variants,
+        onVariantsConfirm: action.payload.onVariantsConfirm,
+        onDialogClose: action.payload.onDialogClose,
+      };
+    case "SHOW_NUMBER_DIALOG":
+      return {
+        ...state,
+        openNumberDialog: true,
+        numberDialogProps: {
+          contentText: action.payload.contentText,
+          title: action.payload.title,
+          min: action.payload.min,
+          max: action.payload.max,
+          initialValue: action.payload.initialValue,
+          onNumberConfirm: action.payload.onNumberConfirm,
+          onDialogClose: action.payload.onDialogClose,
+        },
+      };
+    case "CLOSE_DIALOGS":
+      return {
+        ...state,
+        openTextDialog: false,
+        openConfirmDialog: false,
+        openTrainVariantsDialog: false,
+        openSelectNextMoveDialog: false,
+        openRepertoireDialog: false,
+        openSelectVariantsDialog: false,
+        openNumberDialog: false,
+      };
+    default:
+      return state;
+  }
+}
+
 export const DialogContextProvider = ({
   children,
 }: {
   children: React.ReactNode;
 }) => {
-  const [openTextDialog, setOpenTextDialog] = React.useState(false);
-  const [openConfirmDialog, setOpenConfirmDialog] = React.useState(false);
-  const [openTrainVariantsDialog, setOpenTrainVariantsDialog] =
-    React.useState(false);
-  const [openSelectNextMoveDialog, setOpenSelectNextMoveDialog] =
-    React.useState(false);
-  const [openRepertoireDialog, setOpenRepertoireDialog] = React.useState(false); // Add state for RepertoireDialog
-  const [openSelectVariantsDialog, setOpenSelectVariantsDialog] =
-    React.useState(false); // Add state for SelectVariantsConfirmDialog
-  const [openNumberDialog, setOpenNumberDialog] = React.useState(false);
-  const [numberDialogProps, setNumberDialogProps] =
-    React.useState<NumberDialogProps | null>(null);
-  const [title, setTitle] = React.useState<string>("");
+  const [state, dispatch] = useReducer(reducer, initialState);
 
-  const [onTextConfirm, setOnTextConfirm] = React.useState<
-    (text: string) => void
-  >(() => {});
-  const [onConfirm, setOnConfirm] = React.useState<() => void>(() => {});
-  const [onTrainVariantsConfirm, setOnTrainVariantsConfirm] = React.useState<
-    (trainVariants: TrainVariant[]) => void
-  >(() => {});
-  const [onNextMoveConfirm, setOnNextMoveConfirm] = React.useState<
-    (nextMove: string) => void
-  >(() => {});
-  const [onRepertoireConfirm, setOnRepertoireConfirm] = React.useState<
-    (repertoire: IRepertoire) => void
-  >(() => {}); // Add state for onRepertoireConfirm
-  const [onVariantsConfirm, setOnVariantsConfirm] = React.useState<
-    (variants: Variant[]) => void
-  >(() => {}); // Add state for onVariantsConfirm
-  const [onDialogClose, setOnDialogClose] = React.useState<
-    ((isCancelled: boolean) => void) | undefined
-  >(() => {});
+  const showTextDialog = useCallback((props: TextDialogProps) => {
+    dispatch({ type: "SHOW_TEXT_DIALOG", payload: props });
+  }, []);
 
-  const [trainVariants, setTrainVariants] = React.useState<TrainVariant[]>([]);
-  const [nextMovements, setNextMovements] = React.useState<string[]>([]);
-  const [repertoires, setRepertoires] = React.useState<IRepertoire[]>([]);
-  const [variants, setVariants] = React.useState<Variant[]>([]);
-  const [repertoireId, setRepertoireId] = React.useState<string>("");
+  const showConfirmDialog = useCallback((props: ConfirmDialog) => {
+    dispatch({ type: "SHOW_CONFIRM_DIALOG", payload: props });
+  }, []);
 
-  const [contentText, setContentText] = React.useState<string>("");
+  const showTrainVariantsDialog = useCallback((props: SelectTrainVariantsConfirmDialog) => {
+    dispatch({ type: "SHOW_TRAIN_VARIANTS_DIALOG", payload: props });
+  }, []);
 
-  const showTextDialog = ({
-    title,
-    contentText,
-    onTextConfirm,
-    onDialogClose,
-  }: TextDialogProps) => {
-    setTitle(title);
-    setContentText(contentText);
-    setOnTextConfirm(() => onTextConfirm);
-    setOnDialogClose(() => onDialogClose);
-    setOpenTextDialog(true);
-  };
+  const showSelectNextMoveDialog = useCallback((props: SelectNextMoveDialog) => {
+    dispatch({ type: "SHOW_SELECT_NEXT_MOVE_DIALOG", payload: props });
+  }, []);
 
-  const showConfirmDialog = ({
-    title,
-    contentText,
-    onConfirm,
-    onDialogClose,
-  }: ConfirmDialog) => {
-    setTitle(title ?? "Confirm operation");
-    setContentText(contentText ?? "Are you sure?");
-    setOnConfirm(() => onConfirm);
-    setOnDialogClose(() => onDialogClose);
-    setOpenConfirmDialog(true);
-  };
+  const showRepertoireDialog = useCallback((props: RepertoireDialogProps) => {
+    dispatch({ type: "SHOW_REPERTOIRE_DIALOG", payload: props });
+  }, []);
 
-  const showTrainVariantsDialog = ({
-    title,
-    contentText,
-    trainVariants,
-    repertoireId,
-    onTrainVariantsConfirm,
-    onDialogClose,
-  }: SelectTrainVariantsConfirmDialog) => {
-    setTitle(title ?? "Select train variants");
-    setContentText(
-      contentText ?? "Select variants to train or disable to ignore"
-    );
-    setOnTrainVariantsConfirm(() => onTrainVariantsConfirm);
-    setTrainVariants(trainVariants);
-    setRepertoireId(repertoireId); // Set repertoireId
-    setOnDialogClose(() => onDialogClose);
-    setOpenTrainVariantsDialog(true);
-  };
+  const showSelectVariantsDialog = useCallback((props: SelectVariantsConfirmDialog) => {
+    dispatch({ type: "SHOW_SELECT_VARIANTS_DIALOG", payload: props });
+  }, []);
 
-  const showSelectNextMoveDialog = ({
-    title,
-    contentText,
-    nextMovements,
-    onNextMoveConfirm,
-    onDialogClose,
-  }: SelectNextMoveDialog) => {
-    setTitle(title ?? "Select next move");
-    setContentText(contentText ?? "Select the movement to play");
-    setNextMovements(nextMovements);
-    setOnNextMoveConfirm(() => onNextMoveConfirm);
-    setOnDialogClose(() => onDialogClose);
-    setOpenSelectNextMoveDialog(true);
-  };
+  const showNumberDialog = useCallback((props: NumberDialogProps) => {
+    dispatch({ type: "SHOW_NUMBER_DIALOG", payload: props });
+  }, []);
 
-  const showRepertoireDialog = ({
-    title,
-    contentText,
-    repertoires,
-    onConfirm,
-    onDialogClose,
-  }: RepertoireDialogProps) => {
-    setTitle(title);
-    setContentText(contentText);
-    setRepertoires(repertoires);
-    setOnRepertoireConfirm(() => onConfirm);
-    setOnDialogClose(() => onDialogClose);
-    setOpenRepertoireDialog(true);
-  };
+  const handleDialogClose = useCallback((isCancelled: boolean) => {
+    dispatch({ type: "CLOSE_DIALOGS" });
+    state.numberDialogProps?.onDialogClose?.(isCancelled);
+    state.onDialogClose && state.onDialogClose(isCancelled);
+  }, [state.numberDialogProps, state.onDialogClose]);
 
-  const showSelectVariantsDialog = ({
-    title,
-    contentText,
-    variants,
-    onVariantsConfirm,
-    onDialogClose,
-  }: SelectVariantsConfirmDialog) => {
-    setTitle(title ?? "Select variants");
-    setContentText(contentText ?? "Select the variants to confirm");
-    setVariants(variants);
-    setOnVariantsConfirm(() => onVariantsConfirm);
-    setOnDialogClose(() => onDialogClose);
-    setOpenSelectVariantsDialog(true);
-  };
+  const handleTextConfirm = useCallback((text: string) => {
+    dispatch({ type: "CLOSE_DIALOGS" });
+    state.onTextConfirm(text);
+  }, [state.onTextConfirm]);
 
-  const showNumberDialog = ({
-    title,
-    contentText,
-    min,
-    max,
-    initialValue,
-    onNumberConfirm,
-    onDialogClose,
-  }: NumberDialogProps) => {
-    setNumberDialogProps({
-      title,
-      contentText,
-      min,
-      max,
-      initialValue,
-      onNumberConfirm,
-      onDialogClose,
-    });
-    setOpenNumberDialog(true);
-  };
+  const handleConfirm = useCallback(() => {
+    dispatch({ type: "CLOSE_DIALOGS" });
+    state.onConfirm();
+  }, [state.onConfirm]);
 
-  const handleDialogClose = (isCancelled: boolean) => {
-    setOpenConfirmDialog(false);
-    setOpenTextDialog(false);
-    setOpenTrainVariantsDialog(false);
-    setOpenSelectNextMoveDialog(false);
-    setOpenRepertoireDialog(false); // Close RepertoireDialog
-    setOpenSelectVariantsDialog(false);
-    setOpenNumberDialog(false);
-    numberDialogProps?.onDialogClose?.(isCancelled);
-    onDialogClose && onDialogClose(isCancelled);
-  };
+  const handleTrainVariantsConfirm = useCallback((trainVariants: TrainVariant[]) => {
+    dispatch({ type: "CLOSE_DIALOGS" });
+    state.onTrainVariantsConfirm(trainVariants);
+  }, [state.onTrainVariantsConfirm]);
 
-  const handleTextConfirm = (text: string) => {
-    setOpenTextDialog(false);
-    onTextConfirm(text);
-  };
+  const handleNextMoveConfirm = useCallback((nextMove: string) => {
+    dispatch({ type: "CLOSE_DIALOGS" });
+    state.onNextMoveConfirm(nextMove);
+  }, [state.onNextMoveConfirm]);
 
-  const handleConfirm = () => {
-    setOpenConfirmDialog(false);
-    onConfirm();
-  };
+  const handleRepertoireConfirm = useCallback((repertoire: IRepertoire) => {
+    dispatch({ type: "CLOSE_DIALOGS" });
+    state.onRepertoireConfirm(repertoire);
+  }, [state.onRepertoireConfirm]);
 
-  const handleTrainVariantsConfirm = (trainVariants: TrainVariant[]) => {
-    setOpenTrainVariantsDialog(false);
-    onTrainVariantsConfirm(trainVariants);
-  };
+  const handleVariantsConfirm = useCallback((variants: Variant[]) => {
+    dispatch({ type: "CLOSE_DIALOGS" });
+    state.onVariantsConfirm(variants);
+  }, [state.onVariantsConfirm]);
 
-  const handleNextMoveConfirm = (nextMove: string) => {
-    setOpenSelectNextMoveDialog(false);
-    onNextMoveConfirm(nextMove);
-  };
-
-  const handleRepertoireConfirm = (repertoire: IRepertoire) => {
-    setOpenRepertoireDialog(false);
-    onRepertoireConfirm(repertoire);
-  };
-
-  const handleVariantsConfirm = (variants: Variant[]) => {
-    setOpenSelectVariantsDialog(false);
-    onVariantsConfirm(variants);
-  };
-
-  const handleNumberConfirm = (number: number) => {
-    if (numberDialogProps && numberDialogProps.onNumberConfirm) {
-      setOpenNumberDialog(false);
-      numberDialogProps.onNumberConfirm(number);
+  const handleNumberConfirm = useCallback((number: number) => {
+    if (state.numberDialogProps && state.numberDialogProps.onNumberConfirm) {
+      dispatch({ type: "CLOSE_DIALOGS" });
+      state.numberDialogProps.onNumberConfirm(number);
     }
-  };
+  }, [state.numberDialogProps]);
 
   return (
     <DialogContext.Provider
@@ -313,74 +345,74 @@ export const DialogContextProvider = ({
       }}
     >
       {children}
-      {openTextDialog && (
+      {state.openTextDialog && (
         <TextDialog
-          open={openTextDialog}
+          open={state.openTextDialog}
           initialValue=""
           onClose={handleDialogClose}
-          contentText={contentText}
+          contentText={state.contentText}
           onTextConfirm={handleTextConfirm}
-          title={title}
+          title={state.title}
         />
       )}
-      {openConfirmDialog && (
+      {state.openConfirmDialog && (
         <ConfirmDialog
-          open={openConfirmDialog}
+          open={state.openConfirmDialog}
           onClose={handleDialogClose}
-          contentText={contentText}
+          contentText={state.contentText}
           onConfirm={handleConfirm}
-          title={title}
+          title={state.title}
         />
       )}
-      {openTrainVariantsDialog && (
+      {state.openTrainVariantsDialog && (
         <SelectTrainVariantsDialog
-          open={openTrainVariantsDialog}
-          contentText={contentText}
-          trainVariants={trainVariants}
+          open={state.openTrainVariantsDialog}
+          contentText={state.contentText}
+          trainVariants={state.trainVariants}
           onClose={handleDialogClose}
           onConfirm={handleTrainVariantsConfirm}
-          title={title}
-          repertoireId={repertoireId}
+          title={state.title}
+          repertoireId={state.repertoireId}
         />
       )}
-      {openSelectNextMoveDialog && (
+      {state.openSelectNextMoveDialog && (
         <SelectNextMoveDialog
-          open={openSelectNextMoveDialog}
-          contentText={contentText}
-          nextMovements={nextMovements}
+          open={state.openSelectNextMoveDialog}
+          contentText={state.contentText}
+          nextMovements={state.nextMovements}
           onClose={handleDialogClose}
           onConfirm={handleNextMoveConfirm}
-          title={title}
+          title={state.title}
         />
       )}
-      {openRepertoireDialog && (
+      {state.openRepertoireDialog && (
         <RepertoireDialog
-          open={openRepertoireDialog}
-          contentText={contentText}
-          repertoires={repertoires}
+          open={state.openRepertoireDialog}
+          contentText={state.contentText}
+          repertoires={state.repertoires}
           onClose={handleDialogClose}
           onConfirm={handleRepertoireConfirm}
-          title={title}
+          title={state.title}
         />
       )}
-      {openSelectVariantsDialog && (
+      {state.openSelectVariantsDialog && (
         <SelectVariantsDialog
-          open={openSelectVariantsDialog}
-          contentText={contentText}
-          variants={variants}
+          open={state.openSelectVariantsDialog}
+          contentText={state.contentText}
+          variants={state.variants}
           onClose={handleDialogClose}
           onConfirm={handleVariantsConfirm}
-          title={title}
+          title={state.title}
         />
       )}
-      {numberDialogProps && (
+      {state.numberDialogProps && (
         <NumberDialog
-          open={openNumberDialog}
-          title={numberDialogProps.title}
-          contentText={numberDialogProps.contentText}
-          min={numberDialogProps.min}
-          max={numberDialogProps.max}
-          initialValue={numberDialogProps.initialValue}
+          open={state.openNumberDialog}
+          title={state.numberDialogProps.title}
+          contentText={state.numberDialogProps.contentText}
+          min={state.numberDialogProps.min}
+          max={state.numberDialogProps.max}
+          initialValue={state.numberDialogProps.initialValue}
           onNumberConfirm={handleNumberConfirm}
           onClose={handleDialogClose}
         />

@@ -3,8 +3,8 @@ import { useParams } from "react-router-dom";
 import EditRepertoireViewContainer from "./EditRepertoireViewContainer";
 import { IRepertoire } from "../../../../../common/src/types/Repertoire";
 import { getRepertoire } from "../../../repository/repertoires/repertoires";
-import { useNavbarContext } from "../../../contexts/NavbarContext";
 import { RepertoireContextProvider } from "../../../contexts/RepertoireContext";
+import { useNavbarDispatch } from "../../../contexts/NavbarContext";
 
 const EditRepertoirePage = () => {
   const { id } = useParams();
@@ -30,7 +30,7 @@ const EditRepertoirePage = () => {
     refetchRepertoire();
   }, [refetchRepertoire]);
 
-  const { setOpen } = useNavbarContext();
+  const { setOpen } = useNavbarDispatch();
   useEffect(() => {
     setOpen(false);
   }, [setOpen]);
