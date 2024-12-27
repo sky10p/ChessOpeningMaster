@@ -1,64 +1,48 @@
-import React from "react";
-import { RepertoireInfoPanel } from "../../../design/chess/RepertoireInfoPanel/RepertoireInfoPanel"
-import { MoveVariantNode } from "../../../../models/VariantNode";
-import { useDialogContext } from "../../../../contexts/DialogContext";
+import React, { useState } from "react";
+import { RepertoireInfoPanel } from "../../../design/chess/RepertoireInfoPanel/RepertoireInfoPanel";
 import { useRepertoireContext } from "../../../../contexts/RepertoireContext";
+import { Variant } from "../../../../models/chess.models";
+import { useRepertoireInfo } from "../../../../hooks/useRepertoireInfo";
+import { useMenuContext } from "../../../../contexts/MenuContext";
 
 export const RepertoireInfo = () => {
-    const {
-        variants,
-        currentMoveNode,
-        orientation,
-        repertoireId,
-        repertoireName,
-        updateRepertoire,
-        chess,
-        changeNameMove,
-        goToMove,
-        deleteMove,
-        comment,
-        updateComment,
-      } = useRepertoireContext();
-    
-      const { showConfirmDialog, showRepertoireDialog, showSelectVariantsDialog } =
-        useDialogContext();
-        
-    /* return <RepertoireInfoPanel variants={[]} fen={""} currentMoveNode={new MoveVariantNode} goToMove={function (move: MoveVariantNode): void {
-        throw new Error("Function not implemented.");
-    } } deleteMove={function (move: MoveVariantNode): void {
-        throw new Error("Function not implemented.");
-    } } changeNameMove={function (move: MoveVariantNode, newName: string): void {
-        throw new Error("Function not implemented.");
-    } } moves={[]} onSelectVariant={function (): void {
-        throw new Error("Function not implemented.");
-    } } />; 
-    
-    <VariantsTree
-        variants={variants}
-        currentNode={currentMoveNode}
-        orientation={orientation}
-        deleteVariant={deleteVariant}
-        copyVariantToRepertoire={copyVariantToRepertoire}
-        copyVariantsToRepertoire={copyVariantsToRepertoire}
-        deleteVariants={deleteVariants}
-        changeNameMove={changeNameMove}
-        deleteMove={deleteMove}
-        goToMove={goToMove}
-        currentMoveNode={currentMoveNode}
-      ></VariantsTree>
-    */
+  const {
+    variants,
+    currentMoveNode,
+    chess,
+    changeNameMove,
+    goToMove,
+    deleteMove,
+    comment,
+    updateComment,
+  } = useRepertoireContext();
 
-    return <RepertoireInfoPanel 
-        variants={variants}
-        fen={chess.fen()}
-        currentMoveNode={currentMoveNode} 
-        goToMove={goToMove} 
-        deleteMove={deleteMove} 
-        changeNameMove={changeNameMove} 
-        onSelectVariant={() => {}}
-        comment={comment}
-        updateComment={updateComment}
+  const [selectedVariant, setSelectedVariant] = useState<Variant>(variants[0]);
 
+  const { toggleMenu } = useMenuContext();
+
+  const { downloadVariantPGN, copyVariantPGN,copyVariantToRepertoire,copyVariantsToRepertoire,deleteVariants, deleteVariant } =
+    useRepertoireInfo();
+
+  return (
+    <RepertoireInfoPanel
+      variants={variants}
+      fen={chess.fen()}
+      currentMoveNode={currentMoveNode}
+      goToMove={goToMove}
+      deleteMove={deleteMove}
+      changeNameMove={changeNameMove}
+      selectedVariant={selectedVariant}
+      setSelectedVariant={setSelectedVariant}
+      comment={comment}
+      updateComment={updateComment}
+      copyVariantPGN={copyVariantPGN}
+      copyVariantToRepertoire={copyVariantToRepertoire}
+      copyVariantsToRepertoire={copyVariantsToRepertoire}
+      deleteVariants={deleteVariants}
+      downloadVariantPGN={downloadVariantPGN}
+      deleteVariant={deleteVariant}
+      toggleMenu={toggleMenu}
     />
-
-}
+  );
+};

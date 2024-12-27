@@ -19,7 +19,7 @@ const Footer: React.FC<FooterProps> = ({
   };
 
   return (
-    <footer>
+    <footer className='md:hidden'>
       {isVisible && icons.length > 0 && (
         <TabGroup selectedIndex={selectedIndex} onChange={handleChange}>
           <TabList className="flex justify-around bg-gray-800 p-2">

@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
 import UiSwitch from "../../../basic/UiSwitch";
 import {
+  ArrowDownTrayIcon,
   ChatBubbleBottomCenterTextIcon,
+  ClipboardIcon,
+  EllipsisVerticalIcon,
   PresentationChartLineIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import useStockfish from "../../../../libs/useStockfish";
 import { StockfishSubpanel } from "./StockfishSubpanel";
@@ -13,6 +17,8 @@ import { MoveVariantNode } from "../../../../models/VariantNode";
 import SelectVariantsDialog from "../../dialogs/SelectVariantsDialog";
 import { Variant } from "../../../../models/chess.models";
 import { BoardComment } from "../BoardComment";
+import { RepertoireInfoActions } from "./RepertoireInfoActions/RepertoireInfoActions";
+import { RepertoireInfoAction } from "./RepertoireInfoActions/model";
 
 const NUM_LINES = 3;
 
@@ -23,24 +29,18 @@ interface RepertoireInfoPanelProps {
   goToMove: (move: MoveVariantNode) => void;
   deleteMove: (move: MoveVariantNode) => void;
   changeNameMove: (move: MoveVariantNode, newName: string) => void;
-  onSelectVariant: () => void;
+  selectedVariant: Variant;
+  setSelectedVariant: (variant: Variant) => void;
   comment: string;
   updateComment: (comment: string) => void;
-}
-
-/* interface VariantTreeProps {
-  variants: Variant[];
-  currentNode: MoveVariantNode;
-  orientation: BoardOrientation;
-  deleteVariant: (variant: Variant) => void;
+  downloadVariantPGN: (variant: Variant) => void;
+  copyVariantPGN: (variant: Variant) => void;
   copyVariantToRepertoire: (variant: Variant) => void;
-  deleteVariants: () => void;
   copyVariantsToRepertoire: () => void;
-  changeNameMove: (move: MoveVariantNode, newName: string) => void;
-  deleteMove: (move: MoveVariantNode) => void;
-  goToMove: (move: MoveVariantNode) => void;
-  currentMoveNode: MoveVariantNode;
-} */
+  deleteVariants: () => void;
+  deleteVariant: (variant: Variant) => void;
+  toggleMenu: (anchorEl: HTMLElement | null, items: {name: string, action: () => void}[]) => void;
+}
 
 export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
   fen,
@@ -50,12 +50,19 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
   changeNameMove,
   variants,
   comment,
+  selectedVariant,
+  setSelectedVariant,
   updateComment,
+  copyVariantPGN,
+  copyVariantToRepertoire,
+  copyVariantsToRepertoire,
+  deleteVariants,
+  downloadVariantPGN,
+  deleteVariant,
+  toggleMenu,
 }) => {
   const isSelected = (node: MoveVariantNode) => node === currentMoveNode;
-  const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>(
-    variants[0]
-  );
+  
   const [showSelectVariantDialog, setShowSelectVariantDialog] = useState(false);
   useEffect(() => {
     setSelectedVariant(
@@ -73,9 +80,48 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
     stockfishEnabled
   );
 
+  const actions = [
+    {
+      onClick: () => selectedVariant && downloadVariantPGN(selectedVariant),
+      icon: <ArrowDownTrayIcon className="h-5 w-5 text-accent" />,
+      label: "Download",
+    },
+    {
+      onClick: () => selectedVariant && copyVariantPGN(selectedVariant),
+      icon: <ClipboardIcon className="h-5 w-5 text-accent" />,
+      label: "Copy",
+    },
+    {
+      onClick: () => selectedVariant && deleteVariant(selectedVariant),
+      icon: <TrashIcon className="h-5 w-5 text-danger" />,
+      label: "Delete variant",
+    },
+  ];
+
+  const secondaryActions = [{
+    name: "Copy variant to repertoire",
+    action: () => selectedVariant && copyVariantToRepertoire(selectedVariant)
+  },
+  {
+    name: "Copy variants to repertoire",
+    action: copyVariantsToRepertoire
+  },
+  {
+    name: "Delete variants",
+    action: deleteVariants
+  }];
+
+  const moreOptionsAction: RepertoireInfoAction = {
+    label: "More options",
+    icon: <EllipsisVerticalIcon className="h-5 w-5 text-accent" />,
+    onClick: (event) => {
+      toggleMenu(event.currentTarget, secondaryActions);
+    }
+  };
+
   return (
     <>
-      <div className="w-full h-full overflow-y-auto bg-background text-white flex flex-col">
+      <div className="w-full h-full max-h-full overflow-y-auto bg-background text-white flex flex-col">
         <div className="px-4 py-2 flex gap-2 w-full bg-background z-10">
           <UiSwitch
             label={(enabled) => (
@@ -98,23 +144,30 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
             enabled={commentEnabled}
             setEnabled={setCommentEnabled}
           />
+
+          <RepertoireInfoActions
+            actions={actions}
+            moreOptionsAction={moreOptionsAction}
+          />
         </div>
 
         {stockfishEnabled && (
-          <div className="p-1">
+          <div className="p-1 flex-1">
             <StockfishSubpanel lines={lines} fen={fen} />
           </div>
         )}
-        {statisticsEnabled && <StatisticsSubpanel fen={fen} />}
+        {statisticsEnabled && 
+        <div className="flex-1">
+          <StatisticsSubpanel fen={fen} />
+        </div>}
+        <div className="flex flex-col gap-2 p-2 h-full">
         <button
           className="p-2 bg-accent text-black w-full text-center"
           onClick={() => setShowSelectVariantDialog(true)}
         >
           {selectedVariant ? selectedVariant.name : "Change Variant"}
         </button>
-        <div
-          className="overflow-y-auto flex-1"
-        >
+        <div className="overflow-y-auto flex-1">
           <VariantMovementsSubpanel
             moves={selectedVariant?.moves || []}
             currentMoveNode={currentMoveNode}
@@ -132,6 +185,7 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
             />
           </div>
         )}
+        </div>
       </div>
       <SelectVariantsDialog
         open={showSelectVariantDialog}

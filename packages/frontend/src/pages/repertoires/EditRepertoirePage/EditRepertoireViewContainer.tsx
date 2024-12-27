@@ -14,13 +14,13 @@ import {
   PresentationChartLineIcon,
 } from "@heroicons/react/24/outline";
 import SaveIcon from "../../../components/icons/SaveIcon";
-import { RepertoireInfo } from "../../../components/application/chess/board/RepertoireInfo";
 import VariantsIcon from "../../../components/icons/VariantsIcon";
 import { useFooterContext } from "../../../contexts/FooterContext";
 import { BoardCommentContainer } from "../../../components/application/chess/board/BoardCommentContainer";
 import VariantsInfo from "../../../components/application/chess/board/VariantsInfo";
 import StatisticsPanel from "../../../components/design/statistics/StatisticsPanel";
 import { StockfishPanel } from "../../../components/design/stockfish/StockfishPanel";
+import { RepertoireInfo } from "../../../components/application/chess/board/RepertoireInfo";
 
 type FooterSection = "variants" | "comments" | "statistics" | "stockfish";
 
@@ -138,7 +138,7 @@ const EditRepertoireViewContainer: React.FC = () => {
         </div>
       </div>
 
-      <div className="col-span-12 sm:col-span-6 flex flex-col items-start overflow-auto scrollbar-custom border border-secondary rounded bg-gray-800">
+      <div className="sm:hidden col-span-12 sm:col-span-6 flex flex-col items-start overflow-auto scrollbar-custom border border-secondary rounded bg-gray-800">
         {panelSelected === "variants" && <VariantsInfo />}
         {panelSelected === "comments" && <BoardCommentContainer />}
         {panelSelected === "statistics" && (
@@ -147,6 +147,10 @@ const EditRepertoireViewContainer: React.FC = () => {
         {panelSelected === "stockfish" && (
           <StockfishPanel fen={chess.fen()} numLines={3} />
         )}
+      </div>
+
+      <div className="hidden sm:flex sm:col-span-6 flex-col items-start overflow-auto scrollbar-custom border border-secondary rounded bg-gray-800">
+        <RepertoireInfo />
       </div>
     </div>
   );

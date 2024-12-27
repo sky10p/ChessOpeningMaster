@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { MoveVariantNode } from "../../../../models/VariantNode";
 import { Variant } from "../../../../models/chess.models";
-import { variantToPgn } from "../../../../utils/chess/pgn/pgn.utils";
 import { BoardOrientation } from "@chess-opening-master/common/src/types/Orientation";
 import { VariantMovementsPanel } from "./VariantMovementsPanel";
 import VariantActionButtons from "./VariantActionButtons";
@@ -16,6 +15,8 @@ interface VariantTreeProps {
   orientation: BoardOrientation;
   deleteVariant: (variant: Variant) => void;
   copyVariantToRepertoire: (variant: Variant) => void;
+  downloadVariantPGN: (variant: Variant) => void;
+  copyVariantPGN: (variant: Variant) => void;
   deleteVariants: () => void;
   copyVariantsToRepertoire: () => void;
   changeNameMove: (move: MoveVariantNode, newName: string) => void;
@@ -27,10 +28,11 @@ interface VariantTreeProps {
 const VariantTree: React.FC<VariantTreeProps> = ({
   variants,
   currentNode,
-  orientation,
   deleteVariant,
   copyVariantToRepertoire,
   copyVariantsToRepertoire,
+  downloadVariantPGN,
+  copyVariantPGN,
   deleteVariants,
   changeNameMove,
   deleteMove,
@@ -50,46 +52,16 @@ const VariantTree: React.FC<VariantTreeProps> = ({
     );
   }, [variants]);
 
-  const downloadVariantPGN = () => {
-    if (selectedVariant) {
-      const pgn = variantToPgn(selectedVariant, orientation, new Date());
-      const blob = new Blob([pgn], { type: "text/plain;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${selectedVariant.name}.pgn`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-  };
 
-  const copyVariantPGN = () => {
-    if (selectedVariant) {
-      const pgn = variantToPgn(selectedVariant, orientation, new Date());
-      const textarea = document.createElement("textarea");
-      textarea.value = pgn;
-      document.body.appendChild(textarea);
-      textarea.select();
-      try {
-        document.execCommand("copy");
-        console.log("Text copied to clipboard");
-      } catch (err) {
-        console.error("Unable to copy text", err);
-      }
-      document.body.removeChild(textarea);
-    } else {
-      console.error("No variant selected");
-    }
-  };
 
   const variantActions = useMemo(() => () => [
     {
-      onClick: downloadVariantPGN,
+      onClick: () => selectedVariant && downloadVariantPGN(selectedVariant),
       icon: <ArrowDownTrayIcon className="h-5 w-5 text-accent" />,
       label: "Download",
     },
     {
-      onClick: copyVariantPGN,
+      onClick: () => selectedVariant && copyVariantPGN(selectedVariant),
       icon: <ClipboardIcon className="h-5 w-5 text-accent" />,
       label: "Copy",
     },
