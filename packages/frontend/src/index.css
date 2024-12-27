@@ -7,3 +7,11 @@
   --tw-scrollbar-track: #1e293b; /* Fondo principal oscuro */
   --tw-scrollbar-thumb-hover: #64748b; /* Color del pulgar al pasar el ratón */
 }
+
+
+body{
+  background-color: #0f172a;
+  padding-bottom: env(safe-area-inset-bottom);
+  margin: 0;
+  padding: 0;
+}

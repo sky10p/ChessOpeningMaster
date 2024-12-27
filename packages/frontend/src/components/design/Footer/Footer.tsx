@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
+import { Tab, TabGroup, TabList } from '@headlessui/react';
 import { FooterIcon } from './models';
 
 interface FooterProps {

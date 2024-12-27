@@ -15,6 +15,10 @@ export const theme = {
       scrollbarTrack: "#1e293b", /* Color de la pista de la barra de desplazamiento */
       scrollbarThumbHover: "#64748b", /* Color del pulgar de la barra de desplazamiento al pasar el ratón */
     },
+    spacing: {
+      'safe-bottom': 'env(safe-area-inset-bottom)',
+      'screen-dynamic': 'calc(var(--vh, 1vh) * 100)',
+    },
   },
 };
 export const plugins = [

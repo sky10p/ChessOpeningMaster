@@ -16,6 +16,7 @@ export const RepertoireInfoPanelStory: Story = () => {
   const [currentMoveNode, setCurrentMoveNode] = useState(moveFromVariant[0]);
 
   return (
+    <div className="w-1/2 h-1/2 bg-background">
     <RepertoireInfoPanel
       fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
       currentMoveNode={currentMoveNode}
@@ -29,5 +30,6 @@ export const RepertoireInfoPanelStory: Story = () => {
         comment={comment}
         updateComment={setComment}
     />
+    </div>
   );
 };

@@ -75,8 +75,8 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
 
   return (
     <>
-      <div className="w-full h-full overflow-y-auto bg-background text-white">
-        <div className="px-4 py-2 flex gap-2 fixed w-full bg-background z-10">
+      <div className="w-full h-full overflow-y-auto bg-background text-white flex flex-col">
+        <div className="px-4 py-2 flex gap-2 w-full bg-background z-10">
           <UiSwitch
             label={(enabled) => (
               <StockfishLabel
@@ -99,40 +99,39 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
             setEnabled={setCommentEnabled}
           />
         </div>
-        <div className="pt-16">
-          {stockfishEnabled && (
-            <div className="p-1">
-              <StockfishSubpanel lines={lines} fen={fen} />
-            </div>
-          )}
-          {statisticsEnabled && <StatisticsSubpanel fen={fen} />}
-          <button
-            className="p-2 bg-accent text-black w-full text-center"
-            onClick={() => setShowSelectVariantDialog(true)}
-          >
-            {selectedVariant ? selectedVariant.name : "Change Variant"}
-          </button>
-          <div
-            className={`overflow-y-auto ${commentEnabled ? "h-72" : "h-full"}`}
-          >
-            <VariantMovementsSubpanel
-              moves={selectedVariant?.moves || []}
-              currentMoveNode={currentMoveNode}
-              goToMove={goToMove}
-              deleteMove={deleteMove}
-              changeNameMove={changeNameMove}
+
+        {stockfishEnabled && (
+          <div className="p-1">
+            <StockfishSubpanel lines={lines} fen={fen} />
+          </div>
+        )}
+        {statisticsEnabled && <StatisticsSubpanel fen={fen} />}
+        <button
+          className="p-2 bg-accent text-black w-full text-center"
+          onClick={() => setShowSelectVariantDialog(true)}
+        >
+          {selectedVariant ? selectedVariant.name : "Change Variant"}
+        </button>
+        <div
+          className="overflow-y-auto flex-1"
+        >
+          <VariantMovementsSubpanel
+            moves={selectedVariant?.moves || []}
+            currentMoveNode={currentMoveNode}
+            goToMove={goToMove}
+            deleteMove={deleteMove}
+            changeNameMove={changeNameMove}
+          />
+        </div>
+        {commentEnabled && (
+          <div className="overflow-auto flex-1">
+            <BoardComment
+              comment={comment}
+              updateComment={updateComment}
+              editable={true}
             />
           </div>
-          {commentEnabled && (
-            <div className={`h-72 overflow-y-auto`}>
-              <BoardComment
-                comment={comment}
-                updateComment={updateComment}
-                editable={true}
-              />
-            </div>
-          )}
-        </div>
+        )}
       </div>
       <SelectVariantsDialog
         open={showSelectVariantDialog}
