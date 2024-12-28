@@ -1,4 +1,5 @@
-import { TrainVariant, TrainVariantInfo } from "../../../models/chess.models";
+import { TrainVariantInfo } from "@chess-opening-master/common";
+import { TrainVariant } from "../../../models/chess.models";
 import { getTrainVariantInfo } from "../../../repository/repertoires/trainVariants";
 
 const SPACED_REPETITION_CONFIG = {
@@ -39,6 +40,10 @@ export const getSpacedRepetitionVariants = async (
       const lastDate = info.lastDate;
       const daysSinceLastReview = (now - lastDate.getTime()) / (1000 * 60 * 60 * 24);
 
+      if (daysSinceLastReview < 1) {
+        continue;
+      }
+
       const difficulty = 1 + (errors * ERROR_FACTOR);
       const expectedInterval = BASE_INTERVAL_DAYS * difficulty;
 
@@ -48,6 +53,8 @@ export const getSpacedRepetitionVariants = async (
       } else {
         score = (daysSinceLastReview / expectedInterval);
       }
+
+      score += Math.random() * 0.15;
 
       reviewedVariants.push({ variant, score });
     }
