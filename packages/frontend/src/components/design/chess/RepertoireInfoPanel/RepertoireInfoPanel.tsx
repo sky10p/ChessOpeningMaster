@@ -39,7 +39,10 @@ interface RepertoireInfoPanelProps {
   copyVariantsToRepertoire: () => void;
   deleteVariants: () => void;
   deleteVariant: (variant: Variant) => void;
-  toggleMenu: (anchorEl: HTMLElement | null, items: {name: string, action: () => void}[]) => void;
+  toggleMenu: (
+    anchorEl: HTMLElement | null,
+    items: { name: string; action: () => void }[]
+  ) => void;
 }
 
 export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
@@ -62,7 +65,7 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
   toggleMenu,
 }) => {
   const isSelected = (node: MoveVariantNode) => node === currentMoveNode;
-  
+
   const [showSelectVariantDialog, setShowSelectVariantDialog] = useState(false);
   useEffect(() => {
     setSelectedVariant(
@@ -98,30 +101,32 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
     },
   ];
 
-  const secondaryActions = [{
-    name: "Copy variant to repertoire",
-    action: () => selectedVariant && copyVariantToRepertoire(selectedVariant)
-  },
-  {
-    name: "Copy variants to repertoire",
-    action: copyVariantsToRepertoire
-  },
-  {
-    name: "Delete variants",
-    action: deleteVariants
-  }];
+  const secondaryActions = [
+    {
+      name: "Copy variant to repertoire",
+      action: () => selectedVariant && copyVariantToRepertoire(selectedVariant),
+    },
+    {
+      name: "Copy variants to repertoire",
+      action: copyVariantsToRepertoire,
+    },
+    {
+      name: "Delete variants",
+      action: deleteVariants,
+    },
+  ];
 
   const moreOptionsAction: RepertoireInfoAction = {
     label: "More options",
     icon: <EllipsisVerticalIcon className="h-5 w-5 text-accent" />,
     onClick: (event) => {
       toggleMenu(event.currentTarget, secondaryActions);
-    }
+    },
   };
 
   return (
     <>
-      <div className="w-full h-full max-h-full overflow-y-auto bg-background text-white flex flex-col">
+      <div className="w-full h-full max-h-full overflow-hidden bg-background text-white flex flex-col">
         <div className="px-4 py-2 flex gap-2 w-full bg-background z-10">
           <UiSwitch
             label={(enabled) => (
@@ -156,36 +161,33 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
             <StockfishSubpanel lines={lines} fen={fen} />
           </div>
         )}
-        {statisticsEnabled && 
-        <div className="flex-1">
-          <StatisticsSubpanel fen={fen} />
-        </div>}
-        <div className="flex flex-col gap-2 p-2 h-full">
-        <button
-          className="p-2 bg-accent text-black w-full text-center"
-          onClick={() => setShowSelectVariantDialog(true)}
-        >
-          {selectedVariant ? selectedVariant.name : "Change Variant"}
-        </button>
-        <div className="overflow-y-auto flex-1">
-          <VariantMovementsSubpanel
-            moves={selectedVariant?.moves || []}
-            currentMoveNode={currentMoveNode}
-            goToMove={goToMove}
-            deleteMove={deleteMove}
-            changeNameMove={changeNameMove}
-          />
-        </div>
-        {commentEnabled && (
-          <div className="overflow-auto flex-1">
-            <BoardComment
-              comment={comment}
-              updateComment={updateComment}
-              editable={true}
-            />
+        {statisticsEnabled && (
+          <div className="flex-1">
+            <StatisticsSubpanel fen={fen} />
           </div>
         )}
+        <div className="flex flex-col flex-1 gap-2 p-2 overflow-auto">
+          <button
+            className="p-2 bg-accent text-black w-full text-center"
+            onClick={() => setShowSelectVariantDialog(true)}
+          >
+            {selectedVariant ? selectedVariant.name : "Change Variant"}
+          </button>
+          <div className="flex-1 overflow-auto">
+            <VariantMovementsSubpanel
+              moves={selectedVariant?.moves || []}
+              currentMoveNode={currentMoveNode}
+              goToMove={goToMove}
+              deleteMove={deleteMove}
+              changeNameMove={changeNameMove}
+            />
+          </div>
         </div>
+        {commentEnabled && (
+          <div className="flex-1 overflow-auto">
+            <BoardComment comment={comment} updateComment={updateComment} />
+          </div>
+        )}
       </div>
       <SelectVariantsDialog
         open={showSelectVariantDialog}

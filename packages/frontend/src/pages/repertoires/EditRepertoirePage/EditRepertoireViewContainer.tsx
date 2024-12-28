@@ -138,7 +138,7 @@ const EditRepertoireViewContainer: React.FC = () => {
         </div>
       </div>
 
-      <div className="sm:hidden col-span-12 sm:col-span-6 flex flex-col items-start overflow-auto scrollbar-custom border border-secondary rounded bg-gray-800">
+      <div className="sm:hidden col-span-12 sm:col-span-6 flex flex-col items-start overflow-auto border border-secondary rounded bg-gray-800">
         {panelSelected === "variants" && <VariantsInfo />}
         {panelSelected === "comments" && <BoardCommentContainer />}
         {panelSelected === "statistics" && (
@@ -149,7 +149,7 @@ const EditRepertoireViewContainer: React.FC = () => {
         )}
       </div>
 
-      <div className="hidden sm:flex sm:col-span-6 flex-col items-start overflow-auto scrollbar-custom border border-secondary rounded bg-gray-800">
+      <div className="hidden sm:flex sm:col-span-6 flex-col items-start overflow-auto border border-secondary rounded bg-gray-800">
         <RepertoireInfo />
       </div>
     </div>

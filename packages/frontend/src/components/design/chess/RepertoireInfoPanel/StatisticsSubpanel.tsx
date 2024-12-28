@@ -71,7 +71,7 @@ const StatisticsSubpanel: React.FC<StatisticsSubpanelProps> = ({ fen }) => {
   );
 
   return (
-    <div className="p-2 rounded shadow-md w-full">
+    <div className="rounded shadow-md w-full">
       <div className="flex justify-center mb-1">
         <button
           className={`px-2 py-1 mr-1 text-xs font-medium rounded ${source === LichessMovesTypes.MASTERS ? "bg-accent text-black" : "bg-gray-700 text-white"}`}
