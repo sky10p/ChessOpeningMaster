@@ -9,6 +9,7 @@ interface CheckboxProps {
   onChange: (checked: boolean) => void;
   description?: string;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export const UiCheckbox: React.FC<CheckboxProps> = ({
@@ -17,7 +18,8 @@ export const UiCheckbox: React.FC<CheckboxProps> = ({
   checked,
   indeterminate = false,
   onChange,
-    className,
+  className,
+  style,
 }) => {
   return (
     <label className={`inline-flex items-center cursor-pointer ${className}`}>
@@ -32,7 +34,9 @@ export const UiCheckbox: React.FC<CheckboxProps> = ({
           }
         }}
       />
-      {label && <span>{typeof label === "function" ? label(checked) : label}</span>}
+      {label && (
+        <span style={style}>{typeof label === "function" ? label(checked) : label}</span>
+      )}
       {description && <p className="text-xs text-textLight">{description}</p>}
     </label>
   );

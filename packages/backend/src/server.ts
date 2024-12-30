@@ -171,7 +171,7 @@ app.post("/repertoires/:id/variantsInfo", async (req, res) => {
 
   const shouldUpdate =
     errors > trainVariantsInfo.errors ||
-    (errors < trainVariantsInfo.errors && currentDate > lastDate);
+    (errors <= trainVariantsInfo.errors && currentDate > lastDate);
 
   if (!shouldUpdate) {
     return res.status(200).json({ message: "No update needed" });
@@ -180,7 +180,7 @@ app.post("/repertoires/:id/variantsInfo", async (req, res) => {
   const updatedVariants = await db
     .collection("variantsInfo")
     .findOneAndUpdate(
-      { _id: new ObjectId(id) },
+      { _id: new ObjectId(trainVariantsInfo._id) },
       {
         $set: { repertoireId: id, variantName, errors, lastDate: currentDate },
       },

@@ -68,6 +68,6 @@ export const getSpacedRepetitionVariants = async (
     }
   }
 
-  return finalSelection;
+  return finalSelection.map(v => ({ ...v, state: "inProgress" }));
 };
 

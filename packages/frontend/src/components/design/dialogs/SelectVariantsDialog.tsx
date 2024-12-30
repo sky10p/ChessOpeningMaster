@@ -8,12 +8,14 @@ import {
   Description,
 } from "@headlessui/react";
 import { UiCheckbox } from "../../basic/UiCheckbox";
+import { useTrainVariantInfo } from "../../../hooks/useTrainVariantInfo";
 
 interface SelectVariantsDialogProps {
   open: boolean;
   title: string;
   contentText: string;
   variants: Variant[];
+  repertoireId: string;
   onConfirm: (variants: Variant[]) => void;
   onClose: (isCancelled: boolean) => void;
   multiple?: boolean;
@@ -28,10 +30,12 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
   title,
   contentText,
   variants,
+  repertoireId,
   onConfirm,
   onClose,
   multiple = true,
 }) => {
+  const {getTextColorFromVariant} = useTrainVariantInfo(repertoireId);
   const [selectedVariants, setSelectedVariants] = useState<Set<number>>(
     new Set()
   );
@@ -207,6 +211,7 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
                         handleToggleVariant(variant.originalIndex)
                       }
                       className="ml-2 text-textLight"
+                      style={{ color: getTextColorFromVariant(variant) }}
                     />
                   ))}
                 </div>

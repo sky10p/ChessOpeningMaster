@@ -400,6 +400,7 @@ export const DialogContextProvider = ({
           open={state.openSelectVariantsDialog}
           contentText={state.contentText}
           variants={state.variants}
+          repertoireId={state.repertoireId}
           onClose={handleDialogClose}
           onConfirm={handleVariantsConfirm}
           title={state.title}

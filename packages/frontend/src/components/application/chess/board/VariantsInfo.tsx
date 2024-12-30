@@ -8,6 +8,7 @@ import { useRepertoireInfo } from "../../../../hooks/useRepertoireInfo";
 const VariantsInfo: React.FC = () => {
   const {
     variants,
+    repertoireId,
     currentMoveNode,
     orientation,
     changeNameMove,
@@ -24,6 +25,7 @@ const VariantsInfo: React.FC = () => {
 
       <VariantsTree
         variants={variants}
+        repertoireId={repertoireId}
         currentNode={currentMoveNode}
         orientation={orientation}
         deleteVariant={deleteVariant}

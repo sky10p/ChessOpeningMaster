@@ -23,6 +23,7 @@ import { RepertoireInfoAction } from "./RepertoireInfoActions/model";
 const NUM_LINES = 3;
 
 interface RepertoireInfoPanelProps {
+  repertoireId: string;
   variants: Variant[];
   fen: string;
   currentMoveNode: MoveVariantNode;
@@ -51,6 +52,7 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
   goToMove,
   deleteMove,
   changeNameMove,
+  repertoireId,
   variants,
   comment,
   selectedVariant,
@@ -195,6 +197,7 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
         title="Select Variant"
         contentText="Choose a single variant"
         variants={variants}
+        repertoireId={repertoireId}
         onConfirm={(selected) => {
           if (selected.length > 0) {
             setSelectedVariant(selected[0]);

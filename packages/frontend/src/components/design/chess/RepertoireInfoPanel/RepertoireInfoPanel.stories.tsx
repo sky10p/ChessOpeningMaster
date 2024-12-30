@@ -18,6 +18,7 @@ export const RepertoireInfoPanelStory: Story = () => {
   return (
     <div className="w-1/2 h-1/2 bg-background">
       <RepertoireInfoPanel
+        repertoireId="1"
         fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
         currentMoveNode={currentMoveNode}
         goToMove={(move) => setCurrentMoveNode(move)}

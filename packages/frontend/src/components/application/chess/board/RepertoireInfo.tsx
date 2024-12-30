@@ -20,6 +20,7 @@ export const RepertoireInfo = () => {
   const [selectedVariant, setSelectedVariant] = useState<Variant>(variants[0]);
 
   const { toggleMenu } = useMenuContext();
+  const { repertoireId } = useRepertoireContext();
 
   const { downloadVariantPGN, copyVariantPGN,copyVariantToRepertoire,copyVariantsToRepertoire,deleteVariants, deleteVariant } =
     useRepertoireInfo();
@@ -42,6 +43,7 @@ export const RepertoireInfo = () => {
       deleteVariants={deleteVariants}
       downloadVariantPGN={downloadVariantPGN}
       deleteVariant={deleteVariant}
+      repertoireId={repertoireId}
       toggleMenu={toggleMenu}
     />
   );

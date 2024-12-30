@@ -11,6 +11,7 @@ import { BoardOrientation } from "@chess-opening-master/common";
 
 interface VariantTreeProps {
   variants: Variant[];
+  repertoireId: string;
   currentNode: MoveVariantNode;
   orientation: BoardOrientation;
   deleteVariant: (variant: Variant) => void;
@@ -27,6 +28,7 @@ interface VariantTreeProps {
 
 const VariantTree: React.FC<VariantTreeProps> = ({
   variants,
+  repertoireId,
   currentNode,
   deleteVariant,
   copyVariantToRepertoire,
@@ -124,6 +126,7 @@ const VariantTree: React.FC<VariantTreeProps> = ({
         title="Select Variant"
         contentText="Choose a single variant"
         variants={variants}
+        repertoireId={repertoireId}
         onConfirm={(selected) => {
           if (selected.length > 0) {
             setSelectedVariant(selected[0]);
