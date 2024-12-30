@@ -1,4 +1,4 @@
-import { IRepertoire } from "../../../../../../common/src/types/Repertoire";
+import { IRepertoire } from "@chess-opening-master/common";
 import { MoveVariantNode } from "../../../../models/VariantNode"
 import { toPGN } from "../pgn.utils";
 import { testRepertoireWithCommentsMock } from "./mocks/repertoire-with-comments.mock";

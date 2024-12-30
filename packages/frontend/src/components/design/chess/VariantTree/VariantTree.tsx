@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { MoveVariantNode } from "../../../../models/VariantNode";
 import { Variant } from "../../../../models/chess.models";
-import { BoardOrientation } from "@chess-opening-master/common/src/types/Orientation";
 import { VariantMovementsPanel } from "./VariantMovementsPanel";
 import VariantActionButtons from "./VariantActionButtons";
 import SelectVariantsDialog from "../../dialogs/SelectVariantsDialog";
 
 import { TrashIcon, ClipboardIcon, ArrowDownTrayIcon, ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
 import { TrashListIcon } from "../../../icons/TrashListIcon";
+import { BoardOrientation } from "@chess-opening-master/common";
 
 interface VariantTreeProps {
   variants: Variant[];

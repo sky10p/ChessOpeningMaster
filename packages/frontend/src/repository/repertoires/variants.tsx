@@ -1,8 +1,8 @@
-import { IRepertoire } from "../../../../common/src/types/Repertoire";
 import { Variant } from "../../models/chess.models";
 import { MoveVariantNode } from "../../models/VariantNode";
 import { putRepertoire } from "./repertoires";
 import { variantsToMoves } from "../../utils/chess/variants/VariantUtils";
+import { IRepertoire } from "@chess-opening-master/common";
 
 
 export const deleteVariant = async (repertoire: IRepertoire, variant: Variant) => {

@@ -17,6 +17,7 @@
     "start:backend:prod": "lerna run start:prod --scope @chess-opening-master/backend --stream",
     "start:dev": "concurrently \"yarn start:front:dev\" \"yarn start:backend:dev\"",
     "start:prod": "concurrently \"yarn start:front:prod\" \"yarn start:backend:prod\"",
+    "front:tsc:noEmits": "lerna run tsc:noEmits --scope @chess-opening-master/frontend --stream",
     "develop:components": "lerna run develop:components --scope @chess-opening-master/frontend --stream",
     "test": "lerna run test --stream",
     "lint": "lerna exec -- eslint . --ext .ts,.tsx --ignore-path .eslintignore"

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle, Description } from "@headlessui/react";
-import { IRepertoire } from "../../../../../common/src/types/Repertoire";
+import { IRepertoire } from "@chess-opening-master/common";
 
 interface RepertoireDialogProps {
   open: boolean;

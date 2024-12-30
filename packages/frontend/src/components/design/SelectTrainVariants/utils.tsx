@@ -1,5 +1,5 @@
+import { TrainVariantInfo } from "@chess-opening-master/common";
 import { TrainVariant } from "../../../models/chess.models";
-import { TrainVariantInfo } from "./models";
 
 export const VARIANT_COLORS = {
   noErrors: "#008000", // Verde

@@ -10,7 +10,7 @@ import {
   Description,
 } from "@headlessui/react";
 import { UiCheckbox } from "../../basic/UiCheckbox";
-import { TrainVariantInfo } from "../SelectTrainVariants/models";
+import { TrainVariantInfo } from "@chess-opening-master/common";
 
 interface SelectTrainVariantsDialogProps {
   open: boolean;
@@ -173,6 +173,65 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
   };
   const isSomeSelected = selectedTrainVariants.size > 0 && !isAllSelected;
 
+  const isVariantNew = (trainVariant: TrainVariant) => {
+    const info = trainVariantsInfo[trainVariant.variant.fullName];
+    return !info || !info.lastDate;
+  };
+
+  const isVariantNotStudiedToday = (trainVariant: TrainVariant) => {
+    const info = trainVariantsInfo[trainVariant.variant.fullName];
+    if (!info || !info.lastDate) return true;
+    const lastDate = new Date(info.lastDate);
+    const today = new Date();
+    return (
+      lastDate.getDate() !== today.getDate() ||
+      lastDate.getMonth() !== today.getMonth() ||
+      lastDate.getFullYear() !== today.getFullYear()
+    );
+  };
+
+  const newVariantIndexes = useMemo(() =>
+    trainVariants
+      .map((tv, i) => (isVariantNew(tv) ? i : -1))
+      .filter((i) => i !== -1),
+    [trainVariants, trainVariantsInfo]
+  );
+
+  const notStudiedIndexes = useMemo(() =>
+    trainVariants
+      .map((tv, i) => (isVariantNotStudiedToday(tv) ? i : -1))
+      .filter((i) => i !== -1),
+    [trainVariants, trainVariantsInfo]
+  );
+
+  const allNewSelected = newVariantIndexes.length > 0 &&
+    newVariantIndexes.every((i) => selectedTrainVariants.has(i));
+  const someNewSelected = newVariantIndexes.some((i) => selectedTrainVariants.has(i));
+
+  const allNotStudiedSelected = notStudiedIndexes.length > 0 &&
+    notStudiedIndexes.every((i) => selectedTrainVariants.has(i));
+  const someNotStudiedSelected = notStudiedIndexes.some((i) => selectedTrainVariants.has(i));
+
+  const handleSelectNewVariants = () => {
+    const newSet = new Set(selectedTrainVariants);
+    if (allNewSelected) {
+      newVariantIndexes.forEach((i) => newSet.delete(i));
+    } else {
+      newVariantIndexes.forEach((i) => newSet.add(i));
+    }
+    setSelectedTrainVariants(newSet);
+  };
+
+  const handleSelectNotStudiedToday = () => {
+    const newSet = new Set(selectedTrainVariants);
+    if (allNotStudiedSelected) {
+      notStudiedIndexes.forEach((i) => newSet.delete(i));
+    } else {
+      notStudiedIndexes.forEach((i) => newSet.add(i));
+    }
+    setSelectedTrainVariants(newSet);
+  };
+
   return (
     <Dialog
       open={open}
@@ -196,12 +255,25 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
             onChange={handleFilterChange}
           />
           <div className="mb-4">
-
             <UiCheckbox
               label="Select All"
               checked={isAllSelected}
               indeterminate={isSomeSelected}
               onChange={handleSelectAll}
+              className="ml-2 text-textLight"
+            />
+            <UiCheckbox
+              label="Select New"
+              checked={allNewSelected}
+              indeterminate={!allNewSelected && someNewSelected}
+              onChange={handleSelectNewVariants}
+              className="ml-2 text-textLight"
+            />
+            <UiCheckbox
+              label="Not Studied Today"
+              checked={allNotStudiedSelected}
+              indeterminate={!allNotStudiedSelected && someNotStudiedSelected}
+              onChange={handleSelectNotStudiedToday}
               className="ml-2 text-textLight"
             />
           </div>

@@ -1,14 +1,13 @@
 import { Chess, Move } from "chess.js";
 import React, { useCallback, useEffect, useState } from "react";
 import { MoveVariantNode } from "../models/VariantNode";
-import { IMoveNode } from "../../../common/src/types/MoveNode";
 import { Variant } from "../models/chess.models";
 import { useAlertContext } from "./AlertContext";
 import { putRepertoire } from "../repository/repertoires/repertoires";
 import { toPGN } from "../utils/chess/pgn/pgn.utils";
 import { useDialogContext } from "./DialogContext";
 import { useHeaderDispatch } from "./HeaderContext";
-import { BoardOrientation } from "@chess-opening-master/common";
+import { BoardOrientation, IMoveNode } from "@chess-opening-master/common";
 
 interface RepertoireContextProps {
   chess: Chess;

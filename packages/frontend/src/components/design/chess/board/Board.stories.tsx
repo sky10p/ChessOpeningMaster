@@ -3,7 +3,7 @@ import Board from "./Board";
 import React from "react";
 import { Chess, Move, Square } from "chess.js";
 import { MoveVariantNode } from "../../../../models/VariantNode";
-import { BoardOrientation } from "../../../../../../common/src/types/Orientation";
+import { BoardOrientation } from "@chess-opening-master/common";
 
 export const BoardResponsive: Story = () => {
   const chess = new Chess();

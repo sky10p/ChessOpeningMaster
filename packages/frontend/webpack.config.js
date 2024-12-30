@@ -2,6 +2,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const DotenvWebpackPlugin = require('dotenv-webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+
 
 const path = require('path');
 
@@ -43,6 +45,9 @@ module.exports = {
   },
   devtool: 'source-map',
   plugins: [
+    new ForkTsCheckerWebpackPlugin({
+      async: false,
+    }),
     new DotenvWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: './src/index.html',

@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import EditRepertoireViewContainer from "./EditRepertoireViewContainer";
-import { IRepertoire } from "../../../../../common/src/types/Repertoire";
 import { getRepertoire } from "../../../repository/repertoires/repertoires";
 import { RepertoireContextProvider } from "../../../contexts/RepertoireContext";
 import { useNavbarDispatch } from "../../../contexts/NavbarContext";
+import { IRepertoire } from "@chess-opening-master/common";
 
 const EditRepertoirePage = () => {
   const { id } = useParams();

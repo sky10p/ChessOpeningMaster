@@ -1,7 +1,7 @@
 import React from "react";
 import { TrainVariant } from "../../../models/chess.models";
 import { VARIANT_COLORS } from "./utils";
-import { TrainVariantInfo } from "./models";
+import { TrainVariantInfo } from "@chess-opening-master/common";
 
 interface VariantsProgressBarProps {
   variants: TrainVariant[];

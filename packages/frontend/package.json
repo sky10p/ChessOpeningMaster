@@ -8,6 +8,7 @@
     "start:dev": "cross-env NODE_ENV=development FRONT_PORT=3002 webpack serve --mode development --open",
     "start:tailwind:dev": "cross-env NODE_ENV=development FRONT_PORT=3002 webpack serve --mode development --open --config webpack-tailwind.config.js",
     "develop:components": "ladle serve",
+    "tsc:noEmits": "tsc --noEmit",
     "test": "jest",
     "lint": "eslint"
   },
@@ -23,6 +24,7 @@
   "devDependencies": {
     "autoprefixer": "^10.4.20",
     "copy-webpack-plugin": "^12.0.2",
+    "fork-ts-checker-webpack-plugin": "^9.0.2",
     "postcss": "^8.4.49",
     "postcss-loader": "^8.1.1",
     "tailwindcss": "^3.4.17",

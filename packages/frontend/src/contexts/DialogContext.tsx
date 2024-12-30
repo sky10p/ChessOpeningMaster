@@ -5,10 +5,10 @@ import { ConfirmDialog } from "../components/design/dialogs/ConfirmDialog";
 import SelectTrainVariantsDialog from "../components/design/dialogs/SelectTrainVariantsDialog";
 import { TrainVariant, Variant } from "../models/chess.models";
 import SelectNextMoveDialog from "../components/design/dialogs/SelectNextMoveDialog";
-import RepertoireDialog from "../components/design/dialogs/RepertoireDialog"; // Import RepertoireDialog
-import { IRepertoire } from "../../../common/src/types/Repertoire"; // Import IRepertoire
+import RepertoireDialog from "../components/design/dialogs/RepertoireDialog"; 
 import SelectVariantsDialog from "../components/design/dialogs/SelectVariantsDialog";
-import { NumberDialog } from "../components/design/dialogs/NumberDialog"; // Import NumberDialog
+import { NumberDialog } from "../components/design/dialogs/NumberDialog";
+import { IRepertoire } from "@chess-opening-master/common";
 
 interface TextDialogProps {
   title: string;

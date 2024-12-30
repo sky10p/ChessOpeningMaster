@@ -1,13 +1,13 @@
-import React, { useState } from "react";
+import React from "react";
 import { Disclosure } from "@headlessui/react";
 import { ChevronUpIcon } from "@heroicons/react/20/solid";
 import whiteKing from "../../../../assets/white-king.svg";
 import blackKing from "../../../../assets/black-king.svg";
 import { getMovementsFromVariant } from "../../../../utils/chess/variants/getMovementsFromVariants";
-import { Turn } from "@chess-opening-master/common/src/types/Orientation";
 import { TrainVariant } from "../../../../models/chess.models";
 import { MoveVariantNode } from "../../../../models/VariantNode";
 import { variantToPgn } from "../../../../utils/chess/pgn/pgn.utils";
+import { Turn } from "@chess-opening-master/common";
 
 interface TrainInfoProps {
   turn: Turn;
@@ -35,12 +35,6 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
   const availableVariants = trainVariants.filter(
     (variant) => variant.state === "inProgress"
   );
-
-  const [expandedVariant, setExpandedVariant] = useState<number | null>(null);
-
-  const handleToggleVariant = (index: number) => {
-    setExpandedVariant(expandedVariant === index ? null : index);
-  };
 
   const handleCopyPgn = () => {
     if (lastTrainVariant) {

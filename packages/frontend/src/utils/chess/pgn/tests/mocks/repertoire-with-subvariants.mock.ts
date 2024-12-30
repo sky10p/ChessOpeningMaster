@@ -1,4 +1,4 @@
-import { IMoveNode } from "../../../../../../../common/src/types/MoveNode";
+import { IMoveNode } from "@chess-opening-master/common";
 
 export const testRepertoireWithSubvariantsMock: IMoveNode = {
   id: "initial",

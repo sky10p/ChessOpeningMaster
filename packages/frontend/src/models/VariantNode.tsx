@@ -1,6 +1,6 @@
 import { Move, Square } from "chess.js";
 import { Variant } from "./chess.models";
-import { IMoveNode } from "../../../common/src/types/MoveNode";
+import { IMoveNode } from "@chess-opening-master/common";
 
 export class MoveVariantNode implements IMoveNode {
   id: string;
@@ -48,9 +48,11 @@ export class MoveVariantNode implements IMoveNode {
   ) => {
     if (moveNodes.length === 0) return;
     moveNodes.forEach((moveNode) => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      if(!moveNode.move) {
+        throw new Error("Move is null");
+      }
       const newNode = moveVariantNode.addMove(
-        moveNode.move!,
+        moveNode.move,
         moveNode.variantName,
         moveNode.comment
       );

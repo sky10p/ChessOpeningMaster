@@ -2,8 +2,8 @@ import React, { CSSProperties } from "react";
 import { Chessboard } from "react-chessboard";
 import useBoardStyle from "./useBoardStyle";
 import { Move, Square, Chess } from "chess.js";
-import { BoardOrientation } from "../../../../../../common/src/types/Orientation";
 import { MoveVariantNode } from "../../../../models/VariantNode";
+import { BoardOrientation } from "@chess-opening-master/common";
 
 interface ChessProps {
   chess: Chess;

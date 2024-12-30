@@ -3,8 +3,6 @@ import { Story } from "@ladle/react";
 import { RepertoireInfoPanel } from "./RepertoireInfoPanel";
 import { MoveVariantNode } from "../../../../models/VariantNode";
 import { testRepertoireWithSubvariantsMock } from "../../../../utils/chess/pgn/tests/mocks/repertoire-with-subvariants.mock";
-import { RepertoireInfoAction } from "./RepertoireInfoActions/model";
-import { ClipboardIcon, EllipsisVerticalIcon } from "@heroicons/react/24/solid";
 
 export const RepertoireInfoPanelStory: Story = () => {
   const [comment, setComment] = useState("");
@@ -35,6 +33,10 @@ export const RepertoireInfoPanelStory: Story = () => {
         copyVariantPGN={() => console.log("Copy variant PGN")}
         deleteVariant={() => console.log("Delete variant")}
         downloadVariantPGN={() => console.log("Download variant PGN")}
+        copyVariantToRepertoire={() => console.log("Copy variant to repertoire")}
+        copyVariantsToRepertoire={() => console.log("Copy variants to repertoire")}
+        deleteVariants={() => console.log("Delete variants")} 
+        toggleMenu={() => console.log("Toggle menu")}
       />
     </div>
   );

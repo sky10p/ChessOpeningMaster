@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { PlusIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 
-import { IRepertoire } from "../../../../../common/src/types/Repertoire";
 import {
   deleteRepertoire,
   duplicateRepertoire,
@@ -15,6 +14,7 @@ import { useMenuContext } from "../../../contexts/MenuContext";
 import { Navbar } from "../../design/Navbar/Navbar";
 import { API_URL } from "../../../repository/constants";
 import { useNavbarDispatch, useNavbarState } from "../../../contexts/NavbarContext";
+import { IRepertoire } from "@chess-opening-master/common";
 
 
 

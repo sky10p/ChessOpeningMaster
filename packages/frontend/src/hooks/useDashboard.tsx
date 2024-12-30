@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getFullInfoRepertoires } from "../repository/repertoires/repertoires";
-import { IRepertoireDashboard } from "@chess-opening-master/common/src/types/Repertoire";
+import { IRepertoireDashboard } from "@chess-opening-master/common";
 
 export const useDashboard = () => {
     const [dashbardoRepertoires, setDashboardRepertoires] = useState<IRepertoireDashboard[]>([]);

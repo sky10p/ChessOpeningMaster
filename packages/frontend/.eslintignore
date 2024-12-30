@@ -2,6 +2,7 @@ build/
 node_modules/
 webpack.config.js
 Board.stories.tsx
+**/*.stories.tsx
 .eslintrc.js
 jest.config.js
 frontend/build/
