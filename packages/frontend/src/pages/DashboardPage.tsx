@@ -7,7 +7,7 @@ import { VariantsProgressBar } from "../components/design/SelectTrainVariants/Va
 import { MoveVariantNode } from "../models/VariantNode";
 import { TrainVariant, Variant } from "../models/chess.models";
 
-export const Dashboard = () => {
+export const DashboardPage = () => {
   const navigate = useNavigate();
   const { repertoires } = useDashboard();
 

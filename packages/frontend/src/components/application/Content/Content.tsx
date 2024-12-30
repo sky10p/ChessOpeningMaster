@@ -4,7 +4,7 @@ import CreateRepertoire from "../../../pages/repertoires/CreateRepertoire";
 import EditRepertoirePage from "../../../pages/repertoires/EditRepertoirePage/EditRepertoirePage";
 import TrainRepertoirePage from "../../../pages/repertoires/TrainRepertoirePage/TrainRepertoirePage";
 import { MainContainer } from "../../design/layouts/MainContainer";
-import { Dashboard } from "../../../pages/Dashboard";
+import { DashboardPage } from "../../../pages/DashboardPage";
 
 
 
@@ -20,7 +20,7 @@ const Content = () => {
         />
         <Route path="/repertoire/:id" element={<EditRepertoirePage />} />
         <Route path="/repertoire/train/:id" element={<TrainRepertoirePage />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
 
         <Route path="/" element={<Navigate to="/dashboard" />} />
       </Routes>
