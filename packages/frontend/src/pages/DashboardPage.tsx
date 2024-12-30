@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { EyeIcon, PlayIcon } from "@heroicons/react/24/solid"; // Import Heroicons
 import { useNavigate } from "react-router-dom";
 import { IRepertoire, IRepertoireDashboard, TrainVariantInfo } from "@chess-opening-master/common";
@@ -10,6 +10,11 @@ import { TrainVariant, Variant } from "../models/chess.models";
 export const DashboardPage = () => {
   const navigate = useNavigate();
   const { repertoires } = useDashboard();
+  const [orientationFilter, setOrientationFilter] = useState<"all" | "white" | "black">("all");
+
+  const filteredRepertoires = orientationFilter === "all"
+    ? repertoires
+    : repertoires.filter((r) => r.orientation === orientationFilter);
 
   const goToRepertoire = (repertoire: IRepertoire) => {
     navigate(`/repertoire/${repertoire._id}`);
@@ -50,7 +55,7 @@ export const DashboardPage = () => {
   }
 
   const getVariantsForOpening = (opening: string): TrainVariant[] => {
-    const relatedRepertoires = repertoires.filter((repertoire) =>
+    const relatedRepertoires = filteredRepertoires.filter((repertoire) =>
       repertoire.moveNodes
         ? MoveVariantNode.initMoveVariantNode(repertoire.moveNodes)
             .getVariants()
@@ -69,14 +74,23 @@ export const DashboardPage = () => {
     return variants;
   };
 
-  const openings = getDifferentOpenings(repertoires);
+  const openings = getDifferentOpenings(filteredRepertoires);
 
   return (
     <div className="container p-4 w-full overflow-auto h-full bg-primary rounded-lg shadow-xl flex flex-col space-y-4">
       <h1 className="text-2xl font-bold mb-4 text-white">Dashboard</h1>
       <div className="flex-1 px-4 overflow-y-auto">
+        <select
+          value={orientationFilter}
+          onChange={(e) => setOrientationFilter(e.target.value as "all" | "white" | "black")}
+          className="mb-4 bg-gray-700 text-white px-4 py-2 border border-gray-600 rounded-lg shadow-sm hover:border-accent focus:outline-none transition ease-in-out duration-150"
+        >
+          <option value="all">All</option>
+          <option value="white">White</option>
+          <option value="black">Black</option>
+        </select>
         <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {repertoires.map((repertoire) => (
+          {filteredRepertoires.map((repertoire) => (
             <li
               key={repertoire._id}
               className="p-4 border rounded-lg  from-primary shadow-xl"
@@ -119,7 +133,7 @@ export const DashboardPage = () => {
               <VariantsProgressBar
                 variants={getVariantsForOpening(opening)}
                 variantInfo={getTrainVariantInfo(
-                  repertoires.flatMap((r) => r.variantsInfo)
+                  filteredRepertoires.flatMap((r) => r.variantsInfo)
                 )}
               />
             </div>
