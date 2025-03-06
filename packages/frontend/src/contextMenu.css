@@ -1,0 +1,89 @@
+/* Context Menu Styles */
+.context-menu,
+.dropdown-menu,
+.menu-list,
+.menu-popup,
+.popover,
+.submenu {
+  background-color: #1e293b !important; /* Dark slate blue background */
+  color: #f8fafc !important; /* Light text color */
+  border: 1px solid #475569 !important; /* Medium slate border */
+  border-radius: 0.375rem !important; /* Rounded corners */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important; /* Subtle shadow */
+}
+
+/* Menu items */
+.context-menu-item,
+.dropdown-item,
+.menu-item,
+.popover-item,
+.submenu-item,
+li[role="menuitem"],
+div[role="menuitem"] {
+  color: #f8fafc !important; /* Light text */
+  background-color: transparent !important;
+  transition: background-color 0.2s ease !important;
+}
+
+/* Hover state for menu items */
+.context-menu-item:hover,
+.dropdown-item:hover,
+.menu-item:hover,
+.popover-item:hover,
+.submenu-item:hover,
+li[role="menuitem"]:hover,
+div[role="menuitem"]:hover {
+  background-color: #334155 !important; /* Slightly lighter slate on hover */
+  color: #f8fafc !important;
+}
+
+/* Dividers in menus */
+.context-menu-divider,
+.dropdown-divider,
+.menu-divider,
+hr {
+  border-color: #475569 !important; /* Medium slate divider */
+  opacity: 0.5 !important;
+}
+
+/* Disabled items */
+.context-menu-item.disabled,
+.dropdown-item.disabled,
+.menu-item.disabled,
+.popover-item.disabled,
+.submenu-item.disabled,
+li[role="menuitem"].disabled,
+div[role="menuitem"].disabled {
+  color: #64748b !important; /* Muted text for disabled items */
+  opacity: 0.7 !important;
+}
+
+/* Icons in menu items */
+.context-menu-item i,
+.dropdown-item i,
+.menu-item i,
+.popover-item i,
+.submenu-item i,
+li[role="menuitem"] i,
+div[role="menuitem"] i,
+.context-menu-item svg,
+.dropdown-item svg,
+.menu-item svg,
+.popover-item svg,
+.submenu-item svg,
+li[role="menuitem"] svg,
+div[role="menuitem"] svg {
+  color: #94a3b8 !important; /* Light slate for icons */
+}
+
+/* Active/selected menu item */
+.context-menu-item.active,
+.dropdown-item.active,
+.menu-item.active,
+.popover-item.active,
+.submenu-item.active,
+li[role="menuitem"].active,
+div[role="menuitem"].active {
+  background-color: #2563eb !important; /* Blue background for active item */
+  color: white !important;
+}

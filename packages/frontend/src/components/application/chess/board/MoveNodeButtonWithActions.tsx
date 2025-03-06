@@ -76,7 +76,7 @@ export const MoveNodeButtonWithActions: React.FC<MoveNodeButtonProps> = ({
         <Menu as="div" className="relative inline-block text-left">
           <div>
             <MenuItems
-              className="absolute z-10 mt-2 w-56 origin-top-right bg-white border border-gray-200 divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+              className="absolute z-10 mt-2 w-56 origin-top-right rounded-md shadow-lg focus:outline-none context-menu"
               style={{ top: contextMenu.y, left: contextMenu.x }}
             >
               <div className="py-1">
@@ -89,9 +89,7 @@ export const MoveNodeButtonWithActions: React.FC<MoveNodeButtonProps> = ({
                         }
                         handleCloseContextMenu();
                       }}
-                      className={`${
-                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
-                      } group flex items-center px-4 py-2 text-sm`}
+                      className={`context-menu-item ${active ? 'active' : ''} group flex items-center px-4 py-2 text-sm`}
                     >
                       Delete
                     </button>
@@ -101,9 +99,7 @@ export const MoveNodeButtonWithActions: React.FC<MoveNodeButtonProps> = ({
                   {({ active }) => (
                     <button
                       onClick={handleRenameDialog}
-                      className={`${
-                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
-                      } group flex items-center px-4 py-2 text-sm`}
+                      className={`context-menu-item ${active ? 'active' : ''} group flex items-center px-4 py-2 text-sm`}
                     >
                       Rename
                     </button>

@@ -80,7 +80,7 @@ export const ActionsMenu: React.FC<ActionsMenuProps> = ({anchorEl, closeMenu, it
     return (
         open ? (
             <div 
-                className="absolute bg-white border rounded shadow mt-2 z-50"
+                className="absolute border rounded shadow mt-2 z-50 context-menu"
                 style={{ top: position.top, left: position.left }}
                 ref={menuRef}
                 onMouseDown={(e) => e.stopPropagation()} // Prevent menu from closing when interacting
@@ -89,7 +89,7 @@ export const ActionsMenu: React.FC<ActionsMenuProps> = ({anchorEl, closeMenu, it
                     <div 
                         key={item.name} 
                         onClick={(event) => handleClick(event, item.action)} 
-                        className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
+                        className="px-4 py-2 cursor-pointer context-menu-item"
                     >
                         {item.name}
                     </div>

@@ -128,29 +128,44 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
 
   return (
     <>
-      <div className="w-full h-full max-h-full overflow-hidden bg-background text-white flex flex-col">
-        <div className="px-4 py-2 flex gap-2 w-full bg-background z-10">
-          <UiSwitch
-            label={(enabled) => (
-              <StockfishLabel
-                depth={depth}
-                maxDepth={maxDepth}
-                enabled={enabled}
-              />
-            )}
-            enabled={stockfishEnabled}
-            setEnabled={setStockfishEnabled}
-          />
-          <UiSwitch
-            label={<PresentationChartLineIcon className="h-6 w-6" />}
-            enabled={statisticsEnabled}
-            setEnabled={setStatisticsEnabled}
-          />
-          <UiSwitch
-            label={<ChatBubbleBottomCenterTextIcon className="h-6 w-6" />}
-            enabled={commentEnabled}
-            setEnabled={setCommentEnabled}
-          />
+      <div className="w-full h-full max-h-full overflow-hidden bg-slate-800 text-white flex flex-col rounded-lg shadow-lg border border-slate-700">
+        {/* Header con controles y acciones */}
+        <div className="px-4 py-3 flex items-center justify-between w-full bg-gradient-to-r from-slate-800 to-slate-700 z-10 border-b border-slate-600 rounded-t-lg">
+          <div className="flex items-center gap-3">
+            <UiSwitch
+              label={(enabled) => (
+                <div className="flex items-center">
+                  <StockfishLabel
+                    depth={depth}
+                    maxDepth={maxDepth}
+                    enabled={enabled}
+                  />
+                </div>
+              )}
+              enabled={stockfishEnabled}
+              setEnabled={setStockfishEnabled}
+            />
+            <UiSwitch
+              label={
+                <div className="flex items-center">
+                  <PresentationChartLineIcon className="h-5 w-5 text-blue-400" />
+                  <span className="ml-1 text-sm font-medium hidden sm:inline">Stats</span>
+                </div>
+              }
+              enabled={statisticsEnabled}
+              setEnabled={setStatisticsEnabled}
+            />
+            <UiSwitch
+              label={
+                <div className="flex items-center">
+                  <ChatBubbleBottomCenterTextIcon className="h-5 w-5 text-green-400" />
+                  <span className="ml-1 text-sm font-medium hidden sm:inline">Notes</span>
+                </div>
+              }
+              enabled={commentEnabled}
+              setEnabled={setCommentEnabled}
+            />
+          </div>
 
           <RepertoireInfoActions
             actions={actions}
@@ -158,38 +173,53 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
           />
         </div>
 
-        {stockfishEnabled && (
-          <div className="p-1 flex-1">
-            <StockfishSubpanel lines={lines} fen={fen} />
+        {/* Contenido principal con paneles condicionales */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Panel de variante siempre visible */}
+          <div className="flex flex-col flex-1 overflow-hidden">
+            <button
+              className="m-3 py-2 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-md transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+              onClick={() => setShowSelectVariantDialog(true)}
+            >
+              <span>{selectedVariant ? selectedVariant.name : "Select Variant"}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            
+            <div className="flex-1 overflow-auto px-2">
+              <VariantMovementsSubpanel
+                moves={selectedVariant?.moves || []}
+                currentMoveNode={currentMoveNode}
+                goToMove={goToMove}
+                deleteMove={deleteMove}
+                changeNameMove={changeNameMove}
+              />
+            </div>
           </div>
-        )}
-        {statisticsEnabled && (
-          <div className="flex-1">
-            <StatisticsSubpanel fen={fen} />
-          </div>
-        )}
-        <div className="flex flex-col flex-1 gap-2 p-2 overflow-auto">
-          <button
-            className="p-2 bg-accent text-black w-full text-center"
-            onClick={() => setShowSelectVariantDialog(true)}
-          >
-            {selectedVariant ? selectedVariant.name : "Change Variant"}
-          </button>
-          <div className="flex-1 overflow-auto">
-            <VariantMovementsSubpanel
-              moves={selectedVariant?.moves || []}
-              currentMoveNode={currentMoveNode}
-              goToMove={goToMove}
-              deleteMove={deleteMove}
-              changeNameMove={changeNameMove}
-            />
-          </div>
+
+          {/* Paneles condicionales */}
+          {stockfishEnabled && (
+            <div className="p-3 border-t border-slate-700 bg-slate-800">
+              <h3 className="text-sm font-medium text-slate-300 mb-2">Engine Analysis</h3>
+              <StockfishSubpanel lines={lines} fen={fen} />
+            </div>
+          )}
+          
+          {statisticsEnabled && (
+            <div className="p-3 border-t border-slate-700 bg-slate-800">
+              <h3 className="text-sm font-medium text-slate-300 mb-2">Statistical Analysis</h3>
+              <StatisticsSubpanel fen={fen} />
+            </div>
+          )}
+          
+          {commentEnabled && (
+            <div className="p-3 border-t border-slate-700 bg-slate-800">
+              <h3 className="text-sm font-medium text-slate-300 mb-2">Position Notes</h3>
+              <BoardComment comment={comment} updateComment={updateComment} />
+            </div>
+          )}
         </div>
-        {commentEnabled && (
-          <div className="flex-1 overflow-auto">
-            <BoardComment comment={comment} updateComment={updateComment} />
-          </div>
-        )}
       </div>
       <SelectVariantsDialog
         open={showSelectVariantDialog}

@@ -17,84 +17,113 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
   
   return (
     <div className={`fixed inset-0 z-40 flex ${open ? 'block' : 'hidden'}`}>
+      {/* Backdrop with blur effect */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
         onClick={() => setOpen(false)}
       />
-      <div className="relative flex-1 flex flex-col max-w-xs w-full bg-gray-800">
-        <div className="absolute top-2 right-2">
+      
+      {/* Sidebar panel */}
+      <div className="relative flex-1 flex flex-col max-w-xs w-full bg-gradient-to-b from-slate-800 to-slate-900 shadow-xl border-r border-slate-700 transition-transform duration-300">
+        {/* Close button */}
+        <div className="absolute top-3 right-3 z-10">
           <button
-            className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+            className="flex items-center justify-center h-8 w-8 rounded-full bg-slate-700/70 text-slate-300 hover:bg-slate-600 hover:text-white transition-colors duration-200"
             onClick={() => setOpen(false)}
           >
             <span className="sr-only">Close sidebar</span>
-            <XMarkIcon className="h-6 w-6 text-white" aria-hidden="true" />
+            <XMarkIcon className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
+        
         <div className="flex-1 pb-4 overflow-y-auto">
-          <img
-            src={chessNavbarBackground}
-            alt="Chess Navbar Background"
-            className="w-full h-20 object-cover mb-4"
-          />
-          <nav className="mt-5 px-2 space-y-1">
-            
+          {/* Header image with gradient overlay */}
+          <div className="relative">
+            <img
+              src={chessNavbarBackground}
+              alt="Chess Navbar Background"
+              className="w-full h-32 object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent"></div>
+            <div className="absolute bottom-3 left-3 text-2xl font-bold text-white">ChessKeep</div>
+          </div>
+          
+          <nav className="mt-6 px-3 space-y-1.5">
+            {/* Main navigation links */}
             {mainActions.map((link) => (
               <Link
                 key={link.id}
                 to={link.url}
-                className="group flex items-center px-2 py-2 text-base font-medium text-white rounded-md hover:bg-gray-700"
+                className="nav-link group"
                 onClick={() => setOpen(false)}
               >
-                {link.icon}
-                {link.name}
+                <span className="text-amber-400 mr-3">{link.icon}</span>
+                <span>{link.name}</span>
               </Link>
             ))}
-            <div className="border-t border-gray-700 mt-5"></div>
+            
+            <div className="border-t border-slate-700/70 my-4"></div>
+            
             <Link
               key="dashboard"
               to="/dashboard"
-              className="group flex items-center px-2 py-2 text-base font-medium text-white rounded-md hover:bg-gray-700"
+              className="nav-link group"
               onClick={() => setOpen(false)}
             >
-              <ChartPieIcon className="h-6 w-6 mr-2" />
+              <ChartPieIcon className="h-5 w-5 text-blue-400 mr-3" />
               Dashboard
             </Link>
             
-            <button
-              className="group flex items-center justify-between px-2 py-2 text-base font-medium text-white rounded-md hover:bg-gray-700 w-full"
-              onClick={() => setFavouritesOpen(!favouritesOpen)}
-            >
-              <div className="flex items-center">
-                <StarIcon className="h-6 w-6 mr-2" />
-                Repertoires
-              </div>
-              <ChevronDownIcon
-                className={`h-5 w-5 transition-transform ${favouritesOpen ? 'transform rotate-180' : ''}`}
-              />
-            </button>
-            {favouritesOpen && (
-              <div className="overflow-auto max-h-32">
-                {secondaryActions.map((link) => (
-                  <div key={link.id} className="flex items-center justify-between px-2 py-2 text-base font-medium text-white rounded-md hover:bg-gray-700">
-                    <Link
-                      to={link.url}
-                      className="flex items-center"
-                      onClick={() => setOpen(false)}
+            {/* Repertoires dropdown */}
+            <div className="mt-2">
+              <button
+                className="w-full nav-link justify-between group"
+                onClick={() => setFavouritesOpen(!favouritesOpen)}
+              >
+                <div className="flex items-center">
+                  <StarIcon className="h-5 w-5 text-amber-400 mr-3" />
+                  <span>Repertoires</span>
+                </div>
+                <ChevronDownIcon
+                  className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${favouritesOpen ? 'transform rotate-180' : ''}`}
+                />
+              </button>
+              
+              {/* Repertoire items */}
+              {favouritesOpen && (
+                <div className="mt-1 ml-8 space-y-1 overflow-auto max-h-40 pr-2">
+                  {secondaryActions.map((link) => (
+                    <div 
+                      key={link.id} 
+                      className="flex items-center justify-between py-2 px-3 text-sm font-medium text-slate-300 rounded-md hover:bg-slate-700/50 hover:text-white transition-colors duration-200"
                     >
-                      {link.name}
-                    </Link>
-                    <button
-                      className="ml-4 flex-shrink-0 h-6 w-6 text-gray-400 hover:text-gray-300"
-                      onClick={link.onActionClick}
-                    >
-                      <EllipsisVerticalIcon className="h-6 w-6" aria-hidden="true" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+                      <Link
+                        to={link.url}
+                        className="flex-1 truncate"
+                        onClick={() => setOpen(false)}
+                      >
+                        {link.name}
+                      </Link>
+                      <button
+                        className="ml-2 p-1 rounded-md text-slate-400 hover:text-amber-400 hover:bg-slate-700"
+                        onClick={link.onActionClick}
+                      >
+                        <EllipsisVerticalIcon className="h-4 w-4" aria-hidden="true" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </nav>
+          
+          {/* Footer section */}
+          <div className="mt-auto px-3 py-4">
+            <div className="px-3 py-3 bg-slate-800/50 rounded-lg border border-slate-700/50 text-xs text-slate-400">
+              <p>ChessOpeningMaster v1.0</p>
+              <p className="mt-1">Manage your chess repertoire with ease</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

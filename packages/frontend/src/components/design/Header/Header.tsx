@@ -1,7 +1,6 @@
 import React from "react";
 import { Bars3Icon, CloudArrowUpIcon } from "@heroicons/react/24/outline";
 import { HeaderIcon } from "./models";
-
 import { CloudDoneIcon } from "../../icons/CloudDoneIcon";
 
 interface HeaderProps {
@@ -12,36 +11,47 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ setOpenNavbar, isSaving, icons }) => {
   return (
-    <header className="relative bg-gray-800 shadow">
-      <div className="flex items-center justify-between p-4">
-        <button
-          aria-label="menu"
-          className="p-2 text-gray-300 hover:text-white"
-          onClick={() => setOpenNavbar(true)}
-        >
-          <Bars3Icon className="h-6 w-6" />
-        </button>
-        <div className="flex items-center flex-grow">
-          <h1 className="text-xl font-semibold text-accent">ChessKeep</h1>
-          <div className="flex items-center ml-4">
-            <p className="text-sm text-gray-300 hidden md:block mt-1">
+    <header className="relative bg-gradient-to-r from-slate-800 to-slate-900 shadow-md border-b border-slate-700">
+      <div className="max-w-7xl mx-auto flex items-center justify-between p-3 px-4">
+        <div className="flex items-center">
+          <button
+            aria-label="menu"
+            className="p-2 text-slate-300 hover:text-white hover:bg-slate-700 rounded-md transition-all duration-200"
+            onClick={() => setOpenNavbar(true)}
+          >
+            <Bars3Icon className="h-6 w-6" />
+          </button>
+          
+          <h1 className="ml-3 text-2xl font-bold bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent">
+            ChessKeep
+          </h1>
+        </div>
+        
+        <div className="flex items-center">
+          <div className="flex items-center px-3 py-1.5 bg-slate-700/50 rounded-md mr-6 border border-slate-600">
+            <p className="text-sm text-slate-300 hidden md:block">
               {isSaving ? "Saving repertoire..." : "Last repertoire saved"}
             </p>
-            <div className="ml-2 text-gray-300">
-              {isSaving ? <CloudArrowUpIcon className="h-6 w-6" /> : <CloudDoneIcon className="h-6 w-6" />}
+            <div className="ml-2 text-slate-300">
+              {isSaving ? (
+                <CloudArrowUpIcon className="h-5 w-5 text-blue-400 animate-pulse" />
+              ) : (
+                <CloudDoneIcon className="h-5 w-5 text-green-400" />
+              )}
             </div>
           </div>
-        </div>
-        <div className="flex items-center space-x-4">
-          {icons.map((icon, i) => (
-            <button
-              key={i}
-              onClick={icon.onClick}
-              className="text-gray-300 hover:text-accent h-6 w-6"
-            >
-              {icon.icon}
-            </button>
-          ))}
+          
+          <div className="flex items-center space-x-3">
+            {icons.map((icon, i) => (
+              <button
+                key={i}
+                onClick={icon.onClick}
+                className="flex items-center justify-center w-8 h-8 text-slate-300 hover:text-amber-400 hover:bg-slate-700/50 rounded-md transition-all duration-200"
+              >
+                {icon.icon}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </header>
