@@ -23,7 +23,7 @@ const Header: React.FC<HeaderProps> = ({ setOpenNavbar, isSaving, icons }) => {
           </button>
           
           <h1 className="ml-3 text-2xl font-bold bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent">
-            ChessKeep
+            <a href="/" className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600">ChessKeep</a>
           </h1>
         </div>
         
