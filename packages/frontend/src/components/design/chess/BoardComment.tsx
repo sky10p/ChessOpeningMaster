@@ -17,17 +17,26 @@ export const BoardComment: React.FC<BoardCommentProps> = ({
   };
 
   return (
-    <div className="p-4 bg-gray-800 rounded shadow-md h-full w-full">
+    <div className="rounded-md shadow-md w-full overflow-hidden border border-slate-700 bg-slate-900">
       {!editable && (!comment || comment === "") ? (
-        <p className="text-sm text-gray-400">No comments</p>
+        <div className="flex items-center justify-center h-32 text-slate-500 p-4">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+          </svg>
+          <span>No comments for this position</span>
+        </div>
       ) : (
         <Textarea
-          className="w-full h-full p-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-accent"
-          placeholder="Add a comment to the current position"
-          rows={10}
+          className="w-full p-3 bg-slate-800 text-white border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-slate-500 resize-none min-h-[150px]"
+          placeholder="Add notes about this position..."
+          rows={6}
           disabled={!editable}
           value={comment}
           onChange={handleChange}
+          style={{ 
+            boxShadow: 'none', 
+            fontFamily: 'system-ui, -apple-system, sans-serif'
+          }}
         />
       )}
     </div>

@@ -3,31 +3,95 @@
 @tailwind utilities;
 
 :root {
+  /* Enhanced color palette */
+  --color-primary: #1e40af;      /* Deep blue */
+  --color-primary-light: #3b82f6; /* Lighter blue */
+  --color-secondary: #9333ea;    /* Purple */
+  --color-accent: #f59e0b;       /* Amber/gold */
+  --color-accent-light: #fbbf24; /* Light amber */
+  
+  /* Background colors */
+  --color-bg-dark: #0f172a;      /* Dark slate blue */
+  --color-bg-card: #1e293b;      /* Slightly lighter slate */
+  
+  /* Text colors */
+  --color-text-primary: #f8fafc;  /* Almost white */
+  --color-text-secondary: #cbd5e1; /* Light gray */
+  --color-text-muted: #94a3b8;     /* Muted gray */
+  
+  /* Chess theme colors */
+  --color-chess-light: #f0d9b5;    /* Light square */
+  --color-chess-dark: #b58863;     /* Dark square */
+  
+  /* Scrollbar colors */
   --tw-scrollbar-thumb: #475569;
   --tw-scrollbar-track: #1e293b;
-  --tw-scrollbar-thumb-hover: #64748b; 
+  --tw-scrollbar-thumb-hover: #64748b;
+  
+  /* Animation speeds */
+  --transition-fast: 150ms;
+  --transition-normal: 250ms;
+  --transition-slow: 350ms;
+  
+  /* Context menu colors */
+  --context-menu-bg: #1e293b;
+  --context-menu-text: #f8fafc;
+  --context-menu-hover-bg: #334155;
+  --context-menu-border: #475569;
 }
 
 body {
-  background-color: #0f172a;
+  background-color: var(--color-bg-dark);
+  color: var(--color-text-primary);
   padding-bottom: env(safe-area-inset-bottom);
   margin: 0;
   padding: 0;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
+/* Improved scrollbar styling */
 div::-webkit-scrollbar {
   width: 8px;
 }
 
 div::-webkit-scrollbar-track {
   background: var(--tw-scrollbar-track);
+  border-radius: 4px;
 }
 
 div::-webkit-scrollbar-thumb {
   background-color: var(--tw-scrollbar-thumb);
   border-radius: 4px;
+  transition: background-color var(--transition-fast) ease;
 }
 
 div::-webkit-scrollbar-thumb:hover {
   background-color: var(--tw-scrollbar-thumb-hover);
+}
+
+/* Custom component styles */
+@layer components {
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-all duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50;
+  }
+  
+  .btn-secondary {
+    @apply bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md transition-all duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50;
+  }
+  
+  .btn-accent {
+    @apply bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-4 rounded-md transition-all duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-opacity-50;
+  }
+  
+  .card {
+    @apply bg-slate-800 rounded-lg shadow-lg p-4 border border-slate-700;
+  }
+  
+  .nav-link {
+    @apply flex items-center px-3 py-2 text-base font-medium text-slate-200 rounded-md transition-colors duration-200 hover:bg-slate-700 hover:text-white;
+  }
+  
+  .nav-link-active {
+    @apply flex items-center px-3 py-2 text-base font-medium rounded-md bg-blue-700 text-white;
+  }
 }

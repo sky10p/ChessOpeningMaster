@@ -131,12 +131,12 @@ export const VariantMovementsPanel: React.FC<VariantMovementsPanelProps> = ({
       ))}
       {contextMenu.node && (
         <div
-          className="fixed z-10 bg-white border text-black border-gray-300 rounded shadow-lg context-menu"
+          className="fixed z-10 rounded shadow-lg context-menu"
           style={{ top: contextMenu.y, left: contextMenu.x }}
           onMouseLeave={handleCloseContextMenu}
         >
-          <div className="p-2 cursor-pointer hover:bg-gray-200" onClick={() => { if (contextMenu.node) { deleteMove(contextMenu.node); } handleCloseContextMenu(); }}>Delete</div>
-          <div className="p-2 cursor-pointer hover:bg-gray-200" onClick={handleRenameDialog}>Rename</div>
+          <div className="p-2 cursor-pointer context-menu-item" onClick={() => { if (contextMenu.node) { deleteMove(contextMenu.node); } handleCloseContextMenu(); }}>Delete</div>
+          <div className="p-2 cursor-pointer context-menu-item" onClick={handleRenameDialog}>Rename</div>
         </div>
       )}
       <TextDialog

@@ -71,85 +71,131 @@ const StatisticsSubpanel: React.FC<StatisticsSubpanelProps> = ({ fen }) => {
   );
 
   return (
-    <div className="rounded shadow-md w-full">
-      <div className="flex justify-center mb-1">
-        <button
-          className={`px-2 py-1 mr-1 text-xs font-medium rounded ${source === LichessMovesTypes.MASTERS ? "bg-accent text-black" : "bg-gray-700 text-white"}`}
-          onClick={() => handleSourceChange(LichessMovesTypes.MASTERS)}
-        >
-          Masters
-        </button>
-        <button
-          className={`px-2 py-1 text-xs font-medium rounded ${source === LichessMovesTypes.LICHESS ? "bg-accent text-black" : "bg-gray-700 text-white"}`}
-          onClick={() => handleSourceChange(LichessMovesTypes.LICHESS)}
-        >
-          Lichess
-        </button>
-      </div>
-      {source === LichessMovesTypes.LICHESS && (
-        <div className="flex justify-center mb-1 w-full overflow-x-auto"> 
-          <div className="flex min-w-full">
-            <label className="flex items-center mr-1 text-xs">
+    <div className="rounded-md shadow-md w-full overflow-hidden border border-slate-700">
+      {/* Selector de fuente de datos */}
+      <div className="bg-slate-800 p-3 border-b border-slate-700">
+        <div className="flex justify-center mb-2">
+          <div className="inline-flex rounded-md shadow-sm" role="group">
+            <button
+              className={`px-3 py-1.5 text-xs font-medium rounded-l-md border border-slate-600 focus:z-10 focus:ring-2 focus:ring-blue-500 focus:outline-none
+                ${source === LichessMovesTypes.MASTERS 
+                  ? "bg-blue-600 text-white border-blue-700" 
+                  : "bg-slate-700 text-slate-300 hover:bg-slate-600"}`}
+              onClick={() => handleSourceChange(LichessMovesTypes.MASTERS)}
+            >
+              Masters
+            </button>
+            <button
+              className={`px-3 py-1.5 text-xs font-medium rounded-r-md border border-slate-600 focus:z-10 focus:ring-2 focus:ring-blue-500 focus:outline-none
+                ${source === LichessMovesTypes.LICHESS 
+                  ? "bg-blue-600 text-white border-blue-700" 
+                  : "bg-slate-700 text-slate-300 hover:bg-slate-600"}`}
+              onClick={() => handleSourceChange(LichessMovesTypes.LICHESS)}
+            >
+              Lichess
+            </button>
+          </div>
+        </div>
+        
+        {/* Filtros de rating (solo para Lichess) */}
+        {source === LichessMovesTypes.LICHESS && (
+          <div className="flex flex-wrap justify-center gap-1 w-full">
+            <label className="flex items-center px-2 py-1 bg-slate-700 rounded-md text-xs">
               <input
                 type="checkbox"
                 checked={ratings.length === ratingOptions.length}
                 onChange={handleToggleAll}
-                className="mr-1"
+                className="mr-1.5 h-3 w-3 rounded border-slate-600 text-blue-600 focus:ring-blue-500"
               />
-              Select All
+              <span className="text-slate-300">All</span>
             </label>
             {ratingOptions.map((rating) => (
-              <label key={rating} className="flex items-center mr-1 text-xs">
+              <label key={rating} className="flex items-center px-2 py-1 bg-slate-700 rounded-md text-xs">
                 <input
                   type="checkbox"
                   checked={ratings.includes(rating)}
                   onChange={() => handleRatingsChange(rating)}
-                  className="mr-1"
+                  className="mr-1.5 h-3 w-3 rounded border-slate-600 text-blue-600 focus:ring-blue-500"
                 />
-                {rating}
+                <span className="text-slate-300">{rating}</span>
               </label>
             ))}
           </div>
-        </div>
-      )}
-      {loading && <p className="text-xs text-gray-400">Loading...</p>}
-      {error && <p className="text-xs text-red-500">{error}</p>}
-      {!loading && !error && (
-        <div className="overflow-y-auto max-h-32">
-          <table className="w-full text-left text-xs text-gray-400">
-            <thead className="bg-gray-700 text-gray-300">
-              <tr>
-                <th className="py-1 px-2">Move</th>
-                <th className="py-1 px-2 w-20 whitespace-nowrap">Games</th> {/* Added whitespace-nowrap */}
-                <th className="py-1 px-2 w-full">Results</th>
-              </tr>
-            </thead>
-            <tbody>
-              {moves.map((move, index) => {
-                const moveTotal = move.white + move.draws + move.black;
-                const winPercentage = (move.white / moveTotal) * 100;
-                const drawPercentage = (move.draws / moveTotal) * 100;
-                const lossPercentage = (move.black / moveTotal) * 100;
-                return (
-                  <tr key={index} className="border-b border-gray-700">
-                    <td className="py-1 px-2">{move.san}</td>
-                    <td className="py-1 px-2 whitespace-nowrap">{((moveTotal / totalGames) * 100).toFixed(1)}% ({moveTotal})</td> {/* Added whitespace-nowrap */}
-                    <td className="py-1 px-2 w-full">
-                      <div className="w-full">
-                        <ResultBar
-                          winPercentage={winPercentage}
-                          drawPercentage={drawPercentage}
-                          lossPercentage={lossPercentage}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+        )}
+      </div>
+      
+      {/* Contenido principal */}
+      <div className="bg-slate-900">
+        {loading && (
+          <div className="flex items-center justify-center h-32 text-slate-400">
+            <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Loading statistics...</span>
+          </div>
+        )}
+        
+        {error && (
+          <div className="flex items-center justify-center h-32 text-red-400 px-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{error}</span>
+          </div>
+        )}
+        
+        {!loading && !error && moves.length === 0 && (
+          <div className="flex items-center justify-center h-32 text-slate-400 px-4">
+            <span>No statistics available for this position.</span>
+          </div>
+        )}
+        
+        {!loading && !error && moves.length > 0 && (
+          <div className="overflow-y-auto max-h-72">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-800 sticky top-0">
+                <tr>
+                  <th className="py-2 px-3 text-xs font-medium text-slate-400">Move</th>
+                  <th className="py-2 px-3 text-xs font-medium text-slate-400 whitespace-nowrap">Games</th>
+                  <th className="py-2 px-3 text-xs font-medium text-slate-400 w-full">Results</th>
+                </tr>
+              </thead>
+              <tbody>
+                {moves.map((move, index) => {
+                  const moveTotal = move.white + move.draws + move.black;
+                  const winPercentage = (move.white / moveTotal) * 100;
+                  const drawPercentage = (move.draws / moveTotal) * 100;
+                  const lossPercentage = (move.black / moveTotal) * 100;
+                  return (
+                    <tr key={index} className="border-b border-slate-800 hover:bg-slate-800 transition-colors">
+                      <td className="py-2 px-3 font-medium text-slate-300">{move.san}</td>
+                      <td className="py-2 px-3 whitespace-nowrap text-slate-400">
+                        <span className="font-medium text-slate-300">{((moveTotal / totalGames) * 100).toFixed(1)}%</span>
+                        <span className="text-xs ml-1">({moveTotal})</span>
+                      </td>
+                      <td className="py-2 px-3 w-full">
+                        <div className="w-full flex items-center gap-2">
+                          <ResultBar
+                            winPercentage={winPercentage}
+                            drawPercentage={drawPercentage}
+                            lossPercentage={lossPercentage}
+                          />
+                          <div className="flex gap-1 text-xs whitespace-nowrap">
+                            <span className="text-green-400">{winPercentage.toFixed(0)}%</span>
+                            <span className="text-slate-400">{drawPercentage.toFixed(0)}%</span>
+                            <span className="text-red-400">{lossPercentage.toFixed(0)}%</span>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
