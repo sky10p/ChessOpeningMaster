@@ -2,19 +2,19 @@ import { TrainVariantInfo } from "@chess-opening-master/common";
 import { TrainVariant } from "../../../models/chess.models";
 
 export const VARIANT_COLORS = {
-  noErrors: "#008000", // Verde
-  oneError: "#FFA07A", // Naranja claro
-  twoErrors: "#FFA500", // Naranja
-  moreThanTwoErrors: "#FF4500", // Rojo anaranjado
-  unresolved: "#FFFFFF", // Blanco
+  noErrors: "#4CAF50", // Green
+  oneError: "#FFEB3B", // Yellow
+  twoErrors: "#FF9800", // Orange
+  moreThanTwoErrors: "#F44336", // Red
+  unresolved: "#9E9E9E", // Gray
 };
 
 export const VARIANT_TEXT_COLORS = {
-  noErrors: "#FFFFFF", // Blanco
-  oneError: "#000000",
-  twoErrors: "#000000",
-  moreThanTwoErrors: "#FFFFFF", // Blanco
-  unresolved: "#FFF",
+  noErrors: "#FFFFFF", // White
+  oneError: "#000000", // Black
+  twoErrors: "#000000", // Black
+  moreThanTwoErrors: "#FFFFFF", // White
+  unresolved: "#FFFFFF", // White
 };
 
 export const getColor = (
