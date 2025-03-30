@@ -31,7 +31,7 @@ export const TextDialog: React.FC<TextDialogProps> = ({open, initialValue, onTex
               </Description>
               <input
                 type="text"
-                className="mt-2 w-full px-3 py-2 border border-secondary rounded focus:outline-none focus:ring-2 focus:ring-accent"
+                className="mt-2 w-full px-3 py-2 border border-secondary rounded focus:outline-none focus:ring-2 focus:ring-accent text-black bg-white"
                 value={value}
                 onChange={(event) => setValue(event.target.value)}
               />

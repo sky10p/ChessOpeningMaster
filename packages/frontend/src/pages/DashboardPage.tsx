@@ -17,11 +17,18 @@ export const DashboardPage = () => {
   const [orientationFilter, setOrientationFilter] = useState<
     "all" | "white" | "black"
   >("all");
+  const [repertoireNameFilter, setRepertoireNameFilter] = useState<string>("");
+  const [openingNameFilter, setOpeningNameFilter] = useState<string>("");
 
   const filteredRepertoires =
     orientationFilter === "all"
       ? repertoires
       : repertoires.filter((r) => r.orientation === orientationFilter);
+  
+  const nameFilteredRepertoires = repertoireNameFilter
+    ? filteredRepertoires.filter((r) => 
+        r.name.toLowerCase().includes(repertoireNameFilter.toLowerCase()))
+    : filteredRepertoires;
 
   const goToRepertoire = (repertoire: IRepertoire) => {
     navigate(`/repertoire/${repertoire._id}`);
@@ -40,7 +47,7 @@ export const DashboardPage = () => {
   };
 
   const getTrainVariantInfo = (
-    trainInfo: TrainVariantInfo[]
+    trainInfo: TrainVariantInfo[] 
   ): Record<string, TrainVariantInfo> => {
     const info: Record<string, TrainVariantInfo> = {};
     trainInfo.forEach((v) => {
@@ -97,19 +104,28 @@ export const DashboardPage = () => {
       </header>
       <div className="flex-1 px-4 overflow-y-auto flex flex-col space-y-4">
         <section className="flex-1 overflow-y-auto">
-          <select
-            value={orientationFilter}
-            onChange={(e) =>
-              setOrientationFilter(e.target.value as "all" | "white" | "black")
-            }
-            className="mb-4 bg-gray-700 text-white px-4 py-2 border border-gray-600 rounded-lg shadow-sm hover:border-accent focus:outline-none transition ease-in-out duration-150 w-auto"
-          >
-            <option value="all">All</option>
-            <option value="white">White</option>
-            <option value="black">Black</option>
-          </select>
+          <div className="flex flex-col md:flex-row gap-4 mb-4">
+            <select
+              value={orientationFilter}
+              onChange={(e) =>
+                setOrientationFilter(e.target.value as "all" | "white" | "black")
+              }
+              className="bg-gray-700 text-white px-4 py-2 border border-gray-600 rounded-lg shadow-sm hover:border-accent focus:outline-none transition ease-in-out duration-150"
+            >
+              <option value="all">All</option>
+              <option value="white">White</option>
+              <option value="black">Black</option>
+            </select>
+            <input
+              type="text"
+              placeholder="Filter repertoires"
+              value={repertoireNameFilter}
+              onChange={(e) => setRepertoireNameFilter(e.target.value)}
+              className="bg-gray-700 text-white px-4 py-2 border border-gray-600 rounded-lg shadow-sm hover:border-accent focus:outline-none transition ease-in-out duration-150 flex-grow"
+            />
+          </div>
           <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredRepertoires.map((repertoire) => (
+            {nameFilteredRepertoires.map((repertoire) => (
               <li
                 key={repertoire._id}
                 className="p-4 bg-gray-800 rounded-lg  shadow-lg border border-gray-700"
@@ -147,8 +163,19 @@ export const DashboardPage = () => {
             <h2 className="text-2xl font-bold mb-2 text-textLight">Openings</h2>
             <p className="text-lg text-gray-300">Browse your prepared openings</p>
           </header>
+          <input
+            type="text"
+            placeholder="Filter openings"
+            value={openingNameFilter}
+            onChange={(e) => setOpeningNameFilter(e.target.value)}
+            className="mb-4 bg-gray-700 text-white px-4 py-2 border border-gray-600 rounded-lg shadow-sm hover:border-accent focus:outline-none transition ease-in-out duration-150 w-full"
+          />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {openings.map((opening) => (
+            {openings
+              .filter(opening => 
+                opening.toLowerCase().includes(openingNameFilter.toLowerCase())
+              )
+              .map((opening) => (
               <div
                 key={opening}
                 className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 hover:shadow-xl transition-shadow duration-300"
@@ -162,6 +189,25 @@ export const DashboardPage = () => {
                     filteredRepertoires.flatMap((r) => r.variantsInfo)
                   )}
                 />
+                <div className="mt-4 text-sm text-gray-400 text-center flex flex-wrap justify-center gap-2">
+                  {filteredRepertoires
+                    .filter((repertoire) =>
+                      repertoire.moveNodes
+                        ? MoveVariantNode.initMoveVariantNode(repertoire.moveNodes)
+                            .getVariants()
+                            .some((v) => v.name === opening)
+                        : false
+                    )
+                    .map((r) => (
+                      <div
+                        key={r._id}
+                        className="px-3 py-1 bg-gray-700 text-white rounded-lg inline-block cursor-pointer hover:bg-gray-600 transition-colors"
+                        onClick={() => goToRepertoire(r)}
+                      >
+                        {r.name}
+                      </div>
+                    ))}
+                </div>
               </div>
             ))}
           </div>

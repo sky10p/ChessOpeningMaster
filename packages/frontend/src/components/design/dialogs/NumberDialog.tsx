@@ -44,7 +44,7 @@ export const NumberDialog: React.FC<NumberDialogProps> = ({ open, min, max, init
                         type="number"
                         min={min}
                         max={max}
-                        className="w-full px-3 py-2 border border-secondary rounded focus:outline-none focus:ring-2 focus:ring-accent"
+                        className="w-full px-3 py-2 border border-secondary rounded focus:outline-none focus:ring-2 focus:ring-accent text-black bg-white"
                         value={value === 0 ? '' : value}
                         onChange={(e) => setValue(e.target.value === '' ? 0 : Number(e.target.value))}
                     />

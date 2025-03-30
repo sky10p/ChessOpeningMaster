@@ -169,7 +169,7 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
           </Description>
           <input
             type="text"
-            className="mb-4 w-full px-3 py-2 border border-secondary rounded focus:outline-none focus:ring-2 focus:ring-accent"
+            className="mb-4 w-full px-3 py-2 border border-secondary rounded focus:outline-none focus:ring-2 focus:ring-accent text-black bg-white"
             placeholder="Filter Variants"
             value={filterText}
             onChange={handleFilterChange}
