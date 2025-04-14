@@ -19,6 +19,7 @@ export const DashboardPage = () => {
   >("all");
   const [repertoireNameFilter, setRepertoireNameFilter] = useState<string>("");
   const [openingNameFilter, setOpeningNameFilter] = useState<string>("");
+  const [selectedSection, setSelectedSection] = useState<'dashboard' | 'openings'>('dashboard');
 
   const filteredRepertoires =
     orientationFilter === "all"
@@ -71,7 +72,7 @@ export const DashboardPage = () => {
         }
       });
     });
-    return openings.sort(); // Sort openings alphabetically
+    return openings.sort();
   };
 
   const getVariantsForOpening = (opening: string): TrainVariant[] => {
@@ -97,121 +98,136 @@ export const DashboardPage = () => {
   const openings = getDifferentOpenings(filteredRepertoires);
 
   return (
-    <div className="container p-4 w-full overflow-auto h-full bg-primary rounded-lg shadow-xl flex flex-col space-y-4">
-      <header className="text-left">
-        <h1 className="text-2xl font-bold mb-2 text-white">Dashboard</h1>
-        <p className="text-lg text-gray-300">Manage your chess repertoires</p>
-      </header>
-      <div className="flex-1 px-4 overflow-y-auto flex flex-col space-y-4">
-        <section className="flex-1 overflow-y-auto">
-          <div className="flex flex-col md:flex-row gap-4 mb-4">
-            <select
-              value={orientationFilter}
-              onChange={(e) =>
-                setOrientationFilter(e.target.value as "all" | "white" | "black")
-              }
-              className="bg-gray-700 text-white px-4 py-2 border border-gray-600 rounded-lg shadow-sm hover:border-accent focus:outline-none transition ease-in-out duration-150"
-            >
-              <option value="all">All</option>
-              <option value="white">White</option>
-              <option value="black">Black</option>
-            </select>
-            <input
-              type="text"
-              placeholder="Filter repertoires"
-              value={repertoireNameFilter}
-              onChange={(e) => setRepertoireNameFilter(e.target.value)}
-              className="bg-gray-700 text-white px-4 py-2 border border-gray-600 rounded-lg shadow-sm hover:border-accent focus:outline-none transition ease-in-out duration-150 flex-grow"
-            />
-          </div>
-          <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {nameFilteredRepertoires.map((repertoire) => (
-              <li
-                key={repertoire._id}
-                className="p-4 bg-gray-800 rounded-lg  shadow-lg border border-gray-700"
-              >
-                <h3 className="text-lg font-semibold mb-3 text-white text-center">
-                  {repertoire.name}
-                </h3>
-                <div className="flex space-x-2 mb-3 justify-center">
-                  <button
-                    className="flex items-center px-3 py-1 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors"
-                    onClick={() => goToRepertoire(repertoire)}
-                  >
-                    <EyeIcon className="h-5 w-5 mr-1" />
-                    View
-                  </button>
-                  <button
-                    className="flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                    onClick={() => goToTrainRepertoire(repertoire)}
-                  >
-                    <PlayIcon className="h-5 w-5 mr-1" />
-                    Train
-                  </button>
-                </div>
-                <VariantsProgressBar
-                  variants={getTrainVariants(repertoire)}
-                  variantInfo={getTrainVariantInfo(repertoire.variantsInfo)}
+    <div className="container p-0 sm:p-4 w-full h-full bg-gradient-to-b from-gray-900 via-primary to-gray-900 rounded-lg shadow-2xl flex flex-col">
+      <nav className="flex flex-col sm:flex-row gap-2 sm:gap-4 p-2 sm:p-4 bg-primary z-20 sticky top-0 border-b border-gray-800">
+        <button
+          className={`px-4 py-2 rounded-t sm:rounded-l sm:rounded-t-none font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'dashboard' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
+          onClick={() => setSelectedSection('dashboard')}
+        >
+          Dashboard
+        </button>
+        <button
+          className={`px-4 py-2 rounded-t sm:rounded-l sm:rounded-t-none font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'openings' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
+          onClick={() => setSelectedSection('openings')}
+        >
+          Openings
+        </button>
+      </nav>
+      <div className="flex-1 flex flex-col relative min-h-0">
+        {selectedSection === 'dashboard' && (
+          <section className="flex-1 flex flex-col min-h-0">
+            <div className="sticky top-12 sm:top-16 z-10 bg-primary pb-2 pt-2 sm:pt-4 px-2 sm:px-4 border-b border-gray-800">
+              <header className="mb-2">
+                <h2 className="font-bold text-gray-100 text-lg sm:text-2xl leading-tight mb-1 truncate">Dashboard</h2>
+                <p className="text-gray-300 text-xs sm:text-base leading-snug mb-2 sm:mb-4 truncate">Manage and review your chess repertoires. Filter by color or name to quickly find what you need.</p>
+              </header>
+              <div className="flex flex-col md:flex-row gap-2 md:gap-4">
+                <select
+                  value={orientationFilter}
+                  onChange={(e) => setOrientationFilter(e.target.value as 'all' | 'white' | 'black')}
+                  className="bg-gray-800 text-gray-100 px-3 py-2 border border-gray-700 rounded-lg shadow-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition ease-in-out duration-150 text-xs sm:text-sm"
+                >
+                  <option value="all">All</option>
+                  <option value="white">White</option>
+                  <option value="black">Black</option>
+                </select>
+                <input
+                  type="text"
+                  placeholder="Filter repertoires"
+                  value={repertoireNameFilter}
+                  onChange={(e) => setRepertoireNameFilter(e.target.value)}
+                  className="bg-gray-800 text-gray-100 px-3 py-2 border border-gray-700 rounded-lg shadow-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition ease-in-out duration-150 flex-grow text-xs sm:text-sm"
                 />
-              </li>
-            ))}
-          </ul>
-        </section>
-        <hr className="border-t-4 border-gray-700 my-6" />
-        <section className="flex-1 overflow-y-auto mt-8">
-          <header className="mb-6">
-            <h2 className="text-2xl font-bold mb-2 text-textLight">Openings</h2>
-            <p className="text-lg text-gray-300">Browse your prepared openings</p>
-          </header>
-          <input
-            type="text"
-            placeholder="Filter openings"
-            value={openingNameFilter}
-            onChange={(e) => setOpeningNameFilter(e.target.value)}
-            className="mb-4 bg-gray-700 text-white px-4 py-2 border border-gray-600 rounded-lg shadow-sm hover:border-accent focus:outline-none transition ease-in-out duration-150 w-full"
-          />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {openings
-              .filter(opening => 
-                opening.toLowerCase().includes(openingNameFilter.toLowerCase())
-              )
-              .map((opening) => (
-              <div
-                key={opening}
-                className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 hover:shadow-xl transition-shadow duration-300"
-              >
-                <h3 className="text-lg font-medium mb-4 text-textLight text-center">
-                  {opening}
-                </h3>
-                <VariantsProgressBar
-                  variants={getVariantsForOpening(opening)}
-                  variantInfo={getTrainVariantInfo(
-                    filteredRepertoires.flatMap((r) => r.variantsInfo)
-                  )}
-                />
-                <div className="mt-4 text-sm text-gray-400 text-center flex flex-wrap justify-center gap-2">
-                  {filteredRepertoires
-                    .filter((repertoire) =>
-                      repertoire.moveNodes
-                        ? MoveVariantNode.initMoveVariantNode(repertoire.moveNodes)
-                            .getVariants()
-                            .some((v) => v.name === opening)
-                        : false
-                    )
-                    .map((r) => (
-                      <div
-                        key={r._id}
-                        className="px-3 py-1 bg-gray-700 text-white rounded-lg inline-block cursor-pointer hover:bg-gray-600 transition-colors"
-                        onClick={() => goToRepertoire(r)}
-                      >
-                        {r.name}
-                      </div>
-                    ))}
-                </div>
               </div>
-            ))}
-          </div>
-        </section>
+            </div>
+            <div className="flex-1 overflow-y-auto pt-2 sm:pt-4 px-1 sm:px-4">
+              <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                {nameFilteredRepertoires.map((repertoire) => (
+                  <li
+                    key={repertoire._id}
+                    className="p-3 sm:p-4 bg-gray-900 rounded-xl shadow-lg border border-gray-800 hover:shadow-2xl transition-shadow duration-300 flex flex-col justify-between ring-0 focus-within:ring-2 focus-within:ring-blue-400"
+                  >
+                    <h3 className="text-base sm:text-lg font-semibold mb-2 text-gray-100 text-center truncate">{repertoire.name}</h3>
+                    <div className="flex space-x-2 mb-2 justify-center">
+                      <button
+                        className="flex items-center px-3 py-1 bg-gray-800 text-gray-100 rounded hover:bg-gray-700 transition-colors text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        onClick={() => goToRepertoire(repertoire)}
+                      >
+                        <EyeIcon className="h-5 w-5 mr-1" />
+                        View
+                      </button>
+                      <button
+                        className="flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        onClick={() => goToTrainRepertoire(repertoire)}
+                      >
+                        <PlayIcon className="h-5 w-5 mr-1" />
+                        Train
+                      </button>
+                    </div>
+                    <VariantsProgressBar
+                      variants={getTrainVariants(repertoire)}
+                      variantInfo={getTrainVariantInfo(repertoire.variantsInfo)}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        )}
+        {selectedSection === 'openings' && (
+          <section className="flex-1 flex flex-col min-h-0">
+            <div className="sticky top-12 sm:top-16 z-10 bg-primary pb-2 pt-2 sm:pt-4 px-2 sm:px-4 border-b border-gray-800">
+              <header className="mb-2">
+                <h2 className="font-bold text-gray-100 text-lg sm:text-2xl leading-tight mb-1 truncate">Openings</h2>
+                <p className="text-gray-300 text-xs sm:text-base leading-snug mb-2 sm:mb-4 truncate">Browse your prepared openings and see which repertoires use them.</p>
+              </header>
+              <input
+                type="text"
+                placeholder="Filter openings"
+                value={openingNameFilter}
+                onChange={(e) => setOpeningNameFilter(e.target.value)}
+                className="bg-gray-800 text-gray-100 px-3 py-2 border border-gray-700 rounded-lg shadow-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition ease-in-out duration-150 w-full text-xs sm:text-sm"
+              />
+            </div>
+            <div className="flex-1 overflow-y-auto pt-2 sm:pt-4 px-1 sm:px-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                {openings
+                  .filter(opening => opening.toLowerCase().includes(openingNameFilter.toLowerCase()))
+                  .map((opening) => (
+                    <div
+                      key={opening}
+                      className="bg-gray-900 p-3 sm:p-4 rounded-xl shadow-lg border border-gray-800 hover:shadow-2xl transition-shadow duration-300 flex flex-col justify-between ring-0 focus-within:ring-2 focus-within:ring-blue-400"
+                    >
+                      <h3 className="text-base sm:text-lg font-medium mb-2 text-gray-100 text-center truncate">{opening}</h3>
+                      <VariantsProgressBar
+                        variants={getVariantsForOpening(opening)}
+                        variantInfo={getTrainVariantInfo(filteredRepertoires.flatMap((r) => r.variantsInfo))}
+                      />
+                      <div className="mt-2 text-xs sm:text-sm text-gray-400 text-center flex flex-wrap justify-center gap-2">
+                        {filteredRepertoires
+                          .filter((repertoire) =>
+                            repertoire.moveNodes
+                              ? MoveVariantNode.initMoveVariantNode(repertoire.moveNodes)
+                                  .getVariants()
+                                  .some((v) => v.name === opening)
+                              : false
+                          )
+                          .map((r) => (
+                            <div
+                              key={r._id}
+                              className="px-3 py-1 bg-gray-800 text-gray-100 rounded-lg inline-block cursor-pointer hover:bg-gray-700 transition-colors"
+                              onClick={() => goToRepertoire(r)}
+                            >
+                              {r.name}
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );
