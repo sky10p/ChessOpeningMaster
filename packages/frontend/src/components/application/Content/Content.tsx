@@ -4,7 +4,7 @@ import CreateRepertoire from "../../../pages/repertoires/CreateRepertoire";
 import EditRepertoirePage from "../../../pages/repertoires/EditRepertoirePage/EditRepertoirePage";
 import TrainRepertoirePage from "../../../pages/repertoires/TrainRepertoirePage/TrainRepertoirePage";
 import { MainContainer } from "../../design/layouts/MainContainer";
-import { DashboardPage } from "../../../pages/DashboardPage";
+import { DashboardPage } from "../../../pages/DashboardPage/DashboardPage";
 
 
 
