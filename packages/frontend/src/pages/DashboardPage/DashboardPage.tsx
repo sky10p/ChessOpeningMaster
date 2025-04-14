@@ -91,26 +91,6 @@ export const DashboardPage = () => {
     return openings.sort();
   };
 
-  const getVariantsForOpening = (opening: string): TrainVariant[] => {
-    const relatedRepertoires = filteredRepertoires.filter((repertoire) =>
-      repertoire.moveNodes
-        ? MoveVariantNode.initMoveVariantNode(repertoire.moveNodes)
-            .getVariants()
-            .some((v) => v.name === opening)
-        : false
-    );
-
-    const variants: TrainVariant[] = [];
-    relatedRepertoires.forEach((repertoire) => {
-      const trainVariants = getTrainVariants(repertoire).filter(
-        (tv) => tv.variant.name === opening
-      );
-      variants.push(...trainVariants);
-    });
-
-    return variants;
-  };
-
   const openings = getDifferentOpenings(filteredRepertoires);
 
   return (
@@ -149,7 +129,6 @@ export const DashboardPage = () => {
             setOpeningNameFilter={setOpeningNameFilter}
             openings={openings}
             filteredRepertoires={filteredRepertoires}
-            getVariantsForOpening={getVariantsForOpening}
             getTrainVariantInfo={getTrainVariantInfo}
             goToRepertoire={goToRepertoire}
           />
