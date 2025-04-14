@@ -1,4 +1,8 @@
 module.exports = {
+  projects: [
+    '<rootDir>/packages/frontend',
+    '<rootDir>/packages/backend',
+  ],
   preset: 'ts-jest',
   testEnvironment: 'node',
   roots: ['<rootDir>/src'],
