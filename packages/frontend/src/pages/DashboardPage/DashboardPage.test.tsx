@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
@@ -6,6 +7,14 @@ import { DashboardPage } from "./DashboardPage";
 import "@testing-library/jest-dom";
 import { IRepertoireDashboard } from "@chess-opening-master/common";
 import { Color, Square, PieceSymbol } from "chess.js";
+
+class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+  
+  window.ResizeObserver = ResizeObserver;
 
 const emptyMoveNode = { id: "root", move: null, children: [] };
 const mockRepertoires: IRepertoireDashboard[] = [
@@ -43,7 +52,7 @@ describe("DashboardPage", () => {
         <DashboardPage />
       </BrowserRouter>
     );
-    expect(screen.getByText(/manage and review your chess repertoires/i)).toBeInTheDocument();
+    expect(screen.getByText(/Key statistics and metrics for your chess repertoires./i)).toBeInTheDocument();
   });
 
   it("switches to Openings section when tab is clicked", () => {

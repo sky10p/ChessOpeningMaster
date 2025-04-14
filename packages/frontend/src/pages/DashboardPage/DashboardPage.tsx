@@ -8,8 +8,9 @@ import {
 import { useDashboard } from "../../hooks/useDashboard";
 import { MoveVariantNode } from "../../models/VariantNode";
 import { TrainVariant, Variant } from "../../models/chess.models";
-import { DashboardSection } from "./sections/DashboardSection";
+import { RepertoiresSection } from "./sections/RepertoiresSection";
 import { OpeningsSection } from "./sections/OpeningsSection";
+import { DashboardSection } from "./sections/DashboardSection";
 
 export const DashboardPage = () => {
   const navigate = useNavigate();
@@ -20,17 +21,17 @@ export const DashboardPage = () => {
   >("all");
   const [repertoireNameFilter, setRepertoireNameFilter] = useState<string>("");
   const [openingNameFilter, setOpeningNameFilter] = useState<string>("");
-  const [selectedSection, setSelectedSection] = useState<'dashboard' | 'openings'>('dashboard');
+  const [selectedSection, setSelectedSection] = useState<'dashboard' | 'repertoires' | 'openings'>('dashboard');
 
   React.useEffect(() => {
     const params = new URLSearchParams(location.search);
     const section = params.get("section");
-    if (section === "dashboard" || section === "openings") {
+    if (section === "dashboard" || section === "repertoires" || section === "openings") {
       setSelectedSection(section);
     }
   }, [location.search]);
 
-  const handleSectionChange = (section: 'dashboard' | 'openings') => {
+  const handleSectionChange = (section: 'dashboard' | 'repertoires' | 'openings') => {
     setSelectedSection(section);
     const params = new URLSearchParams(location.search);
     params.set("section", section);
@@ -103,6 +104,12 @@ export const DashboardPage = () => {
           Dashboard
         </button>
         <button
+          className={`px-4 py-2 rounded-t sm:rounded-l sm:rounded-t-none font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'repertoires' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
+          onClick={() => handleSectionChange('repertoires')}
+        >
+          Repertoires
+        </button>
+        <button
           className={`px-4 py-2 rounded-t sm:rounded-l sm:rounded-t-none font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'openings' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
           onClick={() => handleSectionChange('openings')}
         >
@@ -112,6 +119,11 @@ export const DashboardPage = () => {
       <div className="flex-1 flex flex-col relative min-h-0">
         {selectedSection === 'dashboard' && (
           <DashboardSection
+            repertoires={repertoires}
+          />
+        )}
+        {selectedSection === 'repertoires' && (
+          <RepertoiresSection
             orientationFilter={orientationFilter}
             setOrientationFilter={setOrientationFilter}
             repertoireNameFilter={repertoireNameFilter}
