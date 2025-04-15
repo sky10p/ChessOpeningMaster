@@ -1,4 +1,4 @@
-# ChessOpeningMaster
+# ChessKeep
 
 <p align="center">
 <a href="https://github.com/sky10p/ChessOpeningMaster/blob/master/src/doc/donate/donate.md" alt="Donate shield"><img src="./src/doc/donate/donate-bitcoin.svg" /></a>
@@ -6,7 +6,7 @@
 
 ## Description
 
-ChessOpeningMaster is an application that allows you to manage your chess opening repertoire and train all the variations. The application is designed to be easy to use and offers various useful functionalities to enhance your gameplay.
+ChessKeep is an application that allows you to manage your chess opening repertoire and train all the variations. The application is designed to be easy to use and offers various useful functionalities to enhance your gameplay.
 
 ## Features
 
@@ -28,7 +28,7 @@ ChessOpeningMaster is an application that allows you to manage your chess openin
 
 ## Installation and Configuration
 
-To install and run ChessOpeningMaster on your local environment, follow these steps:
+To install and run ChessKeep on your local environment, follow these steps:
 
 1. Clone the repository to your local machine.
 2. Make sure you have Node.js and yarn installed.
@@ -38,14 +38,14 @@ To install and run ChessOpeningMaster on your local environment, follow these st
 
 ### Configure Nginx
 
-To configure Nginx as a web server for ChessOpeningMaster, create a new Nginx configuration file with the following content:
+To configure Nginx as a web server for ChessKeep, create a new Nginx configuration file with the following content:
 
 ```perl
 server {
     listen 3002;
     server_name myapp.local;  # Replace this with your application's domain name, if you have one
 
-    root <chessopeningmaster path>/build/frontend;
+    root <chesskeep path>/build/frontend;
     index index.html;
 
     location / {
@@ -55,7 +55,7 @@ server {
 
 ```
 
-Make sure to replace `<chessopeningmaster path>` with the path to your ChessOpeningMaster directory on your server.
+Make sure to replace `<chesskeep path>` with the path to your ChessKeep directory on your server.
 
 Reload the Nginx configuration for the changes to take effect:
 
@@ -65,42 +65,42 @@ sudo nginx -t && sudo nginx -s reload
 
 ## Create a Systemd Service for the backend
 
-To create a Systemd service for the ChessOpeningMaster backend, create a new service file at `/etc/systemd/system/chessopeningmaster.service` with the following content:
+To create a Systemd service for the ChessKeep backend, create a new service file at `/etc/systemd/system/chesskeep.service` with the following content:
 
 ```makefile
 [Unit]
-Description=ChessOpeningMaster Backend
+Description=ChessKeep Backend
 After=network-online.target
 Wants=network-online.target
 
 [Service]
-ExecStart=<bin node path> <chessopeningmaster path>/build/backend/server.js
+ExecStart=<bin node path> <chesskeep path>/build/backend/server.js
 Environment=MONGODB_URI=mongodb://localhost:27017/chess_opening_master
 Environment=BACKEND_PORT=3001
 Restart=on-failure
 Type=simple
 User=<user>
 Group=nogroup
-WorkingDirectory=<chessopeningmaster path>/build
+WorkingDirectory=<chesskeep path>/build
 
 [Install]
 WantedBy=multi-user.target
 
 ```
 
-Replace `<bin node path>` with the path to your Node.js binary, `<chessopeningmaster path>` with the path to your ChessOpeningMaster directory, and `<user>` with the appropriate user to run the service.
+Replace `<bin node path>` with the path to your Node.js binary, `<chesskeep path>` with the path to your ChessKeep directory, and `<user>` with the appropriate user to run the service.
 
 Enable and start the service:
 
 ```bash
-sudo systemctl enable chessopeningmaster.service
-sudo systemctl start chessopeningmaster.service
+sudo systemctl enable chesskeep.service
+sudo systemctl start chesskeep.service
 ```
 
 To check the status of the service, run:
 
 ```lua
-sudo systemctl status chessopeningmaster.service
+sudo systemctl status chesskeep.service
 ```
 
 ## Future improvements
@@ -119,7 +119,7 @@ The Chessboard library being used is no longer maintained, it will be replace as
 
 ## Collaboration
 
-Although ChessOpeningMaster was initially created as a personal use tool, any type of collaboration is welcome. If you have ideas for improving the project, feel free to open issues or make pull requests.
+Although ChessKeep was initially created as a personal use tool, any type of collaboration is welcome. If you have ideas for improving the project, feel free to open issues or make pull requests.
 
 ## Screenshots
 
@@ -128,4 +128,4 @@ Although ChessOpeningMaster was initially created as a personal use tool, any ty
 
 ## License
 
-ChessOpeningMaster is licensed under a Non-Commercial Free Software License. You may use, modify, and distribute the software in accordance with the terms of this license. However, commercial use of the software requires prior consent from the author. For more information about commercial use, please contact the project author.
+ChessKeep is licensed under a Non-Commercial Free Software License. You may use, modify, and distribute the software in accordance with the terms of this license. However, commercial use of the software requires prior consent from the author. For more information about commercial use, please contact the project author.

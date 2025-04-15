@@ -1,5 +1,6 @@
 import { TrainVariantInfo } from "@chess-opening-master/common";
 import { TrainVariant } from "../../../models/chess.models";
+import { VariantsProgressCounts, VariantsProgressInfo } from "./models";
 
 export const VARIANT_COLORS = {
   noErrors: "#4CAF50", // Green
@@ -46,4 +47,47 @@ export const getTextColor = (
     return VARIANT_TEXT_COLORS.unresolved;
   }
   return color;
+};
+
+export const getVariantsProgressInfo = (
+  variants: TrainVariant[],
+  variantInfo: Record<string, TrainVariantInfo>
+): VariantsProgressInfo => {
+  const totalVariants = variants.length;
+  const counts: VariantsProgressCounts = {
+    noErrors: 0,
+    oneError: 0,
+    twoErrors: 0,
+    moreThanTwoErrors: 0,
+    unresolved: 0,
+  };
+
+  let hasErrors = false;
+  let hasNewVariants = false;
+
+  variants.forEach((variant) => {
+    const info = variantInfo[variant.variant.fullName];
+    if (info === undefined) {
+      counts.unresolved++;
+    } else if (info.errors === 0) {
+      counts.noErrors++;
+    } else if (info.errors === 1) {
+      counts.oneError++;
+      hasErrors = true;
+    } else if (info.errors === 2) {
+      counts.twoErrors++;
+      hasErrors = true;
+    } else {
+      counts.moreThanTwoErrors++;
+      hasErrors = true;
+    }
+  });
+  hasNewVariants = counts.unresolved > 0;
+
+  return {
+    totalVariants,
+    hasErrors,
+    hasNewVariants,
+    counts,
+  };
 };
