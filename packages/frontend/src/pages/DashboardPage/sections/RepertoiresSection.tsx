@@ -30,13 +30,13 @@ export const RepertoiresSection: React.FC<RepertoiresSectionProps> = ({
   const [statusFilter, setStatusFilter] = React.useState<'all' | 'errors' | 'successful' | 'new'>('all');
 
   const repertoireProgressInfo = React.useMemo(() => {
-    const map = new Map<string, ReturnType<typeof getVariantsProgressInfo>>();
+    const progressMap = new Map<string, ReturnType<typeof getVariantsProgressInfo>>();
     nameFilteredRepertoires.forEach(repertoire => {
       const info = getTrainVariantInfo(repertoire.variantsInfo || []);
       const variants = getTrainVariants(repertoire);
-      map.set(repertoire._id, getVariantsProgressInfo(variants, info));
+      progressMap.set(repertoire._id, getVariantsProgressInfo(variants, info));
     });
-    return map;
+    return progressMap;
   }, [nameFilteredRepertoires, getTrainVariantInfo, getTrainVariants]);
 
   const filterByStatus = React.useCallback((repertoire: IRepertoireDashboard) => {
