@@ -1,5 +1,6 @@
 import React from "react";
 import { RepertoireCard } from "../components/RepertoireCard";
+import { useVariantsProgressInfo } from '../../../hooks/useVariantsProgressInfo';
 import { IRepertoireDashboard, TrainVariantInfo } from "@chess-opening-master/common";
 import { TrainVariant } from "../../../models/chess.models";
 
@@ -28,26 +29,22 @@ export const RepertoiresSection: React.FC<RepertoiresSectionProps> = ({
 }) => {
   const [statusFilter, setStatusFilter] = React.useState<'all' | 'errors' | 'successful' | 'new'>('all');
 
-  const filterByStatus = (repertoire: IRepertoireDashboard) => {
+  const filterByStatus = React.useCallback((repertoire: IRepertoireDashboard) => {
     if (statusFilter === 'all') return true;
     const info = getTrainVariantInfo(repertoire.variantsInfo || []);
     const variants = getTrainVariants(repertoire);
+    const { hasErrors, hasNewVariants } = useVariantsProgressInfo(variants, info);
     if (statusFilter === 'errors') {
-      return variants.some(variant => info[variant.variant.fullName] !== undefined && info[variant.variant.fullName].errors > 0);
+      return hasErrors;
     }
     if (statusFilter === 'successful') {
-      return variants.every(
-        variant =>
-          info[variant.variant.fullName] !== undefined &&
-          info[variant.variant.fullName].errors === 0 &&
-          (info[variant.variant.fullName].lastDate !== undefined && info[variant.variant.fullName].lastDate !== null)
-      );
+      return !hasErrors && !hasNewVariants;
     }
     if (statusFilter === 'new') {
-      return variants.some(variant => !info[variant.variant.fullName]);
+      return hasNewVariants;
     }
     return true;
-  };
+  }, [statusFilter, getTrainVariantInfo, getTrainVariants, useVariantsProgressInfo]);
 
   return (
     <section className="flex-1 flex flex-col min-h-0">
