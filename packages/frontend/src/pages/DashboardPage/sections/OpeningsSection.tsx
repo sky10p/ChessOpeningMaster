@@ -12,21 +12,6 @@ interface OpeningsSectionProps {
   goToRepertoire: (repertoire: IRepertoireDashboard) => void;
 }
 
-const getAllVariantsForOpening = (filteredRepertoires: IRepertoireDashboard[], opening: string) => {
-  return filteredRepertoires.flatMap((r) =>
-    r.moveNodes
-      ? MoveVariantNode.initMoveVariantNode(r.moveNodes)
-          .getVariants()
-          .filter((v) => v.name === opening)
-          .map((v) => ({ variant: v, state: "inProgress" as const }))
-      : []
-  );
-};
-
-const getAllVariantInfoForOpening = (filteredRepertoires: IRepertoireDashboard[], getTrainVariantInfo: (trainInfo: TrainVariantInfo[]) => Record<string, TrainVariantInfo>) => {
-  const infos = filteredRepertoires.flatMap((r) => r.variantsInfo || []);
-  return getTrainVariantInfo(infos);
-};
 
 export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
   openingNameFilter,
@@ -37,36 +22,96 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
   goToRepertoire,
 }) => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [orientationFilter, setOrientationFilter] = useState<'all' | 'white' | 'black'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'errors' | 'successful' | 'new'>('all');
+
+  const getVariantsByOrientation = (repertoires: IRepertoireDashboard[], opening: string) => {
+    return repertoires
+      .filter((r) => orientationFilter === 'all' || r.orientation === orientationFilter)
+      .flatMap((r) => {
+        if (!r.moveNodes) return [];
+        const variants = MoveVariantNode.initMoveVariantNode(r.moveNodes).getVariants();
+        return variants.filter((v) => v.name === opening).map((v) => ({ variant: v, state: 'inProgress' as const, repertoire: r }));
+      });
+  };
+
+  const getVariantInfoByOrientation = (repertoires: IRepertoireDashboard[], opening: string) => {
+    const variants = getVariantsByOrientation(repertoires, opening);
+    const infos = repertoires.flatMap((r) => r.variantsInfo || []);
+    const infoMap = getTrainVariantInfo(infos);
+    return { variants, infoMap };
+  };
+
+  const filterByStatus = (opening: string) => {
+    if (statusFilter === 'all') return true;
+    const { variants, infoMap } = getVariantInfoByOrientation(filteredRepertoires, opening);
+    if (statusFilter === 'errors') {
+      return variants.some(v => infoMap[v.variant.fullName] && infoMap[v.variant.fullName].errors > 0);
+    }
+    if (statusFilter === 'successful') {
+      return variants.length > 0 && variants.every(
+        v => infoMap[v.variant.fullName] && infoMap[v.variant.fullName].errors === 0 && infoMap[v.variant.fullName].lastDate
+      );
+    }
+    if (statusFilter === 'new') {
+      return variants.some(v => !infoMap[v.variant.fullName]);
+    }
+    return true;
+  };
 
   return (
     <section className="flex-1 flex flex-col min-h-0">
       <div className="sticky top-12 sm:top-16 z-10 bg-primary pb-2 pt-2 sm:pt-4 px-2 sm:px-4 border-b border-gray-800">
         <header className="mb-2">
           <h2 className="font-bold text-gray-100 text-lg sm:text-2xl leading-tight mb-1 truncate">Openings</h2>
-          <p className="text-gray-300 text-xs sm:text-base leading-snug mb-2 sm:mb-4 truncate">Browse your prepared openings and see which repertoires use them.</p>
+          <p className="text-gray-300 text-xs sm:text-base leading-snug mb-2 sm:mb-4 truncate">Browse your prepared openings and see which repertoires use them. Filter by color, status, or name.</p>
         </header>
-        <input
-          type="text"
-          placeholder="Filter openings"
-          value={openingNameFilter}
-          onChange={(e) => setOpeningNameFilter(e.target.value)}
-          className="bg-gray-800 text-gray-100 px-3 py-2 border border-gray-700 rounded-lg shadow-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition ease-in-out duration-150 w-full text-xs sm:text-sm"
-        />
+        <div className="flex flex-col md:flex-row gap-2 md:gap-4">
+          <select
+            value={orientationFilter}
+            onChange={(e) => setOrientationFilter(e.target.value as 'all' | 'white' | 'black')}
+            className="bg-gray-800 text-gray-100 px-3 py-2 border border-gray-700 rounded-lg shadow-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition ease-in-out duration-150 text-xs sm:text-sm"
+          >
+            <option value="all">All</option>
+            <option value="white">White</option>
+            <option value="black">Black</option>
+          </select>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as 'all' | 'errors' | 'successful' | 'new')}
+            className="bg-gray-800 text-gray-100 px-3 py-2 border border-gray-700 rounded-lg shadow-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition ease-in-out duration-150 text-xs sm:text-sm"
+          >
+            <option value="all">All</option>
+            <option value="errors">With Errors</option>
+            <option value="successful">Successful</option>
+            <option value="new">New Variants</option>
+          </select>
+          <input
+            type="text"
+            placeholder="Filter openings"
+            value={openingNameFilter}
+            onChange={(e) => setOpeningNameFilter(e.target.value)}
+            className="bg-gray-800 text-gray-100 px-3 py-2 border border-gray-700 rounded-lg shadow-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition ease-in-out duration-150 flex-grow text-xs sm:text-sm"
+          />
+        </div>
       </div>
       <div className="flex-1 overflow-y-auto pt-2 sm:pt-4 px-1 sm:px-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {openings
             .filter(opening => opening.toLowerCase().includes(openingNameFilter.toLowerCase()))
+            .filter(filterByStatus)
             .map((opening) => {
               const repertoiresWithOpening = filteredRepertoires.filter((repertoire) =>
+                (orientationFilter === 'all' || repertoire.orientation === orientationFilter) &&
                 repertoire.moveNodes
                   ? MoveVariantNode.initMoveVariantNode(repertoire.moveNodes)
                       .getVariants()
                       .some((v) => v.name === opening)
                   : false
               );
-              const summaryVariants = getAllVariantsForOpening(filteredRepertoires, opening);
-              const summaryVariantInfo = getAllVariantInfoForOpening(filteredRepertoires, getTrainVariantInfo);
+              const summaryVariants = getVariantsByOrientation(filteredRepertoires, opening);
+              const variantsInfo = filteredRepertoires.flatMap((r) => r.variantsInfo || []);
+              const summaryVariantInfo = getTrainVariantInfo(variantsInfo);
               const isOpen = expanded[opening] || false;
               const repCount = repertoiresWithOpening.length;
               return (

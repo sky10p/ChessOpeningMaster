@@ -22,6 +22,11 @@ interface DashboardSectionProps {
 export const DashboardSection: React.FC<DashboardSectionProps> = ({
   repertoires,
 }) => {
+  // Responsive values for Errors by Opening chart
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const yAxisWidth = isMobile ? 90 : 180;
+  const barChartMargin = { top: 20, right: 30, left: isMobile ? 60 : 120, bottom: 20 };
+
   const [filter, setFilter] = useState<
     "all" | "white" | "black" | "errors" | "unreviewed"
   >("all");
@@ -329,7 +334,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
               </ResponsiveContainer>
             )}
           </div>
-          <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center">
+          <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center overflow-x-auto md:overflow-x-visible">
             <h3 className="text-lg font-semibold text-gray-200 mb-2">
               Errors by Opening
             </h3>
@@ -340,7 +345,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
                 <BarChart
                   data={errorsByOpeningTop5}
                   layout="vertical"
-                  margin={{ top: 20, right: 30, left: 120, bottom: 20 }}
+                  margin={barChartMargin}
                   barCategoryGap={24}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
@@ -357,7 +362,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
                   <YAxis
                     dataKey="opening"
                     type="category"
-                    width={180}
+                    width={yAxisWidth}
                     tick={({ x, y, payload }) => {
                       const name = payload.value;
                       const display =
@@ -370,7 +375,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
                             dy={4}
                             textAnchor="end"
                             fill="#cbd5e1"
-                            fontSize={13}
+                            fontSize={isMobile ? 10 : 13}
                           >
                             {display}
                             {name.length > 28 && <title>{name}</title>}
