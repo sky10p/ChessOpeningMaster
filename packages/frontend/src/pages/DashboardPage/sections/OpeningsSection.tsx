@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { IRepertoireDashboard, TrainVariantInfo } from "@chess-opening-master/common";
 import { MoveVariantNode } from "../../../models/VariantNode";
 import { OpeningCard } from "../components/OpeningCard";
-import { useVariantsProgressInfo } from '../../../hooks/useVariantsProgressInfo';
+import { getVariantsProgressInfo } from "../../../components/design/SelectTrainVariants/utils";
 
 interface OpeningsSectionProps {
   openingNameFilter: string;
@@ -46,7 +46,7 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
   const filterByStatus = React.useCallback((opening: string) => {
     if (statusFilter === 'all') return true;
     const { variants, infoMap } = getVariantInfoByOrientation(filteredRepertoires, opening);
-    const { hasErrors, hasNewVariants } = useVariantsProgressInfo(variants, infoMap);
+    const { hasErrors, hasNewVariants } = getVariantsProgressInfo(variants, infoMap);
     if (statusFilter === 'errors') {
       return hasErrors;
     }
@@ -57,7 +57,7 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
       return hasNewVariants;
     }
     return true;
-  }, [statusFilter, filteredRepertoires, getVariantInfoByOrientation, useVariantsProgressInfo]);
+  }, [statusFilter, filteredRepertoires, getVariantInfoByOrientation, getVariantsProgressInfo]);
 
   return (
     <section className="flex-1 flex flex-col min-h-0">
