@@ -17,7 +17,7 @@ export const toPGN = (
 [Result "*"]
 [Variant "Standard"]
 [Opening "${nameRepertoire}"]
-[Annotator "ChessOpeningMaster"]
+[Annotator "ChessKeep"]
 
 `;
 
@@ -40,7 +40,7 @@ export const variantToPgn = (
 [Result "*"]
 [Variant "Standard"]
 [Opening "${variant.fullName}"]
-[Annotator "ChessOpeningMaster"]
+[Annotator "ChessKeep"]
 
 `;
 

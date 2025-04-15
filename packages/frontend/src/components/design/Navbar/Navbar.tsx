@@ -120,7 +120,7 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
           {/* Footer section */}
           <div className="mt-auto px-3 py-4">
             <div className="px-3 py-3 bg-slate-800/50 rounded-lg border border-slate-700/50 text-xs text-slate-400">
-              <p>ChessOpeningMaster v1.0</p>
+              <p>ChessKeep v1.0</p>
               <p className="mt-1">Manage your chess repertoire with ease</p>
             </div>
           </div>
