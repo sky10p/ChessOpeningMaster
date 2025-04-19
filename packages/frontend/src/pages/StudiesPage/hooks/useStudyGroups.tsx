@@ -2,26 +2,17 @@ import { useState, useMemo } from "react";
 import { randomId } from "../utils";
 import { Study } from "../models";
 
-const FIXED_GROUPS = [
-  "Aperturas",
-  "Medio juego",
-  "Finales",
-  "Juego posicional",
-  "Cálculo",
-];
-
 interface Group {
   id: string;
   name: string;
   studies: Study[];
-  fixed: boolean;
 }
 
 export function useStudyGroups() {
-  const [groups, setGroups] = useState<Group[]>(() =>
-    FIXED_GROUPS.map((name) => ({ id: name, name, studies: [], fixed: true }))
+  const [groups, setGroups] = useState<Group[]>(() => []);
+  const [activeGroupId, setActiveGroupId] = useState<string>(
+    groups[0]?.id || ""
   );
-  const [activeGroupId, setActiveGroupId] = useState<string>(groups[0].id);
   const [selectedStudy, setSelectedStudy] = useState<Study | null>(null);
 
   // Group CRUD
@@ -32,29 +23,49 @@ export function useStudyGroups() {
     ]);
   };
   const editGroup = (id: string, name: string) => {
-    setGroups((prev) => prev.map((g) => (g.id === id ? { ...g, name: name.trim() } : g)));
+    setGroups((prev) =>
+      prev.map((g) => (g.id === id ? { ...g, name: name.trim() } : g))
+    );
   };
   const deleteGroup = (id: string) => {
-    setGroups((prev) => prev.filter((g) => g.id !== id));
-    if (activeGroupId === id) {
-      setActiveGroupId(groups[0].id);
-      setSelectedStudy(null);
-    }
+    setGroups((prev) => {
+      const filtered = prev.filter((g) => g.id !== id);
+      // If the deleted group was active, update activeGroupId based on filtered groups
+      if (activeGroupId === id) {
+        if (filtered.length > 0) {
+          setActiveGroupId(filtered[0].id);
+        } else {
+          setActiveGroupId("");
+        }
+        setSelectedStudy(null);
+      }
+      return filtered;
+    });
   };
 
   // Study CRUD
   const addStudy = (name: string, tags: string[]) => {
-    setGroups((prev) => prev.map((g) =>
-      g.id === activeGroupId
-        ? { ...g, studies: [{ id: randomId(), name: name.trim(), tags, entries: [] }, ...g.studies] }
-        : g
-    ));
+    setGroups((prev) =>
+      prev.map((g) =>
+        g.id === activeGroupId
+          ? {
+              ...g,
+              studies: [
+                { id: randomId(), name: name.trim(), tags, entries: [] },
+                ...g.studies,
+              ],
+            }
+          : g
+      )
+    );
   };
 
   // Tag helpers
   const allTags = useMemo(() => {
     const tags = new Set<string>();
-    groups.forEach((g) => g.studies.forEach((s) => s.tags.forEach((t) => tags.add(t))));
+    groups.forEach((g) =>
+      g.studies.forEach((s) => s.tags.forEach((t) => tags.add(t)))
+    );
     return Array.from(tags).sort();
   }, [groups]);
 

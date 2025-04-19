@@ -24,6 +24,5 @@ export interface Study {
 export interface StudyGroup {
   id: string;
   name: string;
-  fixed?: boolean;
   studies?: Study[];
 }

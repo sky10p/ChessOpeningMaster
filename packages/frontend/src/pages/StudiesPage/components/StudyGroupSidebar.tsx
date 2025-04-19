@@ -45,24 +45,20 @@ const StudyGroupSidebar: React.FC<StudyGroupSidebarProps> = ({
           >
             {g.name}
           </button>
-          {!g.fixed && (
-            <>
-              <button
-                className="ml-1 px-2 py-1 text-xs text-yellow-400 hover:text-yellow-200"
-                title="Edit group"
-                onClick={() => onEditGroup(g.id, g.name)}
-              >
-                ✎
-              </button>
-              <button
-                className="ml-1 px-2 py-1 text-xs text-red-400 hover:text-red-200"
-                title="Delete group"
-                onClick={() => onDeleteGroup(g.id)}
-              >
-                🗑
-              </button>
-            </>
-          )}
+          <button
+            className="ml-1 px-2 py-1 text-xs text-yellow-400 hover:text-yellow-200"
+            title="Edit group"
+            onClick={() => onEditGroup(g.id, g.name)}
+          >
+            ✎
+          </button>
+          <button
+            className="ml-1 px-2 py-1 text-xs text-red-400 hover:text-red-200"
+            title="Delete group"
+            onClick={() => onDeleteGroup(g.id)}
+          >
+            🗑
+          </button>
         </li>
       ))}
     </ul>

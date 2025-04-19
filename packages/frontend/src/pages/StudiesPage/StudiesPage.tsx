@@ -7,7 +7,7 @@ import StudyList from "./components/StudyList";
 import NewStudyModal from "./components/modals/NewStudyModal";
 import NewEntryModal from "./components/modals/NewEntryModal";
 import EditEntryModal from "./components/modals/EditEntryModal";
-import DeleteGroupModal from "./components/modals/DeleteGroupModal";
+import DeleteEntryModal from "./components/modals/DeleteEntryModal";
 import ManualTimeModal from "./components/modals/ManualTimeModal";
 import { Study } from "./models";
 import StudyDetail from "./components/StudyDetail";
@@ -221,7 +221,7 @@ const StudiesPage: React.FC = () => {
         }}
         error={null}
       />
-      <DeleteGroupModal
+      <DeleteEntryModal
         open={showDeleteEntryModal}
         onClose={() => {
           setShowDeleteEntryModal(false);
