@@ -20,7 +20,7 @@ const ManualTimeModal: React.FC<ManualTimeModalProps> = ({ open, onClose, onSave
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 animate-fade-in">
       <div className="bg-slate-800 rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md mx-2">
-        <h3 className="text-lg font-bold mb-4 text-white">Añadir tiempo manual</h3>
+        <h3 className="text-lg font-bold mb-4 text-white">Add manual time</h3>
         <input
           className="w-full px-3 py-2 mb-1 rounded border border-slate-700 bg-slate-900 text-slate-100"
           placeholder="Ej: 2h, 30m, 1:30, 2 (por defecto horas)"
@@ -28,7 +28,7 @@ const ManualTimeModal: React.FC<ManualTimeModalProps> = ({ open, onClose, onSave
           onChange={e => setManualMinutes(e.target.value)}
           autoFocus
         />
-        <div className="text-xs text-slate-400 mb-2">Puedes escribir: 2h, 30m, 1:30, 2 min, 2 (por defecto horas)</div>
+        <div className="text-xs text-slate-400 mb-2">You can write: 2h, 30m, 1:30, 2 min, 2 (defaults to hours)</div>
         <textarea
           className="w-full px-3 py-2 mb-3 rounded border border-slate-700 bg-slate-900 text-slate-100"
           placeholder="Comentario (opcional)"
@@ -48,10 +48,10 @@ const ManualTimeModal: React.FC<ManualTimeModalProps> = ({ open, onClose, onSave
         {error && <div className="text-red-400 mb-2">{error}</div>}
         <div className="flex gap-2 justify-end">
           <button className="px-3 py-1 bg-blue-700 text-white rounded" onClick={handleSave}>
-            Guardar
+            Save
           </button>
           <button className="px-3 py-1 bg-slate-700 text-white rounded" onClick={onClose}>
-            Cancelar
+            Cancel
           </button>
         </div>
       </div>
