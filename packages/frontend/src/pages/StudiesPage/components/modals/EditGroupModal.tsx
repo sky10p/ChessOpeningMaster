@@ -1,0 +1,44 @@
+import React, { useState } from "react";
+
+interface EditGroupModalProps {
+  open: boolean;
+  initialName: string;
+  onClose: () => void;
+  onSave: (name: string) => void;
+  error?: string | null;
+}
+
+const EditGroupModal: React.FC<EditGroupModalProps> = ({ open, initialName, onClose, onSave, error }) => {
+  const [name, setName] = useState(initialName);
+
+  const handleSave = () => {
+    onSave(name);
+  };
+
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 animate-fade-in">
+      <div className="bg-slate-800 rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md mx-2">
+        <h3 className="text-lg font-bold mb-4 text-white">Edit Group</h3>
+        <input
+          className="w-full px-3 py-2 mb-3 rounded border border-slate-700 bg-slate-900 text-slate-100"
+          placeholder="Group name *"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          autoFocus
+        />
+        {error && <div className="text-red-400 mb-2">{error}</div>}
+        <div className="flex gap-2 justify-end">
+          <button className="px-3 py-1 bg-blue-700 text-white rounded" onClick={handleSave}>
+            Save
+          </button>
+          <button className="px-3 py-1 bg-slate-700 text-white rounded" onClick={onClose}>
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default EditGroupModal;
