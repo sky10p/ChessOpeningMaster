@@ -4,6 +4,7 @@ import { XMarkIcon, EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import chessNavbarBackground from "../../../assets/chess-navbar-background.jpg";
 import { NavbarLink } from "./model";
 import { ChartPieIcon, StarIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
+import { AcademicCapIcon } from "@heroicons/react/24/outline";
 
 interface NavbarProps {
   open: boolean;
@@ -115,6 +116,14 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
                 </div>
               )}
             </div>
+            <Link
+              to="/studies"
+              className="nav-link group mt-2"
+              onClick={() => setOpen(false)}
+            >
+              <AcademicCapIcon className="h-5 w-5 text-emerald-400 mr-3" />
+              <span>Studies</span>
+            </Link>
           </nav>
           
           {/* Footer section */}

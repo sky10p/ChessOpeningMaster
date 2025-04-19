@@ -5,7 +5,7 @@ import EditRepertoirePage from "../../../pages/repertoires/EditRepertoirePage/Ed
 import TrainRepertoirePage from "../../../pages/repertoires/TrainRepertoirePage/TrainRepertoirePage";
 import { MainContainer } from "../../design/layouts/MainContainer";
 import { DashboardPage } from "../../../pages/DashboardPage/DashboardPage";
-
+import StudiesPage from "../../../pages/StudiesPage/StudiesPage";
 
 
 const Content = () => {
@@ -21,6 +21,7 @@ const Content = () => {
         <Route path="/repertoire/:id" element={<EditRepertoirePage />} />
         <Route path="/repertoire/train/:id" element={<TrainRepertoirePage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/studies" element={<StudiesPage />} />
 
         <Route path="/" element={<Navigate to="/dashboard" />} />
       </Routes>
