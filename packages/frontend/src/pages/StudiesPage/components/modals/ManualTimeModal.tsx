@@ -3,7 +3,7 @@ import React, { useState } from "react";
 interface ManualTimeModalProps {
   open: boolean;
   onClose: () => void;
-  onSave: (manualMinutes: string, manualComment: string) => void;
+  onSave: (manualMinutes: string, manualComment: string) => Promise<void>;
   error?: string | null;
 }
 

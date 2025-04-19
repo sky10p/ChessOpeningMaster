@@ -1,6 +1,14 @@
 import React, { useMemo } from "react";
 import { useStudyGroups } from "./hooks/useStudyGroups";
 import { useStudyTimer } from "./hooks/useStudyTimer";
+import {
+  fetchStudy,
+  addStudyEntry,
+  editStudyEntry,
+  deleteStudyEntry,
+  addStudySession,
+} from "./repository/studies";
+import { parseManualTime } from "./utils";
 import StudyGroupSidebar from "./components/StudyGroupSidebar";
 import TagFilterBar from "./components/TagFilterBar";
 import StudyList from "./components/StudyList";
@@ -9,7 +17,7 @@ import NewEntryModal from "./components/modals/NewEntryModal";
 import EditEntryModal from "./components/modals/EditEntryModal";
 import DeleteEntryModal from "./components/modals/DeleteEntryModal";
 import ManualTimeModal from "./components/modals/ManualTimeModal";
-import { Study } from "./models";
+import { Study, StudyEntry } from "./models";
 import StudyDetail from "./components/StudyDetail";
 
 const StudiesPage: React.FC = () => {
@@ -37,6 +45,20 @@ const StudiesPage: React.FC = () => {
     finishTimer,
   } = useStudyTimer();
 
+  // Persist session on finish
+  const handleFinishTimer = async () => {
+    finishTimer();
+    if (selectedStudy && activeGroupId) {
+      await addStudySession(activeGroupId, selectedStudy.id, {
+        start: timerStart?.toISOString() || new Date().toISOString(),
+        duration: timerElapsed,
+        manual: false,
+      });
+      const updated = await fetchStudy(activeGroupId, selectedStudy.id);
+      setSelectedStudy(updated);
+    }
+  };
+
   // Modal and input state
   const [showNewGroup, setShowNewGroup] = React.useState(false);
   const [newGroupName, setNewGroupName] = React.useState("");
@@ -48,7 +70,8 @@ const StudiesPage: React.FC = () => {
   const [showEditEntryModal, setShowEditEntryModal] = React.useState(false);
   const [showDeleteEntryModal, setShowDeleteEntryModal] = React.useState(false);
   const [showManualTimeModal, setShowManualTimeModal] = React.useState(false);
-  const [selectedEntry, setSelectedEntry] = React.useState<any>(null);
+  const [editEntry, setEditEntry] = React.useState<StudyEntry | null>(null);
+  const [deleteEntryId, setDeleteEntryId] = React.useState<string | null>(null);
 
   // Tag filtering
   const [tagFilter, setTagFilter] = React.useState<string>("");
@@ -144,11 +167,11 @@ const StudiesPage: React.FC = () => {
                 entrySuccess={null}
                 entryError={null}
                 onEditEntry={(entry) => {
-                  setSelectedEntry(entry);
+                  setEditEntry(entry);
                   setShowEditEntryModal(true);
                 }}
                 onDeleteEntry={(entryId) => {
-                  setSelectedEntry(entryId);
+                  setDeleteEntryId(entryId);
                   setShowDeleteEntryModal(true);
                 }}
                 onShowManualTime={() => setShowManualTimeModal(true)}
@@ -156,8 +179,8 @@ const StudiesPage: React.FC = () => {
                 onStartTimer={startTimer}
                 onPauseTimer={pauseTimer}
                 onResumeTimer={resumeTimer}
-                onFinishTimer={finishTimer}
-                sessions={(selectedStudy && (selectedStudy as Study).sessions) || []}
+                onFinishTimer={handleFinishTimer}
+                sessions={(selectedStudy as Study).sessions || []}
               />
             ) : (
               <div className="max-w-4xl mx-auto">
@@ -170,7 +193,14 @@ const StudiesPage: React.FC = () => {
                     + New Study
                   </button>
                 </div>
-                <StudyList studies={filteredStudies} onSelectStudy={setSelectedStudy} />
+                <StudyList
+                  studies={filteredStudies}
+                  onSelectStudy={async (study) => {
+                    if (!activeGroupId) return;
+                    const full = await fetchStudy(activeGroupId, study.id);
+                    setSelectedStudy(full);
+                  }}
+                />
               </div>
             )}
           </div>
@@ -198,26 +228,34 @@ const StudiesPage: React.FC = () => {
         open={showNewEntryModal}
         onClose={() => {
           setShowNewEntryModal(false);
-          setSelectedEntry(null);
         }}
-        onSave={() => {
-          // TODO: implement add entry logic
+        onSave={async (title, externalUrl, description) => {
+          if (selectedStudy && activeGroupId) {
+            await addStudyEntry(activeGroupId, selectedStudy.id, { title, externalUrl, description });
+            const full = await fetchStudy(activeGroupId, selectedStudy.id);
+            setSelectedStudy(full);
+          }
           setShowNewEntryModal(false);
         }}
         error={null}
       />
       <EditEntryModal
         open={showEditEntryModal}
-        initialTitle={selectedEntry?.title || ""}
-        initialExternalUrl={selectedEntry?.externalUrl || ""}
-        initialDescription={selectedEntry?.description || ""}
+        initialTitle={editEntry?.title || ""}
+        initialExternalUrl={editEntry?.externalUrl || ""}
+        initialDescription={editEntry?.description || ""}
         onClose={() => {
           setShowEditEntryModal(false);
-          setSelectedEntry(null);
+          setEditEntry(null);
         }}
-        onSave={() => {
-          // TODO: implement edit entry logic
+        onSave={async (title, externalUrl, description) => {
+          if (selectedStudy && activeGroupId && editEntry) {
+            await editStudyEntry(activeGroupId, selectedStudy.id, editEntry.id, { title, externalUrl, description });
+            const full = await fetchStudy(activeGroupId, selectedStudy.id);
+            setSelectedStudy(full);
+          }
           setShowEditEntryModal(false);
+          setEditEntry(null);
         }}
         error={null}
       />
@@ -225,19 +263,31 @@ const StudiesPage: React.FC = () => {
         open={showDeleteEntryModal}
         onClose={() => {
           setShowDeleteEntryModal(false);
-          setSelectedEntry(null);
+          setDeleteEntryId(null);
         }}
-        onDelete={() => {
-          // TODO: implement delete entry logic
+        onDelete={async () => {
+          if (selectedStudy && activeGroupId && deleteEntryId) {
+            await deleteStudyEntry(activeGroupId, selectedStudy.id, deleteEntryId);
+            const full = await fetchStudy(activeGroupId, selectedStudy.id);
+            setSelectedStudy(full);
+          }
           setShowDeleteEntryModal(false);
+          setDeleteEntryId(null);
         }}
         error={null}
       />
       <ManualTimeModal
         open={showManualTimeModal}
         onClose={() => setShowManualTimeModal(false)}
-        onSave={() => {
-          // TODO: implement manual time logic
+        onSave={async (manualMinutes: string, manualComment: string) => {
+          if (selectedStudy && activeGroupId) {
+            const seconds = parseManualTime(manualMinutes);
+            if (seconds !== null) {
+              await addStudySession(activeGroupId, selectedStudy.id, { start: new Date().toISOString(), duration: seconds, manual: true, comment: manualComment });
+              const full = await fetchStudy(activeGroupId, selectedStudy.id);
+              setSelectedStudy(full);
+            }
+          }
           setShowManualTimeModal(false);
         }}
         error={null}

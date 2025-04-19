@@ -289,3 +289,133 @@ app.listen(port, () => {
   console.log(process.env.MONGODB_URI);
   console.log(`Example app listening at http://localhost:${port}`);
 });
+
+// Add studies collection routes
+app.get("/studies", async (req, res) => {
+  await client.connect();
+  const db = client.db("chess-opening-master");
+  const groups = await db.collection("studies").find({}).toArray();
+  res.json(groups);
+});
+
+app.post("/studies", async (req, res) => {
+  await client.connect();
+  const { name } = req.body;
+  const db = client.db("chess-opening-master");
+  const result = await db.collection("studies").insertOne({ name, studies: [] });
+  const group = await db.collection("studies").findOne({ _id: result.insertedId });
+  res.json(group);
+});
+
+app.put("/studies/:id/name", async (req, res) => {
+  await client.connect();
+  const { id } = req.params;
+  const { name } = req.body;
+  const db = client.db("chess-opening-master");
+  await db
+    .collection("studies")
+    .updateOne({ _id: new ObjectId(id) }, { $set: { name } });
+  res.sendStatus(200);
+});
+
+app.delete("/studies/:id", async (req, res) => {
+  await client.connect();
+  const { id } = req.params;
+  const db = client.db("chess-opening-master");
+  await db.collection("studies").deleteOne({ _id: new ObjectId(id) });
+  res.sendStatus(200);
+});
+
+app.post("/studies/:groupId/studies", async (req, res) => {
+  await client.connect();
+  const { groupId } = req.params;
+  const { name, tags } = req.body;
+  const db = client.db("chess-opening-master");
+  const studyId = new ObjectId().toString();
+  const newStudy = { id: studyId, name, tags, entries: [], sessions: [] };
+  await db
+    .collection("studies")
+    .updateOne(
+      { _id: new ObjectId(groupId) },
+      { $push: { studies: newStudy } }
+    );
+  res.json(newStudy);
+});
+
+// Get a single study by id (including entries and sessions)
+app.get("/studies/:groupId/studies/:studyId", async (req, res) => {
+  const { groupId, studyId } = req.params;
+  await client.connect();
+  const db = client.db("chess-opening-master");
+  const group = await db.collection("studies").findOne({ _id: new ObjectId(groupId) });
+  if (!group) return res.status(404).json({ message: "Study group not found" });
+  const study = (group.studies || []).find((s: any) => s.id === studyId);
+  if (!study) return res.status(404).json({ message: "Study not found" });
+  res.json(study);
+});
+
+// Study Entry CRUD
+app.post("/studies/:groupId/studies/:studyId/entries", async (req, res) => {
+  const { groupId, studyId } = req.params;
+  const { title, externalUrl, description } = req.body;
+  const db = client.db("chess-opening-master");
+  const entryId = new ObjectId().toString();
+  const newEntry = { id: entryId, title, externalUrl, description };
+  await client.connect();
+  await db.collection("studies").updateOne(
+    { _id: new ObjectId(groupId), "studies.id": studyId },
+    { $push: { "studies.$.entries": newEntry } }
+  );
+  res.json(newEntry);
+});
+
+app.put("/studies/:groupId/studies/:studyId/entries/:entryId", async (req, res) => {
+  const { groupId, studyId, entryId } = req.params;
+  const { title, externalUrl, description } = req.body;
+  await client.connect();
+  const db = client.db("chess-opening-master");
+  await db.collection("studies").updateOne(
+    { _id: new ObjectId(groupId) },
+    {
+      $set: {
+        "studies.$[study].entries.$[entry].title": title,
+        "studies.$[study].entries.$[entry].externalUrl": externalUrl,
+        "studies.$[study].entries.$[entry].description": description,
+      }
+    },
+    {
+      arrayFilters: [
+        { "study.id": studyId },
+        { "entry.id": entryId }
+      ]
+    }
+  );
+  res.sendStatus(200);
+});
+
+app.delete("/studies/:groupId/studies/:studyId/entries/:entryId", async (req, res) => {
+  const { groupId, studyId, entryId } = req.params;
+  await client.connect();
+  const db = client.db("chess-opening-master");
+  await db.collection("studies").updateOne(
+    { _id: new ObjectId(groupId) },
+    { $pull: { "studies.$[study].entries": { id: entryId } } },
+    { arrayFilters: [{ "study.id": studyId }] }
+  );
+  res.sendStatus(200);
+});
+
+// Study Session CRUD
+app.post("/studies/:groupId/studies/:studyId/sessions", async (req, res) => {
+  const { groupId, studyId } = req.params;
+  const { start, duration, manual, comment } = req.body;
+  await client.connect();
+  const db = client.db("chess-opening-master");
+  const sessionId = new ObjectId().toString();
+  const newSession = { id: sessionId, start, duration, manual: manual || false, comment: comment || undefined };
+  await db.collection("studies").updateOne(
+    { _id: new ObjectId(groupId), "studies.id": studyId },
+    { $push: { "studies.$.sessions": newSession } }
+  );
+  res.json(newSession);
+});

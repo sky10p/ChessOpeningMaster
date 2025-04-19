@@ -1,70 +1,55 @@
-import { useState, useMemo } from "react";
-import { randomId } from "../utils";
-import { Study } from "../models";
-
-interface Group {
-  id: string;
-  name: string;
-  studies: Study[];
-}
+import { useState, useMemo, useEffect } from "react";
+import { Study, StudyGroup } from "../models";
+import {
+  fetchStudyGroups,
+  createStudyGroup,
+  renameStudyGroup,
+  deleteStudyGroup,
+  createStudy,
+} from "../repository/studies";
 
 export function useStudyGroups() {
-  const [groups, setGroups] = useState<Group[]>(() => []);
-  const [activeGroupId, setActiveGroupId] = useState<string>(
-    groups[0]?.id || ""
-  );
+  const [groups, setGroups] = useState<StudyGroup[]>([]);
+  const [activeGroupId, setActiveGroupId] = useState<string>("");
   const [selectedStudy, setSelectedStudy] = useState<Study | null>(null);
 
+  // Load groups on mount
+  const refreshGroups = async () => {
+    const data = await fetchStudyGroups();
+    setGroups(data);
+    if (!activeGroupId && data.length > 0) setActiveGroupId(data[0].id);
+  };
+  useEffect(() => {
+    refreshGroups();
+  }, []);
+
   // Group CRUD
-  const addGroup = (name: string) => {
-    setGroups((prev) => [
-      ...prev,
-      { id: randomId(), name: name.trim(), studies: [], fixed: false },
-    ]);
+  const addGroup = async (name: string) => {
+    await createStudyGroup(name);
+    await refreshGroups();
   };
-  const editGroup = (id: string, name: string) => {
-    setGroups((prev) =>
-      prev.map((g) => (g.id === id ? { ...g, name: name.trim() } : g))
-    );
+  const editGroup = async (id: string, name: string) => {
+    await renameStudyGroup(id, name);
+    await refreshGroups();
   };
-  const deleteGroup = (id: string) => {
-    setGroups((prev) => {
-      const filtered = prev.filter((g) => g.id !== id);
-      // If the deleted group was active, update activeGroupId based on filtered groups
-      if (activeGroupId === id) {
-        if (filtered.length > 0) {
-          setActiveGroupId(filtered[0].id);
-        } else {
-          setActiveGroupId("");
-        }
-        setSelectedStudy(null);
-      }
-      return filtered;
-    });
+  const deleteGroup = async (id: string) => {
+    await deleteStudyGroup(id);
+    setSelectedStudy(null);
+    await refreshGroups();
   };
 
   // Study CRUD
-  const addStudy = (name: string, tags: string[]) => {
-    setGroups((prev) =>
-      prev.map((g) =>
-        g.id === activeGroupId
-          ? {
-              ...g,
-              studies: [
-                { id: randomId(), name: name.trim(), tags, entries: [] },
-                ...g.studies,
-              ],
-            }
-          : g
-      )
-    );
+  const addStudy = async (name: string, tags: string[]) => {
+    if (!activeGroupId) return;
+    await createStudy(activeGroupId, name, tags);
+    await refreshGroups();
   };
 
   // Tag helpers
   const allTags = useMemo(() => {
     const tags = new Set<string>();
     groups.forEach((g) =>
-      g.studies.forEach((s) => s.tags.forEach((t) => tags.add(t)))
+      g.studies?.forEach((s) => s.tags.forEach((t) => tags.add(t)))
     );
     return Array.from(tags).sort();
   }, [groups]);
