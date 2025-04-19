@@ -21,9 +21,9 @@ import DeleteEntryModal from "./components/modals/DeleteEntryModal";
 import ManualTimeModal from "./components/modals/ManualTimeModal";
 import { Study, StudyEntry } from "./models";
 import StudyDetail from "./components/StudyDetail";
+import StudyGroupMobile from "../../components/application/StudyGroupMobile";
 
 const StudiesPage: React.FC = () => {
-  // Use custom hooks for stateful logic
   const {
     groups,
     activeGroupId,
@@ -48,7 +48,6 @@ const StudiesPage: React.FC = () => {
     finishTimer,
   } = useStudyTimer();
 
-  // Persist session on finish
   const handleFinishTimer = useCallback(async () => {
     finishTimer();
     if (selectedStudy && activeGroupId) {
@@ -62,7 +61,6 @@ const StudiesPage: React.FC = () => {
     }
   }, [selectedStudy, activeGroupId, timerElapsed, timerStart, finishTimer]);
 
-  // Modal and input state
   const [showNewGroup, setShowNewGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [groupError, setGroupError] = useState<string | null>(null);
@@ -75,7 +73,6 @@ const StudiesPage: React.FC = () => {
   const [editEntry, setEditEntry] = useState<StudyEntry | null>(null);
   const [deleteEntryId, setDeleteEntryId] = useState<string | null>(null);
 
-  // Tag filtering
   const [tagFilter, setTagFilter] = useState<string>("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
@@ -91,7 +88,6 @@ const StudiesPage: React.FC = () => {
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
-  // Tag filter actions
   const handleTagInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTagFilter(e.target.value);
   }, []);
@@ -105,7 +101,6 @@ const StudiesPage: React.FC = () => {
     setSelectedTags((prev) => prev.filter((t) => t !== tag));
   }, []);
 
-  // Sidebar and tag filter handlers for component props
   const handleSidebarEditGroup = (id: string, name: string) => {
     editGroup(id, name);
   };
@@ -113,7 +108,6 @@ const StudiesPage: React.FC = () => {
     deleteGroup(id);
   };
 
-  // delete session handler
   const handleDeleteSession = useCallback(async (sessionId: string) => {
     if (selectedStudy && activeGroupId) {
       await deleteStudySession(activeGroupId, selectedStudy.id, sessionId);
@@ -122,7 +116,6 @@ const StudiesPage: React.FC = () => {
     }
   }, [selectedStudy, activeGroupId]);
   
-  // delete study handler
   const handleDeleteStudy = useCallback(async () => {
     if (selectedStudy && activeGroupId) {
       await deleteStudy(activeGroupId, selectedStudy.id);
@@ -131,11 +124,9 @@ const StudiesPage: React.FC = () => {
     }
   }, [selectedStudy, activeGroupId, refreshGroups]);
 
-  // UI
   return (
     <div className="w-full h-full bg-background text-textLight">
       <div className="w-full flex flex-col md:flex-row md:items-start md:gap-4">
-        {/* Sidebar as panel in desktop */}
         {!isMobile && (
           <StudyGroupSidebar
             groups={groups}
@@ -168,9 +159,17 @@ const StudiesPage: React.FC = () => {
             onDeleteGroup={handleSidebarDeleteGroup}
           />
         )}
-        {/* Main area */}
         <main className="flex-1 flex flex-col h-full overflow-hidden md:ml-0 ml-0 md:pl-0 pl-0 relative z-0 p-2 sm:p-4 max-w-full">
-          {/* Tag filter */}
+          {isMobile && (
+            <StudyGroupMobile
+              groups={groups}
+              activeGroupId={activeGroupId}
+              onSelectGroup={(id) => { setActiveGroupId(id); setSelectedStudy(null); }}
+              addGroup={addGroup}
+              editGroup={editGroup}
+              deleteGroup={deleteGroup}
+            />
+          )}
           <TagFilterBar
             allTags={allTags as string[]}
             selectedTags={selectedTags}
@@ -179,7 +178,6 @@ const StudiesPage: React.FC = () => {
             onTagSelect={handleTagSelect}
             onTagRemove={handleTagRemove}
           />
-          {/* Studies list or detail */}
           <div className="flex-1 overflow-y-auto p-2 sm:p-4 transition-all duration-300">
             {selectedStudy ? (
               <StudyDetail
@@ -230,7 +228,6 @@ const StudiesPage: React.FC = () => {
           </div>
         </main>
       </div>
-      {/* Modals */}
       <NewStudyModal
         open={showNewStudy}
         onClose={() => {
