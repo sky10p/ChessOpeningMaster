@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 
 interface TagFilterBarProps {
   allTags: string[];
@@ -56,4 +56,4 @@ const TagFilterBar: React.FC<TagFilterBarProps> = ({
   </div>
 );
 
-export default TagFilterBar;
+export default memo(TagFilterBar);

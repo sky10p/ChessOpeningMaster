@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { Study } from "../models";
 
 interface StudyListProps {
@@ -29,4 +29,4 @@ const StudyList: React.FC<StudyListProps> = ({ studies, onSelectStudy }) => (
   </div>
 );
 
-export default StudyList;
+export default memo(StudyList);

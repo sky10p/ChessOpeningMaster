@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { formatDuration } from "../utils";
 import { Study, StudyEntry, StudySession } from "../models";
 
@@ -158,4 +158,4 @@ const StudyDetail: React.FC<StudyDetailProps> = ({
   </div>
 );
 
-export default StudyDetail;
+export default memo(StudyDetail);

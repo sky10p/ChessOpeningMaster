@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useCallback } from "react";
 import { useStudyGroups } from "./hooks/useStudyGroups";
 import { useStudyTimer } from "./hooks/useStudyTimer";
 import {
@@ -49,7 +49,7 @@ const StudiesPage: React.FC = () => {
   } = useStudyTimer();
 
   // Persist session on finish
-  const handleFinishTimer = async () => {
+  const handleFinishTimer = useCallback(async () => {
     finishTimer();
     if (selectedStudy && activeGroupId) {
       await addStudySession(activeGroupId, selectedStudy.id, {
@@ -60,25 +60,24 @@ const StudiesPage: React.FC = () => {
       const updated = await fetchStudy(activeGroupId, selectedStudy.id);
       setSelectedStudy(updated);
     }
-  };
+  }, [selectedStudy, activeGroupId, timerElapsed, timerStart, finishTimer]);
 
   // Modal and input state
-  const [showNewGroup, setShowNewGroup] = React.useState(false);
-  const [newGroupName, setNewGroupName] = React.useState("");
-  const [groupError, setGroupError] = React.useState<string | null>(null);
-  const [showNewStudy, setShowNewStudy] = React.useState(false);
-  const [studyError, setStudyError] = React.useState<string | null>(null);
-  // Entry and manual time modal state
-  const [showNewEntryModal, setShowNewEntryModal] = React.useState(false);
-  const [showEditEntryModal, setShowEditEntryModal] = React.useState(false);
-  const [showDeleteEntryModal, setShowDeleteEntryModal] = React.useState(false);
-  const [showManualTimeModal, setShowManualTimeModal] = React.useState(false);
-  const [editEntry, setEditEntry] = React.useState<StudyEntry | null>(null);
-  const [deleteEntryId, setDeleteEntryId] = React.useState<string | null>(null);
+  const [showNewGroup, setShowNewGroup] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
+  const [groupError, setGroupError] = useState<string | null>(null);
+  const [showNewStudy, setShowNewStudy] = useState(false);
+  const [studyError, setStudyError] = useState<string | null>(null);
+  const [showNewEntryModal, setShowNewEntryModal] = useState(false);
+  const [showEditEntryModal, setShowEditEntryModal] = useState(false);
+  const [showDeleteEntryModal, setShowDeleteEntryModal] = useState(false);
+  const [showManualTimeModal, setShowManualTimeModal] = useState(false);
+  const [editEntry, setEditEntry] = useState<StudyEntry | null>(null);
+  const [deleteEntryId, setDeleteEntryId] = useState<string | null>(null);
 
   // Tag filtering
-  const [tagFilter, setTagFilter] = React.useState<string>("");
-  const [selectedTags, setSelectedTags] = React.useState<string[]>([]);
+  const [tagFilter, setTagFilter] = useState<string>("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const filteredStudies = useMemo<Study[]>(() => {
     let studies = (groups.find((g) => g.id === activeGroupId)?.studies || []) as Study[];
@@ -93,16 +92,18 @@ const StudiesPage: React.FC = () => {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   // Tag filter actions
-  const handleTagInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTagInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTagFilter(e.target.value);
-  };
-  const handleTagSelect = (tag: string) => {
-    if (!selectedTags.includes(tag)) setSelectedTags([...selectedTags, tag]);
+  }, []);
+
+  const handleTagSelect = useCallback((tag: string) => {
+    setSelectedTags((prev) => prev.includes(tag) ? prev : [...prev, tag]);
     setTagFilter("");
-  };
-  const handleTagRemove = (tag: string) => {
-    setSelectedTags(selectedTags.filter((t) => t !== tag));
-  };
+  }, []);
+
+  const handleTagRemove = useCallback((tag: string) => {
+    setSelectedTags((prev) => prev.filter((t) => t !== tag));
+  }, []);
 
   // Sidebar and tag filter handlers for component props
   const handleSidebarEditGroup = (id: string, name: string) => {
@@ -113,22 +114,22 @@ const StudiesPage: React.FC = () => {
   };
 
   // delete session handler
-  const handleDeleteSession = async (sessionId: string) => {
+  const handleDeleteSession = useCallback(async (sessionId: string) => {
     if (selectedStudy && activeGroupId) {
       await deleteStudySession(activeGroupId, selectedStudy.id, sessionId);
       const updated = await fetchStudy(activeGroupId, selectedStudy.id);
       setSelectedStudy(updated);
     }
-  };
+  }, [selectedStudy, activeGroupId]);
   
   // delete study handler
-  const handleDeleteStudy = async () => {
+  const handleDeleteStudy = useCallback(async () => {
     if (selectedStudy && activeGroupId) {
       await deleteStudy(activeGroupId, selectedStudy.id);
       await refreshGroups();
       setSelectedStudy(null);
     }
-  };
+  }, [selectedStudy, activeGroupId, refreshGroups]);
 
   // UI
   return (
@@ -218,11 +219,11 @@ const StudiesPage: React.FC = () => {
                 </div>
                 <StudyList
                   studies={filteredStudies}
-                  onSelectStudy={async (study) => {
+                  onSelectStudy={useCallback(async (study) => {
                     if (!activeGroupId) return;
                     const full = await fetchStudy(activeGroupId, study.id);
                     setSelectedStudy(full);
-                  }}
+                  }, [activeGroupId])}
                 />
               </div>
             )}
