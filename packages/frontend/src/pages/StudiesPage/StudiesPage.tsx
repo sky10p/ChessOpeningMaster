@@ -217,11 +217,11 @@ const StudiesPage: React.FC = () => {
                 </div>
                 <StudyList
                   studies={filteredStudies}
-                  onSelectStudy={useCallback(async (study) => {
+                  onSelectStudy={async (study) => {
                     if (!activeGroupId) return;
                     const full = await fetchStudy(activeGroupId, study.id);
                     setSelectedStudy(full);
-                  }, [activeGroupId])}
+                  }}
                 />
               </div>
             )}
