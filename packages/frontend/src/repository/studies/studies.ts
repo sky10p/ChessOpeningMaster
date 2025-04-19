@@ -110,3 +110,14 @@ export async function addStudySession(
   );
   return res.json();
 }
+
+export async function deleteStudySession(
+  groupId: string,
+  studyId: string,
+  sessionId: string
+): Promise<void> {
+  await fetch(
+    `${API_URL}/studies/${groupId}/studies/${studyId}/sessions/${sessionId}`,
+    { method: 'DELETE' }
+  );
+}

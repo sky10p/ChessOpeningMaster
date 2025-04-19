@@ -419,3 +419,14 @@ app.post("/studies/:groupId/studies/:studyId/sessions", async (req, res) => {
   );
   res.json(newSession);
 });
+
+app.delete("/studies/:groupId/studies/:studyId/sessions/:sessionId", async (req, res) => {
+  const { groupId, studyId, sessionId } = req.params;
+  await client.connect();
+  const db = client.db("chess-opening-master");
+  await db.collection("studies").updateOne(
+    { _id: new ObjectId(groupId), "studies.id": studyId },
+    { $pull: { "studies.$.sessions": { id: sessionId } } }
+  );
+  res.sendStatus(200);
+});

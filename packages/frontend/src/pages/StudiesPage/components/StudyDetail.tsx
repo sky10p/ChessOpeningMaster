@@ -21,6 +21,7 @@ interface StudyDetailProps {
   onResumeTimer: () => void;
   onFinishTimer: () => void;
   sessions: StudySession[];
+  onDeleteSession: (sessionId: string) => void;
 }
 
 const StudyDetail: React.FC<StudyDetailProps> = ({
@@ -38,6 +39,7 @@ const StudyDetail: React.FC<StudyDetailProps> = ({
   onResumeTimer,
   onFinishTimer,
   sessions,
+  onDeleteSession,
 }) => (
   <div className="max-w-2xl mx-auto bg-slate-800 rounded-lg shadow-lg p-2 sm:p-6 animate-fade-in">
     <button className="mb-4 text-blue-400 hover:underline" onClick={onBack}>
@@ -100,6 +102,13 @@ const StudyDetail: React.FC<StudyDetailProps> = ({
             <span>{new Date(s.start).toLocaleDateString()} {s.manual ? "(manual)" : ""}</span>
             <span className="font-mono">{formatDuration(s.duration)}</span>
             {s.comment && <span className="italic text-slate-500">{s.comment}</span>}
+            <button
+              className="ml-auto px-2 py-0.5 bg-red-600 text-white rounded text-xs"
+              title="Delete session"
+              onClick={() => onDeleteSession(s.id)}
+            >
+              🗑
+            </button>
           </li>
         ))}
         {sessions.length === 0 && <li className="text-slate-500">Sin sesiones aún.</li>}

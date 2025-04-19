@@ -9,9 +9,10 @@ interface NewStudyModalProps {
 
 const NewStudyModal: React.FC<NewStudyModalProps> = ({ open, onClose, onSave, error }) => {
   const [name, setName] = useState("");
-  const [tags, setTags] = useState<string[]>([]);
+  const [tagString, setTagString] = useState("");
 
   const handleSave = () => {
+    const tags = tagString.split(",").map(t => t.trim()).filter(Boolean);
     onSave(name, tags);
   };
 
@@ -30,8 +31,8 @@ const NewStudyModal: React.FC<NewStudyModalProps> = ({ open, onClose, onSave, er
         <input
           className="w-full px-3 py-2 mb-3 rounded border border-slate-700 bg-slate-900 text-slate-100"
           placeholder="Tags (comma separated)"
-          value={tags.join(", ")}
-          onChange={(e) => setTags(e.target.value.split(",").map((t) => t.trim()).filter(Boolean))}
+          value={tagString}
+          onChange={(e) => setTagString(e.target.value)}
         />
         {error && <div className="text-red-400 mb-2">{error}</div>}
         <div className="flex gap-2 justify-end">

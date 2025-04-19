@@ -3,16 +3,17 @@ import React, { useState } from "react";
 interface ManualTimeModalProps {
   open: boolean;
   onClose: () => void;
-  onSave: (manualMinutes: string, manualComment: string) => Promise<void>;
+  onSave: (manualMinutes: string, manualComment: string, manualDate: string) => Promise<void>;
   error?: string | null;
 }
 
 const ManualTimeModal: React.FC<ManualTimeModalProps> = ({ open, onClose, onSave, error }) => {
   const [manualMinutes, setManualMinutes] = useState("");
   const [manualComment, setManualComment] = useState("");
+  const [manualDate, setManualDate] = useState(() => new Date().toISOString().substr(0, 10));
 
   const handleSave = () => {
-    onSave(manualMinutes, manualComment);
+    onSave(manualMinutes, manualComment, manualDate);
   };
 
   if (!open) return null;
@@ -35,6 +36,15 @@ const ManualTimeModal: React.FC<ManualTimeModalProps> = ({ open, onClose, onSave
           onChange={e => setManualComment(e.target.value)}
           rows={2}
         />
+        <div className="mb-2">
+          <label className="block text-slate-300 text-sm mb-1">Fecha:</label>
+          <input
+            type="date"
+            className="w-full px-3 py-2 rounded border border-slate-700 bg-slate-900 text-slate-100"
+            value={manualDate}
+            onChange={e => setManualDate(e.target.value)}
+          />
+        </div>
         {error && <div className="text-red-400 mb-2">{error}</div>}
         <div className="flex gap-2 justify-end">
           <button className="px-3 py-1 bg-blue-700 text-white rounded" onClick={handleSave}>

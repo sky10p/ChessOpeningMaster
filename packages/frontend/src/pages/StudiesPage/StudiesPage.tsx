@@ -7,6 +7,7 @@ import {
   editStudyEntry,
   deleteStudyEntry,
   addStudySession,
+  deleteStudySession, // import deleteStudySession
 } from "../../repository/studies/studies";
 import { parseManualTime } from "./utils";
 import StudyGroupSidebar from "./components/StudyGroupSidebar";
@@ -109,6 +110,15 @@ const StudiesPage: React.FC = () => {
     deleteGroup(id);
   };
 
+  // delete session handler
+  const handleDeleteSession = async (sessionId: string) => {
+    if (selectedStudy && activeGroupId) {
+      await deleteStudySession(activeGroupId, selectedStudy.id, sessionId);
+      const updated = await fetchStudy(activeGroupId, selectedStudy.id);
+      setSelectedStudy(updated);
+    }
+  };
+
   // UI
   return (
     <div className="w-full h-full bg-background text-textLight">
@@ -181,6 +191,7 @@ const StudiesPage: React.FC = () => {
                 onResumeTimer={resumeTimer}
                 onFinishTimer={handleFinishTimer}
                 sessions={(selectedStudy as Study).sessions || []}
+                onDeleteSession={handleDeleteSession} // pass delete handler
               />
             ) : (
               <div className="max-w-4xl mx-auto">
@@ -279,11 +290,11 @@ const StudiesPage: React.FC = () => {
       <ManualTimeModal
         open={showManualTimeModal}
         onClose={() => setShowManualTimeModal(false)}
-        onSave={async (manualMinutes: string, manualComment: string) => {
+        onSave={async (manualMinutes: string, manualComment: string, manualDate: string) => {
           if (selectedStudy && activeGroupId) {
             const seconds = parseManualTime(manualMinutes);
             if (seconds !== null) {
-              await addStudySession(activeGroupId, selectedStudy.id, { start: new Date().toISOString(), duration: seconds, manual: true, comment: manualComment });
+              await addStudySession(activeGroupId, selectedStudy.id, { start: manualDate, duration: seconds, manual: true, comment: manualComment });
               const full = await fetchStudy(activeGroupId, selectedStudy.id);
               setSelectedStudy(full);
             }
