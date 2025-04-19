@@ -5,11 +5,11 @@ export const randomId = () => Math.random().toString(36).slice(2, 10);
 export const parseManualTime = (input: string): number | null => {
   const trimmed = input.trim().toLowerCase();
   if (!trimmed) return null;
-  let match = trimmed.match(/^(\d+)\s*(?:h|hora|horas)?$/);
+  let match = trimmed.match(/^\d+\s*(?:h)?$/);
   if (match) return parseInt(match[1], 10) * 3600;
-  match = trimmed.match(/^(\d+)\s*(?:m|min|minuto|minutos)$/);
+  match = trimmed.match(/^\d+\s*(?:m|min)?$/);
   if (match) return parseInt(match[1], 10) * 60;
-  match = trimmed.match(/^(\d+)\s*(?:h|hora|horas)?[\s:]+(\d+)\s*(?:m|min|minuto|minutos)?$/);
+  match = trimmed.match(/^\d+\s*(?:h)?[\s:]+\d+\s*(?:m|min)?$/);
   if (match) return parseInt(match[1], 10) * 3600 + parseInt(match[2], 10) * 60;
   match = trimmed.match(/^(\d+)$/);
   if (match) return parseInt(match[1], 10) * 3600;

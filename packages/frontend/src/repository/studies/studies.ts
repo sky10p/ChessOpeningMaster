@@ -1,4 +1,3 @@
-// New file: API calls for studies and groups
 import { StudyGroup, Study, StudyEntry, StudySession } from "../../pages/StudiesPage/models";
 import { API_URL } from "../constants";
 
@@ -6,7 +5,6 @@ import { API_URL } from "../constants";
 export async function fetchStudyGroups(): Promise<StudyGroup[]> {
   const res = await fetch(`${API_URL}/studies`);
   const data = (await res.json()) as Array<{ _id: string; name: string; studies?: Study[] }>;
-  // Transform MongoDB _id to id
   return data.map(({ _id, name, studies }) => ({ id: _id, name, studies }));
 }
 
@@ -41,7 +39,6 @@ export async function createStudy(groupId: string, name: string, tags: string[])
   });
 }
 
-// Fetch a single study by groupId and studyId
 export async function fetchStudy(
   groupId: string,
   studyId: string
@@ -50,7 +47,6 @@ export async function fetchStudy(
   return res.json();
 }
 
-// Delete a study by groupId and studyId
 export async function deleteStudy(
   groupId: string,
   studyId: string
@@ -61,7 +57,6 @@ export async function deleteStudy(
   );
 }
 
-// Study Entry CRUD
 export async function addStudyEntry(
   groupId: string,
   studyId: string,
@@ -105,7 +100,6 @@ export async function deleteStudyEntry(
   );
 }
 
-// Study Session CRUD
 export async function addStudySession(
   groupId: string,
   studyId: string,

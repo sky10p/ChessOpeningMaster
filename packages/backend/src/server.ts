@@ -5,7 +5,7 @@ import cors from "cors";
 const uri =
   process.env.MONGODB_URI || "mongodb://localhost:27017/chess_opening_master";
 const client = new MongoClient(uri);
-// Connect to MongoDB once at startup
+
 client.connect()
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => {
