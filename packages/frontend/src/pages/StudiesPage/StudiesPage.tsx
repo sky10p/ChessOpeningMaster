@@ -7,7 +7,8 @@ import {
   editStudyEntry,
   deleteStudyEntry,
   addStudySession,
-  deleteStudySession, // import deleteStudySession
+  deleteStudySession,
+  deleteStudy,
 } from "../../repository/studies/studies";
 import { parseManualTime } from "./utils";
 import StudyGroupSidebar from "./components/StudyGroupSidebar";
@@ -34,6 +35,7 @@ const StudiesPage: React.FC = () => {
     deleteGroup,
     addStudy,
     allTags,
+    refreshGroups,
   } = useStudyGroups();
 
   const {
@@ -118,6 +120,15 @@ const StudiesPage: React.FC = () => {
       setSelectedStudy(updated);
     }
   };
+  
+  // delete study handler
+  const handleDeleteStudy = async () => {
+    if (selectedStudy && activeGroupId) {
+      await deleteStudy(activeGroupId, selectedStudy.id);
+      await refreshGroups();
+      setSelectedStudy(null);
+    }
+  };
 
   // UI
   return (
@@ -191,7 +202,8 @@ const StudiesPage: React.FC = () => {
                 onResumeTimer={resumeTimer}
                 onFinishTimer={handleFinishTimer}
                 sessions={(selectedStudy as Study).sessions || []}
-                onDeleteSession={handleDeleteSession} // pass delete handler
+                onDeleteSession={handleDeleteSession}
+                onDeleteStudy={handleDeleteStudy}
               />
             ) : (
               <div className="max-w-4xl mx-auto">

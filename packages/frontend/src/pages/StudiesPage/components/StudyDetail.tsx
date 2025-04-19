@@ -22,6 +22,7 @@ interface StudyDetailProps {
   onFinishTimer: () => void;
   sessions: StudySession[];
   onDeleteSession: (sessionId: string) => void;
+  onDeleteStudy: () => void;
 }
 
 const StudyDetail: React.FC<StudyDetailProps> = ({
@@ -40,10 +41,14 @@ const StudyDetail: React.FC<StudyDetailProps> = ({
   onFinishTimer,
   sessions,
   onDeleteSession,
+  onDeleteStudy,
 }) => (
   <div className="max-w-2xl mx-auto bg-slate-800 rounded-lg shadow-lg p-2 sm:p-6 animate-fade-in">
     <button className="mb-4 text-blue-400 hover:underline" onClick={onBack}>
       ← Back to studies
+    </button>
+    <button className="mb-4 ml-4 text-red-400 hover:underline" onClick={() => { if (window.confirm('Are you sure you want to delete this study?')) onDeleteStudy(); }}>
+      Delete Study
     </button>
     <div className="flex flex-wrap items-center gap-2 mb-2">
       <h2 className="text-xl font-bold text-white mr-2">{study.name}</h2>

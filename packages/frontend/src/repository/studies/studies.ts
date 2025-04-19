@@ -50,6 +50,17 @@ export async function fetchStudy(
   return res.json();
 }
 
+// Delete a study by groupId and studyId
+export async function deleteStudy(
+  groupId: string,
+  studyId: string
+): Promise<void> {
+  await fetch(
+    `${API_URL}/studies/${groupId}/studies/${studyId}`,
+    { method: 'DELETE' }
+  );
+}
+
 // Study Entry CRUD
 export async function addStudyEntry(
   groupId: string,

@@ -354,6 +354,21 @@ app.get("/studies/:groupId/studies/:studyId", async (req, res) => {
   res.json(study);
 });
 
+app.delete("/studies/:groupId/studies/:studyId", async (req, res) => {
+  const { groupId, studyId } = req.params;
+  await client.connect();
+  const db = client.db("chess-opening-master");
+  const result = await db.collection("studies").updateOne(
+    { _id: new ObjectId(groupId) },
+    { $pull: { studies: { id: studyId } } }
+  );
+  if (result.modifiedCount > 0) {
+    res.sendStatus(200);
+  } else {
+    res.status(404).json({ message: "Study not found" });
+  }
+});
+
 // Study Entry CRUD
 app.post("/studies/:groupId/studies/:studyId/entries", async (req, res) => {
   const { groupId, studyId } = req.params;
