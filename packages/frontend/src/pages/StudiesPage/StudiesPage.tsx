@@ -7,7 +7,7 @@ import {
   editStudyEntry,
   deleteStudyEntry,
   addStudySession,
-} from "./repository/studies";
+} from "../../repository/studies/studies";
 import { parseManualTime } from "./utils";
 import StudyGroupSidebar from "./components/StudyGroupSidebar";
 import TagFilterBar from "./components/TagFilterBar";

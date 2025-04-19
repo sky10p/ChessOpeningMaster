@@ -1,15 +1,17 @@
 // New file: API calls for studies and groups
-import { StudyGroup, Study, StudyEntry, StudySession } from "../models";
+import { StudyGroup, Study, StudyEntry, StudySession } from "../../pages/StudiesPage/models";
+import { API_URL } from "../constants";
 
-const API_BASE = process.env.REACT_APP_API_URL || "";
 
 export async function fetchStudyGroups(): Promise<StudyGroup[]> {
-  const res = await fetch(`${API_BASE}/studies`);
-  return res.json();
+  const res = await fetch(`${API_URL}/studies`);
+  const data = (await res.json()) as Array<{ _id: string; name: string; studies?: Study[] }>;
+  // Transform MongoDB _id to id
+  return data.map(({ _id, name, studies }) => ({ id: _id, name, studies }));
 }
 
 export async function createStudyGroup(name: string): Promise<StudyGroup> {
-  const res = await fetch(`${API_BASE}/studies`, {
+  const res = await fetch(`${API_URL}/studies`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name }),
@@ -18,7 +20,7 @@ export async function createStudyGroup(name: string): Promise<StudyGroup> {
 }
 
 export async function renameStudyGroup(id: string, name: string): Promise<void> {
-  await fetch(`${API_BASE}/studies/${id}/name`, {
+  await fetch(`${API_URL}/studies/${id}/name`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name }),
@@ -26,13 +28,13 @@ export async function renameStudyGroup(id: string, name: string): Promise<void> 
 }
 
 export async function deleteStudyGroup(id: string): Promise<void> {
-  await fetch(`${API_BASE}/studies/${id}`, {
+  await fetch(`${API_URL}/studies/${id}`, {
     method: "DELETE",
   });
 }
 
 export async function createStudy(groupId: string, name: string, tags: string[]): Promise<void> {
-  await fetch(`${API_BASE}/studies/${groupId}/studies`, {
+  await fetch(`${API_URL}/studies/${groupId}/studies`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name, tags }),
@@ -44,7 +46,7 @@ export async function fetchStudy(
   groupId: string,
   studyId: string
 ): Promise<Study> {
-  const res = await fetch(`${API_BASE}/studies/${groupId}/studies/${studyId}`);
+  const res = await fetch(`${API_URL}/studies/${groupId}/studies/${studyId}`);
   return res.json();
 }
 
@@ -55,7 +57,7 @@ export async function addStudyEntry(
   entry: Omit<StudyEntry, 'id'>
 ): Promise<StudyEntry> {
   const res = await fetch(
-    `${API_BASE}/studies/${groupId}/studies/${studyId}/entries`,
+    `${API_URL}/studies/${groupId}/studies/${studyId}/entries`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -72,7 +74,7 @@ export async function editStudyEntry(
   data: Omit<StudyEntry, 'id'>
 ): Promise<void> {
   await fetch(
-    `${API_BASE}/studies/${groupId}/studies/${studyId}/entries/${entryId}`,
+    `${API_URL}/studies/${groupId}/studies/${studyId}/entries/${entryId}`,
     {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -87,7 +89,7 @@ export async function deleteStudyEntry(
   entryId: string
 ): Promise<void> {
   await fetch(
-    `${API_BASE}/studies/${groupId}/studies/${studyId}/entries/${entryId}`,
+    `${API_URL}/studies/${groupId}/studies/${studyId}/entries/${entryId}`,
     { method: 'DELETE' }
   );
 }
@@ -99,7 +101,7 @@ export async function addStudySession(
   session: Omit<StudySession, 'id'>
 ): Promise<StudySession> {
   const res = await fetch(
-    `${API_BASE}/studies/${groupId}/studies/${studyId}/sessions`,
+    `${API_URL}/studies/${groupId}/studies/${studyId}/sessions`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

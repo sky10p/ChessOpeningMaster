@@ -6,7 +6,7 @@ import {
   renameStudyGroup,
   deleteStudyGroup,
   createStudy,
-} from "../repository/studies";
+} from "../../../repository/studies/studies";
 
 export function useStudyGroups() {
   const [groups, setGroups] = useState<StudyGroup[]>([]);
@@ -66,5 +66,6 @@ export function useStudyGroups() {
     deleteGroup,
     addStudy,
     allTags,
+    refreshGroups, // added export of refreshGroups
   };
 }
