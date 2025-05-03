@@ -6,7 +6,7 @@ import TrainRepertoirePage from "../../../pages/repertoires/TrainRepertoirePage/
 import { MainContainer } from "../../design/layouts/MainContainer";
 import { DashboardPage } from "../../../pages/DashboardPage/DashboardPage";
 import StudiesPage from "../../../pages/StudiesPage/StudiesPage";
-
+import PathPage from "../../../pages/PathPage/PathPage";
 
 const Content = () => {
   return (
@@ -22,6 +22,7 @@ const Content = () => {
         <Route path="/repertoire/train/:id" element={<TrainRepertoirePage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/studies" element={<StudiesPage />} />
+        <Route path="/path" element={<PathPage />} />
 
         <Route path="/" element={<Navigate to="/dashboard" />} />
       </Routes>
