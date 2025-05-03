@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { waitFor } from '@testing-library/react';
 import { useStudyGroups } from '../hooks/useStudyGroups';
 import * as repo from '../../../repository/studies/studies';
