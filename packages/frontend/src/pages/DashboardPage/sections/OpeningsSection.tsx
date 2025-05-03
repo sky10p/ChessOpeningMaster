@@ -11,6 +11,7 @@ interface OpeningsSectionProps {
   filteredRepertoires: IRepertoireDashboard[];
   getTrainVariantInfo: (trainInfo: TrainVariantInfo[]) => Record<string, TrainVariantInfo>;
   goToRepertoire: (repertoire: IRepertoireDashboard) => void;
+  goToTrainRepertoire: (repertoire: IRepertoireDashboard) => void;
 }
 
 
@@ -21,6 +22,7 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
   filteredRepertoires,
   getTrainVariantInfo,
   goToRepertoire,
+  goToTrainRepertoire,
 }) => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [orientationFilter, setOrientationFilter] = useState<'all' | 'white' | 'black'>('all');
@@ -125,6 +127,7 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
                   repCount={repCount}
                   onToggle={() => setExpanded((prev) => ({ ...prev, [opening]: !isOpen }))}
                   goToRepertoire={goToRepertoire}
+                  goToTrainRepertoire={goToTrainRepertoire}
                   getTrainVariantInfo={getTrainVariantInfo}
                 />
               );

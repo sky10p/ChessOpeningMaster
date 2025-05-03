@@ -49,12 +49,12 @@ export const DashboardPage = () => {
         r.name.toLowerCase().includes(repertoireNameFilter.toLowerCase()))
     : filteredRepertoires;
 
-  const goToRepertoire = (repertoire: IRepertoire) => {
-    navigate(`/repertoire/${repertoire._id}`);
+  const goToRepertoire = (repertoire: IRepertoire, variantName?: string) => {
+    navigate(`/repertoire/${repertoire._id}${variantName ? `?variantName=${variantName}` : ''}`);
   };
 
-  const goToTrainRepertoire = (repertoire: IRepertoire) => {
-    navigate(`/repertoire/train/${repertoire._id}`);
+  const goToTrainRepertoire = (repertoire: IRepertoire, variantName?: string) => {
+    navigate(`/repertoire/train/${repertoire._id}${variantName ? `?variantName=${variantName}` : ''}`);
   };
 
   const getTrainVariants = (repertoire: IRepertoire): TrainVariant[] => {
@@ -150,6 +150,7 @@ export const DashboardPage = () => {
             filteredRepertoires={filteredRepertoires}
             getTrainVariantInfo={getTrainVariantInfo}
             goToRepertoire={goToRepertoire}
+            goToTrainRepertoire={goToTrainRepertoire}
           />
         )}
         {selectedSection === 'studies' && (

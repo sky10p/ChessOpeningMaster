@@ -26,6 +26,7 @@ export const RepertoireInfoPanelStory: Story = () => {
         changeNameMove={() => {
           console.log("Change name move");
         }}
+        defaultVariant={variantMoves[0]}
         selectedVariant={variantMoves[0]}
         setSelectedVariant={() => console.log("Set selected variant")}
         variants={variantMoves}
