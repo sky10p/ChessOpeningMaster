@@ -1,6 +1,6 @@
 import { VariantInfo } from "../models/VariantInfo";
 
-export const variantesInfoMock: VariantInfo = {
+export const variantsInfoMock: VariantInfo = {
     "_id": {
       "$oid": "675204d95abbd47059d2f101"
     },
