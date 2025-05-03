@@ -14,6 +14,7 @@ interface RepertoiresSectionProps {
   goToTrainRepertoire: (repertoire: IRepertoireDashboard) => void;
   getTrainVariants: (repertoire: IRepertoireDashboard) => TrainVariant[];
   getTrainVariantInfo: (trainInfo: TrainVariantInfo[]) => Record<string, TrainVariantInfo>;
+  updateRepertoires: () => void;
 }
 
 export const RepertoiresSection: React.FC<RepertoiresSectionProps> = ({
@@ -26,6 +27,7 @@ export const RepertoiresSection: React.FC<RepertoiresSectionProps> = ({
   goToTrainRepertoire,
   getTrainVariants,
   getTrainVariantInfo,
+  updateRepertoires,
 }) => {
   const [statusFilter, setStatusFilter] = React.useState<'all' | 'errors' | 'successful' | 'new'>('all');
 
@@ -102,6 +104,7 @@ export const RepertoiresSection: React.FC<RepertoiresSectionProps> = ({
               goToTrainRepertoire={goToTrainRepertoire}
               getTrainVariants={getTrainVariants}
               getTrainVariantInfo={getTrainVariantInfo}
+              updateRepertoires={updateRepertoires}
             />
           ))}
         </ul>

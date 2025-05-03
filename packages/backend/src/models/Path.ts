@@ -6,6 +6,7 @@ export type Path =
 export type PathVariant = {
   _id: { $oid: string };
   repertoireId: string;
+  repertoireName: string;
   name: string;
   errors: number;
   lastDate: { $date: string };

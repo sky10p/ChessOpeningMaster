@@ -26,4 +26,5 @@ export interface Repertoire {
   moveNodes: MoveNode;
   orientation: "white" | "black";
   order: number;
+  disabled?: boolean;
 }

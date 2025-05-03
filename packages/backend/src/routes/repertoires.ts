@@ -12,7 +12,9 @@ import {
   updateRepertoire,
   updateRepertoireName,
   moveRepertoireOrderUp,
-  deleteRepertoire
+  deleteRepertoire,
+  disableRepertoire,
+  enableRepertoire
 } from "../controllers/repertoiresController";
 
 const router = Router();
@@ -23,11 +25,13 @@ router.get("/download", downloadRepertoires);
 router.get("/:id", getRepertoireById);
 router.get("/:id/download", downloadRepertoireById);
 router.post("/", createRepertoire);
-router.post(":/id/duplicate", duplicateRepertoire);
+router.post("/:id/duplicate", duplicateRepertoire);
 router.get("/:id/variantsInfo", getVariantsInfo);
 router.post("/:id/variantsInfo", postVariantsInfo);
 router.put("/:id", updateRepertoire);
 router.put("/:id/name", updateRepertoireName);
+router.put("/:id/enable", enableRepertoire);
+router.put("/:id/disable", disableRepertoire);
 router.patch("/:id/order/up", moveRepertoireOrderUp);
 router.delete("/:id", deleteRepertoire);
 

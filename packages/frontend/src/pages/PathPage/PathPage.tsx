@@ -48,7 +48,7 @@ const PathPage: React.FC = () => {
                   {path.type === "variant" && (
                     <>
                       <BookOpenIcon className="h-7 w-7 sm:h-8 sm:w-8 text-blue-400 mb-2" />
-                      <div className="font-semibold text-base sm:text-lg text-blue-300 mb-1">Repertoire Variant to Review</div>
+                      <div className="font-semibold text-base sm:text-lg text-blue-300 mb-1">Repertoire to review: {path.repertoireName}</div>
                       <div className="text-sm sm:text-base text-gray-100 mb-1"><span className="font-medium">Name:</span> {path.name}</div>
                       <div className="text-gray-300 mb-1"><span className="font-medium">Errors:</span> {path.errors}</div>
                       <div className="text-gray-300 mb-1"><span className="font-medium">Last Reviewed:</span> {path.lastDate?.$date ? new Date(path.lastDate.$date).toLocaleString() : "Never"}</div>

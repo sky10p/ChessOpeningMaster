@@ -16,7 +16,7 @@ import { StudiesSection } from "./sections/StudiesSection";
 export const DashboardPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { repertoires } = useDashboard();
+  const { repertoires, updateRepertoires } = useDashboard();
   const [orientationFilter, setOrientationFilter] = useState<
     "all" | "white" | "black"
   >("all");
@@ -140,6 +140,7 @@ export const DashboardPage = () => {
             goToTrainRepertoire={goToTrainRepertoire}
             getTrainVariants={getTrainVariants}
             getTrainVariantInfo={getTrainVariantInfo}
+            updateRepertoires={updateRepertoires}
           />
         )}
         {selectedSection === 'openings' && (

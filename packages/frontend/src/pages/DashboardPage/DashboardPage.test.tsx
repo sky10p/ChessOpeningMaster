@@ -33,6 +33,7 @@ describe("DashboardPage", () => {
     jest.spyOn(useDashboardModule, "useDashboard").mockReturnValue({
       repertoires: mockRepertoires,
       setRepertoires: jest.fn(),
+      updateRepertoires: jest.fn().mockResolvedValue(undefined),
     });
   });
 
@@ -121,6 +122,7 @@ describe("Openings section behaviors", () => {
     jest.spyOn(useDashboardModule, "useDashboard").mockReturnValue({
       repertoires: [makeRep("1", "Rep1", "white", "Ruy Lopez")],
       setRepertoires: jest.fn(),
+      updateRepertoires: jest.fn().mockResolvedValue(undefined),
     });
     render(
       <BrowserRouter>
@@ -140,6 +142,7 @@ describe("Openings section behaviors", () => {
         makeRep("2", "Rep2", "black", "Ruy Lopez"),
       ],
       setRepertoires: jest.fn(),
+      updateRepertoires: jest.fn().mockResolvedValue(undefined),
     });
     render(
       <BrowserRouter>
@@ -161,6 +164,7 @@ describe("Openings section behaviors", () => {
     jest.spyOn(useDashboardModule, "useDashboard").mockReturnValue({
       repertoires: [],
       setRepertoires: jest.fn(),
+      updateRepertoires: jest.fn().mockResolvedValue(undefined),
     });
     render(
       <BrowserRouter>
@@ -179,6 +183,7 @@ describe("Openings section behaviors", () => {
         makeRep("2", "Rep2", "black", "Italian Game"),
       ],
       setRepertoires: jest.fn(),
+      updateRepertoires: jest.fn().mockResolvedValue(undefined),
     });
     render(
       <BrowserRouter>
@@ -196,6 +201,7 @@ describe("Openings section behaviors", () => {
     jest.spyOn(useDashboardModule, "useDashboard").mockReturnValue({
       repertoires: [makeRep("1", "Rep1", "white", "Ruy Lopez")],
       setRepertoires: jest.fn(),
+      updateRepertoires: jest.fn().mockResolvedValue(undefined),
     });
     render(
       <BrowserRouter>

@@ -6,4 +6,5 @@ export type Path = {
   lastDate?: { $date: string };
   lastSession?: string | null;
   repertoireId?: string;
+  repertoireName?: string;
 };
