@@ -6,15 +6,17 @@ const uri =
   process.env.MONGODB_URI || "mongodb://localhost:27017/chess_opening_master";
 const client = new MongoClient(uri);
 
-client.connect()
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => {
+export const connectDB = async () => {
+  try {
+    await client.connect();
+    console.log("Connected to MongoDB");
+  } catch (err) {
     console.error("MongoDB connection error", err);
     process.exit(1);
-  });
+  }
+};
 
 const app = express();
-const port = process.env.BACKEND_PORT || 3001;
 
 app.use(
   express.json({
@@ -422,6 +424,4 @@ app.delete("/studies/:groupId/studies/:studyId/sessions/:sessionId", async (req,
   res.sendStatus(200);
 });
 
-app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port}`);
-});
+export default app;

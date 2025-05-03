@@ -20,6 +20,7 @@
     "front:tsc:noEmits": "lerna run tsc:noEmits --scope @chess-opening-master/frontend --stream",
     "develop:components": "lerna run develop:components --scope @chess-opening-master/frontend --stream",
     "test": "lerna run test --stream",
+    "test:backend": "lerna run test --scope @chess-opening-master/backend --stream",
     "lint": "lerna exec -- eslint . --ext .ts,.tsx --ignore-path .eslintignore"
   },
   "devDependencies": {

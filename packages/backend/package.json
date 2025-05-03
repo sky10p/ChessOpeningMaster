@@ -5,9 +5,10 @@
     "main": "dist/server.js",
     "scripts": {
       "build": "tsc",
-      "start:dev": "cross-env NODE_ENV=development ts-node-dev -r dotenv/config --respawn --ignore-watch node_modules src/server.ts",
-      "start:prod": "cross-env NODE_ENV=production node dist/server.js",
-      "lint": "eslint './src/**/*.{ts}'"
+      "start:dev": "cross-env NODE_ENV=development ts-node-dev -r dotenv/config --respawn --ignore-watch node_modules src/app.ts",
+      "start:prod": "cross-env NODE_ENV=production node dist/app.js",
+      "lint": "eslint './src/**/*.{ts}'",
+      "test": "jest"
     },
     "dependencies": {
       "express": "^4.18.2",
