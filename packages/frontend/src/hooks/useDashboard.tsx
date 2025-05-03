@@ -3,7 +3,7 @@ import { getFullInfoRepertoires } from "../repository/repertoires/repertoires";
 import { IRepertoireDashboard } from "@chess-opening-master/common";
 
 export const useDashboard = () => {
-    const [dashbardoRepertoires, setDashboardRepertoires] = useState<IRepertoireDashboard[]>([]);
+    const [dashbardRepertoires, setDashboardRepertoires] = useState<IRepertoireDashboard[]>([]);
      
     useEffect(() => {
         getFullInfoRepertoires().then((data) => {
@@ -21,7 +21,7 @@ export const useDashboard = () => {
     }, []);
 
     return {
-        repertoires: dashbardoRepertoires,
+        repertoires: dashbardRepertoires,
         setRepertoires: setDashboardRepertoires,
         updateRepertoires
     };
