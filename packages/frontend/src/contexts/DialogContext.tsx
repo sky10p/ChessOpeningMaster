@@ -9,12 +9,22 @@ import RepertoireDialog from "../components/design/dialogs/RepertoireDialog";
 import SelectVariantsDialog from "../components/design/dialogs/SelectVariantsDialog";
 import { NumberDialog } from "../components/design/dialogs/NumberDialog";
 import { IRepertoire } from "@chess-opening-master/common";
+import { TextAreaDialog } from "../components/design/dialogs/TextAreaDialog";
 
 interface TextDialogProps {
   title: string;
   contentText: string;
   onTextConfirm: (text: string) => void;
   onDialogClose?: () => void;
+}
+
+interface TextAreaDialogProps {
+  title: string;
+  contentText: string;
+  initialValue?: string;
+  rows?: number;
+  onTextConfirm: (text: string) => void;
+  onDialogClose?: (isCancelled: boolean) => void;
 }
 
 interface ConfirmDialog {
@@ -28,7 +38,7 @@ interface SelectTrainVariantsConfirmDialog {
   title?: string;
   contentText?: string;
   trainVariants: TrainVariant[];
-  repertoireId: string; // Add repertoireId
+  repertoireId: string;
   onTrainVariantsConfirm: (trainVariants: TrainVariant[]) => void;
   onDialogClose?: () => void;
 }
@@ -69,6 +79,7 @@ interface NumberDialogProps {
 
 interface DialogContextProps {
   showTextDialog: (props: TextDialogProps) => void;
+  showTextAreaDialog: (props: TextAreaDialogProps) => void;
   showConfirmDialog: (props: ConfirmDialog) => void;
   showTrainVariantsDialog: (props: SelectTrainVariantsConfirmDialog) => void;
   showSelectNextMoveDialog: (props: SelectNextMoveDialog) => void;
@@ -95,6 +106,7 @@ export const useDialogContext = (): DialogContextProps => {
 
 interface State {
   openTextDialog: boolean;
+  openTextAreaDialog: boolean;
   openConfirmDialog: boolean;
   openTrainVariantsDialog: boolean;
   openSelectNextMoveDialog: boolean;
@@ -104,6 +116,8 @@ interface State {
   numberDialogProps: NumberDialogProps | null;
   title: string;
   contentText: string;
+  initialValue: string;
+  textAreaDialogProps: TextAreaDialogProps | null;
   onDialogClose?: (isCancelled: boolean) => void;
   onTextConfirm: (text: string) => void;
   onConfirm: () => void;
@@ -120,6 +134,7 @@ interface State {
 
 const initialState: State = {
   openTextDialog: false,
+  openTextAreaDialog: false,
   openConfirmDialog: false,
   openTrainVariantsDialog: false,
   openSelectNextMoveDialog: false,
@@ -129,7 +144,9 @@ const initialState: State = {
   numberDialogProps: null,
   title: "",
   contentText: "",
+  initialValue: "",
   onDialogClose: undefined,
+  textAreaDialogProps: null,
   onTextConfirm: () => {},
   onConfirm: () => {},
   onTrainVariantsConfirm: () => {},
@@ -145,6 +162,7 @@ const initialState: State = {
 
 type Action =
   | { type: "SHOW_TEXT_DIALOG"; payload: TextDialogProps }
+  | { type: "SHOW_TEXT_AREA_DIALOG"; payload: TextAreaDialogProps }
   | { type: "SHOW_CONFIRM_DIALOG"; payload: ConfirmDialog }
   | {
       type: "SHOW_TRAIN_VARIANTS_DIALOG";
@@ -169,6 +187,19 @@ function reducer(state: typeof initialState, action: Action): State {
         contentText: action.payload.contentText,
         onTextConfirm: action.payload.onTextConfirm,
         onDialogClose: action.payload.onDialogClose,
+      };
+    case "SHOW_TEXT_AREA_DIALOG":
+      return {
+        ...state,
+        openTextAreaDialog: true,
+        textAreaDialogProps: {
+          title: action.payload.title,
+          contentText: action.payload.contentText,
+          initialValue: action.payload.initialValue || "",
+          rows: action.payload.rows || 5,
+          onTextConfirm: action.payload.onTextConfirm,
+          onDialogClose: action.payload.onDialogClose,
+        },
       };
     case "SHOW_CONFIRM_DIALOG":
       return {
@@ -242,12 +273,15 @@ function reducer(state: typeof initialState, action: Action): State {
       return {
         ...state,
         openTextDialog: false,
+        openTextAreaDialog: false,
         openConfirmDialog: false,
         openTrainVariantsDialog: false,
         openSelectNextMoveDialog: false,
         openRepertoireDialog: false,
         openSelectVariantsDialog: false,
         openNumberDialog: false,
+        textAreaDialogProps: null,
+        numberDialogProps: null,
       };
     default:
       return state;
@@ -263,6 +297,10 @@ export const DialogContextProvider = ({
 
   const showTextDialog = useCallback((props: TextDialogProps) => {
     dispatch({ type: "SHOW_TEXT_DIALOG", payload: props });
+  }, []);
+
+  const showTextAreaDialog = useCallback((props: TextAreaDialogProps) => {
+    dispatch({ type: "SHOW_TEXT_AREA_DIALOG", payload: props });
   }, []);
 
   const showConfirmDialog = useCallback((props: ConfirmDialog) => {
@@ -292,13 +330,21 @@ export const DialogContextProvider = ({
   const handleDialogClose = useCallback((isCancelled: boolean) => {
     dispatch({ type: "CLOSE_DIALOGS" });
     state.numberDialogProps?.onDialogClose?.(isCancelled);
+    state.textAreaDialogProps?.onDialogClose?.(isCancelled);
     state.onDialogClose && state.onDialogClose(isCancelled);
-  }, [state.numberDialogProps, state.onDialogClose]);
+  }, [state.numberDialogProps, state.textAreaDialogProps, state.onDialogClose]);
 
   const handleTextConfirm = useCallback((text: string) => {
     dispatch({ type: "CLOSE_DIALOGS" });
     state.onTextConfirm(text);
   }, [state.onTextConfirm]);
+
+  const handleTextAreaConfirm = useCallback((text: string) => {
+    if (state.textAreaDialogProps && state.textAreaDialogProps.onTextConfirm) {
+      dispatch({ type: "CLOSE_DIALOGS" });
+      state.textAreaDialogProps.onTextConfirm(text);
+    }
+  }, [state.textAreaDialogProps]);
 
   const handleConfirm = useCallback(() => {
     dispatch({ type: "CLOSE_DIALOGS" });
@@ -336,6 +382,7 @@ export const DialogContextProvider = ({
     <DialogContext.Provider
       value={{
         showTextDialog,
+        showTextAreaDialog,
         showConfirmDialog,
         showTrainVariantsDialog,
         showSelectNextMoveDialog,
@@ -353,6 +400,17 @@ export const DialogContextProvider = ({
           contentText={state.contentText}
           onTextConfirm={handleTextConfirm}
           title={state.title}
+        />
+      )}
+      {state.textAreaDialogProps && (
+        <TextAreaDialog
+          open={state.openTextAreaDialog}
+          initialValue={state.textAreaDialogProps.initialValue || ""}
+          rows={state.textAreaDialogProps.rows}
+          onClose={handleDialogClose}
+          contentText={state.textAreaDialogProps.contentText}
+          onTextConfirm={handleTextAreaConfirm}
+          title={state.textAreaDialogProps.title}
         />
       )}
       {state.openConfirmDialog && (

@@ -30,6 +30,7 @@ interface RepertoireInfoPanelProps {
   goToMove: (move: MoveVariantNode) => void;
   deleteMove: (move: MoveVariantNode) => void;
   changeNameMove: (move: MoveVariantNode, newName: string) => void;
+  defaultVariant: Variant;
   selectedVariant: Variant;
   setSelectedVariant: (variant: Variant) => void;
   comment: string;
@@ -55,6 +56,7 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
   repertoireId,
   variants,
   comment,
+  defaultVariant,
   selectedVariant,
   setSelectedVariant,
   updateComment,
@@ -73,7 +75,7 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
     setSelectedVariant(
       variants.find((variant) =>
         variant.moves.some((move) => isSelected(move))
-      ) ?? variants[0]
+      ) ?? defaultVariant
     );
   }, [variants]);
   const [stockfishEnabled, setStockfishEnabled] = React.useState(false);

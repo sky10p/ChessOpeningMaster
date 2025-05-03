@@ -233,13 +233,21 @@ export const RepertoireContextProvider: React.FC<
     setHasChanges(true);
   };
 
+  const getMoveHistoryFromCurrentMove = () => {
+    let moveNode = currentMove;
+    while (moveNode.parent) {
+      moveNode = moveNode.parent;
+    }
+    return moveNode;
+  }
+
   const saveRepertory = React.useCallback(async () => {
     try {
       setIsSaving(true);
       await putRepertoire(
         repertoireId,
         repertoireName,
-        moveHistory.getMoveNodeWithoutParent(),
+        getMoveHistoryFromCurrentMove().getMoveNodeWithoutParent(),
         orientation
       );
       setIsSaving(false);
@@ -254,6 +262,7 @@ export const RepertoireContextProvider: React.FC<
     orientation,
     comment,
     showAlert,
+    currentMove,
   ]);
 
   const getPgn = useCallback(() => {

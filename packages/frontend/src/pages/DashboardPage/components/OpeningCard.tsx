@@ -12,7 +12,8 @@ interface OpeningCardProps {
   isOpen: boolean;
   repCount: number;
   onToggle: () => void;
-  goToRepertoire: (repertoire: IRepertoireDashboard) => void;
+  goToRepertoire: (repertoire: IRepertoireDashboard, variantName: string) => void;
+  goToTrainRepertoire: (repertoire: IRepertoireDashboard, variantName: string) => void;
   getTrainVariantInfo: (trainInfo: TrainVariantInfo[]) => Record<string, TrainVariantInfo>;
 }
 
@@ -25,6 +26,7 @@ export const OpeningCard: React.FC<OpeningCardProps> = ({
   repCount,
   onToggle,
   goToRepertoire,
+  goToTrainRepertoire,
   getTrainVariantInfo,
 }) => {
   if (repertoiresWithOpening.length === 1) {
@@ -42,15 +44,21 @@ export const OpeningCard: React.FC<OpeningCardProps> = ({
           <div className="flex items-center gap-2 justify-center">
             <span
               className="cursor-pointer font-medium text-gray-100 hover:underline"
-              onClick={() => goToRepertoire(r)}
+              onClick={() => goToRepertoire(r, opening)}
             >
               {r.name}
             </span>
             <button
               className="ml-1 px-2 py-0.5 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs focus:outline-none focus:ring-2 focus:ring-blue-400"
-              onClick={() => goToRepertoire(r)}
+              onClick={() => goToRepertoire(r, opening)}
             >
               View
+            </button>
+            <button
+              className="ml-1 px-2 py-0.5 bg-green-600 text-white rounded hover:bg-green-700 text-xs focus:outline-none focus:ring-2 focus:ring-green-400"
+              onClick={() => goToTrainRepertoire(r, opening)}
+            >
+              Train
             </button>
           </div>
         </div>
@@ -77,7 +85,8 @@ export const OpeningCard: React.FC<OpeningCardProps> = ({
           opening={opening}
           repertoiresWithOpening={repertoiresWithOpening}
           getTrainVariantInfo={getTrainVariantInfo}
-          goToRepertoire={goToRepertoire}
+          goToRepertoire={(repertoire) => goToRepertoire(repertoire, opening)}
+          goToTrainRepertoire={(repertoire) => goToTrainRepertoire(repertoire, opening)}
         />
       )}
     </div>

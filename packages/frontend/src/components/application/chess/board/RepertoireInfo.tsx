@@ -4,6 +4,7 @@ import { useRepertoireContext } from "../../../../contexts/RepertoireContext";
 import { Variant } from "../../../../models/chess.models";
 import { useRepertoireInfo } from "../../../../hooks/useRepertoireInfo";
 import { useMenuContext } from "../../../../contexts/MenuContext";
+import { useLocation } from "react-router-dom";
 
 export const RepertoireInfo = () => {
   const {
@@ -17,7 +18,15 @@ export const RepertoireInfo = () => {
     updateComment,
   } = useRepertoireContext();
 
-  const [selectedVariant, setSelectedVariant] = useState<Variant>(variants[0]);
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const variantNameParam = params.get("variantName");
+  const pathVariant = variants.find(
+    (variant) => variant.name === variantNameParam || variant.fullName === variantNameParam
+  );
+  const defaultVariant = pathVariant ?? variants[0];
+
+  const [selectedVariant, setSelectedVariant] = useState<Variant>(defaultVariant);
 
   const { toggleMenu } = useMenuContext();
   const { repertoireId } = useRepertoireContext();
@@ -33,6 +42,7 @@ export const RepertoireInfo = () => {
       goToMove={goToMove}
       deleteMove={deleteMove}
       changeNameMove={changeNameMove}
+      defaultVariant={defaultVariant}
       selectedVariant={selectedVariant}
       setSelectedVariant={setSelectedVariant}
       comment={comment}

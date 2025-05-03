@@ -3,6 +3,7 @@ import cors from "cors";
 import { connectDB } from "./db/mongo";
 import repertoiresRouter from "./routes/repertoires";
 import studiesRouter from "./routes/studies";
+import paths from "./routes/paths";
 import errorHandler from "./middleware/errorHandler";
 
 const app = express();
@@ -18,6 +19,7 @@ app.use(cors());
 
 app.use("/repertoires", repertoiresRouter);
 app.use("/studies", studiesRouter);
+app.use("/paths", paths)
 
 app.use(errorHandler);
 

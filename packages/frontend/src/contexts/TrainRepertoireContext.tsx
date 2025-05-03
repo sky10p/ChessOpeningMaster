@@ -5,6 +5,7 @@ import { TrainVariant } from "../models/chess.models";
 import { deepEqual } from "../utils/deepEqual";
 import { saveTrainVariantInfo } from "../repository/repertoires/trainVariants";
 import { Turn } from "@chess-opening-master/common";
+import { useLocation } from "react-router-dom";
 
 interface TrainRepertoireContextProps {
   turn: Turn;
@@ -53,10 +54,21 @@ export const TrainRepertoireContextProvider: React.FC<
     initBoard,
     variants,
   } = useRepertoireContext();
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const variantName = params.get("variantName") || undefined;
+  const defaultTrainVariants: TrainVariant[] = variants
+    .filter(
+      (v) =>
+        !variantName || v.fullName === variantName || v.name === variantName
+    )
+    .map((v) => ({
+      variant: v,
+      state: "inProgress",
+    }));
   const [allowedMoves, setAllowedMoves] = React.useState<MoveVariantNode[]>([]);
-  const [trainVariants, setTrainVariants] = React.useState<TrainVariant[]>(
-    variants.map((v) => ({ variant: v, state: "inProgress" }))
-  );
+  const [trainVariants, setTrainVariants] =
+    React.useState<TrainVariant[]>(defaultTrainVariants);
   const [lastTrainVariant, setLastTrainVariant] =
     React.useState<TrainVariant>();
 

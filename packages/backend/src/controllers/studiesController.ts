@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { ObjectId } from "mongodb";
 import { getDB } from "../db/mongo";
+import { ObjectId } from "mongodb";
 
 export async function getStudies(req: Request, res: Response, next: NextFunction) {
   try {
