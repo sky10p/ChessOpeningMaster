@@ -17,7 +17,7 @@ export async function getRepertoires(req: Request, res: Response, next: NextFunc
   }
 }
 
-export async function getRepertoiresFull(req: Request, res: Response, next: NextFunction) {
+export async function getFullRepertoires(req: Request, res: Response, next: NextFunction) {
   try {
     const db = getDB();
     const repertoires = await db

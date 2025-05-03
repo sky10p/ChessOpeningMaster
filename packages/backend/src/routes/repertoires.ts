@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {
   getRepertoires,
-  getRepertoiresFull,
+  getFullRepertoires,
   downloadRepertoires,
   getRepertoireById,
   downloadRepertoireById,
@@ -18,7 +18,7 @@ import {
 const router = Router();
 
 router.get("/", getRepertoires);
-router.get("/full", getRepertoiresFull);
+router.get("/full", getFullRepertoires);
 router.get("/download", downloadRepertoires);
 router.get("/:id", getRepertoireById);
 router.get("/:id/download", downloadRepertoireById);
