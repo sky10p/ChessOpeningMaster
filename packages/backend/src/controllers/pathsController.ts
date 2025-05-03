@@ -3,6 +3,12 @@ import { getDB } from "../db/mongo";
 import { VariantInfo } from "../models/VariantInfo";
 import { StudySession } from "../models/Study";
 import { Path } from "../models/Path";
+import { Db, ObjectId } from "mongodb";
+
+const getRepertoireName = async (db: Db, repertoireId: string): Promise<string> => {
+  const repertoire = await db.collection("repertoires").findOne({ _id: new ObjectId(repertoireId) });
+  return repertoire ? repertoire.name : "Unknown Repertoire";
+}
 
 export async function getPaths(req: Request, res: Response, next: NextFunction) {
   try {
@@ -15,13 +21,30 @@ export async function getPaths(req: Request, res: Response, next: NextFunction) 
       lastDate: string | { $date: string };
     }
 
-    const variantsInfo: VariantInfo[] = (await db.collection<VariantInfoDocument>("variantsInfo").find({}).toArray()).map((v) => ({
+    const allVariantsInfo: VariantInfo[] = (await db.collection<VariantInfoDocument>("variantsInfo").find({}).toArray()).map((v) => ({
       _id: { $oid: v._id },
       repertoireId: v.repertoireId,
       variantName: v.variantName,
       errors: v.errors,
       lastDate: typeof v.lastDate === 'object' && '$date' in v.lastDate ? v.lastDate : { $date: v.lastDate }
     }));
+
+    const repertoireIds = [...new Set(allVariantsInfo.map(variant => variant.repertoireId))];
+    
+    const repertoireStatusMap = new Map<string, boolean>();
+    const repertoires = await db.collection("repertoires").find(
+      { _id: { $in: repertoireIds.map(id => new ObjectId(id)) } },
+      { projection: { _id: 1, disabled: 1 } }
+    ).toArray();
+    
+    for (const repertoire of repertoires) {
+      repertoireStatusMap.set(String(repertoire._id), repertoire.disabled || false);
+    }
+    
+    const variantsInfo = allVariantsInfo.filter(variant => 
+      !repertoireStatusMap.get(variant.repertoireId)
+    );
+
     const studiesGroups = await db.collection("studies").find({}).toArray();
 
     let variantToReview: VariantInfo | null = null;
@@ -62,6 +85,7 @@ export async function getPaths(req: Request, res: Response, next: NextFunction) 
         type: "variant",
         _id: variantToReview._id,
         repertoireId: variantToReview.repertoireId,
+        repertoireName: await getRepertoireName(db, variantToReview.repertoireId),
         name: variantToReview.variantName,
         errors: variantToReview.errors,
         lastDate: variantToReview.lastDate

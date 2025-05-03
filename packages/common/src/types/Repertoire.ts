@@ -7,6 +7,7 @@ export interface IRepertoire {
     moveNodes: IMoveNode;
     orientation: "white" | "black";
     order: number;
+    disabled?: boolean;
 }
 
 export interface IRepertoireDashboard  extends IRepertoire {

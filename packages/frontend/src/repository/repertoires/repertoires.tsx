@@ -53,7 +53,7 @@ export const putRepertoire = async (id: string, nameRepertory: string, moveNodes
   });
   const data = await response.json();
   return data;
-}
+};
 
 export const putRepertoireName = async (id: string, nameRepertory: string) => {
   const response = await fetch(`${API_URL}/repertoires/${id}/name`, {
@@ -65,7 +65,7 @@ export const putRepertoireName = async (id: string, nameRepertory: string) => {
   });
   const data = await response.json();
   return data;
-}
+};
 
 export const putRepertoireOrderUp = async (id: string) => {
   const response = await fetch(`${API_URL}/repertoires/${id}/order/up`, {
@@ -73,7 +73,7 @@ export const putRepertoireOrderUp = async (id: string) => {
   });
   const data = await response.json();
   return data;
-}
+};
 
 export const deleteRepertoire = async (id: string) => {
   const response = await fetch(`${API_URL}/repertoires/${id}`, {
@@ -81,5 +81,21 @@ export const deleteRepertoire = async (id: string) => {
   });
   const data = await response.json();
   return data;
-}
+};
+
+export const enableRepertoire = async (id: string) => {
+  const response = await fetch(`${API_URL}/repertoires/${id}/enable`, {
+    method: "PUT",
+  });
+  const data = await response.json();
+  return data;
+};
+
+export const disableRepertoire = async (id: string) => {
+  const response = await fetch(`${API_URL}/repertoires/${id}/disable`, {
+    method: "PUT",
+  });
+  const data = await response.json();
+  return data;
+};
 
