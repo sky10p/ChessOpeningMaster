@@ -62,11 +62,6 @@ const VariantTree: React.FC<VariantTreeProps> = ({
     );
     const defaultVariant = pathVariant ?? variants[0];
 
-    console.log("defaultVariant", defaultVariant);
-    console.log("setVariant", variants.find((variant) =>
-      variant.moves.some((move) => isSelected(move))
-    ) ?? defaultVariant)
-
     setSelectedVariant(
       variants.find((variant) =>
         variant.moves.some((move) => isSelected(move))

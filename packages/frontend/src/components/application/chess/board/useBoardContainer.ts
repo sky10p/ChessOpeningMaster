@@ -17,6 +17,7 @@ export const useBoardContainer = (isTraining: boolean) => {
   const [possibleMoves, setPossibleMoves] = useState<Move[]>([]);
   const [circleSquares, setCircleSquares] = useState<Set<Square>>(new Set());
   const [pieceMoved, setPieceMoved] = useState(false);
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
 
   const isCorrectPieceSelected = (square: Square, turn: Color) => {
     const piece = chess.get(square);
@@ -67,9 +68,7 @@ export const useBoardContainer = (isTraining: boolean) => {
         );
       }
       if (isTraining && !isMoveAllowed) {
-        alert("La jugada no es válida según el repertorio.");
-        trainRepertoireContext?.setLastErrors(trainRepertoireContext.lastErrors + 1);
-        unselectPiece();
+        setErrorDialogOpen(true);
         return false;
       } else {
         setChess(tempChess);
@@ -82,6 +81,17 @@ export const useBoardContainer = (isTraining: boolean) => {
     setSelectedSquare(null);
     setSquareStyles({});
     return false;
+  };
+
+  const handleCountAsError = () => {
+    trainRepertoireContext?.setLastErrors(trainRepertoireContext.lastErrors + 1);
+    setErrorDialogOpen(false);
+    unselectPiece();
+  };
+
+  const handleIgnoreError = () => {
+    setErrorDialogOpen(false);
+    unselectPiece();
   };
 
   const handleSquareClick = (square: Square) => {
@@ -140,5 +150,8 @@ export const useBoardContainer = (isTraining: boolean) => {
     setCircleSquares,
     possibleMoves,
     setPossibleMoves,
+    errorDialogOpen,
+    handleCountAsError,
+    handleIgnoreError,
   };
 };
