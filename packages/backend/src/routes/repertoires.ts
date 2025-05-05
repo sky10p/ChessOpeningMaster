@@ -15,7 +15,7 @@ import {
   deleteRepertoire,
   disableRepertoire,
   enableRepertoire,
-  deleteVariantsInfo
+  deleteVariantInfo
 } from "../controllers/repertoiresController";
 
 const router = Router();
@@ -29,7 +29,7 @@ router.post("/", createRepertoire);
 router.post("/:id/duplicate", duplicateRepertoire);
 router.get("/:id/variantsInfo", getVariantsInfo);
 router.post("/:id/variantsInfo", postVariantsInfo);
-router.delete("/:id/variantsInfo", deleteVariantsInfo);
+router.delete("/:id/variantsInfo", deleteVariantInfo);
 router.put("/:id", updateRepertoire);
 router.put("/:id/name", updateRepertoireName);
 router.put("/:id/enable", enableRepertoire);
