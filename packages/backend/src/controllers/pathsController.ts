@@ -81,9 +81,14 @@ export async function getPaths(req: Request, res: Response, next: NextFunction) 
 
     let result: Path;
     if (variantToReview && (!studyToReview || variantToReview.errors > 0)) {
+      
+      const variantId = typeof variantToReview._id === 'object' && '$oid' in variantToReview._id 
+        ? variantToReview._id.$oid 
+        : String(variantToReview._id);
+        
       result = {
         type: "variant",
-        _id: variantToReview._id,
+        id: variantId,
         repertoireId: variantToReview.repertoireId,
         repertoireName: await getRepertoireName(db, variantToReview.repertoireId),
         name: variantToReview.variantName,

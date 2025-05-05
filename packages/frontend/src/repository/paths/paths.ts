@@ -6,3 +6,11 @@ export async function fetchPath(): Promise<Path> {
   if (!res.ok) throw new Error("Failed to fetch path");
   return res.json();
 }
+
+export async function deleteVariantFromPath(variantId: string): Promise<void> {
+  const res = await fetch(`${API_URL}/repertoires/${variantId}/variantsInfo`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error("Failed to remove variant from path");
+  return res.json();
+}

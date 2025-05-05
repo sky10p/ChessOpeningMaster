@@ -192,6 +192,19 @@ export async function postVariantsInfo(req: Request, res: Response, next: NextFu
   }
 }
 
+export async function deleteVariantsInfo(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { id } = req.params;
+    const db = getDB();
+    await db.collection("variantsInfo").deleteOne({ _id: new ObjectId(id) });
+    res.json({ message: "Variant info deleted" });
+  } catch (err) {
+    next(err);
+  }
+}
+
+
+
 export async function updateRepertoire(req: Request, res: Response, next: NextFunction) {
   try {
     const { id } = req.params;
