@@ -4,7 +4,7 @@ export type Path =
   | { message: string };
 
 export type PathVariant = {
-  _id: { $oid: string };
+  id: string;
   repertoireId: string;
   repertoireName: string;
   name: string;

@@ -1,9 +1,11 @@
 import React, { useEffect } from "react";
 import { usePaths } from "../../hooks/usePaths";
-import { AcademicCapIcon, BookOpenIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
+import { useDialogContext } from "../../contexts/DialogContext";
+import { AcademicCapIcon, BookOpenIcon, ArrowPathIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 const PathPage: React.FC = () => {
-  const { path, loading, error, loadPath } = usePaths();
+  const { path, loading, error, loadPath, removeVariantFromPath } = usePaths();
+  const { showConfirmDialog } = useDialogContext();
 
   useEffect(() => {
     loadPath();
@@ -24,6 +26,18 @@ const PathPage: React.FC = () => {
   const goToReviewVariant = () => {
     if (path?.type === "variant" && path.repertoireId) {
       window.location.href = `/repertoire/${path.repertoireId}?variantName=${path.name}`;
+    }
+  };
+
+  const handleRemoveVariant = async () => {
+    if (path?.type === "variant" && path.id) {
+      showConfirmDialog({
+        title: "Remove Variant from Path",
+        contentText: `Are you sure you want to remove "${path.name}" from your learning path? This will reset all training progress for this variant and it will no longer appear in your spaced repetition schedule.`,
+        onConfirm: async () => {
+          await removeVariantFromPath(path.id);
+        }
+      });
     }
   };
 
@@ -66,6 +80,13 @@ const PathPage: React.FC = () => {
                           Start Training
                         </button>
                       </div>
+                      <button
+                        className="mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-semibold flex items-center justify-center gap-2 w-full"
+                        onClick={handleRemoveVariant}
+                      >
+                        <XMarkIcon className="h-5 w-5" />
+                        Remove this variant from path
+                      </button>
                     </>
                   )}
                   {path.type === "study" && path.id && (

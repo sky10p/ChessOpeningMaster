@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { fetchPath } from "../repository/paths/paths";
+import { fetchPath, deleteVariantFromPath } from "../repository/paths/paths";
 import { Path } from "../models/Path";
 
 export function usePaths() {
@@ -20,5 +20,23 @@ export function usePaths() {
     }
   }, []);
 
-  return { path, loading, error, loadPath };
+  const removeVariantFromPath = useCallback(async (variantId: string) => {
+    if (!variantId) {
+      console.warn("removeVariantFromPath called with a falsy variantId");
+      return;
+    }
+    
+    setLoading(true);
+    setError(null);
+    try {
+      await deleteVariantFromPath(variantId);
+      await loadPath(); // Reload path data after removal
+    } catch (err: any) {
+      setError(err.message || "Failed to remove variant from path");
+    } finally {
+      setLoading(false);
+    }
+  }, [loadPath]);
+
+  return { path, loading, error, loadPath, removeVariantFromPath };
 }
