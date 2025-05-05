@@ -192,7 +192,7 @@ export async function postVariantsInfo(req: Request, res: Response, next: NextFu
   }
 }
 
-export async function deleteVariantsInfo(req: Request, res: Response, next: NextFunction) {
+export async function deleteVariantInfo(req: Request, res: Response, next: NextFunction) {
   try {
     const { id } = req.params;
     const db = getDB();
