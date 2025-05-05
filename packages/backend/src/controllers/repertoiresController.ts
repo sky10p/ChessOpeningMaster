@@ -197,13 +197,11 @@ export async function deleteVariantsInfo(req: Request, res: Response, next: Next
     const { id } = req.params;
     const db = getDB();
     await db.collection("variantsInfo").deleteOne({ _id: new ObjectId(id) });
-    res.json({ message: "Variant info deleted" });
+    res.status(204).send();
   } catch (err) {
     next(err);
   }
 }
-
-
 
 export async function updateRepertoire(req: Request, res: Response, next: NextFunction) {
   try {
