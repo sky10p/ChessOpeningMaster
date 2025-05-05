@@ -12,5 +12,4 @@ export async function deleteVariantFromPath(variantId: string): Promise<void> {
     method: 'DELETE',
   });
   if (!res.ok) throw new Error("Failed to remove variant from path");
-  return res.json();
 }
