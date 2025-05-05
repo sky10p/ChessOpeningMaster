@@ -21,7 +21,10 @@ export function usePaths() {
   }, []);
 
   const removeVariantFromPath = useCallback(async (variantId: string) => {
-    if (!variantId) return;
+    if (!variantId) {
+      console.warn("removeVariantFromPath called with a falsy variantId");
+      return;
+    }
     
     setLoading(true);
     setError(null);
