@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { IRepertoireDashboard, TrainVariantInfo } from "@chess-opening-master/common";
 import { MoveVariantNode } from "../../../models/VariantNode";
 import { OpeningCard } from "../components/OpeningCard";
 import { getVariantsProgressInfo } from "../../../components/design/SelectTrainVariants/utils";
+import { RepertoireFilterDropdown } from "../components/RepertoireFilterDropdown";
 
 interface OpeningsSectionProps {
   openingNameFilter: string;
@@ -13,7 +14,6 @@ interface OpeningsSectionProps {
   goToRepertoire: (repertoire: IRepertoireDashboard) => void;
   goToTrainRepertoire: (repertoire: IRepertoireDashboard) => void;
 }
-
 
 export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
   openingNameFilter,
@@ -27,8 +27,9 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [orientationFilter, setOrientationFilter] = useState<'all' | 'white' | 'black'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'errors' | 'successful' | 'new'>('all');
+  const [selectedRepertoires, setSelectedRepertoires] = useState<string[]>([]);
 
-  const getVariantsByOrientation = (repertoires: IRepertoireDashboard[], opening: string) => {
+  const getVariantsByOrientation = useCallback((repertoires: IRepertoireDashboard[], opening: string) => {
     return repertoires
       .filter((r) => orientationFilter === 'all' || r.orientation === orientationFilter)
       .flatMap((r) => {
@@ -36,16 +37,16 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
         const variants = MoveVariantNode.initMoveVariantNode(r.moveNodes).getVariants();
         return variants.filter((v) => v.name === opening).map((v) => ({ variant: v, state: 'inProgress' as const, repertoire: r }));
       });
-  };
+  }, [orientationFilter]);
 
-  const getVariantInfoByOrientation = (repertoires: IRepertoireDashboard[], opening: string) => {
+  const getVariantInfoByOrientation = useCallback((repertoires: IRepertoireDashboard[], opening: string) => {
     const variants = getVariantsByOrientation(repertoires, opening);
     const infos = repertoires.flatMap((r) => r.variantsInfo || []);
     const infoMap = getTrainVariantInfo(infos);
     return { variants, infoMap };
-  };
+  }, [getTrainVariantInfo, getVariantsByOrientation]);
 
-  const filterByStatus = React.useCallback((opening: string) => {
+  const filterByStatus = useCallback((opening: string) => {
     if (statusFilter === 'all') return true;
     const { variants, infoMap } = getVariantInfoByOrientation(filteredRepertoires, opening);
     const { hasErrors, hasNewVariants } = getVariantsProgressInfo(variants, infoMap);
@@ -59,7 +60,31 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
       return hasNewVariants;
     }
     return true;
-  }, [statusFilter, filteredRepertoires, getVariantInfoByOrientation, getVariantsProgressInfo]);
+  }, [statusFilter, filteredRepertoires, getVariantInfoByOrientation]);
+
+  const filterByOrientation = useCallback((opening: string) => {
+    if (orientationFilter === 'all') return true;
+    return filteredRepertoires.some(repertoire => 
+      repertoire.orientation === orientationFilter && 
+      repertoire.moveNodes && 
+      MoveVariantNode.initMoveVariantNode(repertoire.moveNodes)
+        .getVariants()
+        .some(v => v.name === opening)
+    );
+  }, [orientationFilter, filteredRepertoires]);
+  
+  const filterByRepertoire = useCallback((opening: string) => {
+    if (selectedRepertoires.length === 0) return false;
+    if (selectedRepertoires.length === filteredRepertoires.length) return true;
+    
+    return filteredRepertoires.some(repertoire => 
+      selectedRepertoires.includes(repertoire._id) &&
+      repertoire.moveNodes &&
+      MoveVariantNode.initMoveVariantNode(repertoire.moveNodes)
+        .getVariants()
+        .some(v => v.name === opening)
+    );
+  }, [selectedRepertoires, filteredRepertoires]);
 
   return (
     <section className="flex-1 flex flex-col min-h-0">
@@ -78,6 +103,7 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
             <option value="white">White</option>
             <option value="black">Black</option>
           </select>
+          
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as 'all' | 'errors' | 'successful' | 'new')}
@@ -88,6 +114,14 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
             <option value="successful">Successful</option>
             <option value="new">New Variants</option>
           </select>
+          
+          <RepertoireFilterDropdown
+            filteredRepertoires={filteredRepertoires}
+            orientationFilter={orientationFilter}
+            selectedRepertoires={selectedRepertoires}
+            setSelectedRepertoires={setSelectedRepertoires}
+          />
+          
           <input
             type="text"
             placeholder="Filter openings"
@@ -102,6 +136,8 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
           {openings
             .filter(opening => opening.toLowerCase().includes(openingNameFilter.toLowerCase()))
             .filter(filterByStatus)
+            .filter(filterByOrientation)
+            .filter(filterByRepertoire)
             .map((opening) => {
               const repertoiresWithOpening = filteredRepertoires.filter((repertoire) =>
                 (orientationFilter === 'all' || repertoire.orientation === orientationFilter) &&
