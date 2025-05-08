@@ -141,15 +141,14 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
             .map((opening) => {
               const repertoiresWithOpening = filteredRepertoires.filter((repertoire) =>
                 (orientationFilter === 'all' || repertoire.orientation === orientationFilter) &&
-                selectedRepertoires.includes(repertoire._id) &&
                 repertoire.moveNodes
                   ? MoveVariantNode.initMoveVariantNode(repertoire.moveNodes)
                       .getVariants()
                       .some((v) => v.name === opening)
                   : false
               );
-              const summaryVariants = getVariantsByOrientation(filteredRepertoires.filter(r => selectedRepertoires.includes(r._id)), opening);
-              const variantsInfo = filteredRepertoires.filter(r => selectedRepertoires.includes(r._id)).flatMap((r) => r.variantsInfo || []);
+              const summaryVariants = getVariantsByOrientation(filteredRepertoires, opening);
+              const variantsInfo = filteredRepertoires.flatMap((r) => r.variantsInfo || []);
               const summaryVariantInfo = getTrainVariantInfo(variantsInfo);
               const isOpen = expanded[opening] || false;
               const repCount = repertoiresWithOpening.length;
