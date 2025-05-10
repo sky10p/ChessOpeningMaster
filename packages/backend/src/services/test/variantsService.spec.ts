@@ -138,7 +138,6 @@ describe('variantsService', () => {
     });
 
     it('should skip disabled repertoires', async () => {
-      const repertoireId = '6444e7b3d9f33ea3203dd157';
       const variantInfoId = '675204d95abbd47059d2f101';
 
       mockDB.collection.mockImplementation((collectionName: string) => {

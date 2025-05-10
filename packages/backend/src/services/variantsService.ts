@@ -1,5 +1,5 @@
 import { getDB } from "../db/mongo";
-import { MoveVariantNode } from "@chess-opening-master/common";
+import { MoveVariantNode, Variant } from "@chess-opening-master/common";
 import { NewVariantPath, StudiedVariantPath } from "../models/Path";
 import { VariantInfo } from "../models/VariantInfo";
 
@@ -37,7 +37,7 @@ export const getAllVariants = async (): Promise<VariantResult> => {
     const moveVariantNode = MoveVariantNode.initMoveVariantNode(repertoire.moveNodes);
     const repertoireVariants = moveVariantNode.getVariants();
     
-    repertoireVariants.forEach(variant => {
+    repertoireVariants.forEach((variant: Variant) => {
       if (variantsInfoMap.has(variant.fullName)) {
         const variantInfo = variantsInfoMap.get(variant.fullName);
         
