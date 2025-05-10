@@ -49,7 +49,7 @@ export const getAllVariants = async (): Promise<VariantResult> => {
               repertoireName: repertoire.name,
               name: variant.fullName,
               errors: variantInfo.errors || 0,
-              lastDate: variantInfo.lastDate || new Date().toISOString(),
+              lastDate: variantInfo.lastDate,
           });
         }
       } else {

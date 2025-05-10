@@ -2,20 +2,8 @@ import React, { useEffect } from "react";
 import { usePaths } from "../../hooks/usePaths";
 import { useDialogContext } from "../../contexts/DialogContext";
 import { AcademicCapIcon, BookOpenIcon, ArrowPathIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Path, StudyPath, StudiedVariantPath, NewVariantPath, EmptyPath } from "../../models/Path";
+import { isEmptyPath, isNewVariantPath, isStudiedVariantPath, isStudyPath } from "./helpers";
 
-// Type guards to help TypeScript understand the different path types
-const isStudyPath = (path: Path | null): path is StudyPath => 
-  path !== null && 'type' in path && path.type === "study";
-
-const isStudiedVariantPath = (path: Path | null): path is StudiedVariantPath => 
-  path !== null && 'type' in path && path.type === "variant";
-
-const isNewVariantPath = (path: Path | null): path is NewVariantPath => 
-  path !== null && 'type' in path && path.type === "newVariant";
-
-const isEmptyPath = (path: Path | null): path is EmptyPath => 
-  path !== null && 'message' in path;
 
 const formatDate = (date: string | Date): string => {
   const newDate =  new Date(date);
