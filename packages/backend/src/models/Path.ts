@@ -1,6 +1,6 @@
 import { DateType } from "../utils/dateUtils";
 
-export interface VariantPath {
+export interface StudiedVariantPath {
   type: "variant";
   id: string;
   repertoireId: string;
@@ -8,6 +8,13 @@ export interface VariantPath {
   name: string;
   errors: number;
   lastDate: DateType;
+}
+
+export interface NewVariantPath {
+  type: "newVariant";
+  repertoireId: string;
+  repertoireName: string;
+  name: string;
 }
 
 export interface StudyPath {
@@ -22,4 +29,4 @@ export interface EmptyPath {
   message: string;
 }
 
-export type Path = VariantPath | StudyPath | EmptyPath;
+export type Path = StudiedVariantPath | NewVariantPath | StudyPath | EmptyPath;

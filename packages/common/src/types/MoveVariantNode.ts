@@ -1,6 +1,6 @@
 import { Move, Square } from "chess.js";
 import { IMoveNode } from "./MoveNode";
-import { Variant } from "./Variants";
+import { VariantNode } from "./Variants";
 
 export class MoveVariantNode implements IMoveNode {
   id: string;
@@ -110,8 +110,8 @@ export class MoveVariantNode implements IMoveNode {
     };
   }
 
-  getVariants = (): Variant[] => {
-    const variants: Variant[] = [];
+  getVariants = (): VariantNode[] => {
+    const variants: VariantNode[] = [];
     let numVariants = 0;
 
     const getDifferentNodesString = (

@@ -1,4 +1,5 @@
 import { IMoveNode } from "./MoveNode";
+import { MoveVariantNode } from "./MoveVariantNode";
 
 export type TrainVariantInfo = {
     repertoireId: string;
@@ -13,3 +14,10 @@ export type Variant = {
   fullName: string;
   differentMoves: string;
 };
+
+export type VariantNode = {
+  moves: MoveVariantNode[];
+  name: string;
+  fullName: string;
+  differentMoves: string;
+}
