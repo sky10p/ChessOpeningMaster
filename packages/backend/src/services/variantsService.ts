@@ -1,6 +1,5 @@
 import { getDB } from "../db/mongo";
-import { MoveVariantNode, Variant } from "@chess-opening-master/common";
-import { NewVariantPath, StudiedVariantPath } from "@chess-opening-master/common/src/types/Path";
+import { MoveVariantNode, NewVariantPath, StudiedVariantPath, Variant } from "@chess-opening-master/common";
 import { VariantInfo } from "../models/VariantInfo";
 
 interface VariantResult {

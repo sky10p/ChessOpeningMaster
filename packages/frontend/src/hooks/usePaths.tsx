@@ -11,11 +11,15 @@ export function usePaths() {
   const loadPath = useCallback(async (selectedCategory?: PathCategory) => {
     setLoading(true);
     setError(null);
+    
+    const categoryToUse = selectedCategory !== undefined ? selectedCategory : category;
+    
     try {
       if (selectedCategory !== undefined) {
         setCategory(selectedCategory);
       }
-      const data = await fetchPath(selectedCategory !== undefined ? selectedCategory : category);
+      
+      const data = await fetchPath(categoryToUse);
       setPath(data);
     } catch (err: Error | unknown) {
       setError(err instanceof Error ? err.message : "Failed to load path");
