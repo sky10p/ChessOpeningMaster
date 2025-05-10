@@ -1,20 +1,25 @@
-export type Path =
-  | ({ type: "variant" } & PathVariant)
-  | ({ type: "study" } & PathStudy)
-  | { message: string };
+import { DateType } from "../utils/dateUtils";
 
-export type PathVariant = {
+export interface VariantPath {
+  type: "variant";
   id: string;
   repertoireId: string;
   repertoireName: string;
   name: string;
   errors: number;
-  lastDate: { $date: string };
-};
+  lastDate: DateType;
+}
 
-export type PathStudy = {
+export interface StudyPath {
+  type: "study";
   groupId: string;
   studyId: string;
   name: string;
   lastSession: string | null;
-};
+}
+
+export interface EmptyPath {
+  message: string;
+}
+
+export type Path = VariantPath | StudyPath | EmptyPath;
