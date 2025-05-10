@@ -1,4 +1,4 @@
-export type DateType = string | { $date: string };
+export type DateType = string | Date | { $date: string };
 
 export const normalizeDate = (date: DateType): string => {
   return typeof date === 'object' && '$date' in date ? date.$date : date as string;

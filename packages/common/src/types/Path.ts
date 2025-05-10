@@ -1,3 +1,4 @@
+
 export interface StudiedVariantPath {
   type: "variant";
   id: string;
@@ -28,3 +29,5 @@ export interface EmptyPath {
 }
 
 export type Path = StudiedVariantPath | NewVariantPath | StudyPath | EmptyPath;
+
+export type PathCategory = 'variantsWithErrors' | 'newVariants' | 'oldVariants' | 'studyToReview';

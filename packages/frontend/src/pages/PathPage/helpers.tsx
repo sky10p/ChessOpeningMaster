@@ -1,4 +1,5 @@
-import { StudyPath, StudiedVariantPath, NewVariantPath, EmptyPath, Path } from "../../models/Path";
+import { Path } from "@chess-opening-master/common";
+import { StudyPath, StudiedVariantPath, NewVariantPath, EmptyPath } from "@chess-opening-master/common/build/common/types/Path";
 
 export const isStudyPath = (path: Path | null): path is StudyPath => 
   path !== null && 'type' in path && path.type === "study";

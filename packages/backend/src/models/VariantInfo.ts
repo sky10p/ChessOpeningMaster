@@ -3,5 +3,5 @@ export interface VariantInfo {
   repertoireId: string;
   variantName: string;
   errors: number;
-  lastDate: { $date: string };
+  lastDate: Date;
 }
