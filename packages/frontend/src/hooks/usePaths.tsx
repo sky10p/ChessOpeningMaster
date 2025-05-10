@@ -1,24 +1,32 @@
 import { useCallback, useState } from "react";
 import { fetchPath, deleteVariantFromPath } from "../repository/paths/paths";
-import { Path } from "../models/Path";
+import { Path, PathCategory } from "@chess-opening-master/common";
 
 export function usePaths() {
   const [path, setPath] = useState<Path | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [category, setCategory] = useState<PathCategory | undefined>(undefined);
 
-  const loadPath = useCallback(async () => {
+  const loadPath = useCallback(async (selectedCategory?: PathCategory) => {
     setLoading(true);
     setError(null);
+    
+    const categoryToUse = selectedCategory !== undefined ? selectedCategory : category;
+    
     try {
-      const data = await fetchPath();
+      if (selectedCategory !== undefined) {
+        setCategory(selectedCategory);
+      }
+      
+      const data = await fetchPath(categoryToUse);
       setPath(data);
-    } catch (err: any) {
-      setError(err.message || "Failed to load path");
+    } catch (err: Error | unknown) {
+      setError(err instanceof Error ? err.message : "Failed to load path");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [category]);
 
   const removeVariantFromPath = useCallback(async (variantId: string) => {
     if (!variantId) {
@@ -31,12 +39,12 @@ export function usePaths() {
     try {
       await deleteVariantFromPath(variantId);
       await loadPath(); // Reload path data after removal
-    } catch (err: any) {
-      setError(err.message || "Failed to remove variant from path");
+    } catch (err: Error | unknown) {
+      setError(err instanceof Error ? err.message : "Failed to remove variant from path");
     } finally {
       setLoading(false);
     }
   }, [loadPath]);
 
-  return { path, loading, error, loadPath, removeVariantFromPath };
+  return { path, loading, error, loadPath, removeVariantFromPath, category, setCategory };
 }

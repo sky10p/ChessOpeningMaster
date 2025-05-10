@@ -1,8 +1,8 @@
-import { Path } from "../../models/Path";
+import { Path, PathCategory } from "@chess-opening-master/common";
 import { API_URL } from "../constants";
 
-export async function fetchPath(): Promise<Path> {
-  const res = await fetch(`${API_URL}/paths`);
+export async function fetchPath(category?: PathCategory): Promise<Path> {
+  const res = await fetch(`${API_URL}/paths${category ? `?category=${category}` : ''}`);
   if (!res.ok) throw new Error("Failed to fetch path");
   return res.json();
 }

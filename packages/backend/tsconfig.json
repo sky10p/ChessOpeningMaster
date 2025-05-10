@@ -4,5 +4,8 @@
     "outDir": "./build/backend",
     "rootDir": "./src"
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "references": [
+    { "path": "../common" }
+  ]
 }

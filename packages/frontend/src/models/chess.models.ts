@@ -1,4 +1,4 @@
-import { MoveVariantNode } from "./VariantNode";
+import { MoveVariantNode } from "@chess-opening-master/common";
 
 export type Variant = {
   moves: MoveVariantNode[];
@@ -11,4 +11,3 @@ export type TrainVariant = {
   variant: Variant;
   state: "inProgress" | "discarded" | "finished";
 };
-
