@@ -2,6 +2,26 @@ import React, { useEffect } from "react";
 import { usePaths } from "../../hooks/usePaths";
 import { useDialogContext } from "../../contexts/DialogContext";
 import { AcademicCapIcon, BookOpenIcon, ArrowPathIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { Path, StudyPath, StudiedVariantPath, NewVariantPath, EmptyPath } from "../../models/Path";
+
+// Type guards to help TypeScript understand the different path types
+const isStudyPath = (path: Path | null): path is StudyPath => 
+  path !== null && 'type' in path && path.type === "study";
+
+const isStudiedVariantPath = (path: Path | null): path is StudiedVariantPath => 
+  path !== null && 'type' in path && path.type === "variant";
+
+const isNewVariantPath = (path: Path | null): path is NewVariantPath => 
+  path !== null && 'type' in path && path.type === "newVariant";
+
+const isEmptyPath = (path: Path | null): path is EmptyPath => 
+  path !== null && 'message' in path;
+
+const formatDate = (date: string | Date): string => {
+  const newDate =  new Date(date);
+  return newDate.toISOString();
+}
+
 
 const PathPage: React.FC = () => {
   const { path, loading, error, loadPath, removeVariantFromPath } = usePaths();
@@ -12,25 +32,25 @@ const PathPage: React.FC = () => {
   }, [loadPath]);
 
   const goToStudy = () => {
-    if (path?.type === "study" && path.id) {
-      window.location.href = `/studies?studyId=${path.id}`;
+    if (isStudyPath(path)) {
+      window.location.href = `/studies?studyId=${path.studyId}`;
     }
   };
 
   const goToTrainVariant = () => {
-    if (path?.type === "variant" && path.repertoireId) {
+    if (isStudiedVariantPath(path) || isNewVariantPath(path)) {
       window.location.href = `/repertoire/train/${path.repertoireId}?variantName=${path.name}`;
     }
   };
 
   const goToReviewVariant = () => {
-    if (path?.type === "variant" && path.repertoireId) {
+    if (isStudiedVariantPath(path) || isNewVariantPath(path)) {
       window.location.href = `/repertoire/${path.repertoireId}?variantName=${path.name}`;
     }
   };
 
   const handleRemoveVariant = async () => {
-    if (path?.type === "variant" && path.id) {
+    if (isStudiedVariantPath(path)) {
       showConfirmDialog({
         title: "Remove Variant from Path",
         contentText: `Are you sure you want to remove "${path.name}" from your learning path? This will reset all training progress for this variant and it will no longer appear in your spaced repetition schedule.`,
@@ -59,13 +79,13 @@ const PathPage: React.FC = () => {
               {error && <div className="text-red-500 text-center">{error}</div>}
               {!loading && !error && path && (
                 <>
-                  {path.type === "variant" && (
+                  {isStudiedVariantPath(path) && (
                     <>
                       <BookOpenIcon className="h-7 w-7 sm:h-8 sm:w-8 text-blue-400 mb-2" />
                       <div className="font-semibold text-base sm:text-lg text-blue-300 mb-1">Repertoire to review: {path.repertoireName}</div>
                       <div className="text-sm sm:text-base text-gray-100 mb-1"><span className="font-medium">Name:</span> {path.name}</div>
                       <div className="text-gray-300 mb-1"><span className="font-medium">Errors:</span> {path.errors}</div>
-                      <div className="text-gray-300 mb-1"><span className="font-medium">Last Reviewed:</span> {path.lastDate?.$date ? new Date(path.lastDate.$date).toLocaleString() : "Never"}</div>
+                      <div className="text-gray-300 mb-1"><span className="font-medium">Last Reviewed:</span> {formatDate(path.lastDate)}</div>
                       <div className="flex flex-col sm:flex-row gap-3 mt-4 w-full">
                         <button
                           className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-semibold w-full"
@@ -89,12 +109,34 @@ const PathPage: React.FC = () => {
                       </button>
                     </>
                   )}
-                  {path.type === "study" && path.id && (
+                  {isNewVariantPath(path) && (
+                    <>
+                      <BookOpenIcon className="h-7 w-7 sm:h-8 sm:w-8 text-blue-400 mb-2" />
+                      <div className="font-semibold text-base sm:text-lg text-blue-300 mb-1">New Repertoire to learn: {path.repertoireName}</div>
+                      <div className="text-sm sm:text-base text-gray-100 mb-1"><span className="font-medium">Name:</span> {path.name}</div>
+                      <div className="text-gray-300 mb-1"><span className="font-medium">Status:</span> Not yet started</div>
+                      <div className="flex flex-col sm:flex-row gap-3 mt-4 w-full">
+                        <button
+                          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-semibold w-full"
+                          onClick={goToReviewVariant}
+                        >
+                          Start Review
+                        </button>
+                        <button
+                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-semibold w-full"
+                          onClick={goToTrainVariant}
+                        >
+                          Start Training
+                        </button>
+                      </div>
+                    </>
+                  )}
+                  {isStudyPath(path) && (
                     <>
                       <AcademicCapIcon className="h-7 w-7 sm:h-8 sm:w-8 text-emerald-400 mb-2" />
                       <div className="font-semibold text-base sm:text-lg text-emerald-300 mb-1">Study to Review</div>
                       <div className="text-sm sm:text-base text-gray-100 mb-1"><span className="font-medium">Name:</span> {path.name}</div>
-                      <div className="text-gray-300 mb-1"><span className="font-medium">Last Session:</span> {path.lastSession ? new Date(path.lastSession).toLocaleString() : "Never"}</div>
+                      <div className="text-gray-300 mb-1"><span className="font-medium">Last Session:</span> {path.lastSession}</div>
                       <button
                         className="mt-4 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-semibold w-full sm:w-auto"
                         onClick={goToStudy}
@@ -103,7 +145,7 @@ const PathPage: React.FC = () => {
                       </button>
                     </>
                   )}
-                  {path.type === "study" && !path.id && (
+                  {isEmptyPath(path) && (
                     <>
                       <div className="font-semibold text-base sm:text-lg text-gray-200 mb-2">All Caught Up!</div>
                       <div className="text-gray-300 mb-2">You have no variants or studies to review right now. Great job! 🎉</div>

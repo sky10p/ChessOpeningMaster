@@ -7,7 +7,9 @@
       "build": "tsc",
       "lint": "eslint"
     },
-    "dependencies": {},
+    "dependencies": {
+      "chess.js": "^0.13.4"
+    },
     "devDependencies": {
       "typescript": "^5.0.4"
     }
