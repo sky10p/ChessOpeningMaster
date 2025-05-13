@@ -26,10 +26,12 @@ import StudyGroupMobile from "../../components/application/StudyGroupMobile";
 const StudiesPage: React.FC = () => {
   const {
     groups,
+    loading,
     activeGroupId,
     setActiveGroupId,
     selectedStudy,
     setSelectedStudy,
+    handleBackToStudies,
     addGroup,
     editGroup,
     deleteGroup,
@@ -104,6 +106,7 @@ const StudiesPage: React.FC = () => {
   const handleSidebarEditGroup = (id: string, name: string) => {
     editGroup(id, name);
   };
+  
   const handleSidebarDeleteGroup = (id: string) => {
     deleteGroup(id);
   };
@@ -131,10 +134,7 @@ const StudiesPage: React.FC = () => {
           <StudyGroupSidebar
             groups={groups}
             activeGroupId={activeGroupId}
-            onSelectGroup={(id) => {
-              setActiveGroupId(id);
-              setSelectedStudy(null);
-            }}
+            onSelectGroup={setActiveGroupId}
             onShowNewGroup={() => setShowNewGroup(true)}
             showNewGroup={showNewGroup}
             newGroupName={newGroupName}
@@ -164,7 +164,7 @@ const StudiesPage: React.FC = () => {
             <StudyGroupMobile
               groups={groups}
               activeGroupId={activeGroupId}
-              onSelectGroup={(id) => { setActiveGroupId(id); setSelectedStudy(null); }}
+              onSelectGroup={setActiveGroupId}
               addGroup={addGroup}
               editGroup={editGroup}
               deleteGroup={deleteGroup}
@@ -179,10 +179,12 @@ const StudiesPage: React.FC = () => {
             onTagRemove={handleTagRemove}
           />
           <div className="flex-1 overflow-y-auto p-2 sm:p-4 transition-all duration-300">
-            {selectedStudy ? (
+            {loading ? (
+              <div className="text-center p-4 text-blue-400">Loading studies...</div>
+            ) : selectedStudy ? (
               <StudyDetail
                 study={selectedStudy as Study}
-                onBack={() => setSelectedStudy(null)}
+                onBack={handleBackToStudies}
                 onShowNewEntry={() => setShowNewEntryModal(true)}
                 entrySuccess={null}
                 entryError={null}

@@ -22,7 +22,7 @@ const PathPage: React.FC = () => {
 
   const goToStudy = () => {
     if (isStudyPath(path)) {
-      window.location.href = `/studies?studyId=${path.studyId}`;
+      window.location.href = `/studies?groupId=${path.groupId}&studyId=${path.studyId}`;
     }
   };
 

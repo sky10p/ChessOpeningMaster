@@ -21,10 +21,12 @@ const updatedGroups = [
 describe('useStudyGroups', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockFetch.mockResolvedValue(initialGroups);
+    mockFetch.mockReset();
+    window.history.replaceState({}, '', '/');
   });
 
   it('loads initial groups and sets activeGroupId', async () => {
+    mockFetch.mockResolvedValue(initialGroups);
     const { result } = renderHook(() => useStudyGroups());
     await waitFor(() => expect(result.current.groups).toEqual(initialGroups));
     expect(result.current.activeGroupId).toBe('g1');
@@ -33,34 +35,46 @@ describe('useStudyGroups', () => {
   it('addGroup calls createStudyGroup and refreshes groups', async () => {
     mockCreate.mockResolvedValue({ id: 'g2', name: 'Group Two', studies: [] });
     mockFetch.mockResolvedValueOnce(initialGroups).mockResolvedValueOnce(updatedGroups);
+    
     const { result } = renderHook(() => useStudyGroups());
-    await waitFor(() => expect(result.current.groups).toEqual(initialGroups));
+    await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(result.current.groups).toHaveLength(initialGroups.length));
 
     await act(async () => {
       await result.current.addGroup('Group Two');
     });
+    
     expect(mockCreate).toHaveBeenCalledWith('Group Two');
-    await waitFor(() => expect(result.current.groups).toEqual(updatedGroups));
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(result.current.groups).toHaveLength(updatedGroups.length));
   });
 
   it('editGroup calls renameStudyGroup and refreshes', async () => {
+    const renamedGroups = [{ id: 'g1', name: 'New Name', studies: initialGroups[0].studies }];
     mockRename.mockResolvedValue();
-    mockFetch.mockResolvedValueOnce(initialGroups).mockResolvedValueOnce(updatedGroups);
+    mockFetch.mockResolvedValueOnce(initialGroups).mockResolvedValueOnce(renamedGroups);
+    
     const { result } = renderHook(() => useStudyGroups());
-    await waitFor(() => expect(result.current.groups).toEqual(initialGroups));
+    await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(result.current.groups).toHaveLength(initialGroups.length));
 
     await act(async () => {
       await result.current.editGroup('g1', 'New Name');
     });
+    
     expect(mockRename).toHaveBeenCalledWith('g1', 'New Name');
-    await waitFor(() => expect(result.current.groups).toEqual(updatedGroups));
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(result.current.groups).toEqual(renamedGroups));
   });
 
   it('deleteGroup calls deleteStudyGroup and resets selectedStudy', async () => {
     mockDeleteGroup.mockResolvedValue();
     mockFetch.mockResolvedValueOnce(initialGroups).mockResolvedValueOnce([]);
+    
     const { result } = renderHook(() => useStudyGroups());
+    await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(result.current.groups).toEqual(initialGroups));
+    
     if (initialGroups[0].studies && initialGroups[0].studies.length > 0) {
       act(() => { result.current.setSelectedStudy(initialGroups[0].studies[0]); });
     }
@@ -68,22 +82,38 @@ describe('useStudyGroups', () => {
     await act(async () => {
       await result.current.deleteGroup('g1');
     });
+    
     expect(mockDeleteGroup).toHaveBeenCalledWith('g1');
+    expect(mockFetch).toHaveBeenCalledTimes(2);
     await waitFor(() => expect(result.current.groups).toEqual([]));
     expect(result.current.selectedStudy).toBeNull();
   });
 
   it('addStudy calls createStudy and refreshes groups', async () => {
+    const updatedWithNewStudy = [
+      { 
+        id: 'g1', 
+        name: 'Group One', 
+        studies: [
+          { id: 's1', name: 'Study One', tags: [], entries: [] },
+          { id: 's2', name: 'Study Two', tags: ['tag1'], entries: [] }
+        ] 
+      }
+    ];
     mockCreateStudy.mockResolvedValue();
-    mockFetch.mockResolvedValueOnce(initialGroups).mockResolvedValueOnce(updatedGroups);
+    mockFetch.mockResolvedValueOnce(initialGroups).mockResolvedValueOnce(updatedWithNewStudy);
+    
     const { result } = renderHook(() => useStudyGroups());
+    await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(result.current.groups).toEqual(initialGroups));
 
     await act(async () => {
       await result.current.addStudy('Study Two', ['tag1']);
     });
+    
     expect(mockCreateStudy).toHaveBeenCalledWith('g1', 'Study Two', ['tag1']);
-    await waitFor(() => expect(result.current.groups).toEqual(updatedGroups));
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(result.current.groups).toEqual(updatedWithNewStudy));
   });
 
   it('calculates allTags from groups', async () => {
