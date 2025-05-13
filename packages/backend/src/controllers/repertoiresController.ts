@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { ObjectId } from "mongodb";
 import { getDB } from "../db/mongo";
+import AdmZip from "adm-zip";
 
 export async function getRepertoires(req: Request, res: Response, next: NextFunction) {
   try {
@@ -54,10 +55,31 @@ export async function downloadRepertoires(req: Request, res: Response, next: Nex
       .find({})
       .sort({ order: 1 })
       .toArray();
-    res.setHeader("Content-disposition", "attachment; filename=repertoires.json");
-    res.setHeader("Content-type", "application/json");
-    res.write(JSON.stringify(repertoires));
-    res.end();
+    
+    const studies = await db
+      .collection("studies")
+      .find({})
+      .toArray();
+      
+    const variantsInfo = await db
+      .collection("variantsInfo")
+      .find({})
+      .toArray();
+    
+    const zip = new AdmZip();
+    
+    zip.addFile("repertoires.json", Buffer.from(JSON.stringify(repertoires, null, 2)));
+    zip.addFile("studies.json", Buffer.from(JSON.stringify(studies, null, 2)));
+    zip.addFile("variantsInfo.json", Buffer.from(JSON.stringify(variantsInfo, null, 2)));
+    
+    const today = new Date().toISOString().split("T")[0];
+    const zipFileName = `chess-openings-backup-${today}.zip`;
+    
+    res.setHeader("Content-disposition", `attachment; filename=${zipFileName}`);
+    res.setHeader("Content-type", "application/zip");
+    
+    const zipBuffer = zip.toBuffer();
+    res.send(zipBuffer);
   } catch (err) {
     next(err);
   }
