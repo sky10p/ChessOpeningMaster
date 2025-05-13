@@ -44,11 +44,11 @@ export function useStudyGroups() {
     } finally {
       setLoading(false);
     }
-  }, [activeGroupId]);
+  }, []);
   
   useEffect(() => {
     refreshGroups();
-  }, []);
+  }, [refreshGroups]);
 
   const updateUrlParams = useCallback(() => {
     const url = new URL(window.location.href);
