@@ -70,6 +70,8 @@ const StudyGroupSidebar: React.FC<StudyGroupSidebarProps> = ({
                   value={editingGroup.name}
                   onChange={handleNameChange}
                   autoFocus
+                  aria-label={`Edit group name for ${editingGroup.name}`}
+                  role="textbox"
                 />
                 <div className="flex gap-1">
                   <button

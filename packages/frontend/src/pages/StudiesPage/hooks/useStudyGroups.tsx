@@ -44,7 +44,7 @@ export function useStudyGroups() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [activeGroupId]);
   
   useEffect(() => {
     refreshGroups();
