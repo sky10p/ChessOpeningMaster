@@ -18,10 +18,12 @@ import NewStudyModal from "./components/modals/NewStudyModal";
 import NewEntryModal from "./components/modals/NewEntryModal";
 import EditEntryModal from "./components/modals/EditEntryModal";
 import DeleteEntryModal from "./components/modals/DeleteEntryModal";
+import DeleteSessionModal from "./components/modals/DeleteSessionModal";
 import ManualTimeModal from "./components/modals/ManualTimeModal";
 import { Study, StudyEntry } from "./models";
 import StudyDetail from "./components/StudyDetail";
 import StudyGroupMobile from "../../components/application/StudyGroupMobile";
+import ScrollContainer from "./components/containers/ScrollContainer";
 
 const StudiesPage: React.FC = () => {
   const {
@@ -71,15 +73,18 @@ const StudiesPage: React.FC = () => {
   const [showNewEntryModal, setShowNewEntryModal] = useState(false);
   const [showEditEntryModal, setShowEditEntryModal] = useState(false);
   const [showDeleteEntryModal, setShowDeleteEntryModal] = useState(false);
+  const [showDeleteSessionModal, setShowDeleteSessionModal] = useState(false);
   const [showManualTimeModal, setShowManualTimeModal] = useState(false);
   const [editEntry, setEditEntry] = useState<StudyEntry | null>(null);
   const [deleteEntryId, setDeleteEntryId] = useState<string | null>(null);
+  const [deleteSessionId, setDeleteSessionId] = useState<string | null>(null);
 
   const [tagFilter, setTagFilter] = useState<string>("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const filteredStudies = useMemo<Study[]>(() => {
-    let studies = (groups.find((g) => g.id === activeGroupId)?.studies || []) as Study[];
+    let studies = (groups.find((g) => g.id === activeGroupId)?.studies ||
+      []) as Study[];
     if (selectedTags.length > 0) {
       studies = studies.filter((s) =>
         selectedTags.every((tag) => s.tags.includes(tag))
@@ -88,14 +93,17 @@ const StudiesPage: React.FC = () => {
     return studies;
   }, [groups, activeGroupId, selectedTags]);
 
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
-  const handleTagInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setTagFilter(e.target.value);
-  }, []);
+  const handleTagInput = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setTagFilter(e.target.value);
+    },
+    []
+  );
 
   const handleTagSelect = useCallback((tag: string) => {
-    setSelectedTags((prev) => prev.includes(tag) ? prev : [...prev, tag]);
+    setSelectedTags((prev) => (prev.includes(tag) ? prev : [...prev, tag]));
     setTagFilter("");
   }, []);
 
@@ -106,19 +114,31 @@ const StudiesPage: React.FC = () => {
   const handleSidebarEditGroup = (id: string, name: string) => {
     editGroup(id, name);
   };
-  
+
   const handleSidebarDeleteGroup = (id: string) => {
     deleteGroup(id);
   };
+  const handleDeleteSession = useCallback(
+    async (sessionId: string) => {
+      setDeleteSessionId(sessionId);
+      setShowDeleteSessionModal(true);
+    },
+    []
+  );
 
-  const handleDeleteSession = useCallback(async (sessionId: string) => {
-    if (selectedStudy && activeGroupId) {
-      await deleteStudySession(activeGroupId, selectedStudy.id, sessionId);
-      const updated = await fetchStudy(activeGroupId, selectedStudy.id);
-      setSelectedStudy(updated);
-    }
-  }, [selectedStudy, activeGroupId]);
-  
+  const confirmDeleteSession = useCallback(
+    async () => {
+      if (selectedStudy && activeGroupId && deleteSessionId) {
+        await deleteStudySession(activeGroupId, selectedStudy.id, deleteSessionId);
+        const updated = await fetchStudy(activeGroupId, selectedStudy.id);
+        setSelectedStudy(updated);
+      }
+      setShowDeleteSessionModal(false);
+      setDeleteSessionId(null);
+    },
+    [selectedStudy, activeGroupId, deleteSessionId]
+  );
+
   const handleDeleteStudy = useCallback(async () => {
     if (selectedStudy && activeGroupId) {
       await deleteStudy(activeGroupId, selectedStudy.id);
@@ -129,7 +149,7 @@ const StudiesPage: React.FC = () => {
 
   return (
     <div className="w-full h-full bg-background text-textLight">
-      <div className="w-full flex flex-col md:flex-row md:items-start md:gap-4">
+      <div className="w-full h-full flex flex-col md:flex-row md:items-start md:gap-4">
         {!isMobile && (
           <StudyGroupSidebar
             groups={groups}
@@ -178,53 +198,67 @@ const StudiesPage: React.FC = () => {
             onTagSelect={handleTagSelect}
             onTagRemove={handleTagRemove}
           />
-          <div className="flex-1 overflow-y-auto p-2 sm:p-4 transition-all duration-300">
+          <div className="flex-1 overflow-hidden p-2 sm:p-4 transition-all duration-300">
             {loading ? (
-              <div className="text-center p-4 text-blue-400">Loading studies...</div>
+              <div className="text-center p-4 text-blue-400">
+                Loading studies...
+              </div>
             ) : selectedStudy ? (
-              <StudyDetail
-                study={selectedStudy as Study}
-                onBack={handleBackToStudies}
-                onShowNewEntry={() => setShowNewEntryModal(true)}
-                entrySuccess={null}
-                entryError={null}
-                onEditEntry={(entry) => {
-                  setEditEntry(entry);
-                  setShowEditEntryModal(true);
-                }}
-                onDeleteEntry={(entryId) => {
-                  setDeleteEntryId(entryId);
-                  setShowDeleteEntryModal(true);
-                }}
-                onShowManualTime={() => setShowManualTimeModal(true)}
-                timerState={{ running: timerRunning, start: timerStart, elapsed: timerElapsed }}
-                onStartTimer={startTimer}
-                onPauseTimer={pauseTimer}
-                onResumeTimer={resumeTimer}
-                onFinishTimer={handleFinishTimer}
-                sessions={(selectedStudy as Study).sessions || []}
-                onDeleteSession={handleDeleteSession}
-                onDeleteStudy={handleDeleteStudy}
-              />
-            ) : (
-              <div className="max-w-4xl mx-auto">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
-                  <h2 className="text-xl font-bold text-white">{groups.find((g) => g.id === activeGroupId)?.name} Studies</h2>
-                  <button
-                    className="px-3 py-1.5 bg-blue-700 text-white rounded shadow hover:bg-blue-800 transition"
-                    onClick={() => setShowNewStudy(true)}
-                  >
-                    + New Study
-                  </button>
-                </div>
-                <StudyList
-                  studies={filteredStudies}
-                  onSelectStudy={async (study) => {
-                    if (!activeGroupId) return;
-                    const full = await fetchStudy(activeGroupId, study.id);
-                    setSelectedStudy(full);
+              <ScrollContainer>
+                <StudyDetail
+                  study={selectedStudy as Study}
+                  onBack={handleBackToStudies}
+                  onShowNewEntry={() => setShowNewEntryModal(true)}
+                  entrySuccess={null}
+                  entryError={null}
+                  onEditEntry={(entry) => {
+                    setEditEntry(entry);
+                    setShowEditEntryModal(true);
                   }}
+                  onDeleteEntry={(entryId) => {
+                    setDeleteEntryId(entryId);
+                    setShowDeleteEntryModal(true);
+                  }}
+                  onShowManualTime={() => setShowManualTimeModal(true)}
+                  timerState={{
+                    running: timerRunning,
+                    start: timerStart,
+                    elapsed: timerElapsed,
+                  }}
+                  onStartTimer={startTimer}
+                  onPauseTimer={pauseTimer}
+                  onResumeTimer={resumeTimer}
+                  onFinishTimer={handleFinishTimer}
+                  sessions={(selectedStudy as Study).sessions || []}
+                  onDeleteSession={handleDeleteSession}
+                  onDeleteStudy={handleDeleteStudy}
                 />
+              </ScrollContainer>
+            ) : (
+              <div className="h-full flex flex-col">
+                <div className="max-w-4xl mx-auto w-full">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
+                    <h2 className="text-xl font-bold text-white">
+                      {groups.find((g) => g.id === activeGroupId)?.name} Studies
+                    </h2>
+                    <button
+                      className="px-3 py-1.5 bg-blue-700 text-white rounded shadow hover:bg-blue-800 transition"
+                      onClick={() => setShowNewStudy(true)}
+                    >
+                      + New Study
+                    </button>
+                  </div>
+                </div>
+                <ScrollContainer className="max-w-4xl mx-auto w-full">
+                  <StudyList
+                    studies={filteredStudies}
+                    onSelectStudy={async (study: Study) => {
+                      if (!activeGroupId) return;
+                      const full = await fetchStudy(activeGroupId, study.id);
+                      setSelectedStudy(full);
+                    }}
+                  />
+                </ScrollContainer>
               </div>
             )}
           </div>
@@ -254,7 +288,11 @@ const StudiesPage: React.FC = () => {
         }}
         onSave={async (title, externalUrl, description) => {
           if (selectedStudy && activeGroupId) {
-            await addStudyEntry(activeGroupId, selectedStudy.id, { title, externalUrl, description });
+            await addStudyEntry(activeGroupId, selectedStudy.id, {
+              title,
+              externalUrl,
+              description,
+            });
             const full = await fetchStudy(activeGroupId, selectedStudy.id);
             setSelectedStudy(full);
           }
@@ -273,7 +311,12 @@ const StudiesPage: React.FC = () => {
         }}
         onSave={async (title, externalUrl, description) => {
           if (selectedStudy && activeGroupId && editEntry) {
-            await editStudyEntry(activeGroupId, selectedStudy.id, editEntry.id, { title, externalUrl, description });
+            await editStudyEntry(
+              activeGroupId,
+              selectedStudy.id,
+              editEntry.id,
+              { title, externalUrl, description }
+            );
             const full = await fetchStudy(activeGroupId, selectedStudy.id);
             setSelectedStudy(full);
           }
@@ -290,7 +333,11 @@ const StudiesPage: React.FC = () => {
         }}
         onDelete={async () => {
           if (selectedStudy && activeGroupId && deleteEntryId) {
-            await deleteStudyEntry(activeGroupId, selectedStudy.id, deleteEntryId);
+            await deleteStudyEntry(
+              activeGroupId,
+              selectedStudy.id,
+              deleteEntryId
+            );
             const full = await fetchStudy(activeGroupId, selectedStudy.id);
             setSelectedStudy(full);
           }
@@ -302,17 +349,35 @@ const StudiesPage: React.FC = () => {
       <ManualTimeModal
         open={showManualTimeModal}
         onClose={() => setShowManualTimeModal(false)}
-        onSave={async (manualMinutes: string, manualComment: string, manualDate: string) => {
+        onSave={async (
+          manualMinutes: string,
+          manualComment: string,
+          manualDate: string
+        ) => {
           if (selectedStudy && activeGroupId) {
             const seconds = parseManualTime(manualMinutes);
             if (seconds !== null) {
-              await addStudySession(activeGroupId, selectedStudy.id, { start: manualDate, duration: seconds, manual: true, comment: manualComment });
+              await addStudySession(activeGroupId, selectedStudy.id, {
+                start: manualDate,
+                duration: seconds,
+                manual: true,
+                comment: manualComment,
+              });
               const full = await fetchStudy(activeGroupId, selectedStudy.id);
               setSelectedStudy(full);
             }
           }
           setShowManualTimeModal(false);
         }}
+        error={null}
+      />
+      <DeleteSessionModal
+        open={showDeleteSessionModal}
+        onClose={() => {
+          setShowDeleteSessionModal(false);
+          setDeleteSessionId(null);
+        }}
+        onDelete={confirmDeleteSession}
         error={null}
       />
     </div>

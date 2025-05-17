@@ -5,8 +5,8 @@ import EditRepertoirePage from "../../../pages/repertoires/EditRepertoirePage/Ed
 import TrainRepertoirePage from "../../../pages/repertoires/TrainRepertoirePage/TrainRepertoirePage";
 import { MainContainer } from "../../design/layouts/MainContainer";
 import { DashboardPage } from "../../../pages/DashboardPage/DashboardPage";
-import StudiesPage from "../../../pages/StudiesPage/StudiesPage";
 import PathPage from "../../../pages/PathPage/PathPage";
+import StudiesPage from "../../../pages/StudiesPage/StudiesPage";
 
 const Content = () => {
   return (
