@@ -18,6 +18,7 @@ import NewStudyModal from "./components/modals/NewStudyModal";
 import NewEntryModal from "./components/modals/NewEntryModal";
 import EditEntryModal from "./components/modals/EditEntryModal";
 import DeleteEntryModal from "./components/modals/DeleteEntryModal";
+import DeleteSessionModal from "./components/modals/DeleteSessionModal";
 import ManualTimeModal from "./components/modals/ManualTimeModal";
 import { Study, StudyEntry } from "./models";
 import StudyDetail from "./components/StudyDetail";
@@ -72,9 +73,11 @@ const StudiesPage: React.FC = () => {
   const [showNewEntryModal, setShowNewEntryModal] = useState(false);
   const [showEditEntryModal, setShowEditEntryModal] = useState(false);
   const [showDeleteEntryModal, setShowDeleteEntryModal] = useState(false);
+  const [showDeleteSessionModal, setShowDeleteSessionModal] = useState(false);
   const [showManualTimeModal, setShowManualTimeModal] = useState(false);
   const [editEntry, setEditEntry] = useState<StudyEntry | null>(null);
   const [deleteEntryId, setDeleteEntryId] = useState<string | null>(null);
+  const [deleteSessionId, setDeleteSessionId] = useState<string | null>(null);
 
   const [tagFilter, setTagFilter] = useState<string>("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -115,16 +118,25 @@ const StudiesPage: React.FC = () => {
   const handleSidebarDeleteGroup = (id: string) => {
     deleteGroup(id);
   };
-
   const handleDeleteSession = useCallback(
     async (sessionId: string) => {
-      if (selectedStudy && activeGroupId) {
-        await deleteStudySession(activeGroupId, selectedStudy.id, sessionId);
+      setDeleteSessionId(sessionId);
+      setShowDeleteSessionModal(true);
+    },
+    []
+  );
+
+  const confirmDeleteSession = useCallback(
+    async () => {
+      if (selectedStudy && activeGroupId && deleteSessionId) {
+        await deleteStudySession(activeGroupId, selectedStudy.id, deleteSessionId);
         const updated = await fetchStudy(activeGroupId, selectedStudy.id);
         setSelectedStudy(updated);
       }
+      setShowDeleteSessionModal(false);
+      setDeleteSessionId(null);
     },
-    [selectedStudy, activeGroupId]
+    [selectedStudy, activeGroupId, deleteSessionId]
   );
 
   const handleDeleteStudy = useCallback(async () => {
@@ -357,6 +369,15 @@ const StudiesPage: React.FC = () => {
           }
           setShowManualTimeModal(false);
         }}
+        error={null}
+      />
+      <DeleteSessionModal
+        open={showDeleteSessionModal}
+        onClose={() => {
+          setShowDeleteSessionModal(false);
+          setDeleteSessionId(null);
+        }}
+        onDelete={confirmDeleteSession}
         error={null}
       />
     </div>
