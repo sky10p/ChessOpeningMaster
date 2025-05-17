@@ -49,24 +49,23 @@ export function useDateRangeFilter<T>(
       setStartDateRaw(newEndDate);
     }
   };
-
   const setToday = () => {
-    setStartDateRaw(today);
-    setEndDateRaw(today);
+    setStartDate(today);
+    setEndDate(today);
   };
 
   const setThisWeek = () => {
     const weekStart = new Date(today);
     weekStart.setDate(today.getDate() - today.getDay());
     
-    setStartDateRaw(weekStart);
-    setEndDateRaw(today);
+    setStartDate(weekStart);
+    setEndDate(today);
   };
 
   const setThisMonth = () => {
     const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-    setStartDateRaw(monthStart);
-    setEndDateRaw(today);
+    setStartDate(monthStart);
+    setEndDate(today);
   };
 
   const filterItems = (itemsToFilter: T[], itemDateAccessor: (item: T) => string | Date) => {
