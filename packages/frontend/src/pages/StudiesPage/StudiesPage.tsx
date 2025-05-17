@@ -22,6 +22,7 @@ import ManualTimeModal from "./components/modals/ManualTimeModal";
 import { Study, StudyEntry } from "./models";
 import StudyDetail from "./components/StudyDetail";
 import StudyGroupMobile from "../../components/application/StudyGroupMobile";
+import ScrollContainer from "./components/containers/ScrollContainer";
 
 const StudiesPage: React.FC = () => {
   const {
@@ -129,7 +130,7 @@ const StudiesPage: React.FC = () => {
 
   return (
     <div className="w-full h-full bg-background text-textLight">
-      <div className="w-full flex flex-col md:flex-row md:items-start md:gap-4">
+      <div className="w-full h-full flex flex-col md:flex-row md:items-start md:gap-4">
         {!isMobile && (
           <StudyGroupSidebar
             groups={groups}
@@ -178,53 +179,59 @@ const StudiesPage: React.FC = () => {
             onTagSelect={handleTagSelect}
             onTagRemove={handleTagRemove}
           />
-          <div className="flex-1 overflow-y-auto p-2 sm:p-4 transition-all duration-300">
+          <div className="flex-1 overflow-hidden p-2 sm:p-4 transition-all duration-300">
             {loading ? (
               <div className="text-center p-4 text-blue-400">Loading studies...</div>
             ) : selectedStudy ? (
-              <StudyDetail
-                study={selectedStudy as Study}
-                onBack={handleBackToStudies}
-                onShowNewEntry={() => setShowNewEntryModal(true)}
-                entrySuccess={null}
-                entryError={null}
-                onEditEntry={(entry) => {
-                  setEditEntry(entry);
-                  setShowEditEntryModal(true);
-                }}
-                onDeleteEntry={(entryId) => {
-                  setDeleteEntryId(entryId);
-                  setShowDeleteEntryModal(true);
-                }}
-                onShowManualTime={() => setShowManualTimeModal(true)}
-                timerState={{ running: timerRunning, start: timerStart, elapsed: timerElapsed }}
-                onStartTimer={startTimer}
-                onPauseTimer={pauseTimer}
-                onResumeTimer={resumeTimer}
-                onFinishTimer={handleFinishTimer}
-                sessions={(selectedStudy as Study).sessions || []}
-                onDeleteSession={handleDeleteSession}
-                onDeleteStudy={handleDeleteStudy}
-              />
-            ) : (
-              <div className="max-w-4xl mx-auto">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
-                  <h2 className="text-xl font-bold text-white">{groups.find((g) => g.id === activeGroupId)?.name} Studies</h2>
-                  <button
-                    className="px-3 py-1.5 bg-blue-700 text-white rounded shadow hover:bg-blue-800 transition"
-                    onClick={() => setShowNewStudy(true)}
-                  >
-                    + New Study
-                  </button>
-                </div>
-                <StudyList
-                  studies={filteredStudies}
-                  onSelectStudy={async (study) => {
-                    if (!activeGroupId) return;
-                    const full = await fetchStudy(activeGroupId, study.id);
-                    setSelectedStudy(full);
+              <ScrollContainer>
+                <StudyDetail
+                  study={selectedStudy as Study}
+                  onBack={handleBackToStudies}
+                  onShowNewEntry={() => setShowNewEntryModal(true)}
+                  entrySuccess={null}
+                  entryError={null}
+                  onEditEntry={(entry) => {
+                    setEditEntry(entry);
+                    setShowEditEntryModal(true);
                   }}
+                  onDeleteEntry={(entryId) => {
+                    setDeleteEntryId(entryId);
+                    setShowDeleteEntryModal(true);
+                  }}
+                  onShowManualTime={() => setShowManualTimeModal(true)}
+                  timerState={{ running: timerRunning, start: timerStart, elapsed: timerElapsed }}
+                  onStartTimer={startTimer}
+                  onPauseTimer={pauseTimer}
+                  onResumeTimer={resumeTimer}
+                  onFinishTimer={handleFinishTimer}
+                  sessions={(selectedStudy as Study).sessions || []}
+                  onDeleteSession={handleDeleteSession}
+                  onDeleteStudy={handleDeleteStudy}
                 />
+              </ScrollContainer>
+            ) : (
+              <div className="h-full flex flex-col">
+                <div className="max-w-4xl mx-auto w-full">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
+                    <h2 className="text-xl font-bold text-white">{groups.find((g) => g.id === activeGroupId)?.name} Studies</h2>
+                    <button
+                      className="px-3 py-1.5 bg-blue-700 text-white rounded shadow hover:bg-blue-800 transition"
+                      onClick={() => setShowNewStudy(true)}
+                    >
+                      + New Study
+                    </button>
+                  </div>
+                </div>
+                <ScrollContainer className="max-w-4xl mx-auto w-full">
+                  <StudyList
+                    studies={filteredStudies}
+                    onSelectStudy={async (study: Study) => {
+                      if (!activeGroupId) return;
+                      const full = await fetchStudy(activeGroupId, study.id);
+                      setSelectedStudy(full);
+                    }}
+                  />
+                </ScrollContainer>
               </div>
             )}
           </div>
