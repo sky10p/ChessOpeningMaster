@@ -14,6 +14,17 @@ const NewStudyModal: React.FC<NewStudyModalProps> = ({ open, onClose, onSave, er
   const handleSave = () => {
     const tags = tagString.split(",").map(t => t.trim()).filter(Boolean);
     onSave(name, tags);
+    resetForm();
+  };
+  
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+  
+  const resetForm = () => {
+    setName("");
+    setTagString("");
   };
 
   if (!open) return null;
@@ -35,11 +46,10 @@ const NewStudyModal: React.FC<NewStudyModalProps> = ({ open, onClose, onSave, er
           onChange={(e) => setTagString(e.target.value)}
         />
         {error && <div className="text-red-400 mb-2">{error}</div>}
-        <div className="flex gap-2 justify-end">
-          <button className="px-3 py-1 bg-blue-700 text-white rounded" onClick={handleSave}>
+        <div className="flex gap-2 justify-end">          <button className="px-3 py-1 bg-blue-700 text-white rounded" onClick={handleSave}>
             Save
           </button>
-          <button className="px-3 py-1 bg-slate-700 text-white rounded" onClick={onClose}>
+          <button className="px-3 py-1 bg-slate-700 text-white rounded" onClick={handleClose}>
             Cancel
           </button>
         </div>

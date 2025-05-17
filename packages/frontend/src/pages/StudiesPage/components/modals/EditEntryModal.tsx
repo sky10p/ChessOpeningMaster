@@ -16,13 +16,19 @@ const EditEntryModal: React.FC<EditEntryModalProps> = ({ open, initialTitle, ini
   const [description, setDescription] = useState(initialDescription);
 
   useEffect(() => {
-    setTitle(initialTitle);
-    setExternalUrl(initialExternalUrl);
-    setDescription(initialDescription);
-  }, [initialTitle, initialExternalUrl, initialDescription]);
+    if (open) {
+      setTitle(initialTitle);
+      setExternalUrl(initialExternalUrl);
+      setDescription(initialDescription);
+    }
+  }, [initialTitle, initialExternalUrl, initialDescription, open]);
 
   const handleSave = () => {
     onSave(title, externalUrl, description);
+  };
+  
+  const handleClose = () => {
+    onClose();
   };
 
   if (!open) return null;
@@ -51,11 +57,10 @@ const EditEntryModal: React.FC<EditEntryModalProps> = ({ open, initialTitle, ini
           rows={3}
         />
         {error && <div className="text-red-400 mb-2">{error}</div>}
-        <div className="flex gap-2 justify-end">
-          <button className="px-3 py-1 bg-blue-700 text-white rounded" onClick={handleSave}>
+        <div className="flex gap-2 justify-end">          <button className="px-3 py-1 bg-blue-700 text-white rounded" onClick={handleSave}>
             Save
           </button>
-          <button className="px-3 py-1 bg-slate-700 text-white rounded" onClick={onClose}>
+          <button className="px-3 py-1 bg-slate-700 text-white rounded" onClick={handleClose}>
             Cancel
           </button>
         </div>

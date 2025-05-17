@@ -80,7 +80,8 @@ const StudiesPage: React.FC = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   const filteredStudies = useMemo<Study[]>(() => {
-    let studies = (groups.find((g) => g.id === activeGroupId)?.studies || []) as Study[];
+    let studies = (groups.find((g) => g.id === activeGroupId)?.studies ||
+      []) as Study[];
     if (selectedTags.length > 0) {
       studies = studies.filter((s) =>
         selectedTags.every((tag) => s.tags.includes(tag))
@@ -89,14 +90,17 @@ const StudiesPage: React.FC = () => {
     return studies;
   }, [groups, activeGroupId, selectedTags]);
 
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
-  const handleTagInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setTagFilter(e.target.value);
-  }, []);
+  const handleTagInput = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setTagFilter(e.target.value);
+    },
+    []
+  );
 
   const handleTagSelect = useCallback((tag: string) => {
-    setSelectedTags((prev) => prev.includes(tag) ? prev : [...prev, tag]);
+    setSelectedTags((prev) => (prev.includes(tag) ? prev : [...prev, tag]));
     setTagFilter("");
   }, []);
 
@@ -107,19 +111,22 @@ const StudiesPage: React.FC = () => {
   const handleSidebarEditGroup = (id: string, name: string) => {
     editGroup(id, name);
   };
-  
+
   const handleSidebarDeleteGroup = (id: string) => {
     deleteGroup(id);
   };
 
-  const handleDeleteSession = useCallback(async (sessionId: string) => {
-    if (selectedStudy && activeGroupId) {
-      await deleteStudySession(activeGroupId, selectedStudy.id, sessionId);
-      const updated = await fetchStudy(activeGroupId, selectedStudy.id);
-      setSelectedStudy(updated);
-    }
-  }, [selectedStudy, activeGroupId]);
-  
+  const handleDeleteSession = useCallback(
+    async (sessionId: string) => {
+      if (selectedStudy && activeGroupId) {
+        await deleteStudySession(activeGroupId, selectedStudy.id, sessionId);
+        const updated = await fetchStudy(activeGroupId, selectedStudy.id);
+        setSelectedStudy(updated);
+      }
+    },
+    [selectedStudy, activeGroupId]
+  );
+
   const handleDeleteStudy = useCallback(async () => {
     if (selectedStudy && activeGroupId) {
       await deleteStudy(activeGroupId, selectedStudy.id);
@@ -181,7 +188,9 @@ const StudiesPage: React.FC = () => {
           />
           <div className="flex-1 overflow-hidden p-2 sm:p-4 transition-all duration-300">
             {loading ? (
-              <div className="text-center p-4 text-blue-400">Loading studies...</div>
+              <div className="text-center p-4 text-blue-400">
+                Loading studies...
+              </div>
             ) : selectedStudy ? (
               <ScrollContainer>
                 <StudyDetail
@@ -199,7 +208,11 @@ const StudiesPage: React.FC = () => {
                     setShowDeleteEntryModal(true);
                   }}
                   onShowManualTime={() => setShowManualTimeModal(true)}
-                  timerState={{ running: timerRunning, start: timerStart, elapsed: timerElapsed }}
+                  timerState={{
+                    running: timerRunning,
+                    start: timerStart,
+                    elapsed: timerElapsed,
+                  }}
                   onStartTimer={startTimer}
                   onPauseTimer={pauseTimer}
                   onResumeTimer={resumeTimer}
@@ -213,7 +226,9 @@ const StudiesPage: React.FC = () => {
               <div className="h-full flex flex-col">
                 <div className="max-w-4xl mx-auto w-full">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
-                    <h2 className="text-xl font-bold text-white">{groups.find((g) => g.id === activeGroupId)?.name} Studies</h2>
+                    <h2 className="text-xl font-bold text-white">
+                      {groups.find((g) => g.id === activeGroupId)?.name} Studies
+                    </h2>
                     <button
                       className="px-3 py-1.5 bg-blue-700 text-white rounded shadow hover:bg-blue-800 transition"
                       onClick={() => setShowNewStudy(true)}
@@ -261,7 +276,11 @@ const StudiesPage: React.FC = () => {
         }}
         onSave={async (title, externalUrl, description) => {
           if (selectedStudy && activeGroupId) {
-            await addStudyEntry(activeGroupId, selectedStudy.id, { title, externalUrl, description });
+            await addStudyEntry(activeGroupId, selectedStudy.id, {
+              title,
+              externalUrl,
+              description,
+            });
             const full = await fetchStudy(activeGroupId, selectedStudy.id);
             setSelectedStudy(full);
           }
@@ -280,7 +299,12 @@ const StudiesPage: React.FC = () => {
         }}
         onSave={async (title, externalUrl, description) => {
           if (selectedStudy && activeGroupId && editEntry) {
-            await editStudyEntry(activeGroupId, selectedStudy.id, editEntry.id, { title, externalUrl, description });
+            await editStudyEntry(
+              activeGroupId,
+              selectedStudy.id,
+              editEntry.id,
+              { title, externalUrl, description }
+            );
             const full = await fetchStudy(activeGroupId, selectedStudy.id);
             setSelectedStudy(full);
           }
@@ -297,7 +321,11 @@ const StudiesPage: React.FC = () => {
         }}
         onDelete={async () => {
           if (selectedStudy && activeGroupId && deleteEntryId) {
-            await deleteStudyEntry(activeGroupId, selectedStudy.id, deleteEntryId);
+            await deleteStudyEntry(
+              activeGroupId,
+              selectedStudy.id,
+              deleteEntryId
+            );
             const full = await fetchStudy(activeGroupId, selectedStudy.id);
             setSelectedStudy(full);
           }
@@ -309,11 +337,20 @@ const StudiesPage: React.FC = () => {
       <ManualTimeModal
         open={showManualTimeModal}
         onClose={() => setShowManualTimeModal(false)}
-        onSave={async (manualMinutes: string, manualComment: string, manualDate: string) => {
+        onSave={async (
+          manualMinutes: string,
+          manualComment: string,
+          manualDate: string
+        ) => {
           if (selectedStudy && activeGroupId) {
             const seconds = parseManualTime(manualMinutes);
             if (seconds !== null) {
-              await addStudySession(activeGroupId, selectedStudy.id, { start: manualDate, duration: seconds, manual: true, comment: manualComment });
+              await addStudySession(activeGroupId, selectedStudy.id, {
+                start: manualDate,
+                duration: seconds,
+                manual: true,
+                comment: manualComment,
+              });
               const full = await fetchStudy(activeGroupId, selectedStudy.id);
               setSelectedStudy(full);
             }

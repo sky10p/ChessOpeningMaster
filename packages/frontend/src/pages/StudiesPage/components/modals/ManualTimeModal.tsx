@@ -14,6 +14,18 @@ const ManualTimeModal: React.FC<ManualTimeModalProps> = ({ open, onClose, onSave
 
   const handleSave = () => {
     onSave(manualMinutes, manualComment, manualDate);
+    resetForm();
+  };
+  
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+  
+  const resetForm = () => {
+    setManualMinutes("");
+    setManualComment("");
+    setManualDate(new Date().toISOString().substr(0, 10));
   };
 
   if (!open) return null;
@@ -46,11 +58,10 @@ const ManualTimeModal: React.FC<ManualTimeModalProps> = ({ open, onClose, onSave
           />
         </div>
         {error && <div className="text-red-400 mb-2">{error}</div>}
-        <div className="flex gap-2 justify-end">
-          <button className="px-3 py-1 bg-blue-700 text-white rounded" onClick={handleSave}>
+        <div className="flex gap-2 justify-end">          <button className="px-3 py-1 bg-blue-700 text-white rounded" onClick={handleSave}>
             Save
           </button>
-          <button className="px-3 py-1 bg-slate-700 text-white rounded" onClick={onClose}>
+          <button className="px-3 py-1 bg-slate-700 text-white rounded" onClick={handleClose}>
             Cancel
           </button>
         </div>
