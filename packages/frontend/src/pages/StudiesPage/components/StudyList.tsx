@@ -24,4 +24,4 @@ const StudyList = ({ studies, onSelectStudy }: StudyListProps): React.ReactEleme
   );
 };
 
-export default StudyList;
+export default React.memo(StudyList);
