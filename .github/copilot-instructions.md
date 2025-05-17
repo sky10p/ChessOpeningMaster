@@ -1,6 +1,6 @@
 # Copilot Instructions
 
-When generating code, avoid adding comments unless explicitly requested.
+When generating code, don't use comments, the code should be self-explanatory.
 
 Always use yarn instead of npm for package installations.
 
