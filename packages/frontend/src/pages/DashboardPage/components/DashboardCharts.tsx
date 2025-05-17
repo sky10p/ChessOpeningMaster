@@ -20,16 +20,18 @@ export const getRelevantVariants = (
   filter: FilterType
 ) => {
   if (!rep.moveNodes) return [];
-  
-  const variants = MoveVariantNode.initMoveVariantNode(rep.moveNodes).getVariants();
-  
+
+  const variants = MoveVariantNode.initMoveVariantNode(
+    rep.moveNodes
+  ).getVariants();
+
   if (filter === "unreviewed") {
     return variants.filter((variant) => {
       const info = findVariantInfo(variant, rep);
       return !info || !info.lastDate;
     });
   }
-  
+
   return variants;
 };
 
@@ -49,25 +51,25 @@ export const generateOpeningStats = (
   topCount = 5
 ) => {
   const statsMap: Record<string, number> = {};
-  
+
   filteredRepertoires.forEach((rep) => {
     const relevantVariants = getRelevantVariants(rep, filter);
-    
+
     relevantVariants.forEach((variant) => {
       const info = findVariantInfo(variant, rep);
-      
       if (statType === "errors") {
-        if (info && info.errors && info.errors > 0) {
-          statsMap[variant.name] = (statsMap[variant.name] || 0) + info.errors;
+        if (info && (info.errors ?? 0) > 0) {
+          statsMap[variant.name] =
+            (statsMap[variant.name] || 0) + (info.errors ?? 0);
         }
       } else if (statType === "mastered") {
-        if (info && info.lastDate && (!info.errors || info.errors === 0)) {
+        if (info && info.lastDate && (info.errors ?? 0) === 0) {
           statsMap[variant.name] = (statsMap[variant.name] || 0) + 1;
         }
       }
     });
   });
-  
+
   return Object.entries(statsMap)
     .map(([opening, count]) => ({ opening, count }))
     .sort((a, b) => b.count - a.count)
@@ -149,7 +151,10 @@ export const VerticalBarChart: React.FC<VerticalBarChartProps> = ({
               }}
             />
             <Tooltip
-              formatter={(value: number) => [`${value} ${tooltipValueLabel}`, barName]}
+              formatter={(value: number) => [
+                `${value} ${tooltipValueLabel}`,
+                barName,
+              ]}
               labelFormatter={(label: string) => `Opening: ${label}`}
             />
             <Legend />
