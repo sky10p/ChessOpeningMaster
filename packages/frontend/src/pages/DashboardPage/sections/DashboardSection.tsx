@@ -14,6 +14,13 @@ import {
   CartesianGrid,
 } from "recharts";
 import { MoveVariantNode } from "../../../models/VariantNode";
+import {
+  FilterType,
+  VerticalBarChart,
+  findVariantInfo,
+  generateOpeningStats,
+  getRelevantVariants,
+} from "../components/DashboardCharts";
 
 interface DashboardSectionProps {
   repertoires: IRepertoireDashboard[];
@@ -22,14 +29,11 @@ interface DashboardSectionProps {
 export const DashboardSection: React.FC<DashboardSectionProps> = ({
   repertoires,
 }) => {
-  // Responsive values for Errors by Opening chart
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const yAxisWidth = isMobile ? 90 : 180;
   const barChartMargin = { top: 20, right: 30, left: isMobile ? 60 : 120, bottom: 20 };
 
-  const [filter, setFilter] = useState<
-    "all" | "white" | "black" | "errors" | "unreviewed"
-  >("all");
+  const [filter, setFilter] = useState<FilterType>("all");
 
   const invalidOrientationReps = repertoires.filter(
     (r) => r.orientation !== "white" && r.orientation !== "black"
@@ -47,75 +51,22 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
   } else if (filter === "unreviewed") {
     filteredRepertoires = repertoires.filter((r) => {
       if (!r.moveNodes) return false;
-      const variants = MoveVariantNode.initMoveVariantNode(
-        r.moveNodes
-      ).getVariants();
-      return variants.some((variant) => {
-        const info = (r.variantsInfo || []).find(
-          (i) => i.variantName === variant.fullName
-        );
-        return !info || !info.lastDate;
-      });
+      const variants = getRelevantVariants(r, filter);
+      return variants.length > 0;
     });
   }
 
   const totalRepertoires = filteredRepertoires.length;
 
-  const allVariants = filteredRepertoires.flatMap((rep) => {
-    if (!rep.moveNodes) return [];
-    const variants = MoveVariantNode.initMoveVariantNode(
-      rep.moveNodes
-    ).getVariants();
-    if (filter === "unreviewed") {
-      return variants.filter((variant) => {
-        const info = (rep.variantsInfo || []).find(
-          (i) => i.variantName === variant.fullName
-        );
-        return !info || !info.lastDate;
-      });
-    }
-    return variants;
-  });
+  const allVariants = filteredRepertoires.flatMap((rep) => 
+    getRelevantVariants(rep, filter)
+  );
   const totalVariants = allVariants.length;
 
-  const errorsByOpeningMap: Record<string, number> = {};
-  filteredRepertoires.forEach((rep) => {
-    if (!rep.moveNodes) return;
-    const variants = MoveVariantNode.initMoveVariantNode(
-      rep.moveNodes
-    ).getVariants();
-    const relevantVariants =
-      filter === "unreviewed"
-        ? variants.filter((variant) => {
-            const info = (rep.variantsInfo || []).find(
-              (i) => i.variantName === variant.fullName
-            );
-            return !info || !info.lastDate;
-          })
-        : variants;
-    relevantVariants.forEach((variant) => {
-      const info = (rep.variantsInfo || []).find(
-        (i) => i.variantName === variant.fullName
-      );
-      if (info && info.errors && info.errors > 0) {
-        errorsByOpeningMap[variant.name] =
-          (errorsByOpeningMap[variant.name] || 0) + info.errors;
-      }
-    });
-  });
-  const errorsByOpening = Object.entries(errorsByOpeningMap)
-    .map(([opening, errors]) => ({ opening, errors }))
-    .sort((a, b) => b.errors - a.errors);
-  const errorsByOpeningTop5 = errorsByOpening.slice(0, 5);
 
-  const openingCount: Record<string, number> = {};
-  allVariants.forEach((variant) => {
-    openingCount[variant.name] = (openingCount[variant.name] || 0) + 1;
-  });
-  const openingPopularity = Object.entries(openingCount)
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 5);
+  const errorsByOpeningTop5 = generateOpeningStats(filteredRepertoires, filter, "errors", 5);
+  const masteredOpenings = generateOpeningStats(filteredRepertoires, filter, "mastered", 5);
+
 
   const mostRecent = filteredRepertoires.reduce((latest, rep) => {
     const lastDate =
@@ -129,9 +80,11 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
     return latest;
   }, null as null | { name: string; date: Date });
 
+
   let neverReviewed = 0;
   let reviewedWithErrors = 0;
   let reviewedOK = 0;
+  
   allVariants.forEach((variant) => {
     const rep = filteredRepertoires.find(
       (r) =>
@@ -140,11 +93,9 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
           .getVariants()
           .some((v) => v.fullName === variant.fullName)
     );
-    let info: { errors?: number; lastDate?: string | Date } | undefined =
-      undefined;
-    if (rep && rep.variantsInfo) {
-      info = rep.variantsInfo.find((i) => i.variantName === variant.fullName);
-    }
+    
+    const info = rep ? findVariantInfo(variant, rep) : undefined;
+    
     if (!info || !info.lastDate) {
       neverReviewed++;
     } else if (info.errors && info.errors > 0) {
@@ -153,42 +104,37 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
       reviewedOK++;
     }
   });
+  
   const reviewData = [
     { name: "Never Reviewed", value: neverReviewed },
     { name: "Reviewed With Errors", value: reviewedWithErrors },
     { name: "Reviewed OK", value: reviewedOK },
   ];
 
+
   const errorsDistribution: Record<number, number> = {};
   const reviewActivity: Record<string, number> = {};
+  
   filteredRepertoires.forEach((rep) => {
-    const variants = rep.moveNodes
-      ? MoveVariantNode.initMoveVariantNode(rep.moveNodes).getVariants() || []
-      : [];
-    const relevantVariants =
-      filter === "unreviewed"
-        ? variants.filter((variant) => {
-            const info = (rep.variantsInfo || []).find(
-              (i) => i.variantName === variant.fullName
-            );
-            return !info || !info.lastDate;
-          })
-        : variants;
+    const relevantVariants = getRelevantVariants(rep, filter);
+    
     relevantVariants.forEach((variant) => {
-      const info = (rep.variantsInfo || []).find(
-        (i) => i.variantName === variant.fullName
-      );
+      const info = findVariantInfo(variant, rep);
       const err = info?.errors || 0;
+      
       errorsDistribution[err] = (errorsDistribution[err] || 0) + 1;
+      
       if (info && info.lastDate) {
         const date = new Date(info.lastDate).toISOString().slice(0, 10);
         reviewActivity[date] = (reviewActivity[date] || 0) + 1;
       }
     });
   });
+  
   const reviewActivityData = Object.entries(reviewActivity)
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([date, count]) => ({ date, count }));
+
 
   const today = new Date();
   const last10Days = Array.from({ length: 10 }, (_, i) => {
@@ -196,10 +142,12 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
     d.setDate(today.getDate() - (9 - i));
     return d.toISOString().slice(0, 10);
   });
+  
   const reviewActivityDataLast10 = last10Days.map((date) => {
     const entry = reviewActivityData.find((d) => d.date === date);
     return { date, count: entry ? entry.count : 0 };
   });
+  
   const hasReviewActivity = reviewActivityDataLast10.some((d) => d.count > 0);
 
   const COLORS = ["#f59e42", "#ef4444", "#22c55e"];
@@ -334,71 +282,20 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
               </ResponsiveContainer>
             )}
           </div>
-          <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center overflow-x-auto md:overflow-x-visible">
-            <h3 className="text-lg font-semibold text-gray-200 mb-2">
-              Errors by Opening
-            </h3>
-            {errorsByOpeningTop5.length === 0 ? (
-              <div className="text-gray-400 text-center py-8">No data</div>
-            ) : (
-              <ResponsiveContainer width="100%" height={260}>
-                <BarChart
-                  data={errorsByOpeningTop5}
-                  layout="vertical"
-                  margin={barChartMargin}
-                  barCategoryGap={24}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    type="number"
-                    allowDecimals={false}
-                    label={{
-                      value: "Errors",
-                      position: "insideBottomRight",
-                      offset: -5,
-                      fill: "#cbd5e1",
-                    }}
-                  />
-                  <YAxis
-                    dataKey="opening"
-                    type="category"
-                    width={yAxisWidth}
-                    tick={({ x, y, payload }) => {
-                      const name = payload.value;
-                      const display =
-                        name.length > 28 ? name.slice(0, 25) + "…" : name;
-                      return (
-                        <g transform={`translate(${x},${y})`}>
-                          <text
-                            x={0}
-                            y={0}
-                            dy={4}
-                            textAnchor="end"
-                            fill="#cbd5e1"
-                            fontSize={isMobile ? 10 : 13}
-                          >
-                            {display}
-                            {name.length > 28 && <title>{name}</title>}
-                          </text>
-                        </g>
-                      );
-                    }}
-                  />
-                  <Tooltip
-                    formatter={(value: number) => [`${value} errors`, "Errors"]}
-                    labelFormatter={(label: string) => `Opening: ${label}`}
-                  />
-                  <Legend />
-                  <Bar
-                    dataKey="errors"
-                    fill="#ef4444"
-                    name="Errors"
-                    radius={[6, 6, 6, 6]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </div>
+          
+          <VerticalBarChart 
+            data={errorsByOpeningTop5}
+            title="Errors by Opening"
+            label="Errors"
+            barName="Errors"
+            barColor="#ef4444"
+            tooltipValueLabel="errors"
+            emptyMessage="No errors found"
+            isMobile={isMobile}
+            yAxisWidth={yAxisWidth}
+            barChartMargin={barChartMargin}
+          />
+          
           <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center">
             <h3 className="text-lg font-semibold text-gray-200 mb-2">
               Review Activity Over Time (7 days)
@@ -423,59 +320,19 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
               </ResponsiveContainer>
             )}
           </div>
-          <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center">
-            <h3 className="text-lg font-semibold text-gray-200 mb-2">
-              {openingPopularity.length === 5
-                ? "Top 5 Openings Popularity"
-                : "Top 10 Openings Popularity"}
-            </h3>
-            {openingPopularity.length === 0 ? (
-              <div className="text-gray-400 text-center py-8">No data</div>
-            ) : (
-              <ResponsiveContainer width="100%" height={220}>
-                <BarChart
-                  data={openingPopularity}
-                  margin={{ top: 40, right: 30, left: 0, bottom: 0 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="name"
-                    interval={0}
-                    height={70}
-                    tick={({ x, y, payload }) => {
-                      const name = payload.value;
-                      const display =
-                        name.length > 18 ? name.slice(0, 15) + "…" : name;
-                      return (
-                        <g transform={`translate(${x},${y})`}>
-                          <text
-                            x={0}
-                            y={0}
-                            dy={16}
-                            textAnchor="end"
-                            fill="#cbd5e1"
-                            fontSize={12}
-                            transform="rotate(-30)"
-                          >
-                            {display}
-                            {name.length > 18 && <title>{name}</title>}
-                          </text>
-                        </g>
-                      );
-                    }}
-                  />
-                  <YAxis allowDecimals={false} />
-                  <Tooltip />
-                  <Legend
-                    verticalAlign="top"
-                    height={36}
-                    wrapperStyle={{ top: 0, left: 0, right: 0 }}
-                  />
-                  <Bar dataKey="count" fill="#f59e42" name="Repertoires" />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </div>
+          
+          <VerticalBarChart 
+            data={masteredOpenings}
+            title="Top 5 Mastered Openings"
+            label="Mastered Lines"
+            barName="Mastered Lines"
+            barColor="#22c55e"
+            tooltipValueLabel="lines"
+            emptyMessage="No mastered openings found"
+            isMobile={isMobile}
+            yAxisWidth={yAxisWidth}
+            barChartMargin={barChartMargin}
+          />
         </div>
       </div>
     </section>
