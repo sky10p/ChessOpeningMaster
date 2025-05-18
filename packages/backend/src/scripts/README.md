@@ -23,6 +23,7 @@ Where `strategy` can be:
 - `keep_longest` (default): Keep the longest comment in case of conflicts
 - `keep_newest`: Keep the most recently updated comment
 - `merge`: Merge all conflicting comments with newlines between them
+- `interactive`: Prompt for each conflict to manually decide how to resolve it
 
 To run the migration with interactive conflict resolution:
 
