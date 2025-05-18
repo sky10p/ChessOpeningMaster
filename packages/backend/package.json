@@ -8,7 +8,10 @@
     "start:dev": "cross-env NODE_ENV=development ts-node-dev -r dotenv/config --respawn --ignore-watch node_modules src/app.ts",
     "start:prod": "cross-env NODE_ENV=production node dist/app.js",
     "lint": "eslint './src/**/*.{ts}'",
-    "test": "jest"
+    "test": "jest",
+    "test:position-comment": "jest src/services/test/positionCommentService.spec.ts",
+    "migrate:comments:interactive": "ts-node -r dotenv/config src/scripts/migrateRepertoireComments.ts interactive",
+    "create:indexes": "ts-node -r dotenv/config src/scripts/createIndexes.ts"
   },
   "dependencies": {
     "@chess-opening-master/common": "^0.0.0",
@@ -20,6 +23,7 @@
   },
   "devDependencies": {
     "@types/adm-zip": "^0.5.7",
+    "mongodb-memory-server": "^10.1.4",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.0.4"
   }
