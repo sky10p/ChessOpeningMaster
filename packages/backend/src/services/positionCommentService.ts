@@ -225,3 +225,22 @@ export const getPositionComment = async (fen: string): Promise<string | null> =>
   
   return position ? position.comment : null;
 };
+
+export const updatePositionComment = async (fen: string, comment: string): Promise<void> => {
+  const db = getDB();
+  const positionsCollection = db.collection("positions");
+  
+  await positionsCollection.updateOne(
+    { fen },
+    {
+      $set: {
+        comment,
+        updatedAt: new Date(),
+      },
+      $setOnInsert: {
+        createdAt: new Date(),
+      },
+    },
+    { upsert: true }
+  );
+};

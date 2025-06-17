@@ -58,7 +58,9 @@ const VariantTree: React.FC<VariantTreeProps> = ({
   const [showSelectVariantDialog, setShowSelectVariantDialog] = useState(false);
   useEffect(() => {
     const pathVariant = variants.find(
-      (variant) => variant.name === variantNameParam || variant.fullName === variantNameParam
+      (variant) =>
+        variant.name === variantNameParam ||
+        variant.fullName === variantNameParam
     );
     const defaultVariant = pathVariant ?? variants[0];
 

@@ -8,6 +8,10 @@ import { toPGN } from "../utils/chess/pgn/pgn.utils";
 import { useDialogContext } from "./DialogContext";
 import { useHeaderDispatch } from "./HeaderContext";
 import { BoardOrientation, IMoveNode } from "@chess-opening-master/common";
+import {
+  getPositionComment,
+  updatePositionComment,
+} from "../repository/positions/positions";
 
 interface RepertoireContextProps {
   chess: Chess;
@@ -29,7 +33,7 @@ interface RepertoireContextProps {
   variants: Variant[];
   currentMoveNode: MoveVariantNode;
   comment: string;
-  updateComment: (comment: string) => void;
+  updateComment: (comment: string) => Promise<void>;
   saveRepertory: () => void;
   getPgn: () => string;
   updateRepertoire: () => void;
@@ -123,10 +127,24 @@ export const RepertoireContextProvider: React.FC<
     setCurrentMove(moveHistory);
     updateVariants();
   }, [moveHistory]);
-
   useEffect(() => {
     setComment(currentMove.comment ?? "");
   }, [currentMove]);
+
+  useEffect(() => {
+    const loadComment = async () => {
+      try {
+        const fen = chess.fen();
+        const positionComment = await getPositionComment(fen);
+        setComment(positionComment || "");
+      } catch (error) {
+        console.error("Error loading position comment:", error);
+        setComment("");
+      }
+    };
+
+    loadComment();
+  }, [chess, currentMove]);
 
   const updateVariants = () => {
     setVariants(moveHistory.getVariants());
@@ -141,7 +159,6 @@ export const RepertoireContextProvider: React.FC<
   const rotateBoard = () => {
     setOrientation((prev) => (prev === "white" ? "black" : "white"));
   };
-
   const next = () => {
     if (currentMove.children.length === 0) return;
     if (currentMove.children.length === 1) {
@@ -169,7 +186,6 @@ export const RepertoireContextProvider: React.FC<
       });
     }
   };
-
   const prev = () => {
     if (!currentMove.parent) return;
     setCurrentMove(currentMove.parent);
@@ -191,7 +207,6 @@ export const RepertoireContextProvider: React.FC<
   const hasPrev = () => {
     return !!currentMove.parent;
   };
-
   const goToMove = (moveNode: MoveVariantNode) => {
     const newChess = new Chess();
     const moves = [];
@@ -207,10 +222,9 @@ export const RepertoireContextProvider: React.FC<
     setChess(newChess);
     setCurrentMove(moveNode);
   };
-
-  const changeNameMove = (moveNode: MoveVariantNode, newName: string) => {
+  const changeNameMove = async (moveNode: MoveVariantNode, newName: string) => {
     moveNode.variantName = newName == "" ? undefined : newName;
-    goToMove(moveNode);
+    await goToMove(moveNode);
     updateVariants();
     setHasChanges(true);
   };
@@ -226,11 +240,16 @@ export const RepertoireContextProvider: React.FC<
     updateVariants();
     setHasChanges(true);
   };
-
-  const updateComment = (comment: string) => {
-    setComment(comment);
-    currentMove.comment = comment;
-    setHasChanges(true);
+  const updateComment = async (comment: string) => {
+    try {
+      const fen = chess.fen();
+      setComment(comment);
+      await updatePositionComment(fen, comment);
+      setHasChanges(true);
+    } catch (error) {
+      showAlert("Error updating comment.", "error");
+      console.error("Error updating position comment:", error);
+    }
   };
 
   const getMoveHistoryFromCurrentMove = () => {
@@ -239,7 +258,7 @@ export const RepertoireContextProvider: React.FC<
       moveNode = moveNode.parent;
     }
     return moveNode;
-  }
+  };
 
   const saveRepertory = React.useCallback(async () => {
     try {
