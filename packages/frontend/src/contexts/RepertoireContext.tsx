@@ -127,9 +127,6 @@ export const RepertoireContextProvider: React.FC<
     setCurrentMove(moveHistory);
     updateVariants();
   }, [moveHistory]);
-  useEffect(() => {
-    setComment(currentMove.comment ?? "");
-  }, [currentMove]);
 
   useEffect(() => {
     const loadComment = async () => {
@@ -144,7 +141,7 @@ export const RepertoireContextProvider: React.FC<
     };
 
     loadComment();
-  }, [chess, currentMove]);
+  }, [currentMove]);
 
   const updateVariants = () => {
     setVariants(moveHistory.getVariants());
@@ -222,9 +219,9 @@ export const RepertoireContextProvider: React.FC<
     setChess(newChess);
     setCurrentMove(moveNode);
   };
-  const changeNameMove = async (moveNode: MoveVariantNode, newName: string) => {
+  const changeNameMove = (moveNode: MoveVariantNode, newName: string) => {
     moveNode.variantName = newName == "" ? undefined : newName;
-    await goToMove(moveNode);
+    goToMove(moveNode);
     updateVariants();
     setHasChanges(true);
   };
