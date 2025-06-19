@@ -7,15 +7,12 @@ import { getCommentsByFens } from "../../../repository/positions/positions";
 
 const collectFens = (node: MoveVariantNode, chess: Chess, fens: Set<string>) => {
   if (node.children.length === 0) return;
-  const firstChildNode = node.children[0];
-  chess.move(firstChildNode.getMove().san);
-  fens.add(chess.fen());
-  node.children.slice(1).forEach(child => {
-    const chessCopy = new Chess();
-    chessCopy.load(chess.fen());
-    collectFens(child, chessCopy, fens);
-  });
-  collectFens(firstChildNode, chess, fens);
+  for (const child of node.children) {
+    chess.move(child.getMove().san);
+    fens.add(chess.fen());
+    collectFens(child, chess, fens);
+    chess.undo();
+  }
 };
 
 export const toPGN = async (
@@ -24,12 +21,14 @@ export const toPGN = async (
   orientation: BoardOrientation,
   tree: MoveVariantNode
 ): Promise<string> => {
+  const whiteTag = orientation === "white" ? nameRepertoire : "?";
+  const blackTag = orientation === "black" ? nameRepertoire : "?";
   const header = `[Event "${nameRepertoire}"]
 [Site "https://chessrepertoire.com"]
 [Date "${date.toISOString().split("T")[0].replace(/-/g, ".")}"]
 [Round "?"]
-[White "${orientation === "white" ? nameRepertoire : "?"}"]
-[Black "${orientation === "black" ? nameRepertoire : "?"}"]
+[White "${whiteTag}"]
+[Black "${blackTag}"]
 [Result "*"]
 [Variant "Standard"]
 [Opening "${nameRepertoire}"]
@@ -93,12 +92,14 @@ export const variantToPgn = async (
   orientation: BoardOrientation,
   date: Date
 ): Promise<string> => {
+  const whiteTag = orientation === "white" ? variant.fullName : "?";
+  const blackTag = orientation === "black" ? variant.fullName : "?";
   const header = `[Event "${variant.fullName}"]
 [Site "https://chessrepertoire.com"]
 [Date "${date.toISOString().split("T")[0].replace(/-/g, ".")}"]
 [Round "?"]
-[White "${orientation === "white" ? variant.fullName : "?"}"]
-[Black "${orientation === "black" ? variant.fullName : "?"}"]
+[White "${whiteTag}"]
+[Black "${blackTag}"]
 [Result "*"]
 [Variant "Standard"]
 [Opening "${variant.fullName}"]

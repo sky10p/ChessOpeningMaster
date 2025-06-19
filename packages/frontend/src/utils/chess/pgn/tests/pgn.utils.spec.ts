@@ -2,13 +2,11 @@ import { IRepertoire } from "@chess-opening-master/common";
 import { MoveVariantNode } from "../../../../models/VariantNode"
 import { toPGN } from "../pgn.utils";
 import { testRepertoireWithCommentsMock } from "./mocks/repertoire-with-comments.mock";
-import { repertoireWithCommentsPgn } from "./mocks/repertoire-with-comments.pgn";
 import { testRepertoireWithSubvariantsMock } from "./mocks/repertoire-with-subvariants.mock";
 import { repertoireWithSubvariantsPgn } from "./mocks/repertoire-with-subvariants.pgn";
 import { testRepertoireMock } from "./mocks/repertoire-with-variants.mock";
 import { repertoirePgn } from "./mocks/repertoire-with-variants.pgn";
 
-// Mock getCommentsByFens
 jest.mock("../../../../repository/positions/positions");
 import { getCommentsByFens } from "../../../../repository/positions/positions";
 const mockGetCommentsByFens = getCommentsByFens as jest.MockedFunction<typeof getCommentsByFens>;
