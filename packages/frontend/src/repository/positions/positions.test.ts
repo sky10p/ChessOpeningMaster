@@ -1,4 +1,4 @@
-import { getPositionComment, updatePositionComment } from "./positions";
+import { getPositionComment, updatePositionComment, getCommentsByFens } from "./positions";
 import { API_URL } from "../constants";
 
 global.fetch = jest.fn();
@@ -14,6 +14,12 @@ const createMockResponse = (options: {
   status: options.status,
   json: options.json,
 });
+
+const createExpectedUrl = (fens: string[]): string => {
+  const queryParams = new URLSearchParams();
+  fens.forEach(fen => queryParams.append('fens', fen));
+  return `${API_URL}/positions/comments?${queryParams.toString()}`;
+};
 
 describe("positions repository", () => {
   beforeEach(() => {
@@ -316,6 +322,220 @@ describe("positions repository", () => {
           },
         })
       );
+    });
+  });
+  describe("getCommentsByFens", () => {    it("should fetch comments for multiple FENs", async () => {
+      const fens = [
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1",
+      ];
+      const mockComments = { 
+        [fens[0]]: "Comment 1", 
+        [fens[1]]: "Comment 2" 
+      };
+      const mockResponse = createMockResponse({
+        ok: true,
+        status: 200,
+        json: jest.fn().mockResolvedValue(mockComments),
+      });
+      mockFetch.mockResolvedValue(mockResponse as Response);      const result = await getCommentsByFens(fens);
+
+      const expectedUrl = createExpectedUrl(fens);
+      expect(mockFetch).toHaveBeenCalledWith(expectedUrl);
+      expect(result).toEqual(mockComments);
+    });it("should return empty object when no FENs are provided", async () => {
+      const result = await getCommentsByFens([]);
+
+      expect(mockFetch).not.toHaveBeenCalled();
+      expect(result).toEqual({});
+    });    it("should handle positions with missing comments", async () => {
+      const fens = [
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1",
+      ];
+      const mockResponse = createMockResponse({
+        ok: true,
+        status: 200,
+        json: jest.fn().mockResolvedValue({}),
+      });
+      mockFetch.mockResolvedValue(mockResponse as Response);      const result = await getCommentsByFens(fens);
+
+      const expectedUrl = createExpectedUrl(fens);
+      expect(mockFetch).toHaveBeenCalledWith(expectedUrl);
+      expect(result).toEqual({});
+    });    it("should handle network errors gracefully", async () => {
+      const networkError = new Error("Network error");
+      mockFetch.mockRejectedValue(networkError);
+
+      const result = await getCommentsByFens([
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      ]);
+
+      expect(result).toEqual({});
+      expect(console.error).toHaveBeenCalledWith(
+        "Error fetching comments by FENs:",
+        networkError
+      );
+    });    it("should handle malformed JSON response", async () => {
+      const mockResponse = createMockResponse({
+        ok: true,
+        status: 200,
+        json: jest.fn().mockRejectedValue(new Error("Invalid JSON")),
+      });
+      mockFetch.mockResolvedValue(mockResponse as Response);
+
+      const result = await getCommentsByFens([
+        "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      ]);
+
+      expect(result).toEqual({});
+      expect(console.error).toHaveBeenCalledWith(
+        "Error fetching comments by FENs:",
+        expect.any(Error)
+      );
+    });
+  });
+
+  describe("getCommentsByFens", () => {
+    const testFens = [
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1",
+      "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2"
+    ];
+
+    it("should fetch comments for multiple FENs successfully", async () => {
+      const mockCommentsMap = {
+        [testFens[0]]: "Starting position comment",
+        [testFens[1]]: "After e4 comment",
+        [testFens[2]]: "After e4 e5 comment"
+      };
+
+      const mockResponse = createMockResponse({
+        ok: true,
+        status: 200,
+        json: jest.fn().mockResolvedValue(mockCommentsMap),
+      });
+      mockFetch.mockResolvedValue(mockResponse as Response);      const result = await getCommentsByFens(testFens);
+
+      expect(mockFetch).toHaveBeenCalledWith(createExpectedUrl(testFens));
+      expect(result).toEqual(mockCommentsMap);
+    });
+
+    it("should handle single FEN in array", async () => {
+      const singleFen = [testFens[0]];
+      const mockCommentsMap = {
+        [testFens[0]]: "Single position comment"
+      };
+
+      const mockResponse = createMockResponse({
+        ok: true,
+        status: 200,
+        json: jest.fn().mockResolvedValue(mockCommentsMap),
+      });
+      mockFetch.mockResolvedValue(mockResponse as Response);      const result = await getCommentsByFens(singleFen);
+
+      expect(mockFetch).toHaveBeenCalledWith(createExpectedUrl(singleFen));
+      expect(result).toEqual(mockCommentsMap);
+    });    it("should handle empty FENs array", async () => {
+      const result = await getCommentsByFens([]);
+
+      expect(mockFetch).not.toHaveBeenCalled();
+      expect(result).toEqual({});
+    });
+
+    it("should return empty object when response is not ok", async () => {
+      const mockResponse = createMockResponse({
+        ok: false,
+        status: 500,
+      });
+      mockFetch.mockResolvedValue(mockResponse as Response);
+
+      const result = await getCommentsByFens(testFens);
+
+      expect(result).toEqual({});
+      expect(console.error).toHaveBeenCalledWith(
+        "Error fetching position comments:",
+        expect.any(Error)
+      );
+    });    it("should handle network errors gracefully", async () => {
+      const networkError = new Error("Network error");
+      mockFetch.mockRejectedValue(networkError);
+
+      const result = await getCommentsByFens(testFens);
+
+      expect(result).toEqual({});
+      expect(console.error).toHaveBeenCalledWith(
+        "Error fetching comments by FENs:",
+        networkError
+      );
+    });
+
+    it("should handle partial response with only some FENs having comments", async () => {
+      const partialCommentsMap = {
+        [testFens[0]]: "Only first position has comment"
+      };
+
+      const mockResponse = createMockResponse({
+        ok: true,
+        status: 200,
+        json: jest.fn().mockResolvedValue(partialCommentsMap),
+      });
+      mockFetch.mockResolvedValue(mockResponse as Response);
+
+      const result = await getCommentsByFens(testFens);
+
+      expect(result).toEqual(partialCommentsMap);
+    });
+
+    it("should properly encode special characters in FENs", async () => {
+      const fensWithSpaces = [
+        "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+        "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3"
+      ];
+
+      const mockResponse = createMockResponse({
+        ok: true,
+        status: 200,
+        json: jest.fn().mockResolvedValue({}),
+      });
+      mockFetch.mockResolvedValue(mockResponse as Response);
+
+      await getCommentsByFens(fensWithSpaces);      const expectedUrl = createExpectedUrl(fensWithSpaces);
+      expect(mockFetch).toHaveBeenCalledWith(expectedUrl);
+    });    it("should handle malformed JSON response", async () => {
+      const mockResponse = createMockResponse({
+        ok: true,
+        status: 200,
+        json: jest.fn().mockRejectedValue(new Error("Invalid JSON")),
+      });
+      mockFetch.mockResolvedValue(mockResponse as Response);
+
+      const result = await getCommentsByFens(testFens);
+
+      expect(result).toEqual({});
+      expect(console.error).toHaveBeenCalledWith(
+        "Error fetching comments by FENs:",
+        expect.any(Error)
+      );
+    });
+
+    it("should handle duplicate FENs in input array", async () => {
+      const duplicateFens = [testFens[0], testFens[0], testFens[1]];
+      const mockCommentsMap = {
+        [testFens[0]]: "Duplicate position comment",
+        [testFens[1]]: "Second position comment"
+      };
+
+      const mockResponse = createMockResponse({
+        ok: true,
+        status: 200,
+        json: jest.fn().mockResolvedValue(mockCommentsMap),
+      });
+      mockFetch.mockResolvedValue(mockResponse as Response);      const result = await getCommentsByFens(duplicateFens);
+
+      const expectedUrl = createExpectedUrl(duplicateFens);
+      expect(mockFetch).toHaveBeenCalledWith(expectedUrl);
+      expect(result).toEqual(mockCommentsMap);
     });
   });
 });

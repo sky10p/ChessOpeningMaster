@@ -35,7 +35,7 @@ interface RepertoireContextProps {
   comment: string;
   updateComment: (comment: string) => Promise<void>;
   saveRepertory: () => void;
-  getPgn: () => string;
+  getPgn: () => Promise<string>;
   updateRepertoire: () => void;
 }
 
@@ -281,8 +281,8 @@ export const RepertoireContextProvider: React.FC<
     currentMove,
   ]);
 
-  const getPgn = useCallback(() => {
-    const pgn = toPGN(repertoireName, new Date(), orientation, moveHistory);
+  const getPgn = useCallback(async () => {
+    const pgn = await toPGN(repertoireName, new Date(), orientation, moveHistory);
     return pgn;
   }, [repertoireName, orientation, moveHistory]);
 

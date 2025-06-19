@@ -1,6 +1,5 @@
 import { IRepertoire } from "@chess-opening-master/common";
 import { Variant } from "../models/chess.models";
-import { variantToPgn } from "../utils/chess/pgn/pgn.utils";
 import {
   getRepertoire,
   getRepertoires,
@@ -11,6 +10,7 @@ import { MoveVariantNode } from "../models/VariantNode";
 import { useAlertContext } from "../contexts/AlertContext";
 import { useRepertoireContext } from "../contexts/RepertoireContext";
 import { useDialogContext } from "../contexts/DialogContext";
+import { variantToPgn } from "../utils/chess/pgn/pgn.utils";
 
 export const useRepertoireInfo = () => {
   const {
@@ -22,9 +22,9 @@ export const useRepertoireInfo = () => {
   } = useRepertoireContext();
   const { showConfirmDialog, showRepertoireDialog, showSelectVariantsDialog } = useDialogContext();
   const { showAlert } = useAlertContext();
-  const downloadVariantPGN = (variant: Variant) => {
+  const downloadVariantPGN = async (variant: Variant) => {
     if (variant) {
-      const pgn = variantToPgn(variant, orientation, new Date());
+      const pgn = await variantToPgn(variant, orientation, new Date());
       const blob = new Blob([pgn], { type: "text/plain;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -35,9 +35,9 @@ export const useRepertoireInfo = () => {
     }
   };
 
-  const copyVariantPGN = (variant: Variant) => {
+  const copyVariantPGN = async (variant: Variant) => {
     if (variant) {
-      const pgn = variantToPgn(variant, orientation, new Date());
+      const pgn = await variantToPgn(variant, orientation, new Date());
       const textarea = document.createElement("textarea");
       textarea.value = pgn;
       document.body.appendChild(textarea);

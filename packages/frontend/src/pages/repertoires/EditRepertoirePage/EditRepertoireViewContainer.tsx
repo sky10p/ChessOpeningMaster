@@ -43,8 +43,8 @@ const EditRepertoireViewContainer: React.FC = () => {
     toggleMenu(event.currentTarget || null, [
       {
         name: "Download PGN",
-        action: () => {
-          const pgn = getPgn();
+        action: async () => {
+          const pgn = await getPgn();
           const blob = new Blob([pgn], { type: "text/plain" });
           const url = URL.createObjectURL(blob);
           const link = document.createElement("a");

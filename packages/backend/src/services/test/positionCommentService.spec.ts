@@ -3,6 +3,7 @@ import {
   extractComments,
   migrateAllRepertoireComments,
   getPositionComment,
+  getPositionCommentsByFens,
 } from "../positionCommentService";
 import { MoveNode } from "../../models/Repertoire";
 import * as mongo from "../../db/mongo";
@@ -1143,6 +1144,98 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
       expect(mockPositionsFindOne).toHaveBeenCalledWith({
         fen: "some-fen-position",
       });
+    });
+  });  describe("getPositionCommentsByFens", () => {
+    it("should return an empty object if no FENs are provided", async () => {
+      const comments = await getPositionCommentsByFens([]);
+
+      expect(comments).toEqual({});
+      expect(mockPositionsFind).not.toHaveBeenCalled();
+    });
+
+    it("should return comments for the given FENs", async () => {
+      const fen1 = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
+      const fen2 = "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2";
+      mockPositionsFind.mockReturnValue({
+        toArray: jest.fn().mockResolvedValue([
+          { fen: fen1, comment: "Comment for FEN 1", updatedAt: new Date() },
+          { fen: fen2, comment: "Comment for FEN 2", updatedAt: new Date() },
+        ]),
+      });
+
+      const comments = await getPositionCommentsByFens([fen1, fen2]);
+
+      expect(comments).toEqual({
+        [fen1]: "Comment for FEN 1",
+        [fen2]: "Comment for FEN 2"
+      });
+      expect(mockPositionsFind).toHaveBeenCalledWith({
+        fen: { $in: [fen1, fen2] },
+      });
+    });
+
+    it("should return only positions that have comments", async () => {
+      const fen1 = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
+      const fen2 = "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2";
+      const fen3 = "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3";
+      
+      mockPositionsFind.mockReturnValue({
+        toArray: jest.fn().mockResolvedValue([
+          { fen: fen1, comment: "Comment for FEN 1", updatedAt: new Date() },
+          { fen: fen2, comment: "", updatedAt: new Date() },
+          { fen: fen3, comment: null, updatedAt: new Date() },
+        ]),
+      });
+
+      const comments = await getPositionCommentsByFens([fen1, fen2, fen3]);
+
+      expect(comments).toEqual({
+        [fen1]: "Comment for FEN 1"
+      });
+      expect(mockPositionsFind).toHaveBeenCalledWith({
+        fen: { $in: [fen1, fen2, fen3] },
+      });
+    });
+
+    it("should handle single FEN", async () => {
+      const fen = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
+      mockPositionsFind.mockReturnValue({
+        toArray: jest.fn().mockResolvedValue([
+          { fen, comment: "Single comment", updatedAt: new Date() },
+        ]),
+      });
+
+      const comments = await getPositionCommentsByFens([fen]);
+
+      expect(comments).toEqual({
+        [fen]: "Single comment"
+      });
+      expect(mockPositionsFind).toHaveBeenCalledWith({
+        fen: { $in: [fen] },
+      });
+    });
+
+    it("should handle positions with no matches in database", async () => {
+      const fen1 = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
+      const fen2 = "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2";
+      
+      mockPositionsFind.mockReturnValue({
+        toArray: jest.fn().mockResolvedValue([]),
+      });
+
+      const comments = await getPositionCommentsByFens([fen1, fen2]);
+
+      expect(comments).toEqual({});
+      expect(mockPositionsFind).toHaveBeenCalledWith({
+        fen: { $in: [fen1, fen2] },
+      });
+    });
+
+    it("should skip early return when array is empty", async () => {
+      const comments = await getPositionCommentsByFens([]);
+
+      expect(comments).toEqual({});
+      expect(mockPositionsFind).not.toHaveBeenCalled();
     });
   });
 });

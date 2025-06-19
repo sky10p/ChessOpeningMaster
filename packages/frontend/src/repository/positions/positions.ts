@@ -48,3 +48,26 @@ export const updatePositionComment = async (
     throw error;
   }
 };
+
+export const getCommentsByFens = async (
+  fens: string[]
+): Promise<Record<string, string>> => {
+  if (fens.length === 0) {
+    return {};
+  }
+  
+  try {
+    const queryParams = new URLSearchParams();
+    fens.forEach(fen => queryParams.append('fens', fen));
+    
+    const response = await fetch(`${API_URL}/positions/comments?${queryParams.toString()}`);
+    if (!response.ok) {
+      console.error("Error fetching position comments:", new Error(`HTTP ${response.status}`));
+      return {};
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching comments by FENs:", error);
+    return {};
+  }
+};
