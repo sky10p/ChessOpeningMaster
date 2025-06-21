@@ -1149,11 +1149,209 @@ describe("positionCommentService", () => {
           },
         ],
         { ordered: false }
+      );      mockPositionsFind.mockReturnValue({
+        toArray: jest.fn().mockResolvedValue([]),
+      });
+    });
+
+    it("should handle askQuestion timeout error", async () => {
+      mockRepertoiresToArray.mockResolvedValue(mockRepertoires);
+
+      const mockAskQuestion = jest.fn().mockRejectedValue(
+        new Error('Input timeout - no response received within 30 seconds')
       );
+
+      await expect(
+        migrateAllRepertoireComments("interactive", mockAskQuestion)
+      ).rejects.toThrow('Input timeout - no response received within 30 seconds');
+
+      expect(mockAskQuestion).toHaveBeenCalled();
+      expect(mockPositionsBulkWrite).not.toHaveBeenCalled();
+    });
+
+    it("should handle askQuestion readline error", async () => {
+      mockRepertoiresToArray.mockResolvedValue(mockRepertoires);
+
+      const mockAskQuestion = jest.fn().mockRejectedValue(
+        new Error('Readline interface error')
+      );
+
+      await expect(
+        migrateAllRepertoireComments("interactive", mockAskQuestion)
+      ).rejects.toThrow('Readline interface error');
+
+      expect(mockAskQuestion).toHaveBeenCalled();
+      expect(mockPositionsBulkWrite).not.toHaveBeenCalled();
+    });
+
+    it("should handle askQuestion SIGINT interruption", async () => {
+      mockRepertoiresToArray.mockResolvedValue(mockRepertoires);
+
+      const mockAskQuestion = jest.fn().mockRejectedValue(
+        new Error('Process interrupted by user')
+      );
+
+      await expect(
+        migrateAllRepertoireComments("interactive", mockAskQuestion)
+      ).rejects.toThrow('Process interrupted by user');
+
+      expect(mockAskQuestion).toHaveBeenCalled();
+      expect(mockPositionsBulkWrite).not.toHaveBeenCalled();
+    });
+
+    it("should handle askQuestion generic error", async () => {
+      mockRepertoiresToArray.mockResolvedValue(mockRepertoires);
+
+      const mockAskQuestion = jest.fn().mockRejectedValue(
+        new Error('Unexpected error during user input')
+      );
+
+      await expect(
+        migrateAllRepertoireComments("interactive", mockAskQuestion)
+      ).rejects.toThrow('Unexpected error during user input');
+
+      expect(mockAskQuestion).toHaveBeenCalled();
+      expect(mockPositionsBulkWrite).not.toHaveBeenCalled();
+    });
+
+    it("should handle askQuestion error with existing position comment", async () => {
+      mockRepertoiresToArray.mockResolvedValue(mockRepertoires);
+
+      mockPositionsFind.mockReturnValue({
+        toArray: jest.fn().mockResolvedValue([
+          {
+            fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+            comment: "Existing position comment",
+            createdAt: new Date("2022-01-01"),
+            updatedAt: new Date("2022-01-01"),
+          },
+        ]),
+      });
+
+      const mockAskQuestion = jest.fn().mockRejectedValue(
+        new Error('Input timeout - no response received within 30 seconds')
+      );
+
+      await expect(
+        migrateAllRepertoireComments("interactive", mockAskQuestion)
+      ).rejects.toThrow('Input timeout - no response received within 30 seconds');
+
+      expect(mockAskQuestion).toHaveBeenCalled();
+      expect(mockPositionsBulkWrite).not.toHaveBeenCalled();
 
       mockPositionsFind.mockReturnValue({
         toArray: jest.fn().mockResolvedValue([]),
       });
+    });    it("should handle multiple askQuestion calls where second one fails", async () => {
+      const multipleConflictRepertoires = [
+        {
+          _id: new ObjectId("111111111111111111111111"),
+          name: "Repertoire 1",
+          updatedAt: new Date("2023-01-01"),
+          moveNodes: {
+            id: "root",
+            move: null,
+            children: [
+              {
+                id: "e2e4",
+                move: {
+                  color: "w",
+                  piece: "p",
+                  from: "e2",
+                  to: "e4",
+                  san: "e4",
+                  flags: "b",
+                  lan: "e2e4",
+                  before:
+                    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+                  after:
+                    "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+                },
+                comment: "First position comment",
+                children: [],
+              },
+              {
+                id: "d2d4",
+                move: {
+                  color: "w",
+                  piece: "p",
+                  from: "d2",
+                  to: "d4",
+                  san: "d4",
+                  flags: "b",
+                  lan: "d2d4",
+                  before:
+                    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+                  after:
+                    "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1",
+                },
+                comment: "Second position comment",
+                children: [],
+              },
+            ],
+          },
+        },
+        {
+          _id: new ObjectId("222222222222222222222222"),
+          name: "Repertoire 2",
+          updatedAt: new Date("2023-01-02"),
+          moveNodes: {
+            id: "root",
+            move: null,
+            children: [
+              {
+                id: "e2e4",
+                move: {
+                  color: "w",
+                  piece: "p",
+                  from: "e2",
+                  to: "e4",
+                  san: "e4",
+                  flags: "b",
+                  lan: "e2e4",
+                  before:
+                    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+                  after:
+                    "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+                },
+                comment: "Conflicting comment",
+                children: [],
+              },
+              {
+                id: "d2d4",
+                move: {
+                  color: "w",
+                  piece: "p",
+                  from: "d2",
+                  to: "d4",
+                  san: "d4",
+                  flags: "b",
+                  lan: "d2d4",
+                  before:
+                    "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+                  after:
+                    "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1",
+                },
+                comment: "Another conflicting comment for d4",
+                children: [],
+              },
+            ],
+          },
+        },
+      ];
+
+      mockRepertoiresToArray.mockResolvedValue(multipleConflictRepertoires);
+
+      const mockAskQuestion = jest.fn()
+        .mockResolvedValueOnce("2")
+        .mockRejectedValueOnce(new Error('Process interrupted by user'));
+
+      await expect(
+        migrateAllRepertoireComments("interactive", mockAskQuestion)
+      ).rejects.toThrow('Process interrupted by user');
+
+      expect(mockAskQuestion).toHaveBeenCalledTimes(2);
+      expect(mockPositionsBulkWrite).not.toHaveBeenCalled();
     });
   });
   describe("getPositionComment", () => {
