@@ -229,11 +229,12 @@ const resolveInteractiveConflict = async (
 
   options.push(`${optionIndex}. Merge all comments`);
   options.push(`${optionIndex + 1}. Enter custom comment`);
-
   console.log("\nOptions:");
   options.forEach((option) => console.log(option));
 
+  console.log("About to call askQuestion...");
   const answer = await askQuestion("\nEnter your choice (number): ");
+  console.log(`askQuestion returned with answer: "${answer}"`);
   const choice = parseInt(answer);
   
   console.log(`User selected choice: ${choice} (raw input: "${answer}")`);
