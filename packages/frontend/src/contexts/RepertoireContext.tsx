@@ -7,12 +7,11 @@ import { putRepertoire } from "../repository/repertoires/repertoires";
 import { toPGN } from "../utils/chess/pgn/pgn.utils";
 import { useDialogContext } from "./DialogContext";
 import { useHeaderDispatch } from "./HeaderContext";
-import { BoardOrientation, IMoveNode } from "@chess-opening-master/common";
+import { BoardOrientation, getOrientationAwareFen, IMoveNode } from "@chess-opening-master/common";
 import {
   getPositionComment,
   updatePositionComment,
 } from "../repository/positions/positions";
-import { getOrientationAwareFen } from "../utils/chess/fenUtils";
 
 interface RepertoireContextProps {
   chess: Chess;
