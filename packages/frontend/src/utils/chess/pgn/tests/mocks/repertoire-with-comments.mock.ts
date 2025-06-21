@@ -14,10 +14,8 @@ export const testRepertoireWithCommentsMock: IMoveNode = {
         "san": "e4",
         "flags": "b",
         "lan": "e2e4",
-        "before": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-        "after": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
+        "before": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",        "after": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
       },
-      "comment": "Try to control the center",
       "children": [
         {
           "id": "e7e5",
@@ -29,10 +27,8 @@ export const testRepertoireWithCommentsMock: IMoveNode = {
             "san": "e5",
             "flags": "b",
             "lan": "e7e5",
-            "before": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
-            "after": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2"
+            "before": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",            "after": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2"
           },
-          "comment": "Black try to control the center too",
           "children": [
             {
               "id": "g1f3",
@@ -118,10 +114,8 @@ export const testRepertoireWithCommentsMock: IMoveNode = {
                             "san": "Nf6",
                             "flags": "n",
                             "lan": "g8f6",
-                            "before": "r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
-                            "after": "r1bqkb1r/pppp1ppp/2n2n2/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4"
+                            "before": "r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",                            "after": "r1bqkb1r/pppp1ppp/2n2n2/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4"
                           },
-                          "comment": "It is possible to rocking",
                           "variantName": "Defensa Berlinesa",
                           "children": []
                         }
@@ -145,10 +139,8 @@ export const testRepertoireWithCommentsMock: IMoveNode = {
         "san": "d4",
         "flags": "b",
         "lan": "d2d4",
-        "before": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-        "after": "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1"
+        "before": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",        "after": "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1"
       },
-      "comment": "This is a more strategic way to start",
       "children": [
         {
           "id": "d7d5",
@@ -342,10 +334,8 @@ export const testRepertoireWithCommentsMock: IMoveNode = {
                                                                 "san": "Qe2",
                                                                 "flags": "n",
                                                                 "lan": "d1e2",
-                                                                "before": "r1bq1rk1/pp3ppp/2nbpn2/2pp4/3P4/2PBPN2/PP1N1PPP/R1BQ1RK1 w - - 5 8",
-                                                                "after": "r1bq1rk1/pp3ppp/2nbpn2/2pp4/3P4/2PBPN2/PP1NQPPP/R1B2RK1 b - - 6 8"
+                                                                "before": "r1bq1rk1/pp3ppp/2nbpn2/2pp4/3P4/2PBPN2/PP1N1PPP/R1BQ1RK1 w - - 5 8",                                                                "after": "r1bq1rk1/pp3ppp/2nbpn2/2pp4/3P4/2PBPN2/PP1NQPPP/R1B2RK1 b - - 6 8"
                                                               },
-                                                              "comment": "this is the main position in colle system",
                                                               "variantName": "Sistema Colle",
                                                               "children": []
                                                             }

@@ -17,7 +17,6 @@ export const testRepertoireMock: IMoveNode = {
         before: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
         after: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
       },
-      comment: "",
       children: [
         {
           id: "e7e5",
@@ -34,7 +33,6 @@ export const testRepertoireMock: IMoveNode = {
             after:
               "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
           },
-          comment: undefined,
           children: [
             {
               id: "g1f3",
@@ -385,8 +383,6 @@ export const testRepertoireMock: IMoveNode = {
                                                                 after:
                                                                   "r1bq1rk1/pp3ppp/2nbpn2/2pp4/3P4/2PBPN2/PP1NQPPP/R1B2RK1 b - - 6 8",
                                                               },
-                                                              comment:
-                                                                "",
                                                               variantName:
                                                                 "Sistema Colle",
                                                               children: [],

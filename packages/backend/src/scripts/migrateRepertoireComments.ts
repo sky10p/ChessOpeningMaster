@@ -1,5 +1,5 @@
 import { connectDB } from "../db/mongo";
-import { migrateAllRepertoireComments } from "../services/positionCommentService";
+import { migrateAllRepertoireComments } from "./utils/migrateRepertoireComments.utils";
 import readline from "readline";
 
 const askQuestion = (question: string): Promise<string> => {

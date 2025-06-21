@@ -7,7 +7,6 @@ export class MoveVariantNode implements IMoveNode {
   move: Move | null;
   children: MoveVariantNode[];
   parent: MoveVariantNode | null;
-  comment?: string;
   variantName?: string;
   turn: number;
   position: number;
@@ -32,7 +31,6 @@ export class MoveVariantNode implements IMoveNode {
 
     moveVariantNode.id = initialMoveNode.id;
     moveVariantNode.move = initialMoveNode.move;
-    moveVariantNode.comment = initialMoveNode.comment;
     moveVariantNode.variantName = initialMoveNode.variantName;
 
     this.addMoveNodesToMoveVariantNode(
@@ -54,7 +52,6 @@ export class MoveVariantNode implements IMoveNode {
       const newNode = moveVariantNode.addMove(
         moveNode.move,
         moveNode.variantName,
-        moveNode.comment
       );
       newNode.circles = moveNode.circles ? moveNode.circles : [];
       newNode.arrows = moveNode.arrows ? moveNode.arrows : [];
@@ -86,7 +83,6 @@ export class MoveVariantNode implements IMoveNode {
     newNode.parent = this;
     newNode.id = move.lan;
     newNode.variantName = name;
-    newNode.comment = comment;
     if (this.move === null || this.move.color === "b") {
       newNode.turn = this.turn + 1;
     } else {
@@ -102,7 +98,6 @@ export class MoveVariantNode implements IMoveNode {
     return {
       id: this.id,
       move: this.move,
-      comment: this.comment,
       variantName: this.variantName,
       children: this.children.map((child) => child.getMoveNodeWithoutParent()),
       circles: this.circles ? Array.from(this.circles) : [],

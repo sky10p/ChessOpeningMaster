@@ -41,13 +41,16 @@ export class Chess {
   }
   
   undo() {
-    if (this.moveHistory.length > 0) {
-      const lastMove = this.moveHistory.pop();
-      // Simplified undo: just return to starting position for simplicity
+    if (this.moveHistory.length > 0) {      const lastMove = this.moveHistory.pop();
       this.currentFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
       return { san: lastMove || "" };
     }
     return null;
+  }
+
+  reset() {
+    this.currentFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    this.moveHistory = [];
   }
 }
 
