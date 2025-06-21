@@ -3,15 +3,35 @@ import { migrateAllRepertoireComments } from "../services/positionCommentService
 import readline from "readline";
 
 const askQuestion = (question: string): Promise<string> => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
     });
 
-    rl.question(question, (answer) => {
+    const timeout = setTimeout(() => {
       rl.close();
-      resolve(answer.trim());
+      reject(new Error('Input timeout - no response received within 30 seconds'));
+    }, 30000);
+
+    rl.question(question, (answer) => {
+      clearTimeout(timeout);
+      rl.close();
+      const trimmedAnswer = answer.trim();
+      console.log(`Received input: "${trimmedAnswer}"`);
+      resolve(trimmedAnswer);
+    });
+
+    rl.on('error', (error) => {
+      clearTimeout(timeout);
+      rl.close();
+      reject(error);
+    });
+
+    rl.on('SIGINT', () => {
+      clearTimeout(timeout);
+      rl.close();
+      reject(new Error('Process interrupted by user'));
     });
   });
 };
