@@ -4,3 +4,4 @@ export { BoardOrientation, Turn } from "./types/Orientation";
 export { TrainVariantInfo, Variant } from "./types/Variants";
 export { MoveVariantNode } from "./types/MoveVariantNode";
 export { Path, StudyPath, StudiedVariantPath, NewVariantPath, EmptyPath, PathCategory } from "./types/Path";
+export { getOrientationAwareFen } from "./utils/fenUtils";

@@ -10,9 +10,12 @@ import * as mongo from "../../db/mongo";
 
 jest.mock("../../db/mongo");
 
-describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn();
+describe("positionCommentService", () => {
+  const mockPositionsFindOne = jest.fn();
   const mockPositionsUpdateOne = jest.fn();
-  const mockPositionsBulkWrite = jest.fn().mockResolvedValue({ matchedCount: 1, modifiedCount: 1 });
+  const mockPositionsBulkWrite = jest
+    .fn()
+    .mockResolvedValue({ matchedCount: 1, modifiedCount: 1 });
   const mockPositionsFind = jest.fn().mockReturnValue({
     toArray: jest.fn().mockResolvedValue([]),
   });
@@ -41,9 +44,9 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
   const mockDB = {
     collection: mockCollection,
   };
-  
+
   const originalConsoleLog = console.log;
-  
+
   beforeEach(() => {
     jest.clearAllMocks();
     (mongo.getDB as jest.Mock).mockReturnValue(mockDB);
@@ -51,10 +54,10 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
     mockPositionsFindOne.mockResolvedValue(null);
     mockPositionsUpdateOne.mockResolvedValue({ modifiedCount: 1 });
     mockRepertoiresToArray.mockResolvedValue([]);
-    
+
     console.log = jest.fn();
   });
-  
+
   afterEach(() => {
     console.log = originalConsoleLog;
   });
@@ -96,9 +99,10 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
           },
         ],
       };
-      const comments = extractComments(moveNode);
+      const comments = extractComments(moveNode, new Map(), "white");
 
-      expect(comments.size).toBe(2);      const rootComments = comments.get(
+      expect(comments.size).toBe(2);
+      const rootComments = comments.get(
         "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
       );
       expect(rootComments).toBeDefined();
@@ -146,14 +150,15 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
           },
         ],
       };
-      const comments = extractComments(moveNode);
+      const comments = extractComments(moveNode, new Map(), "white");
 
       expect(comments.size).toBe(1);
 
       const rootComments = comments.get(
         "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
       );
-      expect(rootComments).toBeUndefined();      const childComments = comments.get(
+      expect(rootComments).toBeUndefined();
+      const childComments = comments.get(
         "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2"
       );
       expect(childComments).toBeDefined();
@@ -222,40 +227,45 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
           },
         ],
       };
-      const comments = extractComments(moveNode);
+      const comments = extractComments(moveNode, new Map(), "white");
 
-      expect(comments.size).toBe(3);      const firstMoveComments = comments.get(
+      expect(comments.size).toBe(3);
+      const firstMoveComments = comments.get(
         "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
       );
       expect(firstMoveComments).toBeDefined();
-      expect(firstMoveComments && firstMoveComments[0].comment).toBe("First move comment");
+      expect(firstMoveComments && firstMoveComments[0].comment).toBe(
+        "First move comment"
+      );
 
       const secondMoveComments = comments.get(
         "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2"
       );
       expect(secondMoveComments).toBeDefined();
-      expect(secondMoveComments && secondMoveComments[0].comment).toBe("Response comment");
+      expect(secondMoveComments && secondMoveComments[0].comment).toBe(
+        "Response comment"
+      );
 
       const thirdMoveComments = comments.get(
         "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2"
       );
       expect(thirdMoveComments).toBeDefined();
-      expect(thirdMoveComments && thirdMoveComments[0].comment).toBe("Third move comment");
+      expect(thirdMoveComments && thirdMoveComments[0].comment).toBe(
+        "Third move comment"
+      );
     });
-  });  describe("migrateAllRepertoireComments", () => {
-    
+  });
+  describe("migrateAllRepertoireComments", () => {
     const originalConsoleLog = console.log;
-    
+
     beforeEach(() => {
-      
       console.log = jest.fn();
     });
-    
+
     afterEach(() => {
-      
       console.log = originalConsoleLog;
     });
-    
+
     const mockRepertoires = [
       {
         _id: new ObjectId("111111111111111111111111"),
@@ -323,11 +333,14 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
 
       expect(result.processedRepertoires).toBe(2);
       expect(result.migratedComments).toBe(1);
-      expect(result.conflicts).toBe(1);      expect(mockPositionsBulkWrite).toHaveBeenCalledWith(
+      expect(result.conflicts).toBe(1);
+      expect(mockPositionsBulkWrite).toHaveBeenCalledWith(
         [
           {
             updateOne: {
-              filter: { fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1" },
+              filter: {
+                fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+              },
               update: {
                 $set: {
                   comment: "Repertoire 2 comment",
@@ -337,9 +350,9 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
                   createdAt: expect.any(Date),
                 },
               },
-              upsert: true
-            }
-          }
+              upsert: true,
+            },
+          },
         ],
         { ordered: false }
       );
@@ -412,11 +425,14 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
 
       expect(result.processedRepertoires).toBe(2);
       expect(result.migratedComments).toBe(1);
-      expect(result.conflicts).toBe(1);      expect(mockPositionsBulkWrite).toHaveBeenCalledWith(
+      expect(result.conflicts).toBe(1);
+      expect(mockPositionsBulkWrite).toHaveBeenCalledWith(
         [
           {
             updateOne: {
-              filter: { fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1" },
+              filter: {
+                fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+              },
               update: {
                 $set: {
                   comment:
@@ -427,9 +443,9 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
                   createdAt: expect.any(Date),
                 },
               },
-              upsert: true
-            }
-          }
+              upsert: true,
+            },
+          },
         ],
         { ordered: false }
       );
@@ -441,11 +457,14 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
 
       expect(result.processedRepertoires).toBe(2);
       expect(result.migratedComments).toBe(1);
-      expect(result.conflicts).toBe(1);      expect(mockPositionsBulkWrite).toHaveBeenCalledWith(
+      expect(result.conflicts).toBe(1);
+      expect(mockPositionsBulkWrite).toHaveBeenCalledWith(
         [
           {
             updateOne: {
-              filter: { fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1" },
+              filter: {
+                fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+              },
               update: {
                 $set: {
                   comment: "Repertoire 1 comment\n\nRepertoire 2 comment",
@@ -455,16 +474,16 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
                   createdAt: expect.any(Date),
                 },
               },
-              upsert: true
-            }
-          }
+              upsert: true,
+            },
+          },
         ],
         { ordered: false }
       );
-    });    it("should handle existing position comments during migration", async () => {
+    });
+    it("should handle existing position comments during migration", async () => {
       mockRepertoiresToArray.mockResolvedValue(mockRepertoires);
 
-      
       mockPositionsFind.mockReturnValue({
         toArray: jest.fn().mockResolvedValue([
           {
@@ -472,7 +491,7 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
             comment: "Existing position comment",
             createdAt: new Date("2022-01-01"),
             updatedAt: new Date("2022-01-01"),
-          }
+          },
         ]),
       });
 
@@ -480,11 +499,14 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
 
       expect(result.processedRepertoires).toBe(2);
       expect(result.migratedComments).toBe(1);
-      expect(result.conflicts).toBe(1);      expect(mockPositionsBulkWrite).toHaveBeenCalledWith(
+      expect(result.conflicts).toBe(1);
+      expect(mockPositionsBulkWrite).toHaveBeenCalledWith(
         [
           {
             updateOne: {
-              filter: { fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1" },
+              filter: {
+                fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+              },
               update: {
                 $set: {
                   comment:
@@ -495,13 +517,13 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
                   createdAt: expect.any(Date),
                 },
               },
-              upsert: true
-            }
-          }        ],
+              upsert: true,
+            },
+          },
+        ],
         { ordered: false }
       );
 
-      
       mockPositionsFind.mockReturnValue({
         toArray: jest.fn().mockResolvedValue([]),
       });
@@ -518,13 +540,16 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
 
       expect(result.processedRepertoires).toBe(2);
       expect(result.migratedComments).toBe(1);
-      expect(result.conflicts).toBe(1);      expect(mockAskQuestion).toHaveBeenCalled();
+      expect(result.conflicts).toBe(1);
+      expect(mockAskQuestion).toHaveBeenCalled();
 
       expect(mockPositionsBulkWrite).toHaveBeenCalledWith(
         [
           {
             updateOne: {
-              filter: { fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1" },
+              filter: {
+                fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+              },
               update: {
                 $set: {
                   comment: "Repertoire 1 comment",
@@ -534,9 +559,9 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
                   createdAt: expect.any(Date),
                 },
               },
-              upsert: true
-            }
-          }
+              upsert: true,
+            },
+          },
         ],
         { ordered: false }
       );
@@ -577,12 +602,12 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
                   after:
                     "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
                 },
-                
+
                 children: [],
               },
             ],
           },
-        }
+        },
       ];
       mockRepertoiresToArray.mockResolvedValue(noCommentsRepertoires);
 
@@ -643,7 +668,7 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
               },
             ],
           },
-        }
+        },
       ];
       mockRepertoiresToArray.mockResolvedValue(multiplePositionsRepertoire);
 
@@ -652,12 +677,14 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
       expect(result.processedRepertoires).toBe(1);
       expect(result.migratedComments).toBe(2);
       expect(result.conflicts).toBe(0);
-      
+
       expect(mockPositionsBulkWrite).toHaveBeenCalledWith(
         [
           {
             updateOne: {
-              filter: { fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1" },
+              filter: {
+                fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+              },
               update: {
                 $set: {
                   comment: "First position comment",
@@ -667,12 +694,14 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
                   createdAt: expect.any(Date),
                 },
               },
-              upsert: true
-            }
+              upsert: true,
+            },
           },
           {
             updateOne: {
-              filter: { fen: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2" },
+              filter: {
+                fen: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+              },
               update: {
                 $set: {
                   comment: "Second position comment",
@@ -682,9 +711,9 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
                   createdAt: expect.any(Date),
                 },
               },
-              upsert: true
-            }
-          }
+              upsert: true,
+            },
+          },
         ],
         { ordered: false }
       );
@@ -758,19 +787,23 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
       expect(result.processedRepertoires).toBe(2);
       expect(result.migratedComments).toBe(2);
       expect(result.conflicts).toBe(0);
-      
+
       expect(mockPositionsBulkWrite).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
             updateOne: expect.objectContaining({
-              filter: { fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1" }
-            })
+              filter: {
+                fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+              },
+            }),
           }),
           expect.objectContaining({
             updateOne: expect.objectContaining({
-              filter: { fen: "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1" }
-            })
-          })
+              filter: {
+                fen: "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1",
+              },
+            }),
+          }),
         ]),
         { ordered: false }
       );
@@ -781,7 +814,7 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
         {
           _id: new ObjectId("111111111111111111111111"),
           name: "Repertoire with missing updatedAt",
-          
+
           moveNodes: {
             id: "root",
             move: null,
@@ -806,7 +839,7 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
               },
             ],
           },
-        }
+        },
       ];
       mockRepertoiresToArray.mockResolvedValue(malformedRepertoires);
 
@@ -815,12 +848,14 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
       expect(result.processedRepertoires).toBe(1);
       expect(result.migratedComments).toBe(1);
       expect(result.conflicts).toBe(0);
-      
+
       expect(mockPositionsBulkWrite).toHaveBeenCalledWith(
         [
           {
             updateOne: {
-              filter: { fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1" },
+              filter: {
+                fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+              },
               update: {
                 $set: {
                   comment: "Comment in repertoire without updatedAt",
@@ -830,16 +865,16 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
                   createdAt: expect.any(Date),
                 },
               },
-              upsert: true
-            }
-          }
+              upsert: true,
+            },
+          },
         ],
         { ordered: false }
       );
-    });    it("should handle interactive strategy with merge option", async () => {
+    });
+    it("should handle interactive strategy with merge option", async () => {
       mockRepertoiresToArray.mockResolvedValue(mockRepertoires);
 
-      
       const mockAskQuestion = jest.fn().mockResolvedValue("4");
 
       const result = await migrateAllRepertoireComments(
@@ -857,7 +892,9 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
         [
           {
             updateOne: {
-              filter: { fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1" },
+              filter: {
+                fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+              },
               update: {
                 $set: {
                   comment: "Repertoire 1 comment\n\nRepertoire 2 comment",
@@ -867,18 +904,18 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
                   createdAt: expect.any(Date),
                 },
               },
-              upsert: true
-            }
-          }
+              upsert: true,
+            },
+          },
         ],
         { ordered: false }
       );
-    });    it("should handle interactive strategy with custom comment option", async () => {
+    });
+    it("should handle interactive strategy with custom comment option", async () => {
       mockRepertoiresToArray.mockResolvedValue(mockRepertoires);
 
-      
-      
-      const mockAskQuestion = jest.fn()
+      const mockAskQuestion = jest
+        .fn()
         .mockResolvedValueOnce("5")
         .mockResolvedValueOnce("This is my custom comment for this position");
 
@@ -897,7 +934,9 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
         [
           {
             updateOne: {
-              filter: { fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1" },
+              filter: {
+                fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+              },
               update: {
                 $set: {
                   comment: "This is my custom comment for this position",
@@ -907,9 +946,9 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
                   createdAt: expect.any(Date),
                 },
               },
-              upsert: true
-            }
-          }
+              upsert: true,
+            },
+          },
         ],
         { ordered: false }
       );
@@ -918,7 +957,6 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
     it("should handle interactive strategy with invalid choice fallback to merge", async () => {
       mockRepertoiresToArray.mockResolvedValue(mockRepertoires);
 
-      
       const mockAskQuestion = jest.fn().mockResolvedValue("99");
 
       const result = await migrateAllRepertoireComments(
@@ -936,7 +974,9 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
         [
           {
             updateOne: {
-              filter: { fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1" },
+              filter: {
+                fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+              },
               update: {
                 $set: {
                   comment: "Repertoire 1 comment\n\nRepertoire 2 comment",
@@ -946,9 +986,9 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
                   createdAt: expect.any(Date),
                 },
               },
-              upsert: true
-            }
-          }
+              upsert: true,
+            },
+          },
         ],
         { ordered: false }
       );
@@ -957,8 +997,6 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
     it("should handle interactive strategy without askQuestion function", async () => {
       mockRepertoiresToArray.mockResolvedValue(mockRepertoires);
 
-      
-      
       const result = await migrateAllRepertoireComments("interactive");
 
       expect(result.processedRepertoires).toBe(2);
@@ -969,7 +1007,9 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
         [
           {
             updateOne: {
-              filter: { fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1" },
+              filter: {
+                fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+              },
               update: {
                 $set: {
                   comment: "Repertoire 1 comment\n\nRepertoire 2 comment",
@@ -979,9 +1019,9 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
                   createdAt: expect.any(Date),
                 },
               },
-              upsert: true
-            }
-          }
+              upsert: true,
+            },
+          },
         ],
         { ordered: false }
       );
@@ -989,16 +1029,17 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
 
     it("should handle bulkWrite error", async () => {
       mockRepertoiresToArray.mockResolvedValue(mockRepertoires);
-      
-      
+
       const mockError = new Error("Bulk write failed");
       mockPositionsBulkWrite.mockRejectedValueOnce(mockError);
 
-      await expect(migrateAllRepertoireComments()).rejects.toThrow("Bulk write failed");
+      await expect(migrateAllRepertoireComments()).rejects.toThrow(
+        "Bulk write failed"
+      );
 
       expect(mockPositionsBulkWrite).toHaveBeenCalled();
-    });    it("should handle bulkWrite with a large number of operations", async () => {
-      
+    });
+    it("should handle bulkWrite with a large number of operations", async () => {
       const largeRepertoire = {
         _id: new ObjectId("111111111111111111111111"),
         name: "Large Repertoire",
@@ -1006,14 +1047,13 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
         moveNodes: {
           id: "root",
           move: null,
-          children: [] as MoveNode[]
-        }
+          children: [] as MoveNode[],
+        },
       };
-      
-      
-      const generateFen = (index: number) => 
+
+      const generateFen = (index: number) =>
         `rnbqkbnr/pppppppp/8/8/${index}P3/${index}/PPPP1PPP/RNBQKBNR b KQkq - 0 1`;
-      
+
       for (let i = 0; i < 100; i++) {
         largeRepertoire.moveNodes.children.push({
           id: `move-${i}`,
@@ -1032,7 +1072,7 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
           children: [],
         });
       }
-      
+
       mockRepertoiresToArray.mockResolvedValue([largeRepertoire]);
 
       const result = await migrateAllRepertoireComments();
@@ -1040,32 +1080,30 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
       expect(result.processedRepertoires).toBe(1);
       expect(result.migratedComments).toBe(100);
       expect(result.conflicts).toBe(0);
-      
+
       expect(mockPositionsBulkWrite).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
             updateOne: expect.objectContaining({
-              filter: { fen: generateFen(0) }
-            })
+              filter: { fen: generateFen(0) },
+            }),
           }),
           expect.objectContaining({
             updateOne: expect.objectContaining({
-              filter: { fen: generateFen(99) }
-            })
-          })
+              filter: { fen: generateFen(99) },
+            }),
+          }),
         ]),
         { ordered: false }
       );
-      
-      
+
       const bulkWriteArgs = mockPositionsBulkWrite.mock.calls[0][0];
       expect(bulkWriteArgs.length).toBe(100);
     });
 
     it("should handle interactive strategy with existing position comment choice", async () => {
       mockRepertoiresToArray.mockResolvedValue(mockRepertoires);
-      
-      
+
       mockPositionsFind.mockReturnValue({
         toArray: jest.fn().mockResolvedValue([
           {
@@ -1073,11 +1111,10 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
             comment: "Existing position comment",
             createdAt: new Date("2022-01-01"),
             updatedAt: new Date("2022-01-01"),
-          }
+          },
         ]),
       });
 
-      
       const mockAskQuestion = jest.fn().mockResolvedValue("1");
 
       const result = await migrateAllRepertoireComments(
@@ -1095,7 +1132,9 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
         [
           {
             updateOne: {
-              filter: { fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1" },
+              filter: {
+                fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+              },
               update: {
                 $set: {
                   comment: "Existing position comment",
@@ -1105,14 +1144,13 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
                   createdAt: expect.any(Date),
                 },
               },
-              upsert: true
-            }
-          }
+              upsert: true,
+            },
+          },
         ],
         { ordered: false }
       );
-      
-      
+
       mockPositionsFind.mockReturnValue({
         toArray: jest.fn().mockResolvedValue([]),
       });
@@ -1145,7 +1183,8 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
         fen: "some-fen-position",
       });
     });
-  });  describe("getPositionCommentsByFens", () => {
+  });
+  describe("getPositionCommentsByFens", () => {
     it("should return an empty object if no FENs are provided", async () => {
       const comments = await getPositionCommentsByFens([]);
 
@@ -1155,7 +1194,8 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
 
     it("should return comments for the given FENs", async () => {
       const fen1 = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
-      const fen2 = "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2";
+      const fen2 =
+        "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2";
       mockPositionsFind.mockReturnValue({
         toArray: jest.fn().mockResolvedValue([
           { fen: fen1, comment: "Comment for FEN 1", updatedAt: new Date() },
@@ -1167,7 +1207,7 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
 
       expect(comments).toEqual({
         [fen1]: "Comment for FEN 1",
-        [fen2]: "Comment for FEN 2"
+        [fen2]: "Comment for FEN 2",
       });
       expect(mockPositionsFind).toHaveBeenCalledWith({
         fen: { $in: [fen1, fen2] },
@@ -1176,9 +1216,11 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
 
     it("should return only positions that have comments", async () => {
       const fen1 = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
-      const fen2 = "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2";
-      const fen3 = "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3";
-      
+      const fen2 =
+        "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2";
+      const fen3 =
+        "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3";
+
       mockPositionsFind.mockReturnValue({
         toArray: jest.fn().mockResolvedValue([
           { fen: fen1, comment: "Comment for FEN 1", updatedAt: new Date() },
@@ -1190,7 +1232,7 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
       const comments = await getPositionCommentsByFens([fen1, fen2, fen3]);
 
       expect(comments).toEqual({
-        [fen1]: "Comment for FEN 1"
+        [fen1]: "Comment for FEN 1",
       });
       expect(mockPositionsFind).toHaveBeenCalledWith({
         fen: { $in: [fen1, fen2, fen3] },
@@ -1200,15 +1242,17 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
     it("should handle single FEN", async () => {
       const fen = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
       mockPositionsFind.mockReturnValue({
-        toArray: jest.fn().mockResolvedValue([
-          { fen, comment: "Single comment", updatedAt: new Date() },
-        ]),
+        toArray: jest
+          .fn()
+          .mockResolvedValue([
+            { fen, comment: "Single comment", updatedAt: new Date() },
+          ]),
       });
 
       const comments = await getPositionCommentsByFens([fen]);
 
       expect(comments).toEqual({
-        [fen]: "Single comment"
+        [fen]: "Single comment",
       });
       expect(mockPositionsFind).toHaveBeenCalledWith({
         fen: { $in: [fen] },
@@ -1217,8 +1261,9 @@ describe("positionCommentService", () => {  const mockPositionsFindOne = jest.fn
 
     it("should handle positions with no matches in database", async () => {
       const fen1 = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
-      const fen2 = "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2";
-      
+      const fen2 =
+        "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2";
+
       mockPositionsFind.mockReturnValue({
         toArray: jest.fn().mockResolvedValue([]),
       });
