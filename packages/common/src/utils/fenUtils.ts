@@ -28,7 +28,7 @@ const flipBoardPosition = (position: string): string => {
         return char;
       }
       return char === char.toLowerCase() ? char.toUpperCase() : char.toLowerCase();
-    }).join("");
+    }).reverse().join("");
   });
   return flippedRanks.join("/");
 };

@@ -20,6 +20,9 @@
     "front:tsc:noEmits": "lerna run tsc:noEmits --scope @chess-opening-master/frontend --stream",
     "develop:components": "lerna run develop:components --scope @chess-opening-master/frontend --stream",    "test": "lerna run test --stream",
     "test:backend": "lerna run test --scope @chess-opening-master/backend --stream",
+    "test:frontend": "lerna run test --scope @chess-opening-master/frontend --stream",
+    "test:common": "lerna run test --scope @chess-opening-master/common --stream",
+    "test:common:coverage": "lerna run test:coverage --scope @chess-opening-master/common --stream",
     "migrate:comments:interactive": "lerna run migrate:comments:interactive --scope @chess-opening-master/backend --stream",
     "create:indexes": "lerna run create:indexes --scope @chess-opening-master/backend --stream",
     "lint": "lerna exec -- eslint . --ext .ts,.tsx --ignore-path .eslintignore"
