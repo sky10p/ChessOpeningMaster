@@ -240,7 +240,6 @@ export const RepertoireContextProvider: React.FC<
     try {
       const fen = getOrientationAwareFen(chess.fen(), orientation);
       setComment(comment);
-      currentMove.comment = comment;
       await updatePositionComment(fen, comment);
       setHasChanges(true);
     } catch (error) {
