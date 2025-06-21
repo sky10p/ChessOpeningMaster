@@ -2,15 +2,16 @@ import { connectDB } from "../db/mongo";
 import { migrateAllRepertoireComments } from "../services/positionCommentService";
 import readline from "readline";
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
-
 const askQuestion = (question: string): Promise<string> => {
   return new Promise((resolve) => {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+    
     rl.question(question, (answer) => {
-      resolve(answer);
+      rl.close();
+      resolve(answer.trim());
     });
   });
 };
@@ -40,11 +41,9 @@ const runMigration = async () => {
     console.log(`Migrated ${migrationResults.migratedComments} comments`);
     console.log(`Resolved ${migrationResults.conflicts} conflicts`);
     
-    rl.close();
     process.exit(0);
   } catch (error) {
     console.error("Migration failed:", error);
-    rl.close();
     process.exit(1);
   }
 };
