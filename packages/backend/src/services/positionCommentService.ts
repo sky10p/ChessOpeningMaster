@@ -102,13 +102,13 @@ export const migrateAllRepertoireComments = async (
   );
 
   const bulkOperations = [];
-
   for (const [fen, commentsList] of allComments.entries()) {
     const existing = existingPositionsMap.get(fen) as PositionDocument | null;
     let finalComment: string;
 
     if (commentsList.length > 1 || (existing && existing.comment)) {
       conflicts++;
+      console.log(`Resolving conflict for position ${fen} with ${commentsList.length} comments from repertoires and ${existing ? 'existing' : 'no existing'} position comment`);
       finalComment = await resolveConflict(
         conflictStrategy,
         commentsList,
@@ -116,8 +116,10 @@ export const migrateAllRepertoireComments = async (
         fen,
         askQuestion
       );
+      console.log(`Conflict resolved. Final comment: "${finalComment}"`);
     } else {
       finalComment = commentsList[0].comment;
+      console.log(`No conflict for position ${fen}. Using single comment: "${finalComment}"`);
     }
 
     console.log(
@@ -144,13 +146,24 @@ export const migrateAllRepertoireComments = async (
 
     migratedComments++;
   }
-
   if (bulkOperations.length > 0) {
     console.log(
       `Executing bulk write for ${bulkOperations.length} position updates...`
     );
-    await positionsCollection.bulkWrite(bulkOperations, { ordered: false });
-    console.log("Bulk write completed successfully.");
+    try {
+      const result = await positionsCollection.bulkWrite(bulkOperations, { ordered: false });
+      console.log("Bulk write completed successfully.", {
+        insertedCount: result.insertedCount,
+        matchedCount: result.matchedCount,
+        modifiedCount: result.modifiedCount,
+        upsertedCount: result.upsertedCount
+      });
+    } catch (error) {
+      console.error("Bulk write failed:", error);
+      throw error;
+    }
+  } else {
+    console.log("No operations to execute.");
   }
 
   return {
@@ -195,8 +208,13 @@ const resolveInteractiveConflict = async (
 ): Promise<string> => {
   console.log(`\nConflict found for position: ${fen}`);
 
+  const options: string[] = [];
+  let optionIndex = 1;
+
   if (existing && existing.comment) {
     console.log(`Existing position comment: "${existing.comment}"`);
+    options.push(`${optionIndex}. Keep existing position comment`);
+    optionIndex++;
   }
 
   commentsList.forEach((comment, index) => {
@@ -205,35 +223,51 @@ const resolveInteractiveConflict = async (
         comment.comment
       }"`
     );
+    options.push(`${optionIndex}. Keep comment from repertoire ${index + 1}`);
+    optionIndex++;
   });
 
-  const options = [
-    "1. Keep existing position comment",
-    ...commentsList.map(
-      (_, i) => `${i + 2}. Keep comment from repertoire ${i + 1}`
-    ),
-    `${commentsList.length + 2}. Merge all comments`,
-    `${commentsList.length + 3}. Enter custom comment`,
-  ];
+  options.push(`${optionIndex}. Merge all comments`);
+  options.push(`${optionIndex + 1}. Enter custom comment`);
 
   console.log("\nOptions:");
   options.forEach((option) => console.log(option));
 
   const answer = await askQuestion("\nEnter your choice (number): ");
   const choice = parseInt(answer);
+  
+  console.log(`User selected choice: ${choice} (raw input: "${answer}")`);
 
-  if (choice === 1 && existing && existing.comment) {
-    return existing.comment;
-  } else if (choice >= 2 && choice <= commentsList.length + 1) {
-    return commentsList[choice - 2].comment;
-  } else if (choice === commentsList.length + 2) {
-    return resolveMergeConflict(commentsList, existing);
-  } else if (choice === commentsList.length + 3) {
-    return await askQuestion("Enter your custom comment: ");
-  } else {
-    console.log("Invalid choice, using merge strategy as default");
+  let currentOption = 1;
+
+  if (existing && existing.comment) {
+    if (choice === currentOption) {
+      console.log("Keeping existing position comment");
+      return existing.comment;
+    }
+    currentOption++;
+  }
+
+  for (let i = 0; i < commentsList.length; i++) {
+    if (choice === currentOption) {
+      console.log(`Keeping comment from repertoire ${i + 1}: "${commentsList[i].comment}"`);
+      return commentsList[i].comment;
+    }
+    currentOption++;
+  }
+
+  if (choice === currentOption) {
+    console.log("Merging all comments");
     return resolveMergeConflict(commentsList, existing);
   }
+  currentOption++;
+
+  if (choice === currentOption) {
+    console.log("Entering custom comment");
+    return await askQuestion("Enter your custom comment: ");
+  }
+  console.log("Invalid choice, using merge strategy as default");
+  return resolveMergeConflict(commentsList, existing);
 };
 
 const resolveConflict = async (

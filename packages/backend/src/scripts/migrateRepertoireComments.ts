@@ -19,7 +19,7 @@ const askQuestion = (question: string): Promise<string> => {
 const runMigration = async () => {
   try {
     console.log("Connecting to database...");
-    await connectDB();
+    const client = await connectDB();
     
     const interactiveMode = process.argv[2] === "interactive";
     const conflictStrategy = interactiveMode 
@@ -41,6 +41,8 @@ const runMigration = async () => {
     console.log(`Migrated ${migrationResults.migratedComments} comments`);
     console.log(`Resolved ${migrationResults.conflicts} conflicts`);
     
+    await client.close();
+    console.log("Database connection closed.");
     process.exit(0);
   } catch (error) {
     console.error("Migration failed:", error);
