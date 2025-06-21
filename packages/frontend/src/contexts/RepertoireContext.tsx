@@ -7,7 +7,7 @@ import { putRepertoire } from "../repository/repertoires/repertoires";
 import { toPGN } from "../utils/chess/pgn/pgn.utils";
 import { useDialogContext } from "./DialogContext";
 import { useHeaderDispatch } from "./HeaderContext";
-import { BoardOrientation, IMoveNode } from "@chess-opening-master/common";
+import { BoardOrientation, getOrientationAwareFen, IMoveNode } from "@chess-opening-master/common";
 import {
   getPositionComment,
   updatePositionComment,
@@ -127,11 +127,10 @@ export const RepertoireContextProvider: React.FC<
     setCurrentMove(moveHistory);
     updateVariants();
   }, [moveHistory]);
-
   useEffect(() => {
     const loadComment = async () => {
       try {
-        const fen = chess.fen();
+        const fen = getOrientationAwareFen(chess.fen(), orientation);
         const positionComment = await getPositionComment(fen);
         setComment(positionComment || "");
       } catch (error) {
@@ -141,7 +140,7 @@ export const RepertoireContextProvider: React.FC<
     };
 
     loadComment();
-  }, [currentMove]);
+  }, [currentMove, orientation]);
 
   const updateVariants = () => {
     setVariants(moveHistory.getVariants());
@@ -239,7 +238,7 @@ export const RepertoireContextProvider: React.FC<
   };
   const updateComment = async (comment: string) => {
     try {
-      const fen = chess.fen();
+      const fen = getOrientationAwareFen(chess.fen(), orientation);
       setComment(comment);
       currentMove.comment = comment;
       await updatePositionComment(fen, comment);
@@ -283,7 +282,12 @@ export const RepertoireContextProvider: React.FC<
   ]);
 
   const getPgn = useCallback(async () => {
-    const pgn = await toPGN(repertoireName, new Date(), orientation, moveHistory);
+    const pgn = await toPGN(
+      repertoireName,
+      new Date(),
+      orientation,
+      moveHistory
+    );
     return pgn;
   }, [repertoireName, orientation, moveHistory]);
 
