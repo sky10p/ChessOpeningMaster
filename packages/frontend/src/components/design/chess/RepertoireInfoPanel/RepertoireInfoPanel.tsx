@@ -34,7 +34,7 @@ interface RepertoireInfoPanelProps {
   selectedVariant: Variant;
   setSelectedVariant: (variant: Variant) => void;
   comment: string;
-  updateComment: (comment: string) => void;
+  updateComment: (comment: string) => Promise<void>;
   downloadVariantPGN: (variant: Variant) => void;
   copyVariantPGN: (variant: Variant) => void;
   copyVariantToRepertoire: (variant: Variant) => void;
@@ -151,7 +151,9 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
               label={
                 <div className="flex items-center">
                   <PresentationChartLineIcon className="h-5 w-5 text-blue-400" />
-                  <span className="ml-1 text-sm font-medium hidden sm:inline">Stats</span>
+                  <span className="ml-1 text-sm font-medium hidden sm:inline">
+                    Stats
+                  </span>
                 </div>
               }
               enabled={statisticsEnabled}
@@ -161,7 +163,9 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
               label={
                 <div className="flex items-center">
                   <ChatBubbleBottomCenterTextIcon className="h-5 w-5 text-green-400" />
-                  <span className="ml-1 text-sm font-medium hidden sm:inline">Notes</span>
+                  <span className="ml-1 text-sm font-medium hidden sm:inline">
+                    Notes
+                  </span>
                 </div>
               }
               enabled={commentEnabled}
@@ -183,12 +187,25 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
               className="m-3 py-2 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-md transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
               onClick={() => setShowSelectVariantDialog(true)}
             >
-              <span>{selectedVariant ? selectedVariant.name : "Select Variant"}</span>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <span>
+                {selectedVariant ? selectedVariant.name : "Select Variant"}
+              </span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
               </svg>
             </button>
-            
+
             <div className="flex-1 overflow-auto px-2">
               <VariantMovementsSubpanel
                 moves={selectedVariant?.moves || []}
@@ -203,21 +220,27 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
           {/* Paneles condicionales */}
           {stockfishEnabled && (
             <div className="p-3 border-t border-slate-700 bg-slate-800">
-              <h3 className="text-sm font-medium text-slate-300 mb-2">Engine Analysis</h3>
+              <h3 className="text-sm font-medium text-slate-300 mb-2">
+                Engine Analysis
+              </h3>
               <StockfishSubpanel lines={lines} fen={fen} />
             </div>
           )}
-          
+
           {statisticsEnabled && (
             <div className="p-3 border-t border-slate-700 bg-slate-800">
-              <h3 className="text-sm font-medium text-slate-300 mb-2">Statistical Analysis</h3>
+              <h3 className="text-sm font-medium text-slate-300 mb-2">
+                Statistical Analysis
+              </h3>
               <StatisticsSubpanel fen={fen} />
             </div>
           )}
-          
+
           {commentEnabled && (
             <div className="p-3 border-t border-slate-700 bg-slate-800">
-              <h3 className="text-sm font-medium text-slate-300 mb-2">Position Notes</h3>
+              <h3 className="text-sm font-medium text-slate-300 mb-2">
+                Position Notes
+              </h3>
               <BoardComment comment={comment} updateComment={updateComment} />
             </div>
           )}

@@ -36,9 +36,9 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
     (variant) => variant.state === "inProgress"
   );
 
-  const handleCopyPgn = () => {
+  const handleCopyPgn = async () => {
     if (lastTrainVariant) {
-      const pgn = variantToPgn(lastTrainVariant.variant, turn, new Date());
+      const pgn = await variantToPgn(lastTrainVariant.variant, turn, new Date());
       navigator.clipboard.writeText(pgn);
     }
   };

@@ -3,7 +3,7 @@ import { Textarea } from "@headlessui/react";
 
 interface BoardCommentProps {
   comment: string;
-  updateComment: (comment: string) => void;
+  updateComment: (comment: string) => Promise<void>;
   editable?: boolean;
 }
 
