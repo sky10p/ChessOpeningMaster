@@ -552,7 +552,7 @@ describe("positionCommentService", () => {
               },
               update: {
                 $set: {
-                  comment: "Repertoire 1 comment",
+                  comment: "Repertoire 2 comment",
                   updatedAt: expect.any(Date),
                 },
                 $setOnInsert: {
@@ -875,7 +875,7 @@ describe("positionCommentService", () => {
     it("should handle interactive strategy with merge option", async () => {
       mockRepertoiresToArray.mockResolvedValue(mockRepertoires);
 
-      const mockAskQuestion = jest.fn().mockResolvedValue("4");
+      const mockAskQuestion = jest.fn().mockResolvedValue("3");
 
       const result = await migrateAllRepertoireComments(
         "interactive",
@@ -916,7 +916,7 @@ describe("positionCommentService", () => {
 
       const mockAskQuestion = jest
         .fn()
-        .mockResolvedValueOnce("5")
+        .mockResolvedValueOnce("4")
         .mockResolvedValueOnce("This is my custom comment for this position");
 
       const result = await migrateAllRepertoireComments(

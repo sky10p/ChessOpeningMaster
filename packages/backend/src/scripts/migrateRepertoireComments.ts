@@ -6,9 +6,9 @@ const askQuestion = (question: string): Promise<string> => {
   return new Promise((resolve) => {
     const rl = readline.createInterface({
       input: process.stdin,
-      output: process.stdout
+      output: process.stdout,
     });
-    
+
     rl.question(question, (answer) => {
       rl.close();
       resolve(answer.trim());
@@ -17,34 +17,52 @@ const askQuestion = (question: string): Promise<string> => {
 };
 
 const runMigration = async () => {
+  let client;
+
   try {
     console.log("Connecting to database...");
-    await connectDB();
-    
+    client = await connectDB();
+
     const interactiveMode = process.argv[2] === "interactive";
-    const conflictStrategy = interactiveMode 
-      ? "interactive" 
-      : (process.argv[2] as "keep_newest" | "keep_longest" | "merge" | "interactive" || "keep_longest");
-    
+    const conflictStrategy = interactiveMode
+      ? "interactive"
+      : (process.argv[2] as
+          | "keep_newest"
+          | "keep_longest"
+          | "merge"
+          | "interactive") || "keep_longest";
+
     console.log(`Using conflict strategy: ${conflictStrategy}`);
-    
-    console.log("Starting migration of repertoire comments to position comments...");
-    console.log("Note: Comments will be preserved in repertoires during migration.");
-    
+
+    console.log(
+      "Starting migration of repertoire comments to position comments..."
+    );
+    console.log(
+      "Note: Comments will be preserved in repertoires during migration."
+    );
+
     const migrationResults = await migrateAllRepertoireComments(
-      conflictStrategy as "keep_newest" | "keep_longest" | "merge" | "interactive",
+      conflictStrategy as
+        | "keep_newest"
+        | "keep_longest"
+        | "merge"
+        | "interactive",
       askQuestion
     );
-    
     console.log(`Migration completed successfully!`);
-    console.log(`Processed ${migrationResults.processedRepertoires} repertoires`);
+    console.log(
+      `Processed ${migrationResults.processedRepertoires} repertoires`
+    );
     console.log(`Migrated ${migrationResults.migratedComments} comments`);
     console.log(`Resolved ${migrationResults.conflicts} conflicts`);
-    
-    process.exit(0);
   } catch (error) {
     console.error("Migration failed:", error);
-    process.exit(1);
+    process.exitCode = 1;
+  } finally {
+    if (client) {
+      await client.close();
+      console.log("Database connection closed.");
+    }
   }
 };
 
