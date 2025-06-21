@@ -120,6 +120,9 @@ export const migrateAllRepertoireComments = async (
       finalComment = commentsList[0].comment;
     }
 
+    console.log(
+      `Migrating position ${fen} with comment: "${finalComment}" (conflict strategy: ${conflictStrategy})`
+    );
     bulkOperations.push({
       updateOne: {
         filter: { fen },
@@ -135,12 +138,19 @@ export const migrateAllRepertoireComments = async (
         upsert: true,
       },
     });
+    console.log(
+      `Position ${fen} migrated successfully with comment: "${finalComment}"`
+    );
 
     migratedComments++;
   }
 
   if (bulkOperations.length > 0) {
+    console.log(
+      `Executing bulk write for ${bulkOperations.length} position updates...`
+    );
     await positionsCollection.bulkWrite(bulkOperations, { ordered: false });
+    console.log("Bulk write completed successfully.");
   }
 
   return {
