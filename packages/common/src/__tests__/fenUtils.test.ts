@@ -95,6 +95,30 @@ describe("fenUtils", () => {  describe("getOrientationAwareFen", () => {
         const asymmetricPosition = "r6R/8/8/8/8/8/8/8 w - - 0 1";
         const result = getOrientationAwareFen(asymmetricPosition, "black");
         expect(result.split(" ")[0]).toBe("8/8/8/8/8/8/8/r6R");
+      });      it("should correctly flip complex asymmetric piece placements", () => {
+        const asymmetricPosition = "Q1b4k/1n6/8/3P4/2p5/8/6N1/K4B1q w - - 0 1";
+        const result = getOrientationAwareFen(asymmetricPosition, "black");
+        expect(result.split(" ")[0]).toBe("Q1b4k/1n6/8/5P2/4p3/8/6N1/K4B1q");
+      });
+
+      it("should handle asymmetric positions with mixed piece types", () => {
+        const asymmetricPosition = "8/1Q6/8/8/8/8/6q1/8 w - - 0 1";
+        const result = getOrientationAwareFen(asymmetricPosition, "black");
+        expect(result.split(" ")[0]).toBe("8/1Q6/8/8/8/8/6q1/8");
+      });
+
+      it("should correctly rotate diagonal asymmetric patterns", () => {
+        const diagonalPattern = "N7/1n6/2B5/3b4/4p3/5P2/6r1/7R w - - 0 1";
+        const result = getOrientationAwareFen(diagonalPattern, "black");
+        expect(result.split(" ")[0]).toBe("r7/1R6/2p5/3P4/4B3/5b2/6N1/7n");
+      });      it("should handle edge files and ranks asymmetry", () => {
+        const edgeAsymmetric = "n6N/8/8/8/8/8/8/p6P w - - 0 1";
+        const result = getOrientationAwareFen(edgeAsymmetric, "black");
+        expect(result.split(" ")[0]).toBe("p6P/8/8/8/8/8/8/n6N");
+      });      it("should handle comprehensive asymmetric board coverage", () => {
+        const complexAsymmetric = "r1b1k1n1/1p1p1p1p/8/8/8/8/1P1P1P1P/1N1K1B1R w - - 0 1";
+        const result = getOrientationAwareFen(complexAsymmetric, "black");
+        expect(result.split(" ")[0]).toBe("r1b1k1n1/p1p1p1p1/8/8/8/8/P1P1P1P1/1N1K1B1R");
       });
     });
 

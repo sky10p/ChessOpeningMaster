@@ -21,6 +21,10 @@ export const extractComments = (
   comments: Map<string, CommentData[]> = new Map(),
   orientation: BoardOrientation
 ): Map<string, CommentData[]> => {
+  if (!orientation) {
+    throw new Error("Orientation parameter is required for extractComments");
+  }
+
   if (moveNode.move && moveNode.comment) {
     const fen = getOrientationAwareFen(moveNode.move.after, orientation);
     if (!comments.has(fen)) {
@@ -64,10 +68,14 @@ export const migrateAllRepertoireComments = async (
   let migratedComments = 0;
   let conflicts = 0;
   const allComments = new Map<string, CommentData[]>();
-
   for (const repertoire of repertoires) {
     const orientation = repertoire.orientation;
-    const comments = extractComments(repertoire.moveNodes, new Map(), orientation);
+        
+    const comments = extractComments(
+      repertoire.moveNodes, 
+      new Map(), 
+      orientation || "white"
+    );
 
     comments.forEach((commentsList, fen) => {
       if (!allComments.has(fen)) {
