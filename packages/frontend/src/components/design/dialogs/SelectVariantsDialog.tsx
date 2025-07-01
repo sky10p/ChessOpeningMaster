@@ -10,6 +10,7 @@ import {
 } from "@headlessui/react";
 import { UiCheckbox } from "../../basic/UiCheckbox";
 import { useTrainVariantInfo } from "../../../hooks/useTrainVariantInfo";
+import { getVariantsFromCurrentPosition } from "../../../utils/variantUtils";
 
 interface SelectVariantsDialogProps {
   open: boolean;
@@ -38,50 +39,30 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
   multiple = true,
   currentMoveNode,
 }) => {
-  const {getTextColorFromVariant} = useTrainVariantInfo(repertoireId);
+  const {getTextColorFromVariant} = useTrainVariantInfo(repertoireId  );
   const [selectedVariants, setSelectedVariants] = useState<Set<number>>(
     new Set()
   );
   const [filterText, setFilterText] = useState("");
-  const [filterByPosition, setFilterByPosition] = useState(false);
+  const [filterByCurrentPosition, setFilterByCurrentPosition] = useState(false);
 
   const handleFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFilterText(event.target.value);
   };
 
-  const getVariantsFromCurrentPosition = (currentNode: MoveVariantNode, allVariants: Variant[]): Variant[] => {
-    if (currentNode.position === 0) {
-      return allVariants;
-    }
-    
-    const currentPath: string[] = [];
-    let node = currentNode;
-    while (node.parent !== null) {
-      currentPath.unshift(node.id);
-      node = node.parent;
-    }
-    
-    return allVariants.filter(variant => {
-      if (variant.moves.length < currentPath.length) {
-        return false;
-      }
-      
-      for (let i = 0; i < currentPath.length; i++) {
-        if (variant.moves[i].id !== currentPath[i]) {
-          return false;
-        }
-      }
-      
-      return true;
-    });
-  };
-
   const filteredVariantsByPosition = useMemo(() => {
-    if (!currentMoveNode || !filterByPosition) {
+    if (!currentMoveNode || !filterByCurrentPosition) {
       return variants;
     }
     return getVariantsFromCurrentPosition(currentMoveNode, variants);
-  }, [variants, currentMoveNode, filterByPosition]);
+  }, [variants, currentMoveNode, filterByCurrentPosition]);
+
+  const positionFilterCount = useMemo(() => {
+    if (!currentMoveNode) {
+      return 0;
+    }
+    return getVariantsFromCurrentPosition(currentMoveNode, variants).length;
+  }, [currentMoveNode, variants]);
 
   const variantIndexMap = useMemo(() => {
     const map = new Map<string, number>();
@@ -125,7 +106,7 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
     if (open) {
       setSelectedVariants(new Set());
       setFilterText("");
-      setFilterByPosition(false);
+      setFilterByCurrentPosition(false);
     }
   }, [open]);
 
@@ -237,9 +218,9 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
           {currentMoveNode && currentMoveNode.position > 0 && (
             <div className="mb-4">
               <UiCheckbox
-                label={`Filter by current position (${filteredVariantsByPosition.length} variants available)`}
-                checked={filterByPosition}
-                onChange={setFilterByPosition}
+                label={`Filter by current position (${positionFilterCount} variants available)`}
+                checked={filterByCurrentPosition}
+                onChange={setFilterByCurrentPosition}
                 className="ml-2 text-textLight"
               />
             </div>
