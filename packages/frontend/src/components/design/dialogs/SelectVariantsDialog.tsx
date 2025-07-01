@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Variant } from "../../../models/chess.models";
+import { MoveVariantNode } from "../../../models/VariantNode";
 import {
   Dialog,
   DialogBackdrop,
@@ -19,6 +20,7 @@ interface SelectVariantsDialogProps {
   onConfirm: (variants: Variant[]) => void;
   onClose: (isCancelled: boolean) => void;
   multiple?: boolean;
+  currentMoveNode?: MoveVariantNode;
 }
 
 interface GroupedVariant extends Variant {
@@ -34,27 +36,63 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
   onConfirm,
   onClose,
   multiple = true,
+  currentMoveNode,
 }) => {
   const {getTextColorFromVariant} = useTrainVariantInfo(repertoireId);
   const [selectedVariants, setSelectedVariants] = useState<Set<number>>(
     new Set()
   );
   const [filterText, setFilterText] = useState("");
+  const [filterByPosition, setFilterByPosition] = useState(false);
 
   const handleFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFilterText(event.target.value);
   };
 
+  const getVariantsFromCurrentPosition = (currentNode: MoveVariantNode, allVariants: Variant[]): Variant[] => {
+    if (currentNode.position === 0) {
+      return allVariants;
+    }
+    
+    const currentPath: string[] = [];
+    let node = currentNode;
+    while (node.parent !== null) {
+      currentPath.unshift(node.id);
+      node = node.parent;
+    }
+    
+    return allVariants.filter(variant => {
+      if (variant.moves.length < currentPath.length) {
+        return false;
+      }
+      
+      for (let i = 0; i < currentPath.length; i++) {
+        if (variant.moves[i].id !== currentPath[i]) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+  };
+
+  const filteredVariantsByPosition = useMemo(() => {
+    if (!currentMoveNode || !filterByPosition) {
+      return variants;
+    }
+    return getVariantsFromCurrentPosition(currentMoveNode, variants);
+  }, [variants, currentMoveNode, filterByPosition]);
+
   const groupedVariantsByName = useMemo(() => {
-    return variants.reduce((groupedVariants, variant, index) => {
+    return filteredVariantsByPosition.reduce((groupedVariants, variant) => {
       const groupName = variant.name;
       if (!groupedVariants[groupName]) {
         groupedVariants[groupName] = [];
       }
-      groupedVariants[groupName].push({ ...variant, originalIndex: index });
+      groupedVariants[groupName].push({ ...variant, originalIndex: variants.indexOf(variant) });
       return groupedVariants;
     }, {} as Record<string, GroupedVariant[]>);
-  }, [variants]);
+  }, [filteredVariantsByPosition, variants]);
 
   const filteredGroupedVariantsByName = useMemo(() => {
     return Object.keys(groupedVariantsByName).reduce(
@@ -76,6 +114,7 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
     if (open) {
       setSelectedVariants(new Set());
       setFilterText("");
+      setFilterByPosition(false);
     }
   }, [open]);
 
@@ -99,10 +138,17 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
 
   const handleSelectAll = () => {
     if (!multiple) return;
-    if (selectedVariants.size === variants.length) {
-      setSelectedVariants(new Set());
+    const currentVariantIndices = filteredVariantsByPosition.map(variant => variants.indexOf(variant));
+    const allCurrentSelected = currentVariantIndices.every(index => selectedVariants.has(index));
+    
+    if (allCurrentSelected) {
+      const newSelectedVariants = new Set(selectedVariants);
+      currentVariantIndices.forEach(index => newSelectedVariants.delete(index));
+      setSelectedVariants(newSelectedVariants);
     } else {
-      setSelectedVariants(new Set(variants.map((variant, index) => index)));
+      const newSelectedVariants = new Set(selectedVariants);
+      currentVariantIndices.forEach(index => newSelectedVariants.add(index));
+      setSelectedVariants(newSelectedVariants);
     }
   };
 
@@ -136,7 +182,9 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
     handleClose(false);
   };
 
-  const isAllSelected = selectedVariants.size === variants.length;
+  const currentVariantIndices = filteredVariantsByPosition.map(variant => variants.indexOf(variant));
+  const isAllSelected = currentVariantIndices.length > 0 && currentVariantIndices.every(index => selectedVariants.has(index));
+  const isSomeSelected = currentVariantIndices.some(index => selectedVariants.has(index)) && !isAllSelected;
   const isGroupSelected = (groupName: string) => {
     const group = groupedVariantsByName[groupName];
     return group.every((variant) =>
@@ -150,7 +198,6 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
       !isGroupSelected(groupName)
     );
   };
-  const isSomeSelected = selectedVariants.size > 0 && !isAllSelected;
 
   return (
     <Dialog
@@ -174,6 +221,16 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
             value={filterText}
             onChange={handleFilterChange}
           />
+          {currentMoveNode && currentMoveNode.position > 0 && (
+            <div className="mb-4">
+              <UiCheckbox
+                label={`Filter by current position (${filteredVariantsByPosition.length} variants available)`}
+                checked={filterByPosition}
+                onChange={setFilterByPosition}
+                className="ml-2 text-textLight"
+              />
+            </div>
+          )}
           {multiple && (
             <div className="mb-4">
               <UiCheckbox
