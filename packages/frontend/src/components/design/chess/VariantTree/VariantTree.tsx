@@ -151,9 +151,10 @@ const VariantTree: React.FC<VariantTreeProps> = ({
         open={showSelectVariantDialog}
         multiple={false}
         title="Select Variant"
-        contentText="Choose a single variant"
+        contentText="Choose a single variant from current position"
         variants={variants}
         repertoireId={repertoireId}
+        currentMoveNode={currentMoveNode}
         onConfirm={(selected) => {
           if (selected.length > 0) {
             setSelectedVariant(selected[0]);
