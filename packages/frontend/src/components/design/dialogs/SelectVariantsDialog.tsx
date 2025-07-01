@@ -84,9 +84,9 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
   }, [variants, currentMoveNode, filterByPosition]);
 
   const variantIndexMap = useMemo(() => {
-    const map = new Map();
+    const map = new Map<string, number>();
     variants.forEach((variant, index) => {
-      map.set(variant, index);
+      map.set(variant.fullName, index);
     });
     return map;
   }, [variants]);
@@ -97,7 +97,7 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
       if (!groupedVariants[groupName]) {
         groupedVariants[groupName] = [];
       }
-      const originalIndex = variantIndexMap.get(variant);
+      const originalIndex = variantIndexMap.get(variant.fullName);
       if (originalIndex !== undefined) {
         groupedVariants[groupName].push({ ...variant, originalIndex });
       }
@@ -147,9 +147,12 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
     }
   };
 
+  const currentVariantIndices = useMemo(() => {
+    return filteredVariantsByPosition.map(variant => variantIndexMap.get(variant.fullName)).filter(index => index !== undefined) as number[];
+  }, [filteredVariantsByPosition, variantIndexMap]);
+
   const handleSelectAll = () => {
     if (!multiple) return;
-    const currentVariantIndices = filteredVariantsByPosition.map(variant => variantIndexMap.get(variant)).filter(index => index !== undefined) as number[];
     const allCurrentSelected = currentVariantIndices.every(index => selectedVariants.has(index));
     
     if (allCurrentSelected) {
@@ -193,7 +196,6 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
     handleClose(false);
   };
 
-  const currentVariantIndices = filteredVariantsByPosition.map(variant => variantIndexMap.get(variant)).filter(index => index !== undefined) as number[];
   const isAllSelected = currentVariantIndices.length > 0 && currentVariantIndices.every(index => selectedVariants.has(index));
   const isSomeSelected = currentVariantIndices.some(index => selectedVariants.has(index)) && !isAllSelected;
   const isGroupSelected = (groupName: string) => {
