@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Variant } from "../../../models/chess.models";
-import { MoveVariantNode } from "../../../models/VariantNode";
+import { MoveVariantNode } from "@chess-opening-master/common";
 import {
   Dialog,
   DialogBackdrop,

@@ -9,9 +9,10 @@ export const getVariantsFromCurrentPosition = (currentNode: MoveVariantNode, all
   const currentPath: string[] = [];
   let node = currentNode;
   while (node.parent !== null) {
-    currentPath.unshift(node.id);
+    currentPath.push(node.id);
     node = node.parent;
   }
+  currentPath.reverse();
   
   return allVariants.filter(variant => {
     if (variant.moves.length < currentPath.length) {

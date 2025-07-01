@@ -31,7 +31,7 @@ const createMockVariant = (moves: { id: string }[], name: string, fullName: stri
   differentMoves: '',
 });
 
-describe('SelectVariantsDialog - getVariantsFromCurrentPosition', () => {
+describe('SelectVariantsDialog', () => {
   const mockOnConfirm = jest.fn();
   const mockOnClose = jest.fn();
 
