@@ -83,16 +83,27 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
     return getVariantsFromCurrentPosition(currentMoveNode, variants);
   }, [variants, currentMoveNode, filterByPosition]);
 
+  const variantIndexMap = useMemo(() => {
+    const map = new Map();
+    variants.forEach((variant, index) => {
+      map.set(variant, index);
+    });
+    return map;
+  }, [variants]);
+
   const groupedVariantsByName = useMemo(() => {
     return filteredVariantsByPosition.reduce((groupedVariants, variant) => {
       const groupName = variant.name;
       if (!groupedVariants[groupName]) {
         groupedVariants[groupName] = [];
       }
-      groupedVariants[groupName].push({ ...variant, originalIndex: variants.indexOf(variant) });
+      const originalIndex = variantIndexMap.get(variant);
+      if (originalIndex !== undefined) {
+        groupedVariants[groupName].push({ ...variant, originalIndex });
+      }
       return groupedVariants;
     }, {} as Record<string, GroupedVariant[]>);
-  }, [filteredVariantsByPosition, variants]);
+  }, [filteredVariantsByPosition, variantIndexMap]);
 
   const filteredGroupedVariantsByName = useMemo(() => {
     return Object.keys(groupedVariantsByName).reduce(
@@ -138,7 +149,7 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
 
   const handleSelectAll = () => {
     if (!multiple) return;
-    const currentVariantIndices = filteredVariantsByPosition.map(variant => variants.indexOf(variant));
+    const currentVariantIndices = filteredVariantsByPosition.map(variant => variantIndexMap.get(variant)).filter(index => index !== undefined) as number[];
     const allCurrentSelected = currentVariantIndices.every(index => selectedVariants.has(index));
     
     if (allCurrentSelected) {
@@ -182,7 +193,7 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
     handleClose(false);
   };
 
-  const currentVariantIndices = filteredVariantsByPosition.map(variant => variants.indexOf(variant));
+  const currentVariantIndices = filteredVariantsByPosition.map(variant => variantIndexMap.get(variant)).filter(index => index !== undefined) as number[];
   const isAllSelected = currentVariantIndices.length > 0 && currentVariantIndices.every(index => selectedVariants.has(index));
   const isSomeSelected = currentVariantIndices.some(index => selectedVariants.has(index)) && !isAllSelected;
   const isGroupSelected = (groupName: string) => {
