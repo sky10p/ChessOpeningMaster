@@ -9,5 +9,6 @@ module.exports = {
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   moduleNameMapper: {
     '^chess\\.js$': '<rootDir>/src/__mocks__/chess.js.ts',
+    '\\.(svg|png|jpg|jpeg|gif|webp)$': 'jest-transform-stub',
   },
 };

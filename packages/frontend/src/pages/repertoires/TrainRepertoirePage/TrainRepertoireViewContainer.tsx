@@ -163,6 +163,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
               finishedTrain={finishedTrain}
               trainVariants={trainVariants}
               lastTrainVariant={lastTrainVariant}
+              repertoireId={repertoireId}
             />
           )}
           {panelSelected === "help" && (
@@ -182,6 +183,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
             finishedTrain={finishedTrain}
             trainVariants={trainVariants}
             lastTrainVariant={lastTrainVariant}
+            repertoireId={repertoireId}
           />
           
           
@@ -197,6 +199,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
       trainVariants,
       lastTrainVariant,
       allowedMoves,
+      repertoireId,
     ]
   );
 

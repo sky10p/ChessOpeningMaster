@@ -19,6 +19,7 @@ import { Variant } from "../../../../models/chess.models";
 import { BoardComment } from "../BoardComment";
 import { RepertoireInfoActions } from "./RepertoireInfoActions/RepertoireInfoActions";
 import { RepertoireInfoAction } from "./RepertoireInfoActions/model";
+import { useNavigationUtils } from "../../../../utils/navigationUtils";
 
 const NUM_LINES = 3;
 
@@ -68,6 +69,7 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
   deleteVariant,
   toggleMenu,
 }) => {
+  const { goToTrainRepertoire } = useNavigationUtils();
   const isSelected = (node: MoveVariantNode) => node === currentMoveNode;
 
   const [showSelectVariantDialog, setShowSelectVariantDialog] = useState(false);
@@ -106,6 +108,10 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
   ];
 
   const secondaryActions = [
+    {
+      name: "Train variant",
+      action: () => selectedVariant && goToTrainRepertoire(repertoireId, selectedVariant.fullName),
+    },
     {
       name: "Copy variant to repertoire",
       action: () => selectedVariant && copyVariantToRepertoire(selectedVariant),
