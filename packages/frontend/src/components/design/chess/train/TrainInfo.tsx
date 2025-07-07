@@ -1,6 +1,6 @@
 import React from "react";
 import { Disclosure } from "@headlessui/react";
-import { ChevronUpIcon } from "@heroicons/react/20/solid";
+import { ChevronUpIcon, PencilIcon } from "@heroicons/react/20/solid";
 import whiteKing from "../../../../assets/white-king.svg";
 import blackKing from "../../../../assets/black-king.svg";
 import { getMovementsFromVariant } from "../../../../utils/chess/variants/getMovementsFromVariants";
@@ -8,6 +8,7 @@ import { TrainVariant } from "../../../../models/chess.models";
 import { MoveVariantNode } from "../../../../models/VariantNode";
 import { variantToPgn } from "../../../../utils/chess/pgn/pgn.utils";
 import { Turn } from "@chess-opening-master/common";
+import { useNavigationUtils } from "../../../../utils/navigationUtils";
 
 interface TrainInfoProps {
   turn: Turn;
@@ -16,6 +17,7 @@ interface TrainInfoProps {
   finishedTrain: boolean;
   lastTrainVariant: TrainVariant | undefined;
   currentMoveNode: MoveVariantNode;
+  repertoireId: string;
 }
 
 const TrainInfo: React.FC<TrainInfoProps> = ({
@@ -24,8 +26,11 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
   trainVariants,
   finishedTrain,
   lastTrainVariant,
-  currentMoveNode
+  currentMoveNode,
+  repertoireId
 }) => {
+
+  const { goToRepertoire } = useNavigationUtils();
 
   const currentVariant = trainVariants.filter(
     (variant) => variant.state === "finished"
@@ -43,6 +48,12 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
     }
   };
 
+  const handleEditVariant = () => {
+    if (lastTrainVariant) {
+      goToRepertoire(repertoireId, lastTrainVariant.variant.fullName);
+    }
+  };
+
   return (
     <div className="shadow rounded-lg p-6 bg-gray-800">
       {lastTrainVariant && (
@@ -50,12 +61,21 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
           <h2 className="text-lg font-semibold text-gray-200 dark:text-gray-300">Last Finished Variant</h2>
           <div className="flex justify-between items-center mt-2">
             <span className="text-md text-gray-400 dark:text-gray-500">{lastTrainVariant.variant.fullName}</span>
-            <button
-              onClick={handleCopyPgn}
-              className="bg-accent text-primary px-3 py-1 rounded hover:bg-yellow-500 transition-colors"
-            >
-              Copy PGN
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={handleCopyPgn}
+                className="bg-accent text-primary px-3 py-1 rounded hover:bg-yellow-500 transition-colors"
+              >
+                Copy PGN
+              </button>
+              <button
+                onClick={handleEditVariant}
+                className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors flex items-center gap-1"
+              >
+                <PencilIcon className="h-4 w-4" />
+                Edit
+              </button>
+            </div>
           </div>
         </div>
       )}
