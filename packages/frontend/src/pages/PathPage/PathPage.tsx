@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { usePaths } from "../../hooks/usePaths";
 import { useDialogContext } from "../../contexts/DialogContext";
+import { useNavigationUtils } from "../../utils/navigationUtils";
+import { useNavigate } from "react-router-dom";
 import { AcademicCapIcon, BookOpenIcon, ArrowPathIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { isEmptyPath, isNewVariantPath, isStudiedVariantPath, isStudyPath } from "./helpers";
 import { PathCategory } from "@chess-opening-master/common";
@@ -13,6 +15,8 @@ const formatDate = (date: string | Date): string => {
 const PathPage: React.FC = () => {
   const { path, loading, error, loadPath, removeVariantFromPath } = usePaths();
   const { showConfirmDialog } = useDialogContext();
+  const { goToRepertoire, goToTrainRepertoire } = useNavigationUtils();
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<PathCategory | "all">("all");
 
   useEffect(() => {
@@ -22,19 +26,19 @@ const PathPage: React.FC = () => {
 
   const goToStudy = () => {
     if (isStudyPath(path)) {
-      window.location.href = `/studies?groupId=${path.groupId}&studyId=${path.studyId}`;
+      navigate(`/studies?groupId=${encodeURIComponent(path.groupId)}&studyId=${encodeURIComponent(path.studyId)}`);
     }
   };
 
   const goToTrainVariant = () => {
     if (isStudiedVariantPath(path) || isNewVariantPath(path)) {
-      window.location.href = `/repertoire/train/${path.repertoireId}?variantName=${path.name}`;
+      goToTrainRepertoire(path.repertoireId, path.name);
     }
   };
 
   const goToReviewVariant = () => {
     if (isStudiedVariantPath(path) || isNewVariantPath(path)) {
-      window.location.href = `/repertoire/${path.repertoireId}?variantName=${path.name}`;
+      goToRepertoire(path.repertoireId, path.name);
     }
   };
 
