@@ -25,7 +25,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
     "info" | "help" | "trainComments"
   >("info");
   const navigate = useNavigate();
-  const { repertoireId, repertoireName, currentMoveNode, variants, updateComment } =
+  const { repertoireId, repertoireName, currentMoveNode, orientation, variants, updateComment } =
     useRepertoireContext();
   const { showTrainVariantsDialog, showNumberDialog } = useDialogContext();
   const { addIcon: addIconHeader, removeIcon: removeIconHeader } =
@@ -170,12 +170,12 @@ const TrainRepertoireViewContainer: React.FC = () => {
             <HelpInfo allowedMoves={allowedMoves} isYourTurn={isYourTurn} />
           )}
           {panelSelected === "trainComments" && (
-            <HintInfo currentMoveNode={currentMoveNode} updateComment={updateComment} />
+            <HintInfo currentMoveNode={currentMoveNode} orientation={orientation} updateComment={updateComment} />
           )}
         </div>
         <div className="hidden sm:flex flex-col space-y-4 h-full">
-          <div className="h-2/5"><HintInfo currentMoveNode={currentMoveNode} updateComment={updateComment} /></div>
-          
+          <div className="h-2/5"><HintInfo currentMoveNode={currentMoveNode} orientation={orientation} updateComment={updateComment} /></div>
+
           <TrainInfo
             currentMoveNode={currentMoveNode}
             turn={turn}
