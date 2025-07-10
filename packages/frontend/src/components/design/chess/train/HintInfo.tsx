@@ -4,13 +4,15 @@ import { MoveVariantNode } from "../../../../models/VariantNode";
 import { Textarea } from "@headlessui/react";
 import { useDialogContext } from "../../../../contexts/DialogContext";
 import { getPositionComment } from "../../../../repository/positions/positions";
+import { BoardOrientation, getOrientationAwareFen } from "@chess-opening-master/common";
 
 interface HintInfoProps {
   currentMoveNode: MoveVariantNode;
+  orientation: BoardOrientation;
   updateComment: (comment: string) => Promise<void>;
 }
 
-const getFenForNode = (node: MoveVariantNode): string => {
+const getFenForNode = (node: MoveVariantNode, orientation: BoardOrientation): string => {
   const movePath: MoveVariantNode[] = [];
   let currentNode: MoveVariantNode | null = node;
 
@@ -24,11 +26,13 @@ const getFenForNode = (node: MoveVariantNode): string => {
     chess.move(moveNode.getMove());
   }
 
-  return chess.fen();
+  const fen = chess.fen();
+  return getOrientationAwareFen(fen, orientation);
 };
 
 export const HintInfo: React.FC<HintInfoProps> = ({
   currentMoveNode,
+  orientation,
   updateComment,
 }) => {
   const { showTextAreaDialog } = useDialogContext();
@@ -42,7 +46,7 @@ export const HintInfo: React.FC<HintInfoProps> = ({
         comments.push(node.toString());
 
         try {
-          const positionFen = getFenForNode(node);
+          const positionFen = getFenForNode(node, orientation);
           const comment = await getPositionComment(positionFen);
           comments.push(comment || "No comment");
         } catch (error) {
@@ -64,7 +68,7 @@ export const HintInfo: React.FC<HintInfoProps> = ({
   }, [loadHints]);
   const handleUpdateComment = async () => {
     try {
-      const positionFen = getFenForNode(currentMoveNode);
+      const positionFen = getFenForNode(currentMoveNode, orientation);
       const currentComment = await getPositionComment(positionFen);
 
       showTextAreaDialog({
