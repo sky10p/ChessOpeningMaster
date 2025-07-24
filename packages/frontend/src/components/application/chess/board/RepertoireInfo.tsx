@@ -1,11 +1,14 @@
 import React from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { RepertoireInfoPanel } from "../../../design/chess/RepertoireInfoPanel/RepertoireInfoPanel";
 import { useRepertoireContext } from "../../../../contexts/RepertoireContext";
 import { useRepertoireInfo } from "../../../../hooks/useRepertoireInfo";
 import { useMenuContext } from "../../../../contexts/MenuContext";
-import { useLocation } from "react-router-dom";
+import { Variant } from "../../../../models/chess.models";
 
 export const RepertoireInfo = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const {
     variants,
     currentMoveNode,
@@ -18,23 +21,25 @@ export const RepertoireInfo = () => {
     selectedVariant,
     setSelectedVariant,
     repertoireId,
+    initBoard,
   } = useRepertoireContext();
 
-  const location = useLocation();
-  const params = new URLSearchParams(location.search);
-  const variantNameParam = params.get("variantName");
-  const pathVariant = variants.find(
-    (variant) => variant.name === variantNameParam || variant.fullName === variantNameParam
-  );
-  const defaultVariant = pathVariant ?? variants[0];
-
-  React.useEffect(() => {
-    if (!selectedVariant && defaultVariant) {
-      setSelectedVariant(defaultVariant);
-    }
-  }, [selectedVariant, defaultVariant, setSelectedVariant]);
-
   const { toggleMenu } = useMenuContext();
+
+  const handleVariantChange = (variant: Variant | null) => {
+    setSelectedVariant(variant);
+    initBoard();
+    
+    const currentParams = new URLSearchParams(location.search);
+    if (variant?.fullName) {
+      currentParams.set("variantName", variant.fullName);
+    } else {
+      currentParams.delete("variantName");
+    }
+    
+    const newUrl = `${location.pathname}?${currentParams.toString()}`;
+    navigate(newUrl, { replace: true });
+  };
 
   const { downloadVariantPGN, copyVariantPGN,copyVariantToRepertoire,copyVariantsToRepertoire,deleteVariants, deleteVariant } =
     useRepertoireInfo();
@@ -47,8 +52,8 @@ export const RepertoireInfo = () => {
       goToMove={goToMove}
       deleteMove={deleteMove}
       changeNameMove={changeNameMove}
-      selectedVariant={selectedVariant || defaultVariant}
-      setSelectedVariant={setSelectedVariant}
+      selectedVariant={selectedVariant || variants[0]}
+      setSelectedVariant={handleVariantChange}
       comment={comment}
       updateComment={updateComment}
       copyVariantPGN={copyVariantPGN}

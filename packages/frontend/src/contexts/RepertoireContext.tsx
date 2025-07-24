@@ -1,5 +1,6 @@
 import { Chess, Move } from "chess.js";
 import React, { useCallback, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { MoveVariantNode } from "../models/VariantNode";
 import { Variant } from "../models/chess.models";
 import { useAlertContext } from "./AlertContext";
@@ -116,6 +117,7 @@ export const RepertoireContextProvider: React.FC<
 
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
 
+  const location = useLocation();
   const { showAlert } = useAlertContext();
 
   useEffect(() => {
@@ -156,7 +158,15 @@ export const RepertoireContextProvider: React.FC<
     setVariants(newVariants);
 
     if (newVariants.length > 0 && !selectedVariant) {
-      setSelectedVariant(newVariants[0]);
+      const params = new URLSearchParams(location.search);
+      const variantNameParam = params.get("variantName");
+      
+      const pathVariant = newVariants.find(
+        (variant) => variant.name === variantNameParam || variant.fullName === variantNameParam
+      );
+      const defaultVariant = pathVariant ?? newVariants[0];
+      
+      setSelectedVariant(defaultVariant);
     }
   };
 
