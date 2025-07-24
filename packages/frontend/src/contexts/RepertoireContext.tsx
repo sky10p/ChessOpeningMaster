@@ -153,6 +153,24 @@ export const RepertoireContextProvider: React.FC<
     loadComment();
   }, [currentMove, orientation]);
 
+  const getSelectedVariantMove = useCallback(() => {
+    if (!selectedVariant || currentMove.position >= selectedVariant.moves.length) {
+      return undefined;
+    }
+    return selectedVariant.moves[currentMove.position].getMove().san;
+  }, [selectedVariant, currentMove.position]);
+
+  const isValidSelectedVariantPosition = useCallback(() => {
+    return selectedVariant && currentMove.position < selectedVariant.moves.length;
+  }, [selectedVariant, currentMove.position]);
+
+  const getSelectedVariantMoveNode = useCallback(() => {
+    if (!isValidSelectedVariantPosition() || !selectedVariant) {
+      return undefined;
+    }
+    return selectedVariant.moves[currentMove.position];
+  }, [selectedVariant, currentMove.position, isValidSelectedVariantPosition]);
+
   const updateVariants = () => {
     const newVariants = moveHistory.getVariants();
     setVariants(newVariants);
@@ -191,10 +209,7 @@ export const RepertoireContextProvider: React.FC<
     }
 
     if (currentMove.children.length > 1) {
-      const selectedVariantMove = selectedVariant && 
-        currentMove.position < selectedVariant.moves.length 
-        ? selectedVariant.moves[currentMove.position].getMove().san 
-        : undefined;
+      const selectedVariantMove = getSelectedVariantMove();
 
       showSelectNextMoveDialog({
         title: "Select next move",
@@ -206,9 +221,8 @@ export const RepertoireContextProvider: React.FC<
           );
           if (!nextMoveVarianteNode) return;
 
-          const isSelectedMoveInCurrentVariant = selectedVariant &&
-            currentMove.position < selectedVariant.moves.length &&
-            nextMoveVarianteNode.id === selectedVariant.moves[currentMove.position].id;
+          const isSelectedMoveInCurrentVariant = isValidSelectedVariantPosition() &&
+            nextMoveVarianteNode.id === getSelectedVariantMoveNode()?.id;
 
           if (isSelectedMoveInCurrentVariant) {
             chess.move(nextMoveVarianteNode.getMove());
@@ -237,10 +251,10 @@ export const RepertoireContextProvider: React.FC<
   const nextFollowingVariant = () => {
     if (currentMove.children.length === 0) return;
     
-    if (selectedVariant && currentMove.position < selectedVariant.moves.length) {
-      const nextMoveInSelectedVariant = selectedVariant.moves[currentMove.position];
+    if (isValidSelectedVariantPosition()) {
+      const nextMoveInSelectedVariant = getSelectedVariantMoveNode();
       const nextMoveVarianteNode = currentMove.children.find(
-        (child) => child.id === nextMoveInSelectedVariant.id
+        (child) => child.id === nextMoveInSelectedVariant?.id
       );
       
       if (nextMoveVarianteNode) {

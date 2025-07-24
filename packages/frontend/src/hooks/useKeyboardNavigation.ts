@@ -40,16 +40,6 @@ export const useKeyboardNavigation = ({
             }
           }
           break;
-        case ' ':
-          event.preventDefault();
-          if (hasNext()) {
-            if (selectedVariant) {
-              nextFollowingVariant();
-            } else {
-              next();
-            }
-          }
-          break;
       }
     };
 

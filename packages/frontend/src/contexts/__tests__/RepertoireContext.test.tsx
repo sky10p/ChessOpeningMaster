@@ -1,6 +1,7 @@
 import React from "react";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { Move } from "chess.js";
+import { MemoryRouter } from "react-router-dom";
 import {
   RepertoireContextProvider,
   useRepertoireContext,
@@ -41,20 +42,26 @@ const createMockMove = (san: string): Move => ({
   after: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
 });
 
-const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <AlertContextProvider>
-    <DialogContextProvider>
-      <HeaderContextProvider>{children}</HeaderContextProvider>
-    </DialogContextProvider>
-  </AlertContextProvider>
+const TestWrapper: React.FC<{ children: React.ReactNode; initialEntries?: string[] }> = ({ 
+  children, 
+  initialEntries = ['/'] 
+}) => (
+  <MemoryRouter initialEntries={initialEntries}>
+    <AlertContextProvider>
+      <DialogContextProvider>
+        <HeaderContextProvider>{children}</HeaderContextProvider>
+      </DialogContextProvider>
+    </AlertContextProvider>
+  </MemoryRouter>
 );
 
 const createRepertoireProvider = (
   orientation: BoardOrientation = "white",
-  initialMoves?: undefined
+  initialMoves?: undefined,
+  initialEntries?: string[]
 ) => {
   const Component: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <TestWrapper>
+    <TestWrapper initialEntries={initialEntries}>
       <RepertoireContextProvider
         repertoireId="test-repertoire-id"
         repertoireName="Test Repertoire"
@@ -379,6 +386,57 @@ describe("RepertoireContext", () => {
       });
 
       expect(mockGetPositionComment).toHaveBeenCalledTimes(4);
+    });
+  });
+});
+
+describe("RepertoireContext - Variant Identification", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGetPositionComment.mockResolvedValue(null);
+  });
+
+  it("should identify variants correctly from the context", async () => {
+    const Provider = createRepertoireProvider("white", undefined, ['/repertoire/test-id/variants']);
+
+    const { result } = renderHook(() => useRepertoireContext(), {
+      wrapper: Provider,
+    });
+
+    await waitFor(() => {
+      expect(result.current.variants).toBeDefined();
+      expect(Array.isArray(result.current.variants)).toBe(true);
+    });
+  });
+
+  it("should handle variant selection state properly", async () => {
+    const Provider = createRepertoireProvider("white", undefined, ['/repertoire/test-id/variants']);
+
+    const { result } = renderHook(() => useRepertoireContext(), {
+      wrapper: Provider,
+    });
+
+    await waitFor(() => {
+      expect(result.current.selectedVariant).toBeDefined();
+      expect(result.current.setSelectedVariant).toBeDefined();
+      expect(typeof result.current.setSelectedVariant).toBe('function');
+    });
+  });
+
+  it("should navigate correctly through move history", async () => {
+    const Provider = createRepertoireProvider("white");
+
+    const { result } = renderHook(() => useRepertoireContext(), {
+      wrapper: Provider,
+    });
+
+    await waitFor(() => {
+      expect(result.current.moveHistory).toBeDefined();
+      expect(result.current.currentMoveNode).toBeDefined();
+      expect(result.current.next).toBeDefined();
+      expect(result.current.prev).toBeDefined();
+      expect(typeof result.current.next).toBe('function');
+      expect(typeof result.current.prev).toBe('function');
     });
   });
 });
