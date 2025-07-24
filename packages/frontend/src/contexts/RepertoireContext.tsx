@@ -117,18 +117,20 @@ export const RepertoireContextProvider: React.FC<
 
   const location = useLocation();
 
-  const getInitialSelectedVariant = (availableVariants: Variant[]): Variant | null => {
+  const variantNameFromUrl = React.useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get("variantName");
+  }, [location.search]);
+
+  const getInitialSelectedVariant = React.useCallback((availableVariants: Variant[]): Variant | null => {
     if (availableVariants.length === 0) return null;
     
-    const params = new URLSearchParams(location.search);
-    const variantNameParam = params.get("variantName");
-    
     const pathVariant = availableVariants.find(
-      (variant) => variant.name === variantNameParam || variant.fullName === variantNameParam
+      (variant) => variant.name === variantNameFromUrl || variant.fullName === variantNameFromUrl
     );
     
     return pathVariant ?? availableVariants[0];
-  };
+  }, [variantNameFromUrl]);
 
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(
     getInitialSelectedVariant(moveHistory.getVariants())
