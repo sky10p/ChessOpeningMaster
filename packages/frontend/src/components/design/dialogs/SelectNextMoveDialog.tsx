@@ -28,7 +28,7 @@ const SelectNextMoveDialog: React.FC<SelectNextMoveDialogProps> = ({
   onConfirm,
   onClose,
 }) => {
-  const memoizedNextMovements = useMemo(() => nextMovements, [nextMovements.join(',')]);
+  const memoizedNextMovements = useMemo(() => nextMovements, [JSON.stringify(nextMovements)]);
   
   const [selectedNextMove, setSelectedNextMove] = useState<string>(
     selectedVariantMove || memoizedNextMovements[0]

@@ -115,17 +115,36 @@ export const RepertoireContextProvider: React.FC<
 
   const [currentMove, setCurrentMove] = useState<MoveVariantNode>(moveHistory);
 
-  const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
-
   const location = useLocation();
+
+  const getInitialSelectedVariant = (availableVariants: Variant[]): Variant | null => {
+    if (availableVariants.length === 0) return null;
+    
+    const params = new URLSearchParams(location.search);
+    const variantNameParam = params.get("variantName");
+    
+    const pathVariant = availableVariants.find(
+      (variant) => variant.name === variantNameParam || variant.fullName === variantNameParam
+    );
+    
+    return pathVariant ?? availableVariants[0];
+  };
+
+  const [selectedVariant, setSelectedVariant] = useState<Variant | null>(
+    getInitialSelectedVariant(moveHistory.getVariants())
+  );
   const { showAlert } = useAlertContext();
 
   useEffect(() => {
-    setMoveHistory(
-      initialMoves
-        ? MoveVariantNode.initMoveVariantNode(initialMoves)
-        : new MoveVariantNode()
-    );
+    const newMoveHistory = initialMoves
+      ? MoveVariantNode.initMoveVariantNode(initialMoves)
+      : new MoveVariantNode();
+    
+    setMoveHistory(newMoveHistory);
+    
+    const newVariants = newMoveHistory.getVariants();
+    const newSelectedVariant = getInitialSelectedVariant(newVariants);
+    setSelectedVariant(newSelectedVariant);
 
     chess.reset();
   }, [initialMoves]);
@@ -171,20 +190,61 @@ export const RepertoireContextProvider: React.FC<
     return selectedVariant.moves[currentMove.position];
   }, [selectedVariant, currentMove.position, isValidSelectedVariantPosition]);
 
+  const checkIfCurrentVariantMove = (
+    moveNode: MoveVariantNode,
+    isValidSelectedVariantPosition: () => boolean | null,
+    getSelectedVariantMoveNode: () => MoveVariantNode | undefined
+  ) => {
+    return !!isValidSelectedVariantPosition() && 
+           moveNode.id === getSelectedVariantMoveNode()?.id;
+  };
+
+  const executeMove = (moveNode: MoveVariantNode) => {
+    chess.move(moveNode.getMove());
+    setCurrentMove(moveNode);
+    updateVariants();
+  };
+
+  const findVariantContainingMove = (moveNode: MoveVariantNode) => {
+    return variants.find(
+      (variant) =>
+        variant.moves.length > currentMove.position &&
+        variant.moves[currentMove.position].id === moveNode.id
+    );
+  };
+
+  const findMoveNodeBySan = (san: string) => {
+    return currentMove.children.find(
+      (child) => child.getMove().san === san
+    );
+  };
+
+  const buildMovePath = (moveNode: MoveVariantNode): Move[] => {
+    const moves: Move[] = [];
+    let currentNode = moveNode;
+    while (currentNode.parent !== null) {
+      moves.push(currentNode.getMove());
+      currentNode = currentNode.parent;
+    }
+    return moves.reverse();
+  };
+
+  const markChanges = () => setHasChanges(true);
+
+  const hasNoChildren = () => currentMove.children.length === 0;
+  const hasSingleChild = () => currentMove.children.length === 1;
+
   const updateVariants = () => {
     const newVariants = moveHistory.getVariants();
     setVariants(newVariants);
 
-    if (newVariants.length > 0 && !selectedVariant) {
-      const params = new URLSearchParams(location.search);
-      const variantNameParam = params.get("variantName");
-      
-      const pathVariant = newVariants.find(
-        (variant) => variant.name === variantNameParam || variant.fullName === variantNameParam
-      );
-      const defaultVariant = pathVariant ?? newVariants[0];
-      
-      setSelectedVariant(defaultVariant);
+    if (newVariants.length > 0) {
+      if (!selectedVariant || !newVariants.some(v => v.name === selectedVariant.name)) {
+        const newSelectedVariant = getInitialSelectedVariant(newVariants);
+        setSelectedVariant(newSelectedVariant);
+      }
+    } else {
+      setSelectedVariant(null);
     }
   };
 
@@ -199,57 +259,43 @@ export const RepertoireContextProvider: React.FC<
   };
 
   const next = () => {
-    if (currentMove.children.length === 0) return;
-    if (currentMove.children.length === 1) {
-      const moveNode = currentMove.children[0];
-      chess.move(moveNode.getMove());
-      setCurrentMove(moveNode);
-      updateVariants();
+    if (hasNoChildren()) return;
+    
+    if (hasSingleChild()) {
+      executeMove(currentMove.children[0]);
       return;
     }
 
-    if (currentMove.children.length > 1) {
-      const selectedVariantMove = getSelectedVariantMove();
+    const selectedVariantMove = getSelectedVariantMove();
 
-      showSelectNextMoveDialog({
-        title: "Select next move",
-        nextMovements: currentMove.children.map((child) => child.getMove().san),
-        selectedVariantMove,
-        onNextMoveConfirm: (nextMove: string) => {
-          const nextMoveVarianteNode = currentMove.children.find(
-            (child) => child.getMove().san === nextMove
-          );
-          if (!nextMoveVarianteNode) return;
+    showSelectNextMoveDialog({
+      title: "Select next move",
+      nextMovements: currentMove.children.map((child) => child.getMove().san),
+      selectedVariantMove,
+      onNextMoveConfirm: (nextMove: string) => {
+        const nextMoveVarianteNode = findMoveNodeBySan(nextMove);
+        if (!nextMoveVarianteNode) return;
 
-          const isCurrentVariantMove = isValidSelectedVariantPosition() &&
-            nextMoveVarianteNode.id === getSelectedVariantMoveNode()?.id;
+        const isCurrentVariantMove = checkIfCurrentVariantMove(
+          nextMoveVarianteNode,
+          isValidSelectedVariantPosition,
+          getSelectedVariantMoveNode
+        );
 
-          if (isCurrentVariantMove) {
-            chess.move(nextMoveVarianteNode.getMove());
-            setCurrentMove(nextMoveVarianteNode);
-            updateVariants();
-            return;
-          }
+        if (isCurrentVariantMove) {
+          executeMove(nextMoveVarianteNode);
+          return;
+        }
 
-          const firstVariantContainingMove = variants.find(
-            (variant) =>
-              variant.moves.length > currentMove.position &&
-              variant.moves[currentMove.position].id === nextMoveVarianteNode.id
-          );
-
-          const newSelectedVariant = firstVariantContainingMove || null;
-          setSelectedVariant(newSelectedVariant);
-
-          chess.move(nextMoveVarianteNode.getMove());
-          setCurrentMove(nextMoveVarianteNode);
-          updateVariants();
-        },
-      });
-    }
+        const newSelectedVariant = findVariantContainingMove(nextMoveVarianteNode) || null;
+        setSelectedVariant(newSelectedVariant);
+        executeMove(nextMoveVarianteNode);
+      },
+    });
   };
 
   const nextFollowingVariant = () => {
-    if (currentMove.children.length === 0) return;
+    if (hasNoChildren()) return;
     
     if (isValidSelectedVariantPosition()) {
       const nextMoveInSelectedVariant = getSelectedVariantMoveNode();
@@ -258,18 +304,13 @@ export const RepertoireContextProvider: React.FC<
       );
       
       if (nextMoveVarianteNode) {
-        chess.move(nextMoveVarianteNode.getMove());
-        setCurrentMove(nextMoveVarianteNode);
-        updateVariants();
+        executeMove(nextMoveVarianteNode);
         return;
       }
     }
     
-    if (currentMove.children.length === 1) {
-      const moveNode = currentMove.children[0];
-      chess.move(moveNode.getMove());
-      setCurrentMove(moveNode);
-      updateVariants();
+    if (hasSingleChild()) {
+      executeMove(currentMove.children[0]);
       return;
     }
     
@@ -282,15 +323,13 @@ export const RepertoireContextProvider: React.FC<
   };
 
   const addMove = (move: Move) => {
-    const newMove = currentMove.addMove(move, undefined, undefined, () =>
-      setHasChanges(true)
-    );
+    const newMove = currentMove.addMove(move, undefined, undefined, markChanges);
     setCurrentMove(newMove);
     updateVariants();
   };
 
   const hasNext = () => {
-    return currentMove.children.length > 0;
+    return !hasNoChildren();
   };
 
   const hasPrev = () => {
@@ -298,24 +337,16 @@ export const RepertoireContextProvider: React.FC<
   };
   const goToMove = (moveNode: MoveVariantNode) => {
     const newChess = new Chess();
-    const moves = [];
-    let currentNode = moveNode;
-    while (currentNode.parent !== null) {
-      moves.push(currentNode.getMove());
-      currentNode = currentNode.parent;
-    }
-    moves.reverse();
-    moves.forEach((move) => {
-      newChess.move(move);
-    });
+    const moves = buildMovePath(moveNode);
+    moves.forEach((move) => newChess.move(move));
     setChess(newChess);
     setCurrentMove(moveNode);
   };
   const changeNameMove = (moveNode: MoveVariantNode, newName: string) => {
-    moveNode.variantName = newName == "" ? undefined : newName;
+    moveNode.variantName = newName === "" ? undefined : newName;
     goToMove(moveNode);
     updateVariants();
-    setHasChanges(true);
+    markChanges();
   };
 
   const deleteMove = (moveNode: MoveVariantNode) => {
@@ -327,14 +358,14 @@ export const RepertoireContextProvider: React.FC<
 
     goToMove(parentNode);
     updateVariants();
-    setHasChanges(true);
+    markChanges();
   };
   const updateComment = async (comment: string) => {
     try {
       const fen = getOrientationAwareFen(chess.fen(), orientation);
       setComment(comment);
       await updatePositionComment(fen, comment);
-      setHasChanges(true);
+      markChanges();
     } catch (error) {
       showAlert("Error updating comment.", "error");
       console.error("Error updating position comment:", error);
