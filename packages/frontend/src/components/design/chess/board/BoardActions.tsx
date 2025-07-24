@@ -22,17 +22,28 @@ const BoardActions: React.FC<BoardActionsProps> = ({
         className="text-textLight disabled:opacity-50"
         onClick={prev}
         disabled={!hasPrev()}
+        title="Previous move"
+        aria-label="Previous move"
       >
         <ArrowLeftIcon className="h-6 w-6" />
       </button>
+      
       <button
         className="text-textLight disabled:opacity-50 mx-2"
         onClick={next}
         disabled={!hasNext()}
+        title="Next move"
+        aria-label="Next move"
       >
         <ArrowRightIcon className="h-6 w-6" />
       </button>
-      <button className="text-textLight" onClick={rotateBoard}>
+      
+      <button 
+        className="text-textLight" 
+        onClick={rotateBoard}
+        title="Rotate board"
+        aria-label="Rotate board"
+      >
         <ArrowPathIcon className="h-6 w-6" />
       </button>
     </div>

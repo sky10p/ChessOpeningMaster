@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useRepertoireContext } from "../../../contexts/RepertoireContext";
 import { useTrainRepertoireContext } from "../../../contexts/TrainRepertoireContext";
 import { useHeaderDispatch } from "../../../contexts/HeaderContext";
@@ -25,6 +25,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
     "info" | "help" | "trainComments"
   >("info");
   const navigate = useNavigate();
+  const location = useLocation();
   const { repertoireId, repertoireName, currentMoveNode, orientation, variants, updateComment } =
     useRepertoireContext();
   const { showTrainVariantsDialog, showNumberDialog } = useDialogContext();
@@ -90,7 +91,12 @@ const TrainRepertoireViewContainer: React.FC = () => {
         key: "goToEditRepertoire",
         icon: <PencilIcon />,
         onClick: () => {
-          navigate(`/repertoire/${repertoireId}`);
+          const queryParams = new URLSearchParams(location.search);
+          const variantName = queryParams.get("variantName");
+          const editUrl = variantName 
+            ? `/repertoire/${repertoireId}?variantName=${encodeURIComponent(variantName)}`
+            : `/repertoire/${repertoireId}`;
+          navigate(editUrl);
         },
       },
     ];

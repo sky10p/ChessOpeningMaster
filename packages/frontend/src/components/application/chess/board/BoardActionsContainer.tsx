@@ -7,7 +7,13 @@ const BoardActionsContainer: React.FC = () => {
 
 const {next, prev, hasNext, hasPrev, rotateBoard} = useRepertoireContext();
   return (
-    <BoardActions next={next} prev={prev} hasNext={hasNext} hasPrev={hasPrev} rotateBoard={rotateBoard} />
+    <BoardActions 
+      next={next} 
+      prev={prev} 
+      hasNext={hasNext} 
+      hasPrev={hasPrev} 
+      rotateBoard={rotateBoard}
+    />
   );
 };
 

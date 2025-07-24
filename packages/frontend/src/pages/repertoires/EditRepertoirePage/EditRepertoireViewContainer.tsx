@@ -21,6 +21,7 @@ import StatisticsPanel from "../../../components/design/statistics/StatisticsPan
 import { StockfishPanel } from "../../../components/design/stockfish/StockfishPanel";
 import { RepertoireInfo } from "../../../components/application/chess/board/RepertoireInfo";
 import { useFooterDispatch } from "../../../contexts/FooterContext";
+import { useKeyboardNavigation } from "../../../hooks/useKeyboardNavigation";
 
 type FooterSection = "variants" | "comments" | "statistics" | "stockfish";
 
@@ -28,8 +29,20 @@ const EditRepertoireViewContainer: React.FC = () => {
   const navigate = useNavigate();
   const [panelSelected, setPanelSelected] = useState<FooterSection>("variants");
 
-  const { repertoireId, repertoireName, saveRepertory, getPgn, chess } =
-    useRepertoireContext();
+  const { 
+    repertoireId, 
+    repertoireName, 
+    saveRepertory, 
+    getPgn, 
+    chess,
+    next,
+    nextFollowingVariant,
+    prev,
+    hasNext,
+    hasPrev,
+    selectedVariant,
+  } = useRepertoireContext();
+  
   const { toggleMenu } = useMenuContext();
   const { addIcon: addIconHeader, removeIcon: removeIconHeader } =
     useHeaderDispatch();
@@ -38,6 +51,15 @@ const EditRepertoireViewContainer: React.FC = () => {
     removeIcon: removeIconFooter,
     setIsVisible,
   } = useFooterDispatch();
+
+  useKeyboardNavigation({
+    next,
+    nextFollowingVariant,
+    prev,
+    hasNext,
+    hasPrev,
+    selectedVariant,
+  });
 
   const toggleMenuHeader = (event: React.MouseEvent<HTMLElement>) => {
     toggleMenu(event.currentTarget || null, [
