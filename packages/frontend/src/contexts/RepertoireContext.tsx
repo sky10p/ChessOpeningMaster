@@ -180,7 +180,7 @@ export const RepertoireContextProvider: React.FC<
   }, [selectedVariant, currentMove.position]);
 
   const isValidSelectedVariantPosition = useCallback(() => {
-    return selectedVariant && currentMove.position < selectedVariant.moves.length;
+    return !!(selectedVariant && currentMove.position < selectedVariant.moves.length);
   }, [selectedVariant, currentMove.position]);
 
   const getSelectedVariantMoveNode = useCallback(() => {
@@ -190,9 +190,9 @@ export const RepertoireContextProvider: React.FC<
     return selectedVariant.moves[currentMove.position];
   }, [selectedVariant, currentMove.position, isValidSelectedVariantPosition]);
 
-  const checkIfCurrentVariantMove = (
+  const isCurrentVariantMove = (
     moveNode: MoveVariantNode,
-    isValidSelectedVariantPosition: () => boolean | null,
+    isValidSelectedVariantPosition: () => boolean,
     getSelectedVariantMoveNode: () => MoveVariantNode | undefined
   ) => {
     return !!isValidSelectedVariantPosition() && 
@@ -276,13 +276,13 @@ export const RepertoireContextProvider: React.FC<
         const nextMoveVarianteNode = findMoveNodeBySan(nextMove);
         if (!nextMoveVarianteNode) return;
 
-        const isCurrentVariantMove = checkIfCurrentVariantMove(
+        const isSelectedVariantMove = isCurrentVariantMove(
           nextMoveVarianteNode,
           isValidSelectedVariantPosition,
           getSelectedVariantMoveNode
         );
 
-        if (isCurrentVariantMove) {
+        if (isSelectedVariantMove) {
           executeMove(nextMoveVarianteNode);
           return;
         }

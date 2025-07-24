@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { Variant } from '../models/chess.models';
 
+const INPUT_ELEMENTS_SELECTOR = 'input, textarea, [contenteditable], select, [role="textbox"]';
+
 interface UseKeyboardNavigationProps {
   next: () => void;
   nextFollowingVariant: () => void;
@@ -23,7 +25,7 @@ export const useKeyboardNavigation = ({
       if (event.ctrlKey || event.metaKey || event.altKey) return;
       
       const target = event.target as HTMLElement;
-      if (target.matches('input, textarea, [contenteditable], select, [role="textbox"]')) return;
+      if (target.matches(INPUT_ELEMENTS_SELECTOR)) return;
 
       switch (event.key) {
         case 'ArrowLeft':

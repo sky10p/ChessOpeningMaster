@@ -23,6 +23,7 @@ const BoardActions: React.FC<BoardActionsProps> = ({
         onClick={prev}
         disabled={!hasPrev()}
         title="Previous move"
+        aria-label="Previous move"
       >
         <ArrowLeftIcon className="h-6 w-6" />
       </button>
@@ -32,6 +33,7 @@ const BoardActions: React.FC<BoardActionsProps> = ({
         onClick={next}
         disabled={!hasNext()}
         title="Next move"
+        aria-label="Next move"
       >
         <ArrowRightIcon className="h-6 w-6" />
       </button>
@@ -40,6 +42,7 @@ const BoardActions: React.FC<BoardActionsProps> = ({
         className="text-textLight" 
         onClick={rotateBoard}
         title="Rotate board"
+        aria-label="Rotate board"
       >
         <ArrowPathIcon className="h-6 w-6" />
       </button>

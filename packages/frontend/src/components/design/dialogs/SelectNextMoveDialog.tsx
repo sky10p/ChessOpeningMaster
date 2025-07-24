@@ -8,7 +8,7 @@ import {
   Label,
 } from "@headlessui/react";
 import { CheckCircleIcon } from "@heroicons/react/20/solid";
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 
 interface SelectNextMoveDialogProps {
@@ -28,15 +28,13 @@ const SelectNextMoveDialog: React.FC<SelectNextMoveDialogProps> = ({
   onConfirm,
   onClose,
 }) => {
-  const memoizedNextMovements = useMemo(() => nextMovements, [JSON.stringify(nextMovements)]);
-  
   const [selectedNextMove, setSelectedNextMove] = useState<string>(
-    selectedVariantMove || memoizedNextMovements[0]
+    selectedVariantMove || nextMovements[0]
   );
 
   useEffect(() => {
-    setSelectedNextMove(selectedVariantMove || memoizedNextMovements[0]);
-  }, [selectedVariantMove, memoizedNextMovements]);
+    setSelectedNextMove(selectedVariantMove || nextMovements[0]);
+  }, [selectedVariantMove, nextMovements]);
 
   const handleNextMoveConfirm = () => {
     onConfirm(selectedNextMove);
@@ -57,7 +55,7 @@ const SelectNextMoveDialog: React.FC<SelectNextMoveDialogProps> = ({
 
           <div className="space-y-2 mb-4">
             <RadioGroup value={selectedNextMove} onChange={setSelectedNextMove}>
-              {memoizedNextMovements.map((nextMove) => (
+              {nextMovements.map((nextMove) => (
                 <Field
                   key={nextMove}
                   className="flex items-center gap-3 cursor-pointer"
