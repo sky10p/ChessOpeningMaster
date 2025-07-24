@@ -42,10 +42,16 @@ const SelectNextMoveDialog: React.FC<SelectNextMoveDialogProps> = ({
           <div className="space-y-2 mb-4">
             <RadioGroup value={selectedNextMove} onChange={setSelectedNextMove}>
               {nextMovements.map((nextMove) => (
-                <Field key={nextMove} className="flex items-center gap-3 cursor-pointer">
+                <Field 
+                  key={nextMove} 
+                  className="flex items-center gap-3 cursor-pointer"
+                  aria-label={`Select chess move: ${nextMove}${selectedVariantMove === nextMove ? ' (currently selected variant)' : ''}`}
+                  aria-describedby={selectedVariantMove === nextMove ? `variant-indicator-${nextMove}` : undefined}
+                >
                   <Radio
                     value={nextMove}
                     className="group flex size-4 items-center justify-center rounded-full border-2 border-gray-400 data-[checked]:border-blue-400 data-[checked]:bg-blue-400"
+                    aria-label={`Choose ${nextMove} as next move`}
                   >
                     <span className="invisible size-2 rounded-full bg-white group-data-[checked]:visible" />
                   </Radio>
@@ -54,7 +60,11 @@ const SelectNextMoveDialog: React.FC<SelectNextMoveDialogProps> = ({
                       {nextMove}
                     </Label>
                     {selectedVariantMove === nextMove && (
-                      <div className="flex items-center gap-1">
+                      <div 
+                        className="flex items-center gap-1"
+                        id={`variant-indicator-${nextMove}`}
+                        aria-label="This is the currently selected variant move"
+                      >
                         <CheckCircleIcon className="w-4 h-4 text-blue-400" />
                         <span className="text-xs text-blue-400 font-medium">Selected Variant</span>
                       </div>
