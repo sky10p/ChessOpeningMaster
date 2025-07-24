@@ -23,7 +23,7 @@ export const useKeyboardNavigation = ({
       if (event.ctrlKey || event.metaKey || event.altKey) return;
       
       const target = event.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+      if (target.matches('input, textarea, [contenteditable], select, [role="textbox"]')) return;
 
       switch (event.key) {
         case 'ArrowLeft':

@@ -221,10 +221,10 @@ export const RepertoireContextProvider: React.FC<
           );
           if (!nextMoveVarianteNode) return;
 
-          const isSelectedMoveInCurrentVariant = isValidSelectedVariantPosition() &&
+          const isCurrentVariantMove = isValidSelectedVariantPosition() &&
             nextMoveVarianteNode.id === getSelectedVariantMoveNode()?.id;
 
-          if (isSelectedMoveInCurrentVariant) {
+          if (isCurrentVariantMove) {
             chess.move(nextMoveVarianteNode.getMove());
             setCurrentMove(nextMoveVarianteNode);
             updateVariants();
