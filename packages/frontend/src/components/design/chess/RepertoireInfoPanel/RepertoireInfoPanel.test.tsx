@@ -90,7 +90,6 @@ const defaultProps = {
   goToMove: jest.fn(),
   deleteMove: jest.fn(),
   changeNameMove: jest.fn(),
-  defaultVariant: mockVariants[0],
   selectedVariant: mockVariants[0],
   setSelectedVariant: jest.fn(),
   comment: 'Test comment',

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import UiSwitch from "../../../basic/UiSwitch";
 import {
   ArrowDownTrayIcon,
@@ -31,9 +31,8 @@ interface RepertoireInfoPanelProps {
   goToMove: (move: MoveVariantNode) => void;
   deleteMove: (move: MoveVariantNode) => void;
   changeNameMove: (move: MoveVariantNode, newName: string) => void;
-  defaultVariant: Variant;
   selectedVariant: Variant;
-  setSelectedVariant: (variant: Variant) => void;
+  setSelectedVariant: (variant: Variant | null) => void;
   comment: string;
   updateComment: (comment: string) => Promise<void>;
   downloadVariantPGN: (variant: Variant) => void;
@@ -57,7 +56,6 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
   repertoireId,
   variants,
   comment,
-  defaultVariant,
   selectedVariant,
   setSelectedVariant,
   updateComment,
@@ -70,16 +68,9 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
   toggleMenu,
 }) => {
   const { goToTrainRepertoire } = useNavigationUtils();
-  const isSelected = (node: MoveVariantNode) => node === currentMoveNode;
 
   const [showSelectVariantDialog, setShowSelectVariantDialog] = useState(false);
-  useEffect(() => {
-    setSelectedVariant(
-      variants.find((variant) =>
-        variant.moves.some((move) => isSelected(move))
-      ) ?? defaultVariant
-    );
-  }, [variants]);
+
   const [stockfishEnabled, setStockfishEnabled] = React.useState(false);
   const [statisticsEnabled, setStatisticsEnabled] = React.useState(false);
   const [commentEnabled, setCommentEnabled] = React.useState(false);

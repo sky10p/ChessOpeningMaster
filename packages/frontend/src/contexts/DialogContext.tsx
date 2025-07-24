@@ -55,6 +55,7 @@ interface SelectNextMoveDialog {
   title?: string;
   contentText?: string;
   nextMovements: string[];
+  selectedVariantMove?: string;
   onNextMoveConfirm: (nextMove: string) => void;
   onDialogClose?: () => void;
 }
@@ -127,6 +128,7 @@ interface State {
   onVariantsConfirm: (variants: Variant[]) => void;
   trainVariants: TrainVariant[];
   nextMovements: string[];
+  selectedVariantMove?: string;
   repertoires: IRepertoire[];
   variants: Variant[];
   repertoireId: string;
@@ -155,6 +157,7 @@ const initialState: State = {
   onVariantsConfirm: () => {},
   trainVariants: [],
   nextMovements: [],
+  selectedVariantMove: undefined,
   repertoires: [],
   variants: [],
   repertoireId: "",
@@ -231,6 +234,7 @@ function reducer(state: typeof initialState, action: Action): State {
         contentText:
           action.payload.contentText ?? "Select the movement to play",
         nextMovements: action.payload.nextMovements,
+        selectedVariantMove: action.payload.selectedVariantMove,
         onNextMoveConfirm: action.payload.onNextMoveConfirm,
         onDialogClose: action.payload.onDialogClose,
       };
@@ -436,8 +440,8 @@ export const DialogContextProvider = ({
       {state.openSelectNextMoveDialog && (
         <SelectNextMoveDialog
           open={state.openSelectNextMoveDialog}
-          contentText={state.contentText}
           nextMovements={state.nextMovements}
+          selectedVariantMove={state.selectedVariantMove}
           onClose={handleDialogClose}
           onConfirm={handleNextMoveConfirm}
           title={state.title}

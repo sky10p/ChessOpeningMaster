@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import { RepertoireInfoPanel } from "../../../design/chess/RepertoireInfoPanel/RepertoireInfoPanel";
 import { useRepertoireContext } from "../../../../contexts/RepertoireContext";
-import { Variant } from "../../../../models/chess.models";
 import { useRepertoireInfo } from "../../../../hooks/useRepertoireInfo";
 import { useMenuContext } from "../../../../contexts/MenuContext";
 import { useLocation } from "react-router-dom";
@@ -16,6 +15,9 @@ export const RepertoireInfo = () => {
     deleteMove,
     comment,
     updateComment,
+    selectedVariant,
+    setSelectedVariant,
+    repertoireId,
   } = useRepertoireContext();
 
   const location = useLocation();
@@ -26,10 +28,13 @@ export const RepertoireInfo = () => {
   );
   const defaultVariant = pathVariant ?? variants[0];
 
-  const [selectedVariant, setSelectedVariant] = useState<Variant>(defaultVariant);
+  React.useEffect(() => {
+    if (!selectedVariant && defaultVariant) {
+      setSelectedVariant(defaultVariant);
+    }
+  }, [selectedVariant, defaultVariant, setSelectedVariant]);
 
   const { toggleMenu } = useMenuContext();
-  const { repertoireId } = useRepertoireContext();
 
   const { downloadVariantPGN, copyVariantPGN,copyVariantToRepertoire,copyVariantsToRepertoire,deleteVariants, deleteVariant } =
     useRepertoireInfo();
@@ -42,8 +47,7 @@ export const RepertoireInfo = () => {
       goToMove={goToMove}
       deleteMove={deleteMove}
       changeNameMove={changeNameMove}
-      defaultVariant={defaultVariant}
-      selectedVariant={selectedVariant}
+      selectedVariant={selectedVariant || defaultVariant}
       setSelectedVariant={setSelectedVariant}
       comment={comment}
       updateComment={updateComment}
