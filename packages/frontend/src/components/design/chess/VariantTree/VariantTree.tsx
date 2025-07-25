@@ -1,5 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useMemo, useState } from "react";
 import { MoveVariantNode } from "../../../../models/VariantNode";
 import { Variant } from "../../../../models/chess.models";
 import { VariantMovementsPanel } from "./VariantMovementsPanel";
@@ -11,14 +10,15 @@ import {
   ClipboardIcon,
   ArrowDownTrayIcon,
   ClipboardDocumentListIcon,
+  AcademicCapIcon,
 } from "@heroicons/react/24/outline";
 import { TrashListIcon } from "../../../icons/TrashListIcon";
 import { BoardOrientation } from "@chess-opening-master/common";
+import { useNavigationUtils } from "../../../../utils/navigationUtils";
 
 interface VariantTreeProps {
   variants: Variant[];
   repertoireId: string;
-  currentNode: MoveVariantNode;
   orientation: BoardOrientation;
   deleteVariant: (variant: Variant) => void;
   copyVariantToRepertoire: (variant: Variant) => void;
@@ -30,12 +30,13 @@ interface VariantTreeProps {
   deleteMove: (move: MoveVariantNode) => void;
   goToMove: (move: MoveVariantNode) => void;
   currentMoveNode: MoveVariantNode;
+  selectedVariant: Variant | null;
+  setSelectedVariant: (variant: Variant | null) => void;
 }
 
 const VariantTree: React.FC<VariantTreeProps> = ({
   variants,
   repertoireId,
-  currentNode,
   deleteVariant,
   copyVariantToRepertoire,
   copyVariantsToRepertoire,
@@ -46,34 +47,20 @@ const VariantTree: React.FC<VariantTreeProps> = ({
   deleteMove,
   goToMove,
   currentMoveNode,
+  selectedVariant,
+  setSelectedVariant,
 }) => {
-  const location = useLocation();
-  const params = new URLSearchParams(location.search);
-  const variantNameParam = params.get("variantName");
-
-  const isSelected = (node: MoveVariantNode) => node === currentNode;
-  const [selectedVariant, setSelectedVariant] = useState<Variant | undefined>(
-    variants[0]
-  );
+  const { goToTrainRepertoire } = useNavigationUtils();
   const [showSelectVariantDialog, setShowSelectVariantDialog] = useState(false);
-  useEffect(() => {
-    const pathVariant = variants.find(
-      (variant) =>
-        variant.name === variantNameParam ||
-        variant.fullName === variantNameParam
-    );
-    const defaultVariant = pathVariant ?? variants[0];
-
-    setSelectedVariant(
-      variants.find((variant) =>
-        variant.moves.some((move) => isSelected(move))
-      ) ?? defaultVariant
-    );
-  }, [variants, variantNameParam]);
 
   const variantActions = useMemo(
     () => () =>
       [
+        {
+          onClick: () => selectedVariant && goToTrainRepertoire(repertoireId, selectedVariant.fullName),
+          icon: <AcademicCapIcon className="h-5 w-5 text-accent" />,
+          label: "Train",
+        },
         {
           onClick: () => selectedVariant && downloadVariantPGN(selectedVariant),
           icon: <ArrowDownTrayIcon className="h-5 w-5 text-accent" />,
@@ -82,7 +69,7 @@ const VariantTree: React.FC<VariantTreeProps> = ({
         {
           onClick: () => selectedVariant && copyVariantPGN(selectedVariant),
           icon: <ClipboardIcon className="h-5 w-5 text-accent" />,
-          label: "Copy",
+          label: "Copy PGN",
         },
         {
           onClick: () =>
@@ -113,6 +100,9 @@ const VariantTree: React.FC<VariantTreeProps> = ({
       deleteVariant,
       deleteVariants,
       downloadVariantPGN,
+      copyVariantPGN,
+      goToTrainRepertoire,
+      repertoireId,
     ]
   );
 
