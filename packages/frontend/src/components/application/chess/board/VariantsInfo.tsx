@@ -4,6 +4,7 @@ import VariantsTree from "../../../design/chess/VariantTree/VariantTree";
 import { useDialogContext } from "../../../../contexts/DialogContext";
 import { useAlertContext } from "../../../../contexts/AlertContext";
 import { useRepertoireInfo } from "../../../../hooks/useRepertoireInfo";
+import { useVariantNavigation } from "../../../../hooks/useVariantNavigation";
 
 const VariantsInfo: React.FC = () => {
   const {
@@ -14,7 +15,10 @@ const VariantsInfo: React.FC = () => {
     changeNameMove,
     goToMove,
     deleteMove,
+    selectedVariant,
   } = useRepertoireContext();
+
+  const { handleVariantChange } = useVariantNavigation();
 
   useDialogContext();
   useAlertContext();
@@ -26,7 +30,6 @@ const VariantsInfo: React.FC = () => {
       <VariantsTree
         variants={variants}
         repertoireId={repertoireId}
-        currentNode={currentMoveNode}
         orientation={orientation}
         deleteVariant={deleteVariant}
         copyVariantToRepertoire={copyVariantToRepertoire}
@@ -38,6 +41,8 @@ const VariantsInfo: React.FC = () => {
         deleteMove={deleteMove}
         goToMove={goToMove}
         currentMoveNode={currentMoveNode}
+        selectedVariant={selectedVariant}
+        setSelectedVariant={handleVariantChange}
       ></VariantsTree>
 
   );

@@ -7,6 +7,7 @@ import {
   EllipsisVerticalIcon,
   PresentationChartLineIcon,
   TrashIcon,
+  AcademicCapIcon,
 } from "@heroicons/react/24/outline";
 import useStockfish from "../../../../libs/useStockfish";
 import { StockfishSubpanel } from "./StockfishSubpanel";
@@ -82,6 +83,11 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
 
   const actions = [
     {
+      onClick: () => selectedVariant && goToTrainRepertoire(repertoireId, selectedVariant.fullName),
+      icon: <AcademicCapIcon className="h-5 w-5 text-accent" />,
+      label: "Train",
+    },
+    {
       onClick: () => selectedVariant && downloadVariantPGN(selectedVariant),
       icon: <ArrowDownTrayIcon className="h-5 w-5 text-accent" />,
       label: "Download",
@@ -89,7 +95,7 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
     {
       onClick: () => selectedVariant && copyVariantPGN(selectedVariant),
       icon: <ClipboardIcon className="h-5 w-5 text-accent" />,
-      label: "Copy",
+      label: "Copy PGN",
     },
     {
       onClick: () => selectedVariant && deleteVariant(selectedVariant),
@@ -99,10 +105,6 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
   ];
 
   const secondaryActions = [
-    {
-      name: "Train variant",
-      action: () => selectedVariant && goToTrainRepertoire(repertoireId, selectedVariant.fullName),
-    },
     {
       name: "Copy variant to repertoire",
       action: () => selectedVariant && copyVariantToRepertoire(selectedVariant),

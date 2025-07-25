@@ -45,11 +45,6 @@ global.fetch = jest.fn(() =>
   })
 ) as jest.Mock;
 
-interface MenuAction {
-  name: string;
-  action: () => void;
-}
-
 const createMockMoveNode = (id: string): MoveVariantNode => {
   const node = new MoveVariantNode();
   node.id = id;
@@ -116,34 +111,12 @@ describe('RepertoireInfoPanel - Train Variant Action', () => {
     it('should call goToTrainRepertoire with correct repertoireId and selectedVariant fullName when Train variant is clicked', () => {
       render(<RepertoireInfoPanel {...defaultProps} />);
       
-      const moreOptionsButton = screen.getAllByRole('button').find(button => 
-        button.querySelector('svg path[d*="12 6.75a.75.75"]')
-      );
+      const trainButton = screen.getByText('Train').closest('div')?.querySelector('button');
       
-      expect(moreOptionsButton).toBeInTheDocument();
+      expect(trainButton).toBeInTheDocument();
       
-      if (moreOptionsButton) {
-        fireEvent.click(moreOptionsButton);
-      }
-      
-      expect(defaultProps.toggleMenu).toHaveBeenCalledWith(
-        expect.any(HTMLElement),
-        expect.arrayContaining([
-          expect.objectContaining({
-            name: 'Train variant',
-            action: expect.any(Function),
-          }),
-        ])
-      );
-      
-      const toggleMenuCall = defaultProps.toggleMenu.mock.calls[0];
-      const secondaryActions = toggleMenuCall[1];
-      const trainVariantAction = secondaryActions.find((item: MenuAction) => item.name === 'Train variant');
-      
-      expect(trainVariantAction).toBeDefined();
-      
-      if (trainVariantAction) {
-        trainVariantAction.action();
+      if (trainButton) {
+        fireEvent.click(trainButton);
       }
       
       expect(mockGoToTrainRepertoire).toHaveBeenCalledWith(
@@ -157,25 +130,14 @@ describe('RepertoireInfoPanel - Train Variant Action', () => {
       const newProps = {
         ...defaultProps,
         selectedVariant: newSelectedVariant,
-        toggleMenu: jest.fn(),
       };
       
       render(<RepertoireInfoPanel {...newProps} />);
       
-      const moreOptionsButton = screen.getAllByRole('button').find(button => 
-        button.querySelector('svg path[d*="12 6.75a.75.75"]')
-      );
+      const trainButton = screen.getByText('Train').closest('div')?.querySelector('button');
       
-      if (moreOptionsButton) {
-        fireEvent.click(moreOptionsButton);
-      }
-      
-      const toggleMenuCall = newProps.toggleMenu.mock.calls[0];
-      const secondaryActions = toggleMenuCall[1];
-      const trainVariantAction = secondaryActions.find((item: MenuAction) => item.name === 'Train variant');
-      
-      if (trainVariantAction) {
-        trainVariantAction.action();
+      if (trainButton) {
+        fireEvent.click(trainButton);
       }
       
       expect(mockGoToTrainRepertoire).toHaveBeenCalledWith(
@@ -188,31 +150,20 @@ describe('RepertoireInfoPanel - Train Variant Action', () => {
       const propsWithoutSelectedVariant = {
         ...defaultProps,
         selectedVariant: undefined as unknown as Variant,
-        toggleMenu: jest.fn(),
       };
       
       render(<RepertoireInfoPanel {...propsWithoutSelectedVariant} />);
       
-      const moreOptionsButton = screen.getAllByRole('button').find(button => 
-        button.querySelector('svg path[d*="12 6.75a.75.75"]')
-      );
+      const trainButton = screen.getByText('Train').closest('div')?.querySelector('button');
       
-      if (moreOptionsButton) {
-        fireEvent.click(moreOptionsButton);
-      }
-      
-      const toggleMenuCall = propsWithoutSelectedVariant.toggleMenu.mock.calls[0];
-      const secondaryActions = toggleMenuCall[1];
-      const trainVariantAction = secondaryActions.find((item: MenuAction) => item.name === 'Train variant');
-      
-      if (trainVariantAction) {
-        trainVariantAction.action();
+      if (trainButton) {
+        fireEvent.click(trainButton);
       }
       
       expect(mockGoToTrainRepertoire).not.toHaveBeenCalled();
     });
 
-    it('should include Train variant action in secondaryActions array with correct properties', () => {
+    it('should include correct actions in secondaryActions array with correct properties', () => {
       render(<RepertoireInfoPanel {...defaultProps} />);
       
       const moreOptionsButton = screen.getAllByRole('button').find(button => 
@@ -227,10 +178,6 @@ describe('RepertoireInfoPanel - Train Variant Action', () => {
       const secondaryActions = toggleMenuCall[1];
       
       expect(secondaryActions).toEqual([
-        expect.objectContaining({
-          name: 'Train variant',
-          action: expect.any(Function),
-        }),
         expect.objectContaining({
           name: 'Copy variant to repertoire',
           action: expect.any(Function),
@@ -255,20 +202,10 @@ describe('RepertoireInfoPanel - Train Variant Action', () => {
       
       render(<RepertoireInfoPanel {...customProps} />);
       
-      const moreOptionsButton = screen.getAllByRole('button').find(button => 
-        button.querySelector('svg path[d*="12 6.75a.75.75"]')
-      );
+      const trainButton = screen.getByText('Train').closest('div')?.querySelector('button');
       
-      if (moreOptionsButton) {
-        fireEvent.click(moreOptionsButton);
-      }
-      
-      const toggleMenuCall = defaultProps.toggleMenu.mock.calls[0];
-      const secondaryActions = toggleMenuCall[1];
-      const trainVariantAction = secondaryActions.find((item: MenuAction) => item.name === 'Train variant');
-      
-      if (trainVariantAction) {
-        trainVariantAction.action();
+      if (trainButton) {
+        fireEvent.click(trainButton);
       }
       
       expect(mockGoToTrainRepertoire).toHaveBeenCalledWith(
@@ -292,20 +229,10 @@ describe('RepertoireInfoPanel - Train Variant Action', () => {
       
       render(<RepertoireInfoPanel {...customProps} />);
       
-      const moreOptionsButton = screen.getAllByRole('button').find(button => 
-        button.querySelector('svg path[d*="12 6.75a.75.75"]')
-      );
+      const trainButton = screen.getByText('Train').closest('div')?.querySelector('button');
       
-      if (moreOptionsButton) {
-        fireEvent.click(moreOptionsButton);
-      }
-      
-      const toggleMenuCall = defaultProps.toggleMenu.mock.calls[0];
-      const secondaryActions = toggleMenuCall[1];
-      const trainVariantAction = secondaryActions.find((item: MenuAction) => item.name === 'Train variant');
-      
-      if (trainVariantAction) {
-        trainVariantAction.action();
+      if (trainButton) {
+        fireEvent.click(trainButton);
       }
       
       expect(mockGoToTrainRepertoire).toHaveBeenCalledWith(
