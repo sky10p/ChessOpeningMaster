@@ -33,11 +33,11 @@ describe('useVariantNavigation', () => {
   });
 
   describe('handleVariantChange', () => {
-    it('should set selected variant and initialize board when variant is provided', () => {
+    it('should set selected variant and initialize board when variant is provided', async () => {
       const { result } = renderHook(() => useVariantNavigation());
       const variant = createMockVariant('Test Variant', 'Test Variant: Full Name');
 
-      act(() => {
+      await act(async () => {
         result.current.handleVariantChange(variant);
       });
 
@@ -45,11 +45,11 @@ describe('useVariantNavigation', () => {
       expect(mockInitBoard).toHaveBeenCalled();
     });
 
-    it('should update URL with variant name when variant is provided', () => {
+    it('should update URL with variant name when variant is provided', async () => {
       const { result } = renderHook(() => useVariantNavigation());
       const variant = createMockVariant('Test Variant', 'Test Variant: Full Name');
 
-      act(() => {
+      await act(async () => {
         result.current.handleVariantChange(variant);
       });
 
@@ -59,10 +59,10 @@ describe('useVariantNavigation', () => {
       );
     });
 
-    it('should remove variant name from URL when variant is null', () => {
+    it('should remove variant name from URL when variant is null', async () => {
       const { result } = renderHook(() => useVariantNavigation());
 
-      act(() => {
+      await act(async () => {
         result.current.handleVariantChange(null);
       });
 
@@ -70,11 +70,11 @@ describe('useVariantNavigation', () => {
       expect(mockInitBoard).toHaveBeenCalled();
     });
 
-    it('should handle special characters in variant names', () => {
+    it('should handle special characters in variant names', async () => {
       const { result } = renderHook(() => useVariantNavigation());
       const variant = createMockVariant("Queen's Gambit", "Queen's Gambit: Declined & Accepted");
 
-      act(() => {
+      await act(async () => {
         result.current.handleVariantChange(variant);
       });
 
@@ -84,11 +84,11 @@ describe('useVariantNavigation', () => {
       );
     });
 
-    it('should handle variant with empty fullName', () => {
+    it('should handle variant with empty fullName', async () => {
       const { result } = renderHook(() => useVariantNavigation());
       const variant = createMockVariant('Test', '');
 
-      act(() => {
+      await act(async () => {
         result.current.handleVariantChange(variant);
       });
 

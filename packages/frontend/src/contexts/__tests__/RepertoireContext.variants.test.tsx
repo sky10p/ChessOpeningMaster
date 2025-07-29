@@ -87,6 +87,17 @@ describe("RepertoireContext - Enhanced Functionality", () => {
     mockUpdatePositionComment.mockResolvedValue();
     mockGetCommentsByFens.mockResolvedValue({});
     mockPutRepertoire.mockResolvedValue({});
+    
+    // Suppress act warnings for async useEffect operations
+    jest.spyOn(console, 'error').mockImplementation((...args) => {
+      if (typeof args[0] === 'string' && args[0].includes('Warning: An update to RepertoireContextProvider inside a test was not wrapped in act')) {
+        return;
+      }
+    });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   describe("Move operations with enhanced variant handling", () => {
@@ -97,6 +108,11 @@ describe("RepertoireContext - Enhanced Functionality", () => {
         wrapper: Provider,
       });
 
+      // Wait for initial async operations to complete
+      await waitFor(() => {
+        expect(mockGetPositionComment).toHaveBeenCalled();
+      });
+
       await act(async () => {
         const move = createMockMove("e4", "e2e4");
         result.current.addMove(move);
@@ -105,7 +121,7 @@ describe("RepertoireContext - Enhanced Functionality", () => {
       expect(result.current.variants).toBeDefined();
       expect(result.current.currentMoveNode.getMove().san).toBe("e4");
 
-      act(() => {
+      await act(async () => {
         result.current.goToMove(result.current.moveHistory);
       });
 
@@ -117,6 +133,11 @@ describe("RepertoireContext - Enhanced Functionality", () => {
 
       const { result } = renderHook(() => useRepertoireContext(), {
         wrapper: Provider,
+      });
+
+      // Wait for initial async operations to complete
+      await waitFor(() => {
+        expect(mockGetPositionComment).toHaveBeenCalled();
       });
 
       await act(async () => {
@@ -133,7 +154,7 @@ describe("RepertoireContext - Enhanced Functionality", () => {
       expect(currentMove.parent).not.toBeNull();
 
       if (currentMove.parent) {
-        act(() => {
+        await act(async () => {
           result.current.deleteMove(currentMove);
         });
 
@@ -146,6 +167,11 @@ describe("RepertoireContext - Enhanced Functionality", () => {
 
       const { result } = renderHook(() => useRepertoireContext(), {
         wrapper: Provider,
+      });
+
+      // Wait for initial async operations to complete
+      await waitFor(() => {
+        expect(mockGetPositionComment).toHaveBeenCalled();
       });
 
       await act(async () => {
@@ -165,6 +191,11 @@ describe("RepertoireContext - Enhanced Functionality", () => {
         wrapper: Provider,
       });
 
+      // Wait for initial async operations to complete
+      await waitFor(() => {
+        expect(mockGetPositionComment).toHaveBeenCalled();
+      });
+
       await act(async () => {
         const move = createMockMove("e4", "e2e4");
         result.current.addMove(move);
@@ -172,7 +203,7 @@ describe("RepertoireContext - Enhanced Functionality", () => {
 
       expect(result.current.hasPrev()).toBe(true);
 
-      act(() => {
+      await act(async () => {
         result.current.prev();
       });
 
@@ -189,6 +220,11 @@ describe("RepertoireContext - Enhanced Functionality", () => {
         wrapper: Provider,
       });
 
+      // Wait for initial async operations to complete
+      await waitFor(() => {
+        expect(mockGetPositionComment).toHaveBeenCalled();
+      });
+
       await act(async () => {
         const move = createMockMove("e4", "e2e4");
         result.current.addMove(move);
@@ -197,7 +233,7 @@ describe("RepertoireContext - Enhanced Functionality", () => {
       const initialVariants = result.current.variants;
       const initialSelected = result.current.selectedVariant;
 
-      act(() => {
+      await act(async () => {
         result.current.setSelectedVariant(initialSelected);
       });
 
@@ -212,6 +248,11 @@ describe("RepertoireContext - Enhanced Functionality", () => {
         wrapper: Provider,
       });
 
+      // Wait for initial async operations to complete
+      await waitFor(() => {
+        expect(mockGetPositionComment).toHaveBeenCalled();
+      });
+
       await act(async () => {
         const move = createMockMove("e4", "e2e4");
         result.current.addMove(move);
@@ -219,14 +260,14 @@ describe("RepertoireContext - Enhanced Functionality", () => {
 
       const variants = result.current.variants;
       if (variants.length > 0) {
-        act(() => {
+        await act(async () => {
           result.current.setSelectedVariant(variants[0]);
         });
 
         expect(result.current.selectedVariant).toBe(variants[0]);
       }
 
-      act(() => {
+      await act(async () => {
         result.current.setSelectedVariant(null);
       });
 
@@ -242,18 +283,23 @@ describe("RepertoireContext - Enhanced Functionality", () => {
         wrapper: Provider,
       });
 
+      // Wait for initial async operations to complete
+      await waitFor(() => {
+        expect(mockGetPositionComment).toHaveBeenCalled();
+      });
+
       await act(async () => {
         const move = createMockMove("e4", "e2e4");
         result.current.addMove(move);
       });
 
-      act(() => {
+      await act(async () => {
         result.current.prev();
       });
 
       expect(result.current.hasNext()).toBe(true);
 
-      act(() => {
+      await act(async () => {
         result.current.nextFollowingVariant();
       });
 
@@ -267,9 +313,14 @@ describe("RepertoireContext - Enhanced Functionality", () => {
         wrapper: Provider,
       });
 
+      // Wait for initial async operations to complete
+      await waitFor(() => {
+        expect(mockGetPositionComment).toHaveBeenCalled();
+      });
+
       expect(result.current.hasNext()).toBe(false);
 
-      act(() => {
+      await act(async () => {
         result.current.next();
       });
 
@@ -285,15 +336,20 @@ describe("RepertoireContext - Enhanced Functionality", () => {
         wrapper: Provider,
       });
 
+      // Wait for initial async operations to complete
+      await waitFor(() => {
+        expect(mockGetPositionComment).toHaveBeenCalled();
+      });
+
       expect(result.current.orientation).toBe("white");
 
-      act(() => {
+      await act(async () => {
         result.current.rotateBoard();
       });
 
       expect(result.current.orientation).toBe("black");
 
-      act(() => {
+      await act(async () => {
         result.current.rotateBoard();
       });
 
@@ -307,12 +363,17 @@ describe("RepertoireContext - Enhanced Functionality", () => {
         wrapper: Provider,
       });
 
+      // Wait for initial async operations to complete
+      await waitFor(() => {
+        expect(mockGetPositionComment).toHaveBeenCalled();
+      });
+
       await act(async () => {
         const move = createMockMove("e4", "e2e4");
         result.current.addMove(move);
       });
 
-      act(() => {
+      await act(async () => {
         result.current.initBoard();
       });
 
@@ -329,6 +390,11 @@ describe("RepertoireContext - Enhanced Functionality", () => {
         wrapper: Provider,
       });
 
+      // Wait for initial async operations to complete
+      await waitFor(() => {
+        expect(mockGetPositionComment).toHaveBeenCalled();
+      });
+
       await act(async () => {
         const move = createMockMove("e4", "e2e4");
         result.current.addMove(move);
@@ -336,13 +402,13 @@ describe("RepertoireContext - Enhanced Functionality", () => {
 
       const currentMove = result.current.currentMoveNode;
       
-      act(() => {
+      await act(async () => {
         result.current.changeNameMove(currentMove, "Opening Move");
       });
 
       expect(currentMove.variantName).toBe("Opening Move");
 
-      act(() => {
+      await act(async () => {
         result.current.changeNameMove(currentMove, "");
       });
 
@@ -358,6 +424,11 @@ describe("RepertoireContext - Enhanced Functionality", () => {
 
       const { result } = renderHook(() => useRepertoireContext(), {
         wrapper: Provider,
+      });
+
+      // Wait for initial async operations to complete
+      await waitFor(() => {
+        expect(mockGetPositionComment).toHaveBeenCalled();
       });
 
       await act(async () => {
@@ -385,6 +456,11 @@ describe("RepertoireContext - Enhanced Functionality", () => {
         wrapper: Provider,
       });
 
+      // Wait for initial async operations to complete
+      await waitFor(() => {
+        expect(mockGetPositionComment).toHaveBeenCalled();
+      });
+
       await act(async () => {
         const move = createMockMove("e4", "e2e4");
         result.current.addMove(move);
@@ -402,6 +478,11 @@ describe("RepertoireContext - Enhanced Functionality", () => {
 
       const { result } = renderHook(() => useRepertoireContext(), {
         wrapper: Provider,
+      });
+
+      // Wait for initial async operations to complete
+      await waitFor(() => {
+        expect(mockGetPositionComment).toHaveBeenCalled();
       });
 
       expect(result.current.chess).toBeDefined();
