@@ -154,11 +154,6 @@ export const RepertoireContextProvider: React.FC<
   useEffect(() => {
     setOrientation(initialOrientation);
   }, [initialOrientation]);
-
-  useEffect(() => {
-    setCurrentMove(moveHistory);
-    updateVariants();
-  }, [moveHistory]);
   useEffect(() => {
     const loadComment = async () => {
       try {
@@ -236,19 +231,45 @@ export const RepertoireContextProvider: React.FC<
   const hasNoChildren = () => currentMove.children.length === 0;
   const hasSingleChild = () => currentMove.children.length === 1;
 
-  const updateVariants = () => {
+  const findBestVariantForNode = useCallback((variants: Variant[], targetNode?: MoveVariantNode): Variant | null => {
+    if (variants.length === 0) return null;
+
+    if (targetNode) {
+      const movePath = buildMovePath(targetNode).map(move => move.lan);
+      const targetVariant = variants.find(variant => {
+        if (variant.moves.length < movePath.length) return false;
+        return movePath.every((moveId, index) => variant.moves[index].id === moveId);
+      });
+      if (targetVariant) return targetVariant;
+    }
+
+    if (selectedVariant) {
+      const updatedSelectedVariant = variants.find(v => v.fullName === selectedVariant.fullName);
+      if (updatedSelectedVariant) return updatedSelectedVariant;
+
+      const currentPath = buildMovePath(currentMove).map(move => move.lan);
+      const compatibleVariant = variants.find(variant => {
+        return currentPath.length <= variant.moves.length &&
+          currentPath.every((moveId, index) => variant.moves[index].id === moveId);
+      });
+      if (compatibleVariant) return compatibleVariant;
+    }
+
+    return getInitialSelectedVariant(variants);
+  }, [selectedVariant, currentMove, getInitialSelectedVariant]);
+
+  const updateVariants = useCallback((targetNode?: MoveVariantNode) => {
     const newVariants = moveHistory.getVariants();
     setVariants(newVariants);
+    
+    const bestVariant = findBestVariantForNode(newVariants, targetNode);
+    setSelectedVariant(bestVariant);
+  }, [moveHistory, findBestVariantForNode]);
 
-    if (newVariants.length > 0) {
-      if (!selectedVariant || !newVariants.some(v => v.name === selectedVariant.name)) {
-        const newSelectedVariant = getInitialSelectedVariant(newVariants);
-        setSelectedVariant(newSelectedVariant);
-      }
-    } else {
-      setSelectedVariant(null);
-    }
-  };
+  useEffect(() => {
+    setCurrentMove(moveHistory);
+    updateVariants();
+  }, [moveHistory]);
 
   const initBoard = () => {
     const newChess = new Chess();
@@ -322,12 +343,14 @@ export const RepertoireContextProvider: React.FC<
     if (!currentMove.parent) return;
     setCurrentMove(currentMove.parent);
     chess.undo();
+    updateVariants();
   };
 
   const addMove = (move: Move) => {
     const newMove = currentMove.addMove(move, undefined, undefined, markChanges);
+    chess.move(move);
     setCurrentMove(newMove);
-    updateVariants();
+    updateVariants(newMove);
   };
 
   const hasNext = () => {
@@ -343,6 +366,7 @@ export const RepertoireContextProvider: React.FC<
     moves.forEach((move) => newChess.move(move));
     setChess(newChess);
     setCurrentMove(moveNode);
+    updateVariants();
   };
   const changeNameMove = (moveNode: MoveVariantNode, newName: string) => {
     moveNode.variantName = newName === "" ? undefined : newName;
@@ -359,7 +383,7 @@ export const RepertoireContextProvider: React.FC<
     );
 
     goToMove(parentNode);
-    updateVariants();
+    updateVariants(parentNode);
     markChanges();
   };
   const updateComment = async (comment: string) => {
