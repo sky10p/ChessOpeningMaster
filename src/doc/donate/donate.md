@@ -8,7 +8,7 @@ If you like ChessKeep and would like to support its development and maintenance,
 
 You can make a donation in Bitcoin using the following address:
 
-* Address: bc1qkfpw9x3906t9drww2hkdws2djnvkewjmfqnue4
+* Address: bc1qrmt6l8t625h5jv7fy9yl3yt3jmjatkwu8m3rje
 
 ![BTC QR code](qr-bitcoin.png)
 
