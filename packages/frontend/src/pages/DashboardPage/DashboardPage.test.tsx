@@ -209,7 +209,7 @@ describe("Openings section behaviors", () => {
       </BrowserRouter>
     );
     fireEvent.click(screen.getByRole("button", { name: /openings/i }));
-    const viewBtn = screen.getByRole("button", { name: /view/i });
+    const viewBtn = screen.getByRole("button", { name: /^view$/i });
     expect(viewBtn).toBeInTheDocument();
     fireEvent.click(viewBtn);
   });

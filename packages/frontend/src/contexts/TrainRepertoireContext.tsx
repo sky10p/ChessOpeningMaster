@@ -57,10 +57,18 @@ export const TrainRepertoireContextProvider: React.FC<
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const variantName = params.get("variantName") || undefined;
+  const variantNamesParam = params.get("variantNames") || undefined;
+  const variantNames = variantNamesParam
+    ? new Set(variantNamesParam.split("|").filter(Boolean))
+    : undefined;
   const defaultTrainVariants: TrainVariant[] = variants
     .filter(
-      (v) =>
-        !variantName || v.fullName === variantName || v.name === variantName
+      (v) => {
+        if (variantNames && variantNames.size > 0) {
+          return variantNames.has(v.fullName) || variantNames.has(v.name);
+        }
+        return !variantName || v.fullName === variantName || v.name === variantName;
+      }
     )
     .map((v) => ({
       variant: v,
