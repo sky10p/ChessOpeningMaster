@@ -18,8 +18,23 @@ export const useNavigationUtils = () => {
     navigate(`/repertoire/train/${repertoireId}${variantName ? `?variantName=${encodeURIComponent(variantName)}` : ''}`);
   }, [navigate]);
 
+  const goToTrainRepertoireWithVariants = useCallback(
+    (repertoireIdOrObject: string | IRepertoire, variantNames: string[]) => {
+      const repertoireId = resolveId(repertoireIdOrObject);
+      if (!variantNames.length) {
+        navigate(`/repertoire/train/${repertoireId}`);
+        return;
+      }
+      const params = new URLSearchParams();
+      params.set("variantNames", variantNames.join("|"));
+      navigate(`/repertoire/train/${repertoireId}?${params.toString()}`);
+    },
+    [navigate]
+  );
+
   return {
     goToRepertoire,
     goToTrainRepertoire,
+    goToTrainRepertoireWithVariants,
   };
 };

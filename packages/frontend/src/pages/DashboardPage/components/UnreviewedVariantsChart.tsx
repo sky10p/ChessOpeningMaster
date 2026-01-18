@@ -1,0 +1,165 @@
+import React from "react";
+
+export type UnreviewedVariant = {
+  fullName: string;
+  repertoireId: string;
+  repertoireName: string;
+};
+
+export type OpeningWithUnreviewedVariants = {
+  opening: string;
+  count: number;
+  variants: UnreviewedVariant[];
+};
+
+export interface UnreviewedVariantsChartProps {
+  data: OpeningWithUnreviewedVariants[];
+  title: string;
+  emptyMessage?: string;
+  isMobile: boolean;
+  onVariantClick?: (variantFullName: string) => void;
+  onVariantsClick?: (repertoireId: string, variantFullNames: string[]) => void;
+}
+
+export const UnreviewedVariantsChart: React.FC<UnreviewedVariantsChartProps> = ({
+  data,
+  title,
+  emptyMessage = "No data",
+  isMobile,
+  onVariantClick,
+  onVariantsClick,
+}) => {
+  const [expandedOpenings, setExpandedOpenings] = React.useState<Set<string>>(new Set());
+
+  const toggleOpening = (opening: string) => {
+    setExpandedOpenings((prev) => {
+      const next = new Set(prev);
+      if (next.has(opening)) {
+        next.delete(opening);
+      } else {
+        next.add(opening);
+      }
+      return next;
+    });
+  };
+
+  const handleVariantTrain = (variantFullName: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    onVariantClick?.(variantFullName);
+  };
+
+  return (
+    <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col">
+      <h3 className="text-lg font-semibold text-gray-200 mb-2">{title}</h3>
+      {data.length === 0 ? (
+        <div className="text-gray-400 text-center py-8">{emptyMessage}</div>
+      ) : (
+        <div className="space-y-2">
+          {data.map((item) => {
+            const isExpanded = expandedOpenings.has(item.opening);
+            const displayName = isMobile && item.opening.length > 25
+              ? item.opening.slice(0, 22) + "…"
+              : item.opening;
+            const groupedVariants = item.variants.reduce<Record<string, UnreviewedVariant[]>>((acc, variant) => {
+              if (!acc[variant.repertoireId]) {
+                acc[variant.repertoireId] = [];
+              }
+              acc[variant.repertoireId].push(variant);
+              return acc;
+            }, {});
+            const groupedEntries = Object.entries(groupedVariants);
+            
+            return (
+              <div key={item.opening} className="border border-gray-700 rounded-lg overflow-hidden">
+                <button
+                  onClick={() => toggleOpening(item.opening)}
+                  className="w-full px-3 py-2 flex items-center justify-between hover:bg-gray-800 transition-colors text-left"
+                >
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <span className="text-gray-300 flex-shrink-0">
+                      {isExpanded ? "▼" : "▶"}
+                    </span>
+                    <span className="text-gray-200 text-sm truncate" title={item.opening}>
+                      {displayName}
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                    <span className="text-xs text-amber-400 font-semibold">
+                      {item.count} unreviewed
+                    </span>
+                    {onVariantsClick && groupedEntries.length > 0 && (
+                      <div className="flex flex-wrap gap-1 justify-end">
+                        {groupedEntries.map(([repertoireId, variants]) => (
+                          <button
+                            key={repertoireId}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onVariantsClick(repertoireId, variants.map((v) => v.fullName));
+                            }}
+                            className="px-2 py-0.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                            title={`Train all unreviewed for ${variants[0]?.repertoireName || "Repertoire"}`}
+                          >
+                            Train all unreviewed
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </button>
+                
+                {isExpanded && (
+                  <div className="px-3 py-2 bg-gray-800 border-t border-gray-700">
+                    {groupedEntries.map(([repertoireId, variants]) => {
+                      const repertoireName = variants[0]?.repertoireName || "Repertoire";
+                      return (
+                        <div key={repertoireId} className="mb-3 last:mb-0">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs text-gray-300 font-medium truncate" title={repertoireName}>
+                              {repertoireName}
+                            </span>
+                          </div>
+                          <div className="space-y-1">
+                            {variants.map((variant) => {
+                              const shortName = variant.fullName.length > 50
+                                ? variant.fullName.slice(0, 47) + "…"
+                                : variant.fullName;
+                              
+                              return (
+                                <div
+                                  key={`${variant.repertoireId}::${variant.fullName}`}
+                                  className="flex items-center justify-between py-1 px-2 rounded hover:bg-gray-750 text-xs"
+                                >
+                                  <span className="text-gray-300 truncate flex-1 mr-2" title={variant.fullName}>
+                                    {shortName}
+                                  </span>
+                                  <div className="flex items-center gap-2 flex-shrink-0">
+                                    {onVariantClick && (
+                                      <button
+                                        onClick={(e) => handleVariantTrain(variant.fullName, e)}
+                                        className="px-2 py-0.5 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                                        title="Train this variant"
+                                      >
+                                        Train
+                                      </button>
+                                    )}
+                                    <span className="text-amber-400 font-semibold">
+                                      Unreviewed
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};

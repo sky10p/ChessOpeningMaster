@@ -19,8 +19,11 @@ import {
   VerticalBarChart,
   findVariantInfo,
   generateOpeningStats,
+  generateVariantsWithErrorsByOpening,
   getRelevantVariants,
 } from "../components/DashboardCharts";
+import { ExpandableVariantsChart } from "../components/ExpandableVariantsChart";
+import { useNavigationUtils } from "../../../utils/navigationUtils";
 
 interface DashboardSectionProps {
   repertoires: IRepertoireDashboard[];
@@ -32,6 +35,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const yAxisWidth = isMobile ? 90 : 180;
   const barChartMargin = { top: 20, right: 30, left: isMobile ? 60 : 120, bottom: 20 };
+  const { goToTrainRepertoire, goToTrainRepertoireWithVariants } = useNavigationUtils();
 
   const [filter, setFilter] = useState<FilterType>("all");
 
@@ -65,7 +69,34 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
 
 
   const errorsByOpeningTop5 = generateOpeningStats(filteredRepertoires, filter, "errors", 5);
+  const variantsWithErrorsByOpeningTop5 = generateVariantsWithErrorsByOpening(filteredRepertoires, filter, 5);
   const masteredOpenings = generateOpeningStats(filteredRepertoires, filter, "mastered", 5);
+
+  const handleOpeningClick = (openingName: string) => {
+    const repertoireWithOpening = filteredRepertoires.find((rep) => {
+      const variants = getRelevantVariants(rep, filter);
+      return variants.some((v) => v.name === openingName);
+    });
+    
+    if (repertoireWithOpening) {
+      goToTrainRepertoire(repertoireWithOpening._id, openingName);
+    }
+  };
+
+  const handleVariantClick = (variantFullName: string) => {
+    const repertoireWithVariant = filteredRepertoires.find((rep) => {
+      const variants = getRelevantVariants(rep, filter);
+      return variants.some((v) => v.fullName === variantFullName);
+    });
+    
+    if (repertoireWithVariant) {
+      goToTrainRepertoire(repertoireWithVariant._id, variantFullName);
+    }
+  };
+
+  const handleVariantsClick = (repertoireId: string, variantFullNames: string[]) => {
+    goToTrainRepertoireWithVariants(repertoireId, variantFullNames);
+  };
 
 
   const mostRecent = filteredRepertoires.reduce((latest, rep) => {
@@ -294,6 +325,16 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
             isMobile={isMobile}
             yAxisWidth={yAxisWidth}
             barChartMargin={barChartMargin}
+            onOpeningClick={handleOpeningClick}
+          />
+          
+          <ExpandableVariantsChart
+            data={variantsWithErrorsByOpeningTop5}
+            title="Variants with Errors by Opening"
+            emptyMessage="No variants with errors found"
+            isMobile={isMobile}
+            onVariantClick={handleVariantClick}
+            onVariantsClick={handleVariantsClick}
           />
           
           <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center">

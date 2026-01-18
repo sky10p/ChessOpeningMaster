@@ -11,6 +11,8 @@ import {
   Legend,
 } from "recharts";
 import { MoveVariantNode } from "../../../models/VariantNode";
+import { OpeningWithVariants, VariantWithErrors } from "./ExpandableVariantsChart";
+import { OpeningWithUnreviewedVariants, UnreviewedVariant } from "./UnreviewedVariantsChart";
 
 export type FilterType = "all" | "white" | "black" | "errors" | "unreviewed";
 export type VariantInfo = { errors?: number; lastDate?: string | Date };
@@ -76,6 +78,82 @@ export const generateOpeningStats = (
     .slice(0, topCount);
 };
 
+export const generateVariantsWithErrorsByOpening = (
+  filteredRepertoires: IRepertoireDashboard[],
+  filter: FilterType,
+  topCount?: number
+): OpeningWithVariants[] => {
+  const variantsWithErrorsMap: Record<string, Map<string, VariantWithErrors>> = {};
+
+  filteredRepertoires.forEach((rep) => {
+    const relevantVariants = getRelevantVariants(rep, filter);
+
+    relevantVariants.forEach((variant) => {
+      const info = findVariantInfo(variant, rep);
+      if (info && (info.errors ?? 0) > 0) {
+        if (!variantsWithErrorsMap[variant.name]) {
+          variantsWithErrorsMap[variant.name] = new Map();
+        }
+        const key = `${rep._id}::${variant.fullName}`;
+        variantsWithErrorsMap[variant.name].set(key, {
+          fullName: variant.fullName,
+          errors: info.errors ?? 0,
+          repertoireId: rep._id,
+          repertoireName: rep.name,
+        });
+      }
+    });
+  });
+
+  const allOpenings = Object.entries(variantsWithErrorsMap)
+    .map(([opening, variantsMap]) => ({ 
+      opening, 
+      count: variantsMap.size,
+      variants: Array.from(variantsMap.values())
+        .sort((a, b) => b.errors - a.errors)
+    }))
+    .sort((a, b) => {
+      const totalErrorsA = a.variants.reduce((sum, v) => sum + v.errors, 0);
+      const totalErrorsB = b.variants.reduce((sum, v) => sum + v.errors, 0);
+      return totalErrorsB - totalErrorsA;
+    });
+
+  return typeof topCount === "number" ? allOpenings.slice(0, topCount) : allOpenings;
+};
+
+export const generateUnreviewedVariantsByOpening = (
+  filteredRepertoires: IRepertoireDashboard[],
+  topCount?: number
+): OpeningWithUnreviewedVariants[] => {
+  const unreviewedMap: Record<string, Map<string, UnreviewedVariant>> = {};
+
+  filteredRepertoires.forEach((rep) => {
+    const relevantVariants = getRelevantVariants(rep, "unreviewed");
+
+    relevantVariants.forEach((variant) => {
+      if (!unreviewedMap[variant.name]) {
+        unreviewedMap[variant.name] = new Map();
+      }
+      const key = `${rep._id}::${variant.fullName}`;
+      unreviewedMap[variant.name].set(key, {
+        fullName: variant.fullName,
+        repertoireId: rep._id,
+        repertoireName: rep.name,
+      });
+    });
+  });
+
+  const allOpenings = Object.entries(unreviewedMap)
+    .map(([opening, variantsMap]) => ({
+      opening,
+      count: variantsMap.size,
+      variants: Array.from(variantsMap.values()),
+    }))
+    .sort((a, b) => b.count - a.count);
+
+  return typeof topCount === "number" ? allOpenings.slice(0, topCount) : allOpenings;
+};
+
 export interface VerticalBarChartProps {
   data: Array<{ opening: string; count: number }>;
   title: string;
@@ -87,6 +165,7 @@ export interface VerticalBarChartProps {
   isMobile: boolean;
   yAxisWidth: number;
   barChartMargin: { top: number; right: number; left: number; bottom: number };
+  onOpeningClick?: (openingName: string) => void;
 }
 
 export const VerticalBarChart: React.FC<VerticalBarChartProps> = ({
@@ -100,6 +179,7 @@ export const VerticalBarChart: React.FC<VerticalBarChartProps> = ({
   isMobile,
   yAxisWidth,
   barChartMargin,
+  onOpeningClick,
 }) => {
   return (
     <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center overflow-x-auto md:overflow-x-visible">
@@ -142,6 +222,7 @@ export const VerticalBarChart: React.FC<VerticalBarChartProps> = ({
                       textAnchor="end"
                       fill="#cbd5e1"
                       fontSize={isMobile ? 10 : 13}
+                      style={{ cursor: onOpeningClick ? 'pointer' : 'default' }}
                     >
                       {display}
                       {name.length > 28 && <title>{name}</title>}
@@ -156,6 +237,7 @@ export const VerticalBarChart: React.FC<VerticalBarChartProps> = ({
                 barName,
               ]}
               labelFormatter={(label: string) => `Opening: ${label}`}
+              cursor={{ fill: 'rgba(255, 255, 255, 0.1)' }}
             />
             <Legend />
             <Bar
@@ -163,6 +245,8 @@ export const VerticalBarChart: React.FC<VerticalBarChartProps> = ({
               fill={barColor}
               name={barName}
               radius={[6, 6, 6, 6]}
+              onClick={(data) => onOpeningClick?.(data.opening)}
+              style={{ cursor: onOpeningClick ? 'pointer' : 'default' }}
             />
           </BarChart>
         </ResponsiveContainer>
