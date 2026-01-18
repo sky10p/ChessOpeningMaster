@@ -305,10 +305,10 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
                     outerRadius={70}
                     label
                   >
-                    {reviewData.map((entry) => (
+                    {reviewData.map((entry, index) => (
                       <Cell
                         key={`cell-${entry.name}`}
-                        fill={COLORS[reviewData.indexOf(entry) % COLORS.length]}
+                        fill={COLORS[index % COLORS.length]}
                       />
                     ))}
                   </Pie>
