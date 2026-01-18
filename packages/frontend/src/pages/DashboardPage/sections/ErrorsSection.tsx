@@ -31,7 +31,7 @@ export const ErrorsSection: React.FC<ErrorsSectionProps> = ({ repertoires }) => 
     return generateVariantsWithErrorsByOpening(filteredRepertoires, "all");
   }, [filteredRepertoires]);
 
-  const filteredOpenings = useMemo(() => {
+  const filteredOpenings = useMemo<OpeningWithVariants[]>(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
 
     const byRepertoire = allOpeningsData
@@ -199,7 +199,7 @@ export const ErrorsSection: React.FC<ErrorsSectionProps> = ({ repertoires }) => 
 
       <div className="flex-1 min-h-0 overflow-y-auto">
         <ExpandableVariantsChart
-          data={filteredOpenings as OpeningWithVariants[]}
+          data={filteredOpenings}
           title="Errors by Opening"
           emptyMessage="No openings found with the selected filters"
           isMobile={typeof window !== "undefined" && window.innerWidth < 768}

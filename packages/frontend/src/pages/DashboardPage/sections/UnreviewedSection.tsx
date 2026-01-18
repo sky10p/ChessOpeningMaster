@@ -30,7 +30,7 @@ export const UnreviewedSection: React.FC<UnreviewedSectionProps> = ({ repertoire
     return generateUnreviewedVariantsByOpening(filteredRepertoires);
   }, [filteredRepertoires]);
 
-  const filteredOpenings = useMemo(() => {
+  const filteredOpenings = useMemo<OpeningWithUnreviewedVariants[]>(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
 
     const byRepertoire = allOpeningsData
@@ -178,7 +178,7 @@ export const UnreviewedSection: React.FC<UnreviewedSectionProps> = ({ repertoire
 
       <div className="flex-1 min-h-0 overflow-y-auto">
         <UnreviewedVariantsChart
-          data={filteredOpenings as OpeningWithUnreviewedVariants[]}
+          data={filteredOpenings}
           title="Unreviewed Variants by Opening"
           emptyMessage="No unreviewed variants found with the selected filters"
           isMobile={typeof window !== "undefined" && window.innerWidth < 768}
