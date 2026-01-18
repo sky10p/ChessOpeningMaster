@@ -15,7 +15,7 @@ export class Chess {
     return true;
   }
   
-  loadPgn(_pgn: string) {
+  loadPgn() {
     return true;
   }
   

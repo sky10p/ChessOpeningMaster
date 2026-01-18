@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { IRepertoireDashboard } from "@chess-opening-master/common";
 import {
   PieChart,
@@ -34,7 +34,12 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
 }) => {
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const yAxisWidth = isMobile ? 90 : 180;
-  const barChartMargin = { top: 20, right: 30, left: isMobile ? 60 : 120, bottom: 20 };
+  const barChartMargin = useMemo(() => ({ 
+    top: 20, 
+    right: 30, 
+    left: isMobile ? 60 : 120, 
+    bottom: 20 
+  }), [isMobile]);
   const { goToTrainRepertoire, goToTrainRepertoireWithVariants } = useNavigationUtils();
 
   const [filter, setFilter] = useState<FilterType>("all");
@@ -300,10 +305,10 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
                     outerRadius={70}
                     label
                   >
-                    {reviewData.map((entry, index) => (
+                    {reviewData.map((entry) => (
                       <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
+                        key={`cell-${entry.name}`}
+                        fill={COLORS[reviewData.indexOf(entry) % COLORS.length]}
                       />
                     ))}
                   </Pie>
