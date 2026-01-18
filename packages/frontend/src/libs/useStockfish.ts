@@ -30,7 +30,6 @@ const useStockfish = (
     const handleMessage = (event: MessageEvent) => {
 
       const message = event.data;
-      console.log(message);
 
       const sideToMove = fen.split(" ")[1];
 

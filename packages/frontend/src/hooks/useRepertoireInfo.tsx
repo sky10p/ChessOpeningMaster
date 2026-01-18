@@ -44,7 +44,6 @@ export const useRepertoireInfo = () => {
       textarea.select();
       try {
         document.execCommand("copy");
-        console.log("Text copied to clipboard");
       } catch (err) {
         console.error("Unable to copy text", err);
       }

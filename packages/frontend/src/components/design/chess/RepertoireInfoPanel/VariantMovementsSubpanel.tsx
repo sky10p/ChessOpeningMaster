@@ -114,8 +114,8 @@ export const VariantMovementsSubpanel: React.FC<VariantMovementsSubpanelProps> =
     <div className="overflow-y-auto h-full w-full rounded-md bg-slate-900 text-white shadow-inner">
       {turns.length > 0 ? (
         <div className="p-3 space-y-2">
-          {turns.map((turn, index) => (
-            <div key={index} className="grid grid-cols-12 py-1.5 border-b border-slate-800 last:border-0">
+          {turns.map((turn) => (
+            <div key={turn.whiteMove.id} className="grid grid-cols-12 py-1.5 border-b border-slate-800 last:border-0">
               <div className="col-span-1 text-sm font-semibold text-slate-500 flex items-center">{`${turn.turnNumber}.`}</div>
               <div className="col-span-5 cursor-pointer flex items-center" onClick={() => goToMove(turn.whiteMove)}>
                 <MoveItem

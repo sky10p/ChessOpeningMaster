@@ -98,7 +98,7 @@ export const useDialogContext = (): DialogContextProps => {
 
   if (context === null) {
     throw new Error(
-      "useAlertContext must be used within a AlertContextProvider"
+      "useDialogContext must be used within a DialogContextProvider"
     );
   }
 

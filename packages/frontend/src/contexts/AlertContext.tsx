@@ -57,7 +57,7 @@ export const AlertContextProvider = ({
       {children}
       <Alert
         open={alertState.open}
-        setOpen={() => setAlertState({ ...alertState, open: false })}
+        setOpen={() => setAlertState(prev => ({ ...prev, open: false }))}
         alertMessage={alertState.alertMessage}
         alertSeverity={alertState.alertSeverity}
         autoHideDuration={alertState.autoHideDuration}

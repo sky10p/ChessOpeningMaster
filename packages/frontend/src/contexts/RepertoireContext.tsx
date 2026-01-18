@@ -149,7 +149,7 @@ export const RepertoireContextProvider: React.FC<
     setSelectedVariant(newSelectedVariant);
 
     chess.reset();
-  }, [initialMoves]);
+  }, [initialMoves, getInitialSelectedVariant]);
 
   useEffect(() => {
     setOrientation(initialOrientation);
@@ -425,9 +425,9 @@ export const RepertoireContextProvider: React.FC<
     repertoireName,
     moveHistory,
     orientation,
-    comment,
     showAlert,
     currentMove,
+    setIsSaving,
   ]);
 
   const getPgn = useCallback(async () => {

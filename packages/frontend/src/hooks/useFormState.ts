@@ -1,4 +1,4 @@
-import { useState, useCallback, ChangeEvent } from 'react';
+import { useState, useCallback, ChangeEvent, useRef } from 'react';
 
 type FormValue = string | number | boolean | null;
 type FormValues = Record<string, FormValue>;
@@ -15,18 +15,29 @@ interface UseFormStateReturn<T extends FormValues> {
   getValues: <K extends keyof T>() => { [P in K]: T[P] };
 }
 
+function shallowEqual<T extends FormValues>(obj1: T, obj2: T): boolean {
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+  
+  if (keys1.length !== keys2.length) {
+    return false;
+  }
+  
+  return keys1.every(key => obj1[key] === obj2[key]);
+}
+
 export function useFormState<T extends FormValues>(initialValues: T): UseFormStateReturn<T> {
   const [values, setValues] = useState<T>(initialValues);
-  const [initialState] = useState<T>(initialValues);
+  const initialStateRef = useRef<T>(initialValues);
   const [isDirty, setIsDirty] = useState(false);
 
   const handleChange = useCallback((field: keyof T, value: FormValue) => {
     setValues(prev => {
       const newValues = { ...prev, [field]: value };
-      setIsDirty(JSON.stringify(newValues) !== JSON.stringify(initialState));
+      setIsDirty(!shallowEqual(newValues, initialStateRef.current));
       return newValues;
     });
-  }, [initialState]);
+  }, []);
 
   const handleInputChange = useCallback((e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -43,17 +54,17 @@ export function useFormState<T extends FormValues>(initialValues: T): UseFormSta
   }, [handleChange]);
 
   const resetForm = useCallback(() => {
-    setValues(initialState);
+    setValues(initialStateRef.current);
     setIsDirty(false);
-  }, [initialState]);
+  }, []);
 
   const setForm = useCallback((newValues: Partial<T>) => {
     setValues(prev => {
       const updatedValues = { ...prev, ...newValues };
-      setIsDirty(JSON.stringify(updatedValues) !== JSON.stringify(initialState));
+      setIsDirty(!shallowEqual(updatedValues, initialStateRef.current));
       return updatedValues;
     });
-  }, [initialState]);
+  }, []);
 
   const getFormData = useCallback(() => values, [values]);
   

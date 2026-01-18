@@ -21,7 +21,7 @@ export function usePaths() {
       
       const data = await fetchPath(categoryToUse);
       setPath(data);
-    } catch (err: Error | unknown) {
+    } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load path");
     } finally {
       setLoading(false);
@@ -39,7 +39,7 @@ export function usePaths() {
     try {
       await deleteVariantFromPath(variantId);
       await loadPath(); // Reload path data after removal
-    } catch (err: Error | unknown) {
+    } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to remove variant from path");
     } finally {
       setLoading(false);
