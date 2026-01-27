@@ -89,7 +89,7 @@ export const UnreviewedSection: React.FC<UnreviewedSectionProps> = ({ repertoire
   };
 
   return (
-    <section className="flex-1 flex flex-col min-h-0 p-4">
+    <section className="flex-1 flex flex-col min-h-0 p-4 overflow-y-auto">
       <header className="mb-4">
         <h2 className="font-bold text-gray-100 text-2xl leading-tight mb-1 truncate">
           Unreviewed Variants
@@ -176,7 +176,7 @@ export const UnreviewedSection: React.FC<UnreviewedSectionProps> = ({ repertoire
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto">
+      <div className="flex-none sm:flex-1 sm:min-h-0 overflow-visible sm:overflow-y-auto">
         <UnreviewedVariantsChart
           data={filteredOpenings}
           title="Unreviewed Variants by Opening"
