@@ -89,7 +89,7 @@ export const UnreviewedSection: React.FC<UnreviewedSectionProps> = ({ repertoire
   };
 
   return (
-    <section className="flex-1 flex flex-col min-h-0 p-4 overflow-y-auto sm:overflow-hidden">
+    <section className="flex-1 flex flex-col min-h-0 p-4 overflow-y-auto">
       <header className="mb-4">
         <h2 className="font-bold text-gray-100 text-2xl leading-tight mb-1 truncate">
           Unreviewed Variants
