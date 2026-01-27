@@ -103,7 +103,7 @@ export const ErrorsSection: React.FC<ErrorsSectionProps> = ({ repertoires }) => 
   };
 
   return (
-    <section className="flex-1 flex flex-col min-h-0 p-4">
+    <section className="flex-1 flex flex-col min-h-0 p-4 overflow-y-auto sm:overflow-hidden">
       <header className="mb-4">
         <h2 className="font-bold text-gray-100 text-2xl leading-tight mb-1 truncate">
           Errors Management
@@ -197,7 +197,7 @@ export const ErrorsSection: React.FC<ErrorsSectionProps> = ({ repertoires }) => 
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto">
+      <div className="flex-none sm:flex-1 sm:min-h-0 overflow-visible sm:overflow-y-auto">
         <ExpandableVariantsChart
           data={filteredOpenings}
           title="Errors by Opening"
