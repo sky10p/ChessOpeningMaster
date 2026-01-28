@@ -35,6 +35,16 @@ export const toUtcDateKey = (date: Date): string => {
   return `${year}-${month}-${day}`;
 };
 
+export const getLastUtcDateKeys = (length: number): string[] => {
+  const safeLength = Math.max(0, Math.floor(length));
+  const today = new Date();
+  return Array.from({ length: safeLength }, (_, i) => {
+    const d = new Date(today);
+    d.setUTCDate(today.getUTCDate() - (safeLength - 1 - i));
+    return toUtcDateKey(d);
+  });
+};
+
 export const isToday = (date: Date): boolean => {
   return toUtcDateKey(date) === toUtcDateKey(new Date());
 };

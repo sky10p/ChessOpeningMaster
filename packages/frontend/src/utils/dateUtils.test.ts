@@ -1,4 +1,4 @@
-import { isToday, toUtcDateKey } from "./dateUtils";
+import { getLastUtcDateKeys, isToday, toUtcDateKey } from "./dateUtils";
 
 describe("dateUtils", () => {
   describe("toUtcDateKey", () => {
@@ -36,6 +36,37 @@ describe("dateUtils", () => {
     it("returns false for a different UTC day", () => {
       const date = new Date(Date.UTC(2026, 0, 27, 23, 59, 59));
       expect(isToday(date)).toBe(false);
+    });
+  });
+
+  describe("getLastUtcDateKeys", () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date(Date.UTC(2026, 0, 28, 12, 0, 0)));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it("returns the last N UTC date keys", () => {
+      expect(getLastUtcDateKeys(3)).toEqual([
+        "2026-01-26",
+        "2026-01-27",
+        "2026-01-28",
+      ]);
+    });
+
+    it("returns an empty array for non-positive length", () => {
+      expect(getLastUtcDateKeys(0)).toEqual([]);
+      expect(getLastUtcDateKeys(-4)).toEqual([]);
+    });
+
+    it("floors non-integer length", () => {
+      expect(getLastUtcDateKeys(2.7)).toEqual([
+        "2026-01-27",
+        "2026-01-28",
+      ]);
     });
   });
 });

@@ -24,7 +24,7 @@ import {
 } from "../components/DashboardCharts";
 import { ExpandableVariantsChart } from "../components/ExpandableVariantsChart";
 import { useNavigationUtils } from "../../../utils/navigationUtils";
-import { toUtcDateKey } from "../../../utils/dateUtils";
+import { getLastUtcDateKeys, toUtcDateKey } from "../../../utils/dateUtils";
 
 interface DashboardSectionProps {
   repertoires: IRepertoireDashboard[];
@@ -192,12 +192,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
     .map(([date, count]) => ({ date, count }));
 
 
-  const today = new Date();
-  const last10Days = Array.from({ length: 10 }, (_, i) => {
-    const d = new Date(today);
-    d.setDate(today.getDate() - (9 - i));
-    return toUtcDateKey(d);
-  });
+  const last10Days = getLastUtcDateKeys(10);
   
   const reviewActivityDataLast10 = last10Days.map((date) => {
     const entry = reviewActivityData.find((d) => d.date === date);
