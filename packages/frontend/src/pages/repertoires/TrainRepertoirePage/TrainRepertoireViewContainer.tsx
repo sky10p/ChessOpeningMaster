@@ -13,6 +13,8 @@ import {
   PencilIcon,
   ChatBubbleLeftIcon,
   ClipboardDocumentIcon,
+  EyeIcon,
+  EyeSlashIcon,
 } from "@heroicons/react/24/outline";
 import TrainInfo from "../../../components/design/chess/train/TrainInfo";
 import HelpInfo from "../../../components/design/chess/train/HelpInfo";
@@ -24,6 +26,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
   const [panelSelected, setPanelSelected] = React.useState<
     "info" | "help" | "trainComments"
   >("info");
+  const [isFocusMode, setIsFocusMode] = React.useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { repertoireId, repertoireName, currentMoveNode, orientation, variants, updateComment } =
@@ -99,6 +102,11 @@ const TrainRepertoireViewContainer: React.FC = () => {
           navigate(editUrl);
         },
       },
+      {
+        key: "focusMode",
+        icon: isFocusMode ? <EyeSlashIcon /> : <EyeIcon />,
+        onClick: () => setIsFocusMode((prev) => !prev),
+      },
     ];
 
     headerIcons.forEach(({ key, icon, onClick }) => {
@@ -120,10 +128,15 @@ const TrainRepertoireViewContainer: React.FC = () => {
     navigate,
     repertoireId,
     variants,
+    isFocusMode,
   ]);
 
   useEffect(() => {
-    setIsVisible(true);
+    if (!isFocusMode) {
+      setIsVisible(true);
+    } else {
+      setIsVisible(false);
+    }
     const footerIcons = [
       {
         key: "info",
@@ -145,9 +158,11 @@ const TrainRepertoireViewContainer: React.FC = () => {
       },
     ];
 
-    footerIcons.forEach(({ key, label, icon, onClick }) => {
-      addIconFooter({ key, label, icon, onClick });
-    });
+    if (!isFocusMode) {
+      footerIcons.forEach(({ key, label, icon, onClick }) => {
+        addIconFooter({ key, label, icon, onClick });
+      });
+    }
 
     return () => {
       setIsVisible(false);
@@ -155,7 +170,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
         removeIconFooter(key);
       });
     };
-  }, [addIconFooter, removeIconFooter, setIsVisible]);
+  }, [addIconFooter, removeIconFooter, setIsVisible, isFocusMode]);
 
   const renderPanelContent = useMemo(
     () => (
@@ -206,25 +221,53 @@ const TrainRepertoireViewContainer: React.FC = () => {
       lastTrainVariant,
       allowedMoves,
       repertoireId,
+      orientation,
+      updateComment,
     ]
   );
 
   return (
-    <div className="container mx-auto p-1 sm:p-4 h-full bg-background text-textLight">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full">
+    <div
+      className={`container mx-auto p-1 sm:p-4 h-full text-textLight ${
+        isFocusMode ? "bg-slate-950/70" : "bg-background"
+      }`}
+    >
+      <div
+        className={`grid grid-cols-1 gap-4 h-full ${
+          isFocusMode ? "sm:grid-cols-1" : "sm:grid-cols-2"
+        }`}
+      >
         <div className="flex flex-col items-center justify-center h-full">
-          <div className="flex justify-center mb-1 sm:mb-4">
+          <div className="flex flex-col items-center gap-2 mb-1 sm:mb-4">
+            {isFocusMode && (
+              <span className="rounded-full border border-emerald-400/60 bg-emerald-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-200">
+                Focus Mode
+              </span>
+            )}
             <h5 className="text-base sm:text-xl font-bold text-textLight">
               Training {repertoireName}
             </h5>
+            <p className="text-xs sm:text-sm text-textLight/70">
+              {isFocusMode
+                ? "Stay in the zone — panel distractions hidden."
+                : "Review moves, hints, and comments while training."}
+            </p>
           </div>
-          <div className="flex justify-center w-full max-w-md">
-            <BoardContainer isTraining={true} />
+          <div className="flex justify-center w-full">
+            <div
+              className={`rounded-2xl border border-secondary/60 bg-gray-900/60 p-3 shadow-lg ${
+                isFocusMode ? "max-w-2xl" : "max-w-md"
+              }`}
+            >
+              <BoardContainer isTraining={true} />
+            </div>
           </div>
         </div>
-        <div className="flex flex-col items-start h-full overflow-auto border border-secondary rounded bg-gray-800">
-          {renderPanelContent}
-        </div>
+        {!isFocusMode && (
+          <div className="flex flex-col items-start h-full overflow-auto border border-secondary/70 rounded bg-gray-800/90 shadow-md">
+            {renderPanelContent}
+          </div>
+        )}
       </div>
     </div>
   );
