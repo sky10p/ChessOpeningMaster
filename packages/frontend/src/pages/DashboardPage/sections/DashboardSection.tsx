@@ -117,9 +117,14 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
   }, null as null | { name: string; date: Date });
 
 
+  const todayKey = new Date().toISOString().slice(0, 10);
+
   let neverReviewed = 0;
   let reviewedWithErrors = 0;
   let reviewedOK = 0;
+  let reviewedToday = 0;
+  let reviewedTodayErrors = 0;
+  let reviewedTodayOk = 0;
   
   allVariants.forEach((variant) => {
     const rep = filteredRepertoires.find(
@@ -134,7 +139,21 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
     
     if (!info || !info.lastDate) {
       neverReviewed++;
-    } else if (info.errors && info.errors > 0) {
+      return;
+    }
+
+    const lastDateKey = new Date(info.lastDate).toISOString().slice(0, 10);
+
+    if (lastDateKey === todayKey) {
+      reviewedToday++;
+      if (info.errors && info.errors > 0) {
+        reviewedTodayErrors++;
+      } else {
+        reviewedTodayOk++;
+      }
+    }
+
+    if (info.errors && info.errors > 0) {
       reviewedWithErrors++;
     } else {
       reviewedOK++;
@@ -365,6 +384,44 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
                 </BarChart>
               </ResponsiveContainer>
             )}
+          </div>
+
+          <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center">
+            <h3 className="text-lg font-semibold text-gray-200 mb-3">
+              Today's Progress
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 w-full">
+              <div className="flex flex-col items-center">
+                <span className="text-2xl font-bold text-blue-400">
+                  {reviewedToday}
+                </span>
+                <span className="text-gray-300 mt-1 text-sm">Reviewed Today</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-2xl font-bold text-amber-400">
+                  {neverReviewed}
+                </span>
+                <span className="text-gray-300 mt-1 text-sm">Unreviewed</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-2xl font-bold text-red-400">
+                  {reviewedWithErrors}
+                </span>
+                <span className="text-gray-300 mt-1 text-sm">Total Errors</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-2xl font-bold text-red-400">
+                  {reviewedTodayErrors}
+                </span>
+                <span className="text-gray-300 mt-1 text-sm">Errors Today</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-2xl font-bold text-green-400">
+                  {reviewedTodayOk}
+                </span>
+                <span className="text-gray-300 mt-1 text-sm">OK Today</span>
+              </div>
+            </div>
           </div>
           
           <VerticalBarChart 
