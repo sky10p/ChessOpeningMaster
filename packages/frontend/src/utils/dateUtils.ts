@@ -28,7 +28,7 @@ export const isSameDay = (date1: Date, date2: Date): boolean => {
   return setToMidnight(date1).getTime() === setToMidnight(date2).getTime();
 };
 
-export const toLocalDateKey = (date: Date): string => {
+export const toUtcDateKey = (date: Date): string => {
   const year = date.getUTCFullYear();
   const month = String(date.getUTCMonth() + 1).padStart(2, "0");
   const day = String(date.getUTCDate()).padStart(2, "0");
@@ -36,5 +36,5 @@ export const toLocalDateKey = (date: Date): string => {
 };
 
 export const isToday = (date: Date): boolean => {
-  return toLocalDateKey(date) === toLocalDateKey(new Date());
+  return toUtcDateKey(date) === toUtcDateKey(new Date());
 };

@@ -24,7 +24,7 @@ import {
 } from "../components/DashboardCharts";
 import { ExpandableVariantsChart } from "../components/ExpandableVariantsChart";
 import { useNavigationUtils } from "../../../utils/navigationUtils";
-import { toLocalDateKey } from "../../../utils/dateUtils";
+import { toUtcDateKey } from "../../../utils/dateUtils";
 
 interface DashboardSectionProps {
   repertoires: IRepertoireDashboard[];
@@ -118,7 +118,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
   }, null as null | { name: string; date: Date });
 
 
-  const todayKey = toLocalDateKey(new Date());
+  const todayKey = toUtcDateKey(new Date());
 
   let neverReviewed = 0;
   let reviewedWithErrors = 0;
@@ -143,7 +143,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
       return;
     }
 
-    const lastDateKey = toLocalDateKey(new Date(info.lastDate));
+    const lastDateKey = toUtcDateKey(new Date(info.lastDate));
 
     if (lastDateKey === todayKey) {
       reviewedToday++;
@@ -181,7 +181,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
       errorsDistribution[err] = (errorsDistribution[err] || 0) + 1;
       
       if (info && info.lastDate) {
-        const date = toLocalDateKey(new Date(info.lastDate));
+        const date = toUtcDateKey(new Date(info.lastDate));
         reviewActivity[date] = (reviewActivity[date] || 0) + 1;
       }
     });
@@ -196,7 +196,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
   const last10Days = Array.from({ length: 10 }, (_, i) => {
     const d = new Date(today);
     d.setDate(today.getDate() - (9 - i));
-    return toLocalDateKey(d);
+    return toUtcDateKey(d);
   });
   
   const reviewActivityDataLast10 = last10Days.map((date) => {

@@ -1,20 +1,20 @@
-import { isToday, toLocalDateKey } from "./dateUtils";
+import { isToday, toUtcDateKey } from "./dateUtils";
 
 describe("dateUtils", () => {
-  describe("toLocalDateKey", () => {
+  describe("toUtcDateKey", () => {
     it("formats UTC date as YYYY-MM-DD", () => {
       const date = new Date(Date.UTC(2026, 0, 28, 5, 4, 3));
-      expect(toLocalDateKey(date)).toBe("2026-01-28");
+      expect(toUtcDateKey(date)).toBe("2026-01-28");
     });
 
     it("pads single-digit month and day", () => {
       const date = new Date(Date.UTC(2026, 8, 5, 0, 0, 0));
-      expect(toLocalDateKey(date)).toBe("2026-09-05");
+      expect(toUtcDateKey(date)).toBe("2026-09-05");
     });
 
     it("uses UTC when parsing timezone offsets", () => {
       const date = new Date("2026-01-28T01:00:00+10:00");
-      expect(toLocalDateKey(date)).toBe("2026-01-27");
+      expect(toUtcDateKey(date)).toBe("2026-01-27");
     });
   });
 
