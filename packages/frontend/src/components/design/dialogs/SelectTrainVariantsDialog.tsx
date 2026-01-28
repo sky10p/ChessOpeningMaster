@@ -11,6 +11,7 @@ import {
 } from "@headlessui/react";
 import { UiCheckbox } from "../../basic/UiCheckbox";
 import { TrainVariantInfo } from "@chess-opening-master/common";
+import { isToday } from "../../../utils/dateUtils";
 
 interface SelectTrainVariantsDialogProps {
   open: boolean;
@@ -182,12 +183,7 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
     const info = trainVariantsInfo[trainVariant.variant.fullName];
     if (!info || !info.lastDate) return true;
     const lastDate = new Date(info.lastDate);
-    const today = new Date();
-    return (
-      lastDate.getDate() !== today.getDate() ||
-      lastDate.getMonth() !== today.getMonth() ||
-      lastDate.getFullYear() !== today.getFullYear()
-    );
+    return !isToday(lastDate);
   };
 
   const newVariantIndexes = useMemo(() =>
