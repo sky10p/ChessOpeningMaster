@@ -12,6 +12,8 @@ import {
   ChatBubbleBottomCenterTextIcon,
   ComputerDesktopIcon,
   PresentationChartLineIcon,
+  EyeIcon,
+  EyeSlashIcon,
 } from "@heroicons/react/24/outline";
 import SaveIcon from "../../../components/icons/SaveIcon";
 import VariantsIcon from "../../../components/icons/VariantsIcon";
@@ -28,6 +30,7 @@ type FooterSection = "variants" | "comments" | "statistics" | "stockfish";
 const EditRepertoireViewContainer: React.FC = () => {
   const navigate = useNavigate();
   const [panelSelected, setPanelSelected] = useState<FooterSection>("variants");
+  const [isFocusMode, setIsFocusMode] = useState(false);
 
   const { 
     repertoireId, 
@@ -98,6 +101,11 @@ const EditRepertoireViewContainer: React.FC = () => {
       onClick: saveRepertory,
     });
     addIconHeader({
+      key: "focusMode",
+      icon: isFocusMode ? <EyeSlashIcon /> : <EyeIcon />,
+      onClick: () => setIsFocusMode((prev) => !prev),
+    });
+    addIconHeader({
       key: "moreOptions",
       icon: <EllipsisVerticalIcon />,
       onClick: toggleMenuHeader,
@@ -106,36 +114,41 @@ const EditRepertoireViewContainer: React.FC = () => {
     return () => {
       removeIconHeader("trainRepertoire");
       removeIconHeader("saveRepertoire");
+      removeIconHeader("focusMode");
       removeIconHeader("moreOptions");
     };
-  }, [navigate, repertoireId, saveRepertory, getPgn, toggleMenu]);
+  }, [navigate, repertoireId, saveRepertory, getPgn, toggleMenu, isFocusMode]);
 
   useEffect(() => {
-    setIsVisible(true);
-    addIconFooter({
-      key: "variants",
-      label: "Variants",
-      icon: <VariantsIcon className="h-6 w-6" />,
-      onClick: () => setPanelSelected("variants"),
-    });
-    addIconFooter({
-      key: "comments",
-      label: "Comments",
-      icon: <ChatBubbleBottomCenterTextIcon className="h-6 w-6" />,
-      onClick: () => setPanelSelected("comments"),
-    });
-    addIconFooter({
-      key: "statistics",
-      label: "Statistics",
-      icon: <PresentationChartLineIcon className="h-6 w-6" />,
-      onClick: () => setPanelSelected("statistics"),
-    });
-    addIconFooter({
-      key: "stockfish",
-      label: "Stockfish",
-      icon: <ComputerDesktopIcon className="h-6 w-6" />,
-      onClick: () => setPanelSelected("stockfish"),
-    });
+    if (!isFocusMode) {
+      setIsVisible(true);
+      addIconFooter({
+        key: "variants",
+        label: "Variants",
+        icon: <VariantsIcon className="h-6 w-6" />,
+        onClick: () => setPanelSelected("variants"),
+      });
+      addIconFooter({
+        key: "comments",
+        label: "Comments",
+        icon: <ChatBubbleBottomCenterTextIcon className="h-6 w-6" />,
+        onClick: () => setPanelSelected("comments"),
+      });
+      addIconFooter({
+        key: "statistics",
+        label: "Statistics",
+        icon: <PresentationChartLineIcon className="h-6 w-6" />,
+        onClick: () => setPanelSelected("statistics"),
+      });
+      addIconFooter({
+        key: "stockfish",
+        label: "Stockfish",
+        icon: <ComputerDesktopIcon className="h-6 w-6" />,
+        onClick: () => setPanelSelected("stockfish"),
+      });
+    } else {
+      setIsVisible(false);
+    }
 
     return () => {
       setIsVisible(false);
@@ -144,23 +157,48 @@ const EditRepertoireViewContainer: React.FC = () => {
       removeIconFooter("statistics");
       removeIconFooter("stockfish");
     };
-  }, []);
+  }, [addIconFooter, removeIconFooter, setIsVisible, isFocusMode]);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-12 w-full gap-4 bg-background text-textLight h-full">
-      <div className="col-span-12 sm:col-span-6  flex flex-col justify-center items-center">
-        <div className="flex justify-center w-full p-1 sm:p-4">
+    <div
+      className={`grid grid-cols-1 w-full gap-4 text-textLight h-full ${
+        isFocusMode ? "sm:grid-cols-1 bg-slate-950/70" : "sm:grid-cols-12 bg-background"
+      }`}
+    >
+      <div
+        className={`col-span-12 flex flex-col justify-center items-center ${
+          isFocusMode ? "" : "sm:col-span-6"
+        }`}
+      >
+        <div className="flex flex-col items-center w-full gap-2 p-1 sm:p-4">
+          {isFocusMode && (
+            <span className="rounded-full border border-amber-400/60 bg-amber-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-amber-200">
+              Focus Mode
+            </span>
+          )}
           <h1 className="text-base sm:text-2xl font-bold">{repertoireName}</h1>
+          <p className="text-xs sm:text-sm text-textLight/70">
+            {isFocusMode
+              ? "Distractions off — concentrate on the main line."
+              : "Edit moves, comments, and variants."}
+          </p>
         </div>
-        <div className="flex justify-center w-full sm:p-4 lg:max-h-[60vh] lg:max-w-[60vh]">
-          <BoardContainer />
+        <div className="flex justify-center w-full sm:p-4">
+          <div
+            className={`rounded-2xl border border-secondary/60 bg-gray-900/60 p-3 shadow-lg ${
+              isFocusMode ? "lg:max-w-[75vh] lg:max-h-[75vh]" : "lg:max-h-[60vh] lg:max-w-[60vh]"
+            }`}
+          >
+            <BoardContainer />
+          </div>
         </div>
         <div className="flex justify-center w-full p-1 sm:p-4">
           <BoardActionsContainer />
         </div>
       </div>
 
-      <div className="sm:hidden col-span-12 sm:col-span-6 flex flex-col items-start overflow-auto border border-secondary rounded bg-gray-800">
+      {!isFocusMode && (
+        <div className="sm:hidden col-span-12 sm:col-span-6 flex flex-col items-start overflow-auto border border-secondary/70 rounded bg-gray-800/90 shadow-md">
         {panelSelected === "variants" && <VariantsInfo />}
         {panelSelected === "comments" && <BoardCommentContainer />}
         {panelSelected === "statistics" && (
@@ -169,11 +207,14 @@ const EditRepertoireViewContainer: React.FC = () => {
         {panelSelected === "stockfish" && (
           <StockfishPanel fen={chess.fen()} numLines={3} />
         )}
-      </div>
+        </div>
+      )}
 
-      <div className="hidden sm:flex sm:col-span-6 flex-col items-start overflow-auto border border-secondary rounded bg-gray-800">
-        <RepertoireInfo />
-      </div>
+      {!isFocusMode && (
+        <div className="hidden sm:flex sm:col-span-6 flex-col items-start overflow-auto border border-secondary/70 rounded bg-gray-800/90 shadow-md">
+          <RepertoireInfo />
+        </div>
+      )}
     </div>
   );
 };

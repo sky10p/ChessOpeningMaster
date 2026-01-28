@@ -91,15 +91,17 @@ export const RepertoireContextProvider: React.FC<
   const { showSelectNextMoveDialog } = useDialogContext();
 
   useEffect(() => {
-    const intervalSave = setInterval(() => {
-      if (hasChanges) {
-        saveRepertory();
-        setHasChanges(false);
-      }
-    }, 500);
+    if (!hasChanges) {
+      return;
+    }
 
-    return () => clearInterval(intervalSave);
-  }, [hasChanges]);
+    const debounceSave = setTimeout(() => {
+      saveRepertory();
+      setHasChanges(false);
+    }, 1000);
+
+    return () => clearTimeout(debounceSave);
+  }, [hasChanges, saveRepertory]);
 
   const [moveHistory, setMoveHistory] = useState<MoveVariantNode>(
     initialMoves
