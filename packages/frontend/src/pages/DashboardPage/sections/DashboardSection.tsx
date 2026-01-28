@@ -396,7 +396,9 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
                 <span className="text-2xl font-bold text-amber-400">
                   {neverReviewed}
                 </span>
-                <span className="text-gray-300 mt-1 text-sm">Overall Unreviewed</span>
+                <span className="text-gray-300 mt-1 text-sm text-center">
+                  Overall Unreviewed
+                </span>
               </div>
               <div className="flex flex-col items-center">
                 <span className="text-2xl font-bold text-red-400">
