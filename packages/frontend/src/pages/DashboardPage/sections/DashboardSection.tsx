@@ -24,6 +24,7 @@ import {
 } from "../components/DashboardCharts";
 import { ExpandableVariantsChart } from "../components/ExpandableVariantsChart";
 import { useNavigationUtils } from "../../../utils/navigationUtils";
+import { getLastUtcDateKeys, toUtcDateKey } from "../../../utils/dateUtils";
 
 interface DashboardSectionProps {
   repertoires: IRepertoireDashboard[];
@@ -117,9 +118,14 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
   }, null as null | { name: string; date: Date });
 
 
+  const todayKey = toUtcDateKey(new Date());
+
   let neverReviewed = 0;
   let reviewedWithErrors = 0;
   let reviewedOK = 0;
+  let reviewedToday = 0;
+  let reviewedTodayErrors = 0;
+  let reviewedTodayOk = 0;
   
   allVariants.forEach((variant) => {
     const rep = filteredRepertoires.find(
@@ -134,7 +140,21 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
     
     if (!info || !info.lastDate) {
       neverReviewed++;
-    } else if (info.errors && info.errors > 0) {
+      return;
+    }
+
+    const lastDateKey = toUtcDateKey(new Date(info.lastDate));
+
+    if (lastDateKey === todayKey) {
+      reviewedToday++;
+      if (info.errors && info.errors > 0) {
+        reviewedTodayErrors++;
+      } else {
+        reviewedTodayOk++;
+      }
+    }
+
+    if (info.errors && info.errors > 0) {
       reviewedWithErrors++;
     } else {
       reviewedOK++;
@@ -161,7 +181,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
       errorsDistribution[err] = (errorsDistribution[err] || 0) + 1;
       
       if (info && info.lastDate) {
-        const date = new Date(info.lastDate).toISOString().slice(0, 10);
+        const date = toUtcDateKey(new Date(info.lastDate));
         reviewActivity[date] = (reviewActivity[date] || 0) + 1;
       }
     });
@@ -172,12 +192,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
     .map(([date, count]) => ({ date, count }));
 
 
-  const today = new Date();
-  const last10Days = Array.from({ length: 10 }, (_, i) => {
-    const d = new Date(today);
-    d.setDate(today.getDate() - (9 - i));
-    return d.toISOString().slice(0, 10);
-  });
+  const last10Days = getLastUtcDateKeys(10);
   
   const reviewActivityDataLast10 = last10Days.map((date) => {
     const entry = reviewActivityData.find((d) => d.date === date);
@@ -344,7 +359,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
           
           <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center">
             <h3 className="text-lg font-semibold text-gray-200 mb-2">
-              Review Activity Over Time (7 days)
+              Review Activity Over Time (10 days)
             </h3>
             {!hasReviewActivity ? (
               <div className="text-gray-400 text-center py-8">
@@ -365,6 +380,46 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
                 </BarChart>
               </ResponsiveContainer>
             )}
+          </div>
+
+          <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center">
+            <h3 className="text-lg font-semibold text-gray-200 mb-3">
+              Progress Summary
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 w-full">
+              <div className="flex flex-col items-center">
+                <span className="text-2xl font-bold text-amber-400">
+                  {neverReviewed}
+                </span>
+                <span className="text-gray-300 mt-1 text-sm text-center">
+                  Overall Unreviewed
+                </span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-2xl font-bold text-red-400">
+                  {reviewedWithErrors}
+                </span>
+                <span className="text-gray-300 mt-1 text-sm">Overall Errors</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-2xl font-bold text-blue-400">
+                  {reviewedToday}
+                </span>
+                <span className="text-gray-300 mt-1 text-sm">Reviewed Today</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-2xl font-bold text-red-400">
+                  {reviewedTodayErrors}
+                </span>
+                <span className="text-gray-300 mt-1 text-sm">Errors Today</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-2xl font-bold text-green-400">
+                  {reviewedTodayOk}
+                </span>
+                <span className="text-gray-300 mt-1 text-sm">OK Today</span>
+              </div>
+            </div>
           </div>
           
           <VerticalBarChart 
