@@ -359,7 +359,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
           
           <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center">
             <h3 className="text-lg font-semibold text-gray-200 mb-2">
-              Review Activity Over Time (7 days)
+              Review Activity Over Time (10 days)
             </h3>
             {!hasReviewActivity ? (
               <div className="text-gray-400 text-center py-8">
