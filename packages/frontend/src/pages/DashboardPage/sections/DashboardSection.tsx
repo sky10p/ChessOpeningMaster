@@ -24,6 +24,7 @@ import {
 } from "../components/DashboardCharts";
 import { ExpandableVariantsChart } from "../components/ExpandableVariantsChart";
 import { useNavigationUtils } from "../../../utils/navigationUtils";
+import { toLocalDateKey } from "../../../utils/dateUtils";
 
 interface DashboardSectionProps {
   repertoires: IRepertoireDashboard[];
@@ -117,7 +118,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
   }, null as null | { name: string; date: Date });
 
 
-  const todayKey = new Date().toISOString().slice(0, 10);
+  const todayKey = toLocalDateKey(new Date());
 
   let neverReviewed = 0;
   let reviewedWithErrors = 0;
@@ -142,7 +143,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
       return;
     }
 
-    const lastDateKey = new Date(info.lastDate).toISOString().slice(0, 10);
+    const lastDateKey = toLocalDateKey(new Date(info.lastDate));
 
     if (lastDateKey === todayKey) {
       reviewedToday++;
@@ -180,7 +181,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
       errorsDistribution[err] = (errorsDistribution[err] || 0) + 1;
       
       if (info && info.lastDate) {
-        const date = new Date(info.lastDate).toISOString().slice(0, 10);
+        const date = toLocalDateKey(new Date(info.lastDate));
         reviewActivity[date] = (reviewActivity[date] || 0) + 1;
       }
     });
@@ -195,7 +196,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
   const last10Days = Array.from({ length: 10 }, (_, i) => {
     const d = new Date(today);
     d.setDate(today.getDate() - (9 - i));
-    return d.toISOString().slice(0, 10);
+    return toLocalDateKey(d);
   });
   
   const reviewActivityDataLast10 = last10Days.map((date) => {
@@ -388,26 +389,26 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
 
           <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center">
             <h3 className="text-lg font-semibold text-gray-200 mb-3">
-              Today's Progress
+              Progress Summary
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 w-full">
-              <div className="flex flex-col items-center">
-                <span className="text-2xl font-bold text-blue-400">
-                  {reviewedToday}
-                </span>
-                <span className="text-gray-300 mt-1 text-sm">Reviewed Today</span>
-              </div>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 w-full">
               <div className="flex flex-col items-center">
                 <span className="text-2xl font-bold text-amber-400">
                   {neverReviewed}
                 </span>
-                <span className="text-gray-300 mt-1 text-sm">Unreviewed</span>
+                <span className="text-gray-300 mt-1 text-sm">Overall Unreviewed</span>
               </div>
               <div className="flex flex-col items-center">
                 <span className="text-2xl font-bold text-red-400">
                   {reviewedWithErrors}
                 </span>
-                <span className="text-gray-300 mt-1 text-sm">Total Errors</span>
+                <span className="text-gray-300 mt-1 text-sm">Overall Errors</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-2xl font-bold text-blue-400">
+                  {reviewedToday}
+                </span>
+                <span className="text-gray-300 mt-1 text-sm">Reviewed Today</span>
               </div>
               <div className="flex flex-col items-center">
                 <span className="text-2xl font-bold text-red-400">
