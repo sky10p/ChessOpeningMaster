@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from "react";
 import { IRepertoireDashboard } from "@chess-opening-master/common";
-import { generateUnreviewedVariantsByOpening, getRelevantVariants } from "../components/DashboardCharts";
-import { OpeningWithUnreviewedVariants, UnreviewedVariantsChart } from "../components/UnreviewedVariantsChart";
+import { generateUnreviewedVariantsByOpening, getRelevantVariants } from "./DashboardSection/utils";
+import { OpeningWithUnreviewedVariants } from "./DashboardSection/types";
+import { UnreviewedVariantsChart } from "../components/UnreviewedVariantsChart";
 import { RepertoireFilterDropdown } from "../components/RepertoireFilterDropdown";
 import { useNavigationUtils } from "../../../utils/navigationUtils";
 

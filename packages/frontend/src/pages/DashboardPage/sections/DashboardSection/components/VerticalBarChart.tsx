@@ -9,9 +9,10 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
+import { ChartMargins, OpeningStats } from "../types";
 
-export interface VerticalBarChartProps {
-  data: Array<{ opening: string; count: number }>;
+interface VerticalBarChartProps {
+  data: OpeningStats[];
   title: string;
   label: string;
   barName: string;
@@ -20,7 +21,7 @@ export interface VerticalBarChartProps {
   emptyMessage?: string;
   isMobile: boolean;
   yAxisWidth: number;
-  barChartMargin: { top: number; right: number; left: number; bottom: number };
+  barChartMargin: ChartMargins;
   onOpeningClick?: (openingName: string) => void;
 }
 
@@ -78,7 +79,8 @@ export const VerticalBarChart: React.FC<VerticalBarChartProps> = ({
                       textAnchor="end"
                       fill="#cbd5e1"
                       fontSize={isMobile ? 10 : 13}
-                      style={{ cursor: onOpeningClick ? 'pointer' : 'default' }}
+                      style={{ cursor: onOpeningClick ? "pointer" : "default" }}
+                      onClick={() => onOpeningClick?.(name)}
                     >
                       {display}
                       {name.length > 28 && <title>{name}</title>}
@@ -93,7 +95,7 @@ export const VerticalBarChart: React.FC<VerticalBarChartProps> = ({
                 barName,
               ]}
               labelFormatter={(label: string) => `Opening: ${label}`}
-              cursor={{ fill: 'rgba(255, 255, 255, 0.1)' }}
+              cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
             />
             <Legend />
             <Bar
@@ -102,7 +104,7 @@ export const VerticalBarChart: React.FC<VerticalBarChartProps> = ({
               name={barName}
               radius={[6, 6, 6, 6]}
               onClick={(data) => onOpeningClick?.(data.opening)}
-              style={{ cursor: onOpeningClick ? 'pointer' : 'default' }}
+              style={{ cursor: onOpeningClick ? "pointer" : "default" }}
             />
           </BarChart>
         </ResponsiveContainer>

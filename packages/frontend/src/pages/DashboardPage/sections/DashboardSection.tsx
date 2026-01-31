@@ -14,14 +14,15 @@ import {
   CartesianGrid,
 } from "recharts";
 import { MoveVariantNode } from "../../../models/VariantNode";
+import { FilterType } from "./DashboardSection/types";
 import {
-  FilterType,
-  VerticalBarChart,
   findVariantInfo,
   generateOpeningStats,
   generateVariantsWithErrorsByOpening,
+  generateOpeningRatioStats,
   getRelevantVariants,
-} from "../components/DashboardCharts";
+} from "./DashboardSection/utils";
+import { VerticalBarChart } from "../components/DashboardCharts";
 import { ExpandableVariantsChart } from "../components/ExpandableVariantsChart";
 import { useNavigationUtils } from "../../../utils/navigationUtils";
 import { getLastUtcDateKeys, toUtcDateKey } from "../../../utils/dateUtils";
@@ -77,6 +78,8 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
   const errorsByOpeningTop5 = generateOpeningStats(filteredRepertoires, filter, "errors", 5);
   const variantsWithErrorsByOpeningTop5 = generateVariantsWithErrorsByOpening(filteredRepertoires, filter, 5);
   const masteredOpenings = generateOpeningStats(filteredRepertoires, filter, "mastered", 5);
+  const worstRatioOpenings = generateOpeningRatioStats(filteredRepertoires, filter, "worst", 5);
+  const bestRatioOpenings = generateOpeningRatioStats(filteredRepertoires, filter, "best", 5);
 
   const handleOpeningClick = (openingName: string) => {
     const repertoireWithOpening = filteredRepertoires.find((rep) => {
@@ -347,6 +350,139 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
             barChartMargin={barChartMargin}
             onOpeningClick={handleOpeningClick}
           />
+          
+          <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center overflow-x-auto md:overflow-x-visible">
+            <h3 className="text-lg font-semibold text-gray-200 mb-2">Worst Openings (Error Ratio)</h3>
+            {worstRatioOpenings.length === 0 ? (
+              <div className="text-gray-400 text-center py-8">No data</div>
+            ) : (
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart
+                  data={worstRatioOpenings}
+                  layout="vertical"
+                  margin={barChartMargin}
+                  barCategoryGap={24}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    type="number"
+                    allowDecimals={false}
+                    domain={[0, 100]}
+                    label={{
+                      value: "Error Ratio %",
+                      position: "insideBottomRight",
+                      offset: -5,
+                      fill: "#cbd5e1",
+                    }}
+                  />
+                  <YAxis
+                    dataKey="opening"
+                    type="category"
+                    width={yAxisWidth}
+                    tick={({ x, y, payload }) => {
+                      const name = payload.value;
+                      const display = name.length > 28 ? name.slice(0, 25) + "…" : name;
+                      return (
+                        <g transform={`translate(${x},${y})`}>
+                          <text x={0} y={0} dy={4} textAnchor="end" fill="#cbd5e1" fontSize={isMobile ? 10 : 13}>
+                            {display}
+                          </text>
+                        </g>
+                      );
+                    }}
+                  />
+                  <Tooltip
+                    formatter={(value: number, _name: string, props) => {
+                      const data = props.payload as { problemVariants: number; totalVariants: number } | undefined;
+                      if (!data) return [`${value}%`, "Error Ratio"];
+                      return [
+                        `${value}% (${data.problemVariants}/${data.totalVariants})`,
+                        "Error Ratio",
+                      ];
+                    }}
+                    labelFormatter={(label: string) => `Opening: ${label}`}
+                    cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
+                  />
+                  <Legend />
+                  <Bar
+                    dataKey="ratio"
+                    fill="#ef4444"
+                    name="Error Ratio %"
+                    radius={[6, 6, 6, 6]}
+                    onClick={(data) => handleOpeningClick(data.opening)}
+                    style={{ cursor: "pointer" }}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+          
+          <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center overflow-x-auto md:overflow-x-visible">
+            <h3 className="text-lg font-semibold text-gray-200 mb-2">Best Openings (Success Ratio)</h3>
+            {bestRatioOpenings.length === 0 ? (
+              <div className="text-gray-400 text-center py-8">No data</div>
+            ) : (
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart
+                  data={bestRatioOpenings.map(o => ({ ...o, successRatio: 100 - o.ratio }))}
+                  layout="vertical"
+                  margin={barChartMargin}
+                  barCategoryGap={24}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    type="number"
+                    allowDecimals={false}
+                    domain={[0, 100]}
+                    label={{
+                      value: "Success Ratio %",
+                      position: "insideBottomRight",
+                      offset: -5,
+                      fill: "#cbd5e1",
+                    }}
+                  />
+                  <YAxis
+                    dataKey="opening"
+                    type="category"
+                    width={yAxisWidth}
+                    tick={({ x, y, payload }) => {
+                      const name = payload.value;
+                      const display = name.length > 28 ? name.slice(0, 25) + "…" : name;
+                      return (
+                        <g transform={`translate(${x},${y})`}>
+                          <text x={0} y={0} dy={4} textAnchor="end" fill="#cbd5e1" fontSize={isMobile ? 10 : 13}>
+                            {display}
+                          </text>
+                        </g>
+                      );
+                    }}
+                  />
+                  <Tooltip
+                    formatter={(value: number, _name: string, props) => {
+                      const data = props.payload as { problemVariants: number; totalVariants: number } | undefined;
+                      if (!data) return [`${value}%`, "Success Ratio"];
+                      const mastered = data.totalVariants - data.problemVariants;
+                      return [
+                        `${value}% (${mastered}/${data.totalVariants})`,
+                        "Success Ratio",
+                      ];
+                    }}
+                    labelFormatter={(label: string) => `Opening: ${label}`}
+                    cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
+                  />
+                  <Legend />
+                  <Bar
+                    dataKey="successRatio"
+                    fill="#22c55e"
+                    name="Success Ratio %"
+                    radius={[6, 6, 6, 6]}
+                    onClick={(data) => handleOpeningClick(data.opening)}
+                    style={{ cursor: "pointer" }}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
           
           <ExpandableVariantsChart
             data={variantsWithErrorsByOpeningTop5}
