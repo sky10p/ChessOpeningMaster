@@ -121,6 +121,59 @@ export const generateVariantsWithErrorsByOpening = (
   return typeof topCount === "number" ? allOpenings.slice(0, topCount) : allOpenings;
 };
 
+export interface OpeningRatioStats {
+  opening: string;
+  ratio: number;
+  totalVariants: number;
+  problemVariants: number;
+}
+
+export const generateOpeningRatioStats = (
+  filteredRepertoires: IRepertoireDashboard[],
+  filter: FilterType,
+  sortBy: "worst" | "best",
+  topCount = 5
+): OpeningRatioStats[] => {
+  const openingStats: Record<string, { total: number; problems: number }> = {};
+
+  filteredRepertoires.forEach((rep) => {
+    const relevantVariants = getRelevantVariants(rep, filter);
+
+    relevantVariants.forEach((variant) => {
+      if (!openingStats[variant.name]) {
+        openingStats[variant.name] = { total: 0, problems: 0 };
+      }
+      openingStats[variant.name].total++;
+
+      const info = findVariantInfo(variant, rep);
+      const hasErrors = info && (info.errors ?? 0) > 0;
+      const neverReviewed = !info || !info.lastDate;
+
+      if (hasErrors || neverReviewed) {
+        openingStats[variant.name].problems++;
+      }
+    });
+  });
+
+  const result = Object.entries(openingStats)
+    .filter(([, stats]) => stats.total > 0)
+    .map(([opening, stats]) => ({
+      opening,
+      ratio: Math.round((stats.problems / stats.total) * 100),
+      totalVariants: stats.total,
+      problemVariants: stats.problems,
+    }))
+    .sort((a, b) => {
+      if (sortBy === "worst") {
+        return b.ratio - a.ratio || b.problemVariants - a.problemVariants;
+      }
+      return a.ratio - b.ratio || b.totalVariants - a.totalVariants;
+    })
+    .slice(0, topCount);
+
+  return result;
+};
+
 export const generateUnreviewedVariantsByOpening = (
   filteredRepertoires: IRepertoireDashboard[],
   topCount?: number
