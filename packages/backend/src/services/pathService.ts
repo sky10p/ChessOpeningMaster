@@ -9,12 +9,16 @@ import {
   EmptyPath,
   StudyPath,
   PathCategory,
+  PositionErrorPath,
 } from "@chess-opening-master/common/src/types/Path";
 import { getRepertoireName } from "./repertoireService";
 import { extractId } from "../utils/idUtils";
 import { Document, ObjectId } from "mongodb";
 import { getAllVariants } from "./variantsService";
-import { Variant } from "@chess-opening-master/common";
+import { Variant, VariantState } from "@chess-opening-master/common";
+import { getTopPositionErrors } from "./positionErrorService";
+import { PositionError } from "../models/PositionError";
+import { isDue, getOverdueDays } from "./spacedRepetitionService";
 
 // Type Definitions
 
@@ -24,6 +28,12 @@ export interface VariantInfoDocument {
   variantName: string;
   errors: number;
   lastDate: string | { $date: string };
+  easeFactor?: number;
+  interval?: number;
+  repetitions?: number;
+  state?: VariantState;
+  dueDate?: string | { $date: string };
+  lapses?: number;
 }
 
 export interface StudyToReview {
@@ -68,9 +78,10 @@ interface RepertoireWeight {
 
 // Constants for path selection probabilities
 const PROBABILITIES = {
-  ERROR_VARIANT_THRESHOLD: 60, // 0-60%
-  NEW_VARIANT_THRESHOLD: 90, // 60-90%
-  OLD_VARIANT_THRESHOLD: 95, // 90-95%
+  DUE_VARIANT_THRESHOLD: 50,        // 0-50%: due variants (SRS-scheduled)
+  POSITION_ERROR_THRESHOLD: 70,     // 50-70%: position errors
+  NEW_VARIANT_THRESHOLD: 90,        // 70-90%: new variants
+  OLD_VARIANT_THRESHOLD: 95,        // 90-95%: old variants (legacy)
   // STUDY_REVIEW_THRESHOLD would be 100 (95-100%)
 };
 
@@ -100,6 +111,13 @@ export const getActiveVariants = async (): Promise<VariantInfo[]> => {
  * Normalizes variant information from database format
  */
 function normalizeVariantInfo(variant: VariantInfoDocument): VariantInfo {
+  const parseDueDate = (dueDate?: string | { $date: string }): Date => {
+    if (!dueDate) return new Date();
+    return typeof dueDate === "string"
+      ? new Date(dueDate)
+      : new Date(dueDate.$date);
+  };
+
   return {
     _id: { $oid: variant._id },
     repertoireId: variant.repertoireId,
@@ -109,6 +127,12 @@ function normalizeVariantInfo(variant: VariantInfoDocument): VariantInfo {
       typeof variant.lastDate === "string"
         ? new Date(variant.lastDate)
         : new Date(variant.lastDate.$date),
+    easeFactor: variant.easeFactor ?? 2.5,
+    interval: variant.interval ?? 1,
+    repetitions: variant.repetitions ?? 0,
+    state: variant.state ?? "new",
+    dueDate: parseDueDate(variant.dueDate),
+    lapses: variant.lapses ?? 0,
   };
 }
 
@@ -281,6 +305,12 @@ export const createVariantPath = async (
     name: variant.variantName,
     errors: variant.errors,
     lastDate: variant.lastDate,
+    easeFactor: variant.easeFactor,
+    interval: variant.interval,
+    repetitions: variant.repetitions,
+    state: variant.state,
+    dueDate: variant.dueDate,
+    lapses: variant.lapses,
   };
 };
 
@@ -319,6 +349,28 @@ function createEmptyPath(): EmptyPath {
   return { message: "No variants or studies to review." };
 }
 
+/**
+ * Creates a path object for a position error
+ */
+async function createPositionErrorPath(
+  positionError: PositionError
+): Promise<PositionErrorPath> {
+  const repertoireName = await getRepertoireName(positionError.repertoireId);
+  return {
+    type: "positionError",
+    id: positionError._id || "",
+    repertoireId: positionError.repertoireId,
+    repertoireName,
+    variantName: positionError.variantName || "",
+    orientation: positionError.orientation,
+    fen: positionError.fen,
+    wrongMove: positionError.wrongMove,
+    expectedMoves: positionError.expectedMoves,
+    errorCount: positionError.errorCount,
+    lastErrorDate: positionError.lastErrorDate,
+  };
+}
+
 // Main path determination function
 
 /**
@@ -327,11 +379,10 @@ function createEmptyPath(): EmptyPath {
 export const determineBestPath = async (
   category?: PathCategory
 ): Promise<Path> => {
-  // Get all needed data
   const { newVariants, studiedVariants } = await getAllVariants();
   const studyGroups = await getStudyGroups();
+  const positionErrors = await getTopPositionErrors(20);
 
-  // Convert studied variants to VariantInfo array
   const activeVariants: VariantInfo[] = studiedVariants.map((variant) => ({
     _id: { $oid: variant.id },
     repertoireId: variant.repertoireId,
@@ -341,36 +392,41 @@ export const determineBestPath = async (
       typeof variant.lastDate === "string"
         ? new Date(variant.lastDate)
         : (variant.lastDate as Date),
+    easeFactor: variant.easeFactor ?? 2.5,
+    interval: variant.interval ?? 1,
+    repetitions: variant.repetitions ?? 0,
+    state: variant.state ?? "new",
+    dueDate: variant.dueDate ? new Date(variant.dueDate) : new Date(),
+    lapses: variant.lapses ?? 0,
   }));
 
-  // Define the categories of content to review
   const threeMonthsAgo = getDateThreeMonthsAgo();
   const categories = categorizeContent(
     activeVariants,
     newVariants,
     studyGroups,
-    threeMonthsAgo
+    threeMonthsAgo,
+    positionErrors
   );
 
-  // If nothing to review at all, return empty path
   if (areAllCategoriesEmpty(categories)) {
     return createEmptyPath();
   }
 
-  // Choose a path with probabilistic selection
   const randomValue = Math.random() * 100;
 
   if (category) {
     return await selectPathBasedOnCategory(category, categories);
   }
 
-  // Apply selection logic based on probabilities and availability
   return await selectPathBasedOnProbability(
     randomValue,
     categories.variantsWithErrors,
     categories.newVariants,
     categories.oldVariants,
-    categories.studyToReview
+    categories.studyToReview,
+    categories.positionsWithErrors,
+    categories.dueVariants
   );
 };
 
@@ -390,29 +446,42 @@ function categorizeContent(
   activeVariants: VariantInfo[],
   newVariants: NewVariantPath[],
   studyGroups: StudyGroup[],
-  threeMonthsAgo: Date
+  threeMonthsAgo: Date,
+  positionErrors: PositionError[]
 ) {
-  // Group variants with errors
+  const dueVariants = activeVariants
+    .filter((v) => isDue(v.dueDate))
+    .sort((a, b) => {
+      const aOverdue = getOverdueDays(a.dueDate);
+      const bOverdue = getOverdueDays(b.dueDate);
+      if (aOverdue !== bOverdue) return bOverdue - aOverdue;
+      return b.errors - a.errors;
+    });
+
   const variantsWithErrors = activeVariants.filter((v) => v.errors > 0);
 
-  // Find old variants (not reviewed in >3 months)
   const oldVariants = activeVariants.filter((variant) => {
     const lastReviewDate = new Date(normalizeDate(variant.lastDate));
-    return lastReviewDate < threeMonthsAgo && variant.errors === 0;
+    return lastReviewDate < threeMonthsAgo && variant.errors === 0 && !isDue(variant.dueDate);
   });
 
-  // Find studies to review
   const studyToReview = findStudyToReview(studyGroups);
 
+  const positionsWithErrors = positionErrors.filter((p) => p.errorCount > 0);
+
   return {
+    dueVariants,
     variantsWithErrors,
     oldVariants,
     newVariants,
     studyToReview,
+    positionsWithErrors,
+    hasDueVariants: dueVariants.length > 0,
     hasVariantsWithErrors: variantsWithErrors.length > 0,
     hasNewVariants: newVariants.length > 0,
     hasOldVariants: oldVariants.length > 0,
     hasStudyToReview: studyToReview !== null,
+    hasPositionsWithErrors: positionsWithErrors.length > 0,
   };
 }
 
@@ -420,16 +489,20 @@ function categorizeContent(
  * Checks if all content categories are empty
  */
 function areAllCategoriesEmpty(categories: {
+  hasDueVariants?: boolean;
   hasVariantsWithErrors: boolean;
   hasNewVariants: boolean;
   hasOldVariants: boolean;
   hasStudyToReview: boolean;
+  hasPositionsWithErrors?: boolean;
 }): boolean {
   return (
+    !categories.hasDueVariants &&
     !categories.hasVariantsWithErrors &&
     !categories.hasNewVariants &&
     !categories.hasOldVariants &&
-    !categories.hasStudyToReview
+    !categories.hasStudyToReview &&
+    !categories.hasPositionsWithErrors
   );
 }
 
@@ -439,13 +512,29 @@ function areAllCategoriesEmpty(categories: {
 async function selectPathBasedOnCategory(
   category: string,
   categories: {
+    dueVariants: VariantInfo[];
     variantsWithErrors: VariantInfo[];
     newVariants: NewVariantPath[];
     oldVariants: VariantInfo[];
     studyToReview: StudyToReview | null;
+    positionsWithErrors: PositionError[];
   }
 ): Promise<Path> {
   switch (category) {
+    case "dueVariants": {
+      if (categories.dueVariants.length === 0) {
+        return createEmptyPath();
+      }
+      const dueVariant = categories.dueVariants[0];
+      return await createVariantPath(dueVariant);
+    }
+    case "positionsWithErrors": {
+      if (categories.positionsWithErrors.length === 0) {
+        return createEmptyPath();
+      }
+      const topPositionError = categories.positionsWithErrors[0];
+      return await createPositionErrorPath(topPositionError);
+    }
     case "variantsWithErrors": {
       if (categories.variantsWithErrors.length === 0) {
         return createEmptyPath();
@@ -489,26 +578,31 @@ async function selectPathBasedOnProbability(
   variantsWithErrors: VariantInfo[],
   newVariants: NewVariantPath[],
   oldVariants: VariantInfo[],
-  studyToReview: StudyToReview | null
+  studyToReview: StudyToReview | null,
+  positionsWithErrors: PositionError[],
+  dueVariants: VariantInfo[]
 ): Promise<Path> {
   const {
-    ERROR_VARIANT_THRESHOLD,
+    DUE_VARIANT_THRESHOLD,
+    POSITION_ERROR_THRESHOLD,
     NEW_VARIANT_THRESHOLD,
     OLD_VARIANT_THRESHOLD,
   } = PROBABILITIES;
 
-  // 60% - Select a variant with errors
-  if (randomValue < ERROR_VARIANT_THRESHOLD && variantsWithErrors.length > 0) {
-    const selectedVariant = findVariantWithMostErrors(variantsWithErrors);
-    return await createVariantPath(selectedVariant);
+  if (randomValue < DUE_VARIANT_THRESHOLD && dueVariants.length > 0) {
+    const dueVariant = dueVariants[0];
+    return await createVariantPath(dueVariant);
   }
 
-  // 30% - Select a new variant
+  if (randomValue < POSITION_ERROR_THRESHOLD && positionsWithErrors.length > 0) {
+    const topPositionError = positionsWithErrors[0];
+    return await createPositionErrorPath(topPositionError);
+  }
+
   if (randomValue < NEW_VARIANT_THRESHOLD && newVariants.length > 0) {
     return selectNewVariant(newVariants);
   }
 
-  // 5% - Select an old variant (>3 months without review)
   if (
     randomValue < OLD_VARIANT_THRESHOLD &&
     oldVariants.length > 0 &&
@@ -518,17 +612,17 @@ async function selectPathBasedOnProbability(
     return await createVariantPath(oldestVariant);
   }
 
-  // 5% - Select a study to review
   if (studyToReview) {
     return createStudyPath(studyToReview);
   }
 
-  // Fallback logic if the random selection doesn't find a match
   return await fallbackPathSelection(
     variantsWithErrors,
     newVariants,
     oldVariants,
-    studyToReview
+    studyToReview,
+    positionsWithErrors,
+    dueVariants
   );
 }
 
@@ -554,9 +648,18 @@ async function fallbackPathSelection(
   variantsWithErrors: VariantInfo[],
   newVariants: NewVariantPath[],
   oldVariants: VariantInfo[],
-  studyToReview: StudyToReview | null
+  studyToReview: StudyToReview | null,
+  positionsWithErrors: PositionError[],
+  dueVariants: VariantInfo[]
 ): Promise<Path> {
-  // Try each category in priority order
+  if (dueVariants.length > 0) {
+    return await createVariantPath(dueVariants[0]);
+  }
+
+  if (positionsWithErrors.length > 0) {
+    return await createPositionErrorPath(positionsWithErrors[0]);
+  }
+
   if (variantsWithErrors.length > 0) {
     const selectedVariant = findVariantWithMostErrors(variantsWithErrors);
     return await createVariantPath(selectedVariant);

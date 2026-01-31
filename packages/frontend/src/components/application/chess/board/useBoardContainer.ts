@@ -1,11 +1,18 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Color, Move, Square, Chess } from "chess.js";
 import { useRepertoireContext } from "../../../../contexts/RepertoireContext";
 import { useTrainRepertoireContext } from "../../../../contexts/TrainRepertoireContext";
 import { useAlertContext } from "../../../../contexts/AlertContext";
+import { recordPositionError } from "../../../../repository/positionErrors/positionErrors";
+
+interface WrongMoveInfo {
+  fen: string;
+  wrongMove: string;
+  expectedMoves: string[];
+}
 
 export const useBoardContainer = (isTraining: boolean) => {
-  const { chess, setChess, addMove, orientation, currentMoveNode } =
+  const { chess, setChess, addMove, orientation, currentMoveNode, repertoireId } =
     useRepertoireContext();
   const { showAlert } = useAlertContext();
   const trainRepertoireContext = isTraining
@@ -18,6 +25,7 @@ export const useBoardContainer = (isTraining: boolean) => {
   const [circleSquares, setCircleSquares] = useState<Set<Square>>(new Set());
   const [pieceMoved, setPieceMoved] = useState(false);
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const lastWrongMoveRef = useRef<WrongMoveInfo | null>(null);
 
   const isCorrectPieceSelected = (square: Square, turn: Color) => {
     const piece = chess.get(square);
@@ -68,6 +76,13 @@ export const useBoardContainer = (isTraining: boolean) => {
         );
       }
       if (isTraining && !isMoveAllowed) {
+        lastWrongMoveRef.current = {
+          fen: chess.fen(),
+          wrongMove: move.san,
+          expectedMoves: trainRepertoireContext?.allowedMoves.map(
+            (m) => m.getMove().san
+          ) || [],
+        };
         setErrorDialogOpen(true);
         return false;
       } else {
@@ -85,11 +100,25 @@ export const useBoardContainer = (isTraining: boolean) => {
 
   const handleCountAsError = () => {
     trainRepertoireContext?.setLastErrors(trainRepertoireContext.lastErrors + 1);
+    if (lastWrongMoveRef.current && repertoireId) {
+      const currentVariantName = trainRepertoireContext?.trainVariants
+        .find(tv => tv.state === "inProgress")?.variant.fullName;
+      recordPositionError({
+        fen: lastWrongMoveRef.current.fen,
+        repertoireId,
+        variantName: currentVariantName,
+        orientation,
+        wrongMove: lastWrongMoveRef.current.wrongMove,
+        expectedMoves: lastWrongMoveRef.current.expectedMoves,
+      });
+    }
+    lastWrongMoveRef.current = null;
     setErrorDialogOpen(false);
     unselectPiece();
   };
 
   const handleIgnoreError = () => {
+    lastWrongMoveRef.current = null;
     setErrorDialogOpen(false);
     unselectPiece();
   };

@@ -1,3 +1,5 @@
+import { VariantState } from "./Variants";
+import { BoardOrientation } from "./Orientation";
 
 export interface StudiedVariantPath {
   type: "variant";
@@ -7,6 +9,12 @@ export interface StudiedVariantPath {
   name: string;
   errors: number;
   lastDate: Date;
+  easeFactor?: number;
+  interval?: number;
+  repetitions?: number;
+  state?: VariantState;
+  dueDate?: Date;
+  lapses?: number;
 }
 
 export interface NewVariantPath {
@@ -24,10 +32,24 @@ export interface StudyPath {
   lastSession: string | null;
 }
 
+export interface PositionErrorPath {
+  type: "positionError";
+  id: string;
+  repertoireId: string;
+  repertoireName: string;
+  variantName: string;
+  orientation: BoardOrientation;
+  fen: string;
+  wrongMove: string;
+  expectedMoves: string[];
+  errorCount: number;
+  lastErrorDate: Date;
+}
+
 export interface EmptyPath {
   message: string;
 }
 
-export type Path = StudiedVariantPath | NewVariantPath | StudyPath | EmptyPath;
+export type Path = StudiedVariantPath | NewVariantPath | StudyPath | PositionErrorPath | EmptyPath;
 
-export type PathCategory = 'variantsWithErrors' | 'newVariants' | 'oldVariants' | 'studyToReview';
+export type PathCategory = 'dueVariants' | 'variantsWithErrors' | 'newVariants' | 'oldVariants' | 'studyToReview' | 'positionsWithErrors';

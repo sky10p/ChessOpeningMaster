@@ -13,9 +13,29 @@ export const useNavigationUtils = () => {
     navigate(`/repertoire/${repertoireId}${variantName ? `?variantName=${encodeURIComponent(variantName)}` : ''}`);
   }, [navigate]);
 
+  const goToRepertoireWithFen = useCallback((repertoireIdOrObject: string | IRepertoire, fen: string, variantName?: string) => {
+    const repertoireId = resolveId(repertoireIdOrObject);
+    const params = new URLSearchParams();
+    params.set("fen", fen);
+    if (variantName) {
+      params.set("variantName", variantName);
+    }
+    navigate(`/repertoire/${repertoireId}?${params.toString()}`);
+  }, [navigate]);
+
   const goToTrainRepertoire = useCallback((repertoireIdOrObject: string | IRepertoire, variantName?: string) => {
     const repertoireId = resolveId(repertoireIdOrObject);
     navigate(`/repertoire/train/${repertoireId}${variantName ? `?variantName=${encodeURIComponent(variantName)}` : ''}`);
+  }, [navigate]);
+
+  const goToTrainRepertoireWithFen = useCallback((repertoireIdOrObject: string | IRepertoire, fen: string, variantName?: string) => {
+    const repertoireId = resolveId(repertoireIdOrObject);
+    const params = new URLSearchParams();
+    params.set("fen", fen);
+    if (variantName) {
+      params.set("variantName", variantName);
+    }
+    navigate(`/repertoire/train/${repertoireId}?${params.toString()}`);
   }, [navigate]);
 
   const goToTrainRepertoireWithVariants = useCallback(
@@ -34,7 +54,9 @@ export const useNavigationUtils = () => {
 
   return {
     goToRepertoire,
+    goToRepertoireWithFen,
     goToTrainRepertoire,
+    goToTrainRepertoireWithFen,
     goToTrainRepertoireWithVariants,
   };
 };

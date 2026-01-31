@@ -2,6 +2,11 @@ import { Request, Response, NextFunction } from "express";
 import { ObjectId } from "mongodb";
 import { getDB } from "../db/mongo";
 import AdmZip from "adm-zip";
+import { ResponseQuality } from "@chess-opening-master/common";
+import {
+  calculateNextReview,
+  getDefaultSRSData,
+} from "../services/spacedRepetitionService";
 
 export async function getRepertoires(req: Request, res: Response, next: NextFunction) {
   try {
@@ -176,39 +181,66 @@ export async function getVariantsInfo(req: Request, res: Response, next: NextFun
 export async function postVariantsInfo(req: Request, res: Response, next: NextFunction) {
   try {
     const { id } = req.params;
-    const { variantName, errors } = req.body;
+    const { variantName, errors, responseQuality } = req.body;
     const db = getDB();
     const trainVariantsInfo = await db
       .collection("variantsInfo")
       .findOne({ repertoireId: id, variantName });
+
+    const quality: ResponseQuality = responseQuality ?? (errors > 0 ? 1 : 3);
+
     if (!trainVariantsInfo) {
+      const srsData = getDefaultSRSData();
+      const nextReview = calculateNextReview(srsData, quality);
       const newVariantInfo = {
         repertoireId: id,
         variantName,
         errors,
         lastDate: new Date(),
+        easeFactor: nextReview.easeFactor,
+        interval: nextReview.interval,
+        repetitions: nextReview.repetitions,
+        state: nextReview.state,
+        dueDate: nextReview.dueDate,
+        lapses: nextReview.lapses,
       };
       await db.collection("variantsInfo").insertOne(newVariantInfo);
       return res.status(201).json(newVariantInfo);
     }
-    const currentDate = new Date();
-    const lastDate = new Date(trainVariantsInfo.lastDate);
-    const shouldUpdate =
-      errors > trainVariantsInfo.errors ||
-      (errors <= trainVariantsInfo.errors && currentDate > lastDate);
-    if (!shouldUpdate) {
-      return res.status(200).json({ message: "No update needed" });
-    }
-    const updatedVariants = await db
+
+    const nextReview = calculateNextReview(
+      {
+        easeFactor: trainVariantsInfo.easeFactor,
+        interval: trainVariantsInfo.interval,
+        repetitions: trainVariantsInfo.repetitions,
+        state: trainVariantsInfo.state,
+        dueDate: trainVariantsInfo.dueDate,
+        lapses: trainVariantsInfo.lapses,
+      },
+      quality
+    );
+
+    const updatedData = {
+      repertoireId: id,
+      variantName,
+      errors: trainVariantsInfo.errors + errors,
+      lastDate: new Date(),
+      easeFactor: nextReview.easeFactor,
+      interval: nextReview.interval,
+      repetitions: nextReview.repetitions,
+      state: nextReview.state,
+      dueDate: nextReview.dueDate,
+      lapses: nextReview.lapses,
+    };
+
+    await db
       .collection("variantsInfo")
-      .findOneAndUpdate(
+      .updateOne(
         { _id: new ObjectId(trainVariantsInfo._id) },
-        {
-          $set: { repertoireId: id, variantName, errors, lastDate: currentDate },
-        },
-        { returnDocument: "after" }
+        { $set: updatedData }
       );
-    res.json(updatedVariants);
+
+    res.json(updatedData);
   } catch (err) {
     next(err);
   }

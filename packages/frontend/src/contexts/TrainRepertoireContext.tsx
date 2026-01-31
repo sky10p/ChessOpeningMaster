@@ -147,17 +147,21 @@ export const TrainRepertoireContextProvider: React.FC<
 
   const updateTrainVariants = (lastMove: MoveVariantNode) => {
     const newTrainVariants = trainVariants.map((trainVariant) => {
+      const moveAtPosition = lastMove.position > 0 
+        ? trainVariant.variant.moves[lastMove.position - 1] 
+        : undefined;
+      
       if (
         trainVariant.state === "inProgress" &&
         lastMove.position > 0 &&
-        trainVariant.variant.moves[lastMove.position - 1].id !== lastMove.id
+        (!moveAtPosition || moveAtPosition.id !== lastMove.id)
       ) {
         return { ...trainVariant, state: "discarded" } as TrainVariant;
       }
       if (
         trainVariant.state === "inProgress" &&
         trainVariant.variant.moves.length === lastMove.position &&
-        trainVariant.variant.moves[lastMove.position - 1].id === lastMove.id
+        moveAtPosition?.id === lastMove.id
       ) {
         if (
           lastTrainVariant?.variant.fullName !== trainVariant.variant.fullName

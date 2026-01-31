@@ -5,6 +5,7 @@ import repertoiresRouter from "./routes/repertoires";
 import studiesRouter from "./routes/studies";
 import paths from "./routes/paths";
 import positionsRouter from "./routes/positionComments";
+import positionErrorsRouter from "./routes/positionErrors";
 import errorHandler from "./middleware/errorHandler";
 
 const app = express();
@@ -22,6 +23,7 @@ app.use("/repertoires", repertoiresRouter);
 app.use("/studies", studiesRouter);
 app.use("/paths", paths);
 app.use("/positions", positionsRouter);
+app.use("/position-errors", positionErrorsRouter);
 
 app.use(errorHandler);
 

@@ -49,6 +49,12 @@ export const getAllVariants = async (): Promise<VariantResult> => {
               name: variant.fullName,
               errors: variantInfo.errors || 0,
               lastDate: variantInfo.lastDate,
+              easeFactor: variantInfo.easeFactor,
+              interval: variantInfo.interval,
+              repetitions: variantInfo.repetitions,
+              state: variantInfo.state,
+              dueDate: variantInfo.dueDate,
+              lapses: variantInfo.lapses,
           });
         }
       } else {

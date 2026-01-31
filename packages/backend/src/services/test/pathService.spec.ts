@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongodb';
+import { VariantState } from '@chess-opening-master/common';
 import { 
   getActiveVariants, 
   findVariantToReview,
@@ -17,7 +18,9 @@ import * as mongo from '../../db/mongo';
 import { Variant } from '@chess-opening-master/common';
 import { getRepertoireName } from '../repertoireService';
 import { getAllVariants } from '../variantsService';
+import { getTopPositionErrors } from '../positionErrorService';
 import { NewVariantPath, StudiedVariantPath, StudyPath } from '@chess-opening-master/common/src/types/Path';
+import { VariantInfo } from '../../models/VariantInfo';
 
 jest.mock('../../db/mongo', () => {
   const mockDB = {
@@ -58,6 +61,22 @@ jest.mock('../repertoireService', () => ({
   getRepertoireName: jest.fn().mockResolvedValue('Test Repertoire')
 }));
 
+jest.mock('../positionErrorService', () => ({
+  getTopPositionErrors: jest.fn().mockResolvedValue([])
+}));
+
+function createMockVariantInfo(overrides: { _id: { $oid: string }; repertoireId: string; variantName: string; errors: number; lastDate: Date } & Partial<VariantInfo>): VariantInfo {
+  return {
+    easeFactor: 2.5,
+    interval: 1,
+    repetitions: 0,
+    state: "new" as VariantState,
+    dueDate: new Date(),
+    lapses: 0,
+    ...overrides,
+  };
+}
+
 describe('pathService', () => {
   interface MockDB {
     collection: jest.Mock;
@@ -87,6 +106,7 @@ describe('pathService', () => {
       if (id && typeof id === 'object' && '$oid' in id) return id.$oid;
       return '000000000000000000000000';
     });
+    (getTopPositionErrors as jest.Mock).mockResolvedValue([]);
   });
 
   // Variant data retrieval tests
@@ -214,29 +234,28 @@ describe('pathService', () => {
     });
 
     it('should return variant with most errors', () => {
-      // Create variants with correct VariantInfo structure (with _id as an object with $oid)
       const variants = [
-        {
+        createMockVariantInfo({
           _id: { $oid: '111111111111111111111111' },
           repertoireId: '123456789012345678901234',
           variantName: 'Variant 1',
           errors: 1,
           lastDate: new Date('2023-01-01T00:00:00Z')
-        },
-        {
+        }),
+        createMockVariantInfo({
           _id: { $oid: '222222222222222222222222' },
           repertoireId: '123456789012345678901234',
           variantName: 'Variant 2',
           errors: 3,
           lastDate: new Date('2023-01-01T00:00:00Z')
-        },
-        {
+        }),
+        createMockVariantInfo({
           _id: { $oid: '333333333333333333333333' },
           repertoireId: '123456789012345678901234',
           variantName: 'Variant 3',
           errors: 2,
           lastDate: new Date('2023-01-01T00:00:00Z')
-        }
+        })
       ];
 
       const result = findVariantToReview(variants);
@@ -245,28 +264,25 @@ describe('pathService', () => {
     });
 
     it('should prioritize by date for variants with the same error count', () => {
-      // Create variants with correct VariantInfo structure
       const variants = [
-        {
+        createMockVariantInfo({
           _id: { $oid: '111111111111111111111111' },
           repertoireId: '123456789012345678901234',
           variantName: 'Variant 1',
           errors: 2,
           lastDate: new Date('2023-01-02T00:00:00Z')
-        },
-        {
+        }),
+        createMockVariantInfo({
           _id: { $oid: '222222222222222222222222' },
           repertoireId: '123456789012345678901234',
           variantName: 'Variant 2',
           errors: 2,
           lastDate: new Date('2023-01-01T00:00:00Z')
-        }
+        })
       ];
 
       const result = findVariantToReview(variants);
       
-      // The implementation appears to be selecting the variant with the more recent date
-      // Update our expectation to match the actual implementation behavior
       expect(result).toEqual(variants[0]);
     });
   });
@@ -459,14 +475,13 @@ describe('pathService', () => {
   // Path creation tests
   describe('createVariantPath', () => {
     it('should create a correct studied variant path object', async () => {
-      // Use the correct VariantInfo format with _id as object
-      const variant = {
+      const variant = createMockVariantInfo({
         _id: { $oid: '111111111111111111111111' },
         repertoireId: '123456789012345678901234',
         variantName: 'Test Variant',
         errors: 2,
         lastDate: new Date('2023-01-01T00:00:00Z')
-      };
+      });
 
       (getRepertoireName as jest.Mock).mockResolvedValue('Test Repertoire');
 
@@ -478,7 +493,6 @@ describe('pathService', () => {
       expect(result.repertoireName).toBe('Test Repertoire');
       expect(result.name).toBe('Test Variant');
       expect(result.errors).toBe(2);
-      // Updated expectation for Date object
       expect(result.lastDate).toBeInstanceOf(Date);
       expect(result.lastDate.toISOString()).toBe('2023-01-01T00:00:00.000Z');
     });

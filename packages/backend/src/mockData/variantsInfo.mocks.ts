@@ -7,5 +7,11 @@ export const variantsInfoMock: VariantInfo = {
     "repertoireId": "6444e7b3d9f33ea3203dd157",
     "variantName": "Gambito escocés (4. ...Bc5 9. ...d6)",
     "errors": 0,
-    "lastDate": new Date("2024-12-05T19:54:01.143Z")
+    "lastDate": new Date("2024-12-05T19:54:01.143Z"),
+    "easeFactor": 2.5,
+    "interval": 1,
+    "repetitions": 0,
+    "state": "new",
+    "dueDate": new Date("2024-12-05T19:54:01.143Z"),
+    "lapses": 0
   }

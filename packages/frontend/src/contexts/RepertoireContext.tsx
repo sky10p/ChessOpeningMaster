@@ -63,6 +63,16 @@ export const useRepertoireContext = () => {
   return context;
 };
 
+const buildMovePathFromNode = (moveNode: MoveVariantNode): Move[] => {
+  const moves: Move[] = [];
+  let currentNode = moveNode;
+  while (currentNode.parent !== null) {
+    moves.push(currentNode.getMove());
+    currentNode = currentNode.parent;
+  }
+  return moves.reverse();
+};
+
 interface RepertoireContextProviderProps {
   children: React.ReactNode;
   repertoireId: string;
@@ -122,6 +132,11 @@ export const RepertoireContextProvider: React.FC<
     return params.get("variantName");
   }, [location.search]);
 
+  const fenFromUrl = React.useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get("fen");
+  }, [location.search]);
+
   const getInitialSelectedVariant = React.useCallback((availableVariants: Variant[]): Variant | null => {
     if (availableVariants.length === 0) return null;
     
@@ -149,7 +164,18 @@ export const RepertoireContextProvider: React.FC<
     setSelectedVariant(newSelectedVariant);
 
     chess.reset();
-  }, [initialMoves, getInitialSelectedVariant]);
+
+    if (fenFromUrl) {
+      const targetNode = findMoveNodeByFen(newMoveHistory, fenFromUrl);
+      if (targetNode) {
+        const moves = buildMovePathFromNode(targetNode);
+        const newChess = new Chess();
+        moves.forEach((move) => newChess.move(move));
+        setChess(newChess);
+        setCurrentMove(targetNode);
+      }
+    }
+  }, [initialMoves, getInitialSelectedVariant, fenFromUrl]);
 
   useEffect(() => {
     setOrientation(initialOrientation);
@@ -225,6 +251,31 @@ export const RepertoireContextProvider: React.FC<
     }
     return moves.reverse();
   };
+
+  const findMoveNodeByFen = useCallback((root: MoveVariantNode, targetFen: string): MoveVariantNode | null => {
+    const targetFenPosition = targetFen.split(" ").slice(0, 4).join(" ");
+    
+    const search = (node: MoveVariantNode, currentChess: Chess): MoveVariantNode | null => {
+      const currentFenPosition = currentChess.fen().split(" ").slice(0, 4).join(" ");
+      if (currentFenPosition === targetFenPosition) {
+        return node;
+      }
+      
+      for (const child of node.children) {
+        const newChess = new Chess(currentChess.fen());
+        try {
+          newChess.move(child.getMove());
+          const result = search(child, newChess);
+          if (result) return result;
+        } catch {
+          continue;
+        }
+      }
+      return null;
+    };
+    
+    return search(root, new Chess());
+  }, []);
 
   const markChanges = () => setHasChanges(true);
 

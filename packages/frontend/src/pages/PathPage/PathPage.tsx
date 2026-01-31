@@ -3,9 +3,10 @@ import { usePaths } from "../../hooks/usePaths";
 import { useDialogContext } from "../../contexts/DialogContext";
 import { useNavigationUtils } from "../../utils/navigationUtils";
 import { useNavigate } from "react-router-dom";
-import { AcademicCapIcon, BookOpenIcon, ArrowPathIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { isEmptyPath, isNewVariantPath, isStudiedVariantPath, isStudyPath } from "./helpers";
+import { AcademicCapIcon, BookOpenIcon, ArrowPathIcon, XMarkIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { isEmptyPath, isNewVariantPath, isStudiedVariantPath, isStudyPath, isPositionErrorPath } from "./helpers";
 import { PathCategory } from "@chess-opening-master/common";
+import PositionPreviewBoard from "../../components/design/chess/board/PositionPreviewBoard";
 
 const formatDate = (date: string | Date): string => {
   const newDate = new Date(date);
@@ -15,7 +16,7 @@ const formatDate = (date: string | Date): string => {
 const PathPage: React.FC = () => {
   const { path, loading, error, loadPath, removeVariantFromPath } = usePaths();
   const { showConfirmDialog } = useDialogContext();
-  const { goToRepertoire, goToTrainRepertoire } = useNavigationUtils();
+  const { goToRepertoire, goToTrainRepertoire, goToRepertoireWithFen, goToTrainRepertoireWithFen } = useNavigationUtils();
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<PathCategory | "all">("all");
 
@@ -39,6 +40,18 @@ const PathPage: React.FC = () => {
   const goToReviewVariant = () => {
     if (isStudiedVariantPath(path) || isNewVariantPath(path)) {
       goToRepertoire(path.repertoireId, path.name);
+    }
+  };
+
+  const goToPracticePosition = () => {
+    if (isPositionErrorPath(path)) {
+      goToTrainRepertoireWithFen(path.repertoireId, path.fen, path.variantName || undefined);
+    }
+  };
+
+  const goToReviewPosition = () => {
+    if (isPositionErrorPath(path)) {
+      goToRepertoireWithFen(path.repertoireId, path.fen, path.variantName || undefined);
     }
   };
 
@@ -84,6 +97,7 @@ const PathPage: React.FC = () => {
                   onChange={handleCategoryChange}
                 >
                   <option value="all">All Paths</option>
+                  <option value="positionsWithErrors">Positions with Errors</option>
                   <option value="variantsWithErrors">Variants with Errors</option>
                   <option value="newVariants">New Variants</option>
                   <option value="oldVariants">Old Variants</option>
@@ -179,6 +193,53 @@ const PathPage: React.FC = () => {
                       >
                         Go to Study
                       </button>
+                    </>
+                  )}
+                  {isPositionErrorPath(path) && (
+                    <>
+                      <ExclamationTriangleIcon className="h-7 w-7 sm:h-8 sm:w-8 text-amber-400 mb-2" />
+                      <div className="font-semibold text-base sm:text-lg text-amber-300 mb-1">
+                        Position to Practice
+                      </div>
+                      <div className="text-sm sm:text-base text-gray-100 mb-1">
+                        <span className="font-medium">Repertoire:</span> {path.repertoireName}
+                      </div>
+                      {path.variantName && (
+                        <div className="text-sm text-gray-300 mb-2">
+                          <span className="font-medium">Variant:</span> {path.variantName}
+                        </div>
+                      )}
+                      <div className="my-3">
+                        <PositionPreviewBoard
+                          fen={path.fen}
+                          orientation={path.orientation}
+                          wrongMove={path.wrongMove}
+                          size={280}
+                        />
+                      </div>
+                      <div className="text-sm text-gray-400 mb-2">
+                        <span className="text-red-400">Red arrow:</span> Your wrong move ({path.wrongMove})
+                      </div>
+                      <div className="text-gray-300 mb-1">
+                        <span className="font-medium">Error Count:</span> {path.errorCount} time{path.errorCount !== 1 ? "s" : ""}
+                      </div>
+                      <div className="text-gray-300 mb-1">
+                        <span className="font-medium">Last Error:</span> {formatDate(path.lastErrorDate)}
+                      </div>
+                      <div className="flex flex-col sm:flex-row gap-3 mt-4 w-full">
+                        <button
+                          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-semibold w-full"
+                          onClick={goToReviewPosition}
+                        >
+                          Review Position
+                        </button>
+                        <button
+                          className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded font-semibold w-full"
+                          onClick={goToPracticePosition}
+                        >
+                          Practice Now
+                        </button>
+                      </div>
                     </>
                   )}
                   {isEmptyPath(path) && (

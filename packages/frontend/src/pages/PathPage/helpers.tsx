@@ -1,5 +1,5 @@
 import { Path } from "@chess-opening-master/common";
-import { StudyPath, StudiedVariantPath, NewVariantPath, EmptyPath } from "@chess-opening-master/common/build/common/types/Path";
+import { StudyPath, StudiedVariantPath, NewVariantPath, EmptyPath, PositionErrorPath } from "@chess-opening-master/common/build/common/types/Path";
 
 export const isStudyPath = (path: Path | null): path is StudyPath => 
   path !== null && 'type' in path && path.type === "study";
@@ -9,6 +9,9 @@ export const isStudiedVariantPath = (path: Path | null): path is StudiedVariantP
 
 export const isNewVariantPath = (path: Path | null): path is NewVariantPath => 
   path !== null && 'type' in path && path.type === "newVariant";
+
+export const isPositionErrorPath = (path: Path | null): path is PositionErrorPath =>
+  path !== null && 'type' in path && path.type === "positionError";
 
 export const isEmptyPath = (path: Path | null): path is EmptyPath => 
   path !== null && 'message' in path;
