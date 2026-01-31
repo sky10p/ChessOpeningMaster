@@ -10,6 +10,126 @@ import {
   Legend,
 } from "recharts";
 
+export interface RatioBarChartData {
+  opening: string;
+  ratio: number;
+  problemVariants: number;
+  totalVariants: number;
+}
+
+export interface RatioBarChartProps {
+  data: RatioBarChartData[];
+  type: "worst" | "best";
+  title?: string;
+  emptyMessage?: string;
+  isMobile: boolean;
+  yAxisWidth: number;
+  barChartMargin: { top: number; right: number; left: number; bottom: number };
+  onOpeningClick?: (openingName: string) => void;
+}
+
+export const RatioBarChart: React.FC<RatioBarChartProps> = ({
+  data,
+  type,
+  title,
+  emptyMessage = "No data",
+  isMobile,
+  yAxisWidth,
+  barChartMargin,
+  onOpeningClick,
+}) => {
+  const isWorst = type === "worst";
+  const chartTitle = title ?? (isWorst ? "Worst Openings (Error Ratio)" : "Best Openings (Success Ratio)");
+  const barColor = isWorst ? "#ef4444" : "#22c55e";
+  const ratioLabel = isWorst ? "Error Ratio %" : "Success Ratio %";
+  const ratioName = isWorst ? "Error Ratio" : "Success Ratio";
+  const dataKey = isWorst ? "ratio" : "successRatio";
+
+  const chartData = isWorst
+    ? data
+    : data.map((o) => ({ ...o, successRatio: 100 - o.ratio }));
+
+  const formatTooltip = (value: number, _name: string, props: { payload?: RatioBarChartData & { successRatio?: number } }) => {
+    const payload = props.payload;
+    if (!payload) return [`${value}%`, ratioName];
+    if (isWorst) {
+      return [`${value}% (${payload.problemVariants}/${payload.totalVariants})`, ratioName];
+    }
+    const mastered = payload.totalVariants - payload.problemVariants;
+    return [`${value}% (${mastered}/${payload.totalVariants})`, ratioName];
+  };
+
+  return (
+    <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center overflow-x-auto md:overflow-x-visible">
+      <h3 className="text-lg font-semibold text-gray-200 mb-2">{chartTitle}</h3>
+      {data.length === 0 ? (
+        <div className="text-gray-400 text-center py-8">{emptyMessage}</div>
+      ) : (
+        <ResponsiveContainer width="100%" height={260}>
+          <BarChart
+            data={chartData}
+            layout="vertical"
+            margin={barChartMargin}
+            barCategoryGap={24}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis
+              type="number"
+              allowDecimals={false}
+              domain={[0, 100]}
+              label={{
+                value: ratioLabel,
+                position: "insideBottomRight",
+                offset: -5,
+                fill: "#cbd5e1",
+              }}
+            />
+            <YAxis
+              dataKey="opening"
+              type="category"
+              width={yAxisWidth}
+              tick={({ x, y, payload }) => {
+                const name = payload.value;
+                const display = name.length > 28 ? name.slice(0, 25) + "…" : name;
+                return (
+                  <g transform={`translate(${x},${y})`}>
+                    <text
+                      x={0}
+                      y={0}
+                      dy={4}
+                      textAnchor="end"
+                      fill="#cbd5e1"
+                      fontSize={isMobile ? 10 : 13}
+                      style={{ cursor: onOpeningClick ? "pointer" : "default" }}
+                      onClick={() => onOpeningClick?.(name)}
+                    >
+                      {display}
+                    </text>
+                  </g>
+                );
+              }}
+            />
+            <Tooltip
+              formatter={formatTooltip}
+              labelFormatter={(label: string) => `Opening: ${label}`}
+              cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
+            />
+            <Legend />
+            <Bar
+              dataKey={dataKey}
+              fill={barColor}
+              name={ratioLabel}
+              radius={[6, 6, 6, 6]}
+              onClick={(payload) => onOpeningClick?.(payload.opening)}
+              style={{ cursor: onOpeningClick ? "pointer" : "default" }}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      )}
+    </div>
+  );
+};
+
 export interface VerticalBarChartProps {
   data: Array<{ opening: string; count: number }>;
   title: string;
