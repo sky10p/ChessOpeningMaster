@@ -1,5 +1,6 @@
 import React from "react";
 import { OpeningProgressData } from "../types";
+import { getRatioColor, getRatioTextColor } from "../utils";
 
 interface OpeningsProgressCardProps {
   data: OpeningProgressData[];
@@ -19,22 +20,6 @@ export const OpeningsProgressCard: React.FC<OpeningsProgressCardProps> = ({
     ? [...data].sort((a, b) => a.ratio - b.ratio)
     : [...data].sort((a, b) => b.ratio - a.ratio);
   const top5 = sorted.slice(0, 5);
-
-  const getRatioColor = (ratio: number) => {
-    if (ratio >= 80) return "bg-green-500";
-    if (ratio >= 60) return "bg-lime-500";
-    if (ratio >= 40) return "bg-yellow-500";
-    if (ratio >= 20) return "bg-orange-500";
-    return "bg-red-500";
-  };
-
-  const getRatioTextColor = (ratio: number) => {
-    if (ratio >= 80) return "text-green-400";
-    if (ratio >= 60) return "text-lime-400";
-    if (ratio >= 40) return "text-yellow-400";
-    if (ratio >= 20) return "text-orange-400";
-    return "text-red-400";
-  };
 
   const title = isNeedWork ? "Need Work" : "Well Learned";
   const titleColor = isNeedWork ? "text-red-400" : "text-green-400";

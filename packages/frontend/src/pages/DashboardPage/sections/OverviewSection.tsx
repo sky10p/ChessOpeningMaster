@@ -2,69 +2,15 @@ import React, { useState, useMemo } from "react";
 import { IRepertoireDashboard } from "@chess-opening-master/common";
 import { MoveVariantNode } from "../../../models/VariantNode";
 import { useNavigationUtils } from "../../../utils/navigationUtils";
+import { FilterType } from "./DashboardSection/types";
+import { getRatioColor, getRatioTextColor, generateAllOpeningsProgress } from "./DashboardSection/utils";
 
-type FilterType = "all" | "white" | "black";
 type SortField = "opening" | "totalVariants" | "mastered" | "withProblems" | "ratio";
 type SortDirection = "asc" | "desc";
-
-interface OpeningProgressData {
-  opening: string;
-  totalVariants: number;
-  mastered: number;
-  withProblems: number;
-  ratio: number;
-}
 
 interface OverviewSectionProps {
   repertoires: IRepertoireDashboard[];
 }
-
-const findVariantInfo = (
-  variant: { fullName: string },
-  rep: IRepertoireDashboard
-) => {
-  return (rep.variantsInfo || []).find(
-    (i) => i.variantName === variant.fullName
-  );
-};
-
-const generateAllOpeningsProgress = (
-  filteredRepertoires: IRepertoireDashboard[],
-): OpeningProgressData[] => {
-  const openingStats: Record<string, { total: number; mastered: number; withProblems: number }> = {};
-
-  filteredRepertoires.forEach((rep) => {
-    if (!rep.moveNodes) return;
-    const variants = MoveVariantNode.initMoveVariantNode(rep.moveNodes).getVariants();
-
-    variants.forEach((variant) => {
-      if (!openingStats[variant.name]) {
-        openingStats[variant.name] = { total: 0, mastered: 0, withProblems: 0 };
-      }
-      openingStats[variant.name].total++;
-
-      const info = findVariantInfo(variant, rep);
-      const hasErrors = info && (info.errors ?? 0) > 0;
-      const neverReviewed = !info || !info.lastDate;
-
-      if (hasErrors || neverReviewed) {
-        openingStats[variant.name].withProblems++;
-      } else {
-        openingStats[variant.name].mastered++;
-      }
-    });
-  });
-
-  return Object.entries(openingStats)
-    .filter(([, stats]) => stats.total > 0)
-    .map(([opening, stats]) => ({
-      opening,
-      totalVariants: stats.total,
-      mastered: stats.mastered,
-      withProblems: stats.withProblems,
-      ratio: Math.round((stats.mastered / stats.total) * 100),
-    }));
-};
 
 export const OverviewSection: React.FC<OverviewSectionProps> = ({
   repertoires,
@@ -83,7 +29,7 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
   }, [repertoires, filter]);
 
   const allData = useMemo(
-    () => generateAllOpeningsProgress(filteredRepertoires),
+    () => generateAllOpeningsProgress(filteredRepertoires, "all"),
     [filteredRepertoires]
   );
 
@@ -131,22 +77,6 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
   const getSortIcon = (field: SortField) => {
     if (sortField !== field) return "↕";
     return sortDirection === "asc" ? "↑" : "↓";
-  };
-
-  const getRatioColor = (ratio: number) => {
-    if (ratio >= 80) return "bg-green-500";
-    if (ratio >= 60) return "bg-lime-500";
-    if (ratio >= 40) return "bg-yellow-500";
-    if (ratio >= 20) return "bg-orange-500";
-    return "bg-red-500";
-  };
-
-  const getRatioTextColor = (ratio: number) => {
-    if (ratio >= 80) return "text-green-400";
-    if (ratio >= 60) return "text-lime-400";
-    if (ratio >= 40) return "text-yellow-400";
-    if (ratio >= 20) return "text-orange-400";
-    return "text-red-400";
   };
 
   const totalMastered = allData.reduce((sum, o) => sum + o.mastered, 0);
@@ -285,8 +215,16 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
                   {filteredAndSortedData.map((item) => (
                     <tr
                       key={item.opening}
-                      className="border-b border-gray-800 hover:bg-gray-800 cursor-pointer"
+                      className="border-b border-gray-800 hover:bg-gray-800 cursor-pointer focus:outline-none focus:bg-gray-800"
                       onClick={() => handleOpeningClick(item.opening)}
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleOpeningClick(item.opening);
+                        }
+                      }}
+                      role="button"
                     >
                       <td className="py-2 px-2 text-gray-200 truncate max-w-[250px]" title={item.opening}>
                         {item.opening}
@@ -350,8 +288,16 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
               {filteredAndSortedData.map((item) => (
                 <div
                   key={item.opening}
-                  className="bg-gray-800 rounded-lg p-3 cursor-pointer hover:bg-gray-750"
+                  className="bg-gray-800 rounded-lg p-3 cursor-pointer hover:bg-gray-750 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   onClick={() => handleOpeningClick(item.opening)}
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleOpeningClick(item.opening);
+                    }
+                  }}
+                  role="button"
                 >
                   <div className="flex justify-between items-start mb-2">
                     <span className="text-gray-200 text-sm font-medium truncate flex-1 mr-2" title={item.opening}>

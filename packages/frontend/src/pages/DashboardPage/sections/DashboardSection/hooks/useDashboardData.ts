@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { IRepertoireDashboard } from "@chess-opening-master/common";
-import { MoveVariantNode } from "../../../../../models/VariantNode";
 import { toUtcDateKey, getLastUtcDateKeys } from "../../../../../utils/dateUtils";
+import { useIsMobile } from "../../../../../hooks/useIsMobile";
 import {
   FilterType,
   ProgressStats,
@@ -23,7 +23,7 @@ export const useDashboardData = (
   repertoires: IRepertoireDashboard[],
   filter: FilterType
 ) => {
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const isMobile = useIsMobile();
   const yAxisWidth = isMobile ? 90 : 180;
   const barChartMargin: ChartMargins = useMemo(
     () => ({
@@ -81,6 +81,17 @@ export const useDashboardData = (
     [filteredRepertoires]
   );
 
+  const variantToRepertoireMap = useMemo(() => {
+    const map = new Map<string, IRepertoireDashboard>();
+    filteredRepertoires.forEach((rep) => {
+      const variants = getRelevantVariants(rep, filter);
+      variants.forEach((variant) => {
+        map.set(variant.fullName, rep);
+      });
+    });
+    return map;
+  }, [filteredRepertoires, filter]);
+
   const progressStats = useMemo<ProgressStats>(() => {
     const todayKey = toUtcDateKey(new Date());
     let neverReviewed = 0;
@@ -91,13 +102,7 @@ export const useDashboardData = (
     let reviewedTodayOk = 0;
 
     allVariants.forEach((variant) => {
-      const rep = filteredRepertoires.find(
-        (r) =>
-          r.moveNodes &&
-          MoveVariantNode.initMoveVariantNode(r.moveNodes)
-            .getVariants()
-            .some((v) => v.fullName === variant.fullName)
-      );
+      const rep = variantToRepertoireMap.get(variant.fullName);
 
       const info = rep ? findVariantInfo(variant, rep) : undefined;
 
@@ -132,7 +137,7 @@ export const useDashboardData = (
       reviewedTodayErrors,
       reviewedTodayOk,
     };
-  }, [allVariants, filteredRepertoires]);
+  }, [allVariants, variantToRepertoireMap]);
 
   const reviewData = useMemo<ReviewDataItem[]>(
     () => [
