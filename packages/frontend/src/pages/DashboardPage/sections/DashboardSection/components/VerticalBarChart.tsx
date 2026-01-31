@@ -80,6 +80,7 @@ export const VerticalBarChart: React.FC<VerticalBarChartProps> = ({
                       fill="#cbd5e1"
                       fontSize={isMobile ? 10 : 13}
                       style={{ cursor: onOpeningClick ? "pointer" : "default" }}
+                      onClick={() => onOpeningClick?.(name)}
                     >
                       {display}
                       {name.length > 28 && <title>{name}</title>}

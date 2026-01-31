@@ -2,6 +2,8 @@ import { IRepertoireDashboard } from "@chess-opening-master/common";
 
 export type FilterType = "all" | "white" | "black" | "errors" | "unreviewed";
 
+export type OrientationFilter = "all" | "white" | "black";
+
 export type VariantInfo = { errors?: number; lastDate?: string | Date };
 
 export interface OpeningRatioStats {
@@ -65,4 +67,16 @@ export interface OpeningProgressData {
   mastered: number;
   withProblems: number;
   ratio: number;
+}
+
+export interface UnreviewedVariant {
+  fullName: string;
+  repertoireId: string;
+  repertoireName: string;
+}
+
+export interface OpeningWithUnreviewedVariants {
+  opening: string;
+  count: number;
+  variants: UnreviewedVariant[];
 }

@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from "react";
 import { IRepertoireDashboard } from "@chess-opening-master/common";
-import { generateVariantsWithErrorsByOpening } from "../components/DashboardCharts";
-import { ExpandableVariantsChart, OpeningWithVariants } from "../components/ExpandableVariantsChart";
+import { generateVariantsWithErrorsByOpening, getRelevantVariants } from "./DashboardSection/utils";
+import { OpeningWithVariants } from "./DashboardSection/types";
+import { ExpandableVariantsChart } from "../components/ExpandableVariantsChart";
 import { RepertoireFilterDropdown } from "../components/RepertoireFilterDropdown";
 import { useNavigationUtils } from "../../../utils/navigationUtils";
-import { getRelevantVariants } from "../components/DashboardCharts";
 
 interface ErrorsSectionProps {
   repertoires: IRepertoireDashboard[];

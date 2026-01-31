@@ -2,7 +2,7 @@ import React, { useState, useMemo } from "react";
 import { IRepertoireDashboard } from "@chess-opening-master/common";
 import { MoveVariantNode } from "../../../models/VariantNode";
 import { useNavigationUtils } from "../../../utils/navigationUtils";
-import { FilterType } from "./DashboardSection/types";
+import { OrientationFilter } from "./DashboardSection/types";
 import { getRatioColor, getRatioTextColor, generateAllOpeningsProgress } from "./DashboardSection/utils";
 
 type SortField = "opening" | "totalVariants" | "mastered" | "withProblems" | "ratio";
@@ -16,7 +16,7 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
   repertoires,
 }) => {
   const { goToTrainRepertoire } = useNavigationUtils();
-  const [filter, setFilter] = useState<FilterType>("all");
+  const [filter, setFilter] = useState<OrientationFilter>("all");
   const [sortField, setSortField] = useState<SortField>("ratio");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [minVariants, setMinVariants] = useState<number>(1);
@@ -27,6 +27,20 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
     if (filter === "black") return repertoires.filter((r) => r.orientation === "black");
     return repertoires;
   }, [repertoires, filter]);
+
+  const openingToRepertoireMap = useMemo(() => {
+    const map = new Map<string, string>();
+    filteredRepertoires.forEach((rep) => {
+      if (!rep.moveNodes) return;
+      const variants = MoveVariantNode.initMoveVariantNode(rep.moveNodes).getVariants();
+      variants.forEach((variant) => {
+        if (!map.has(variant.name)) {
+          map.set(variant.name, rep._id);
+        }
+      });
+    });
+    return map;
+  }, [filteredRepertoires]);
 
   const allData = useMemo(
     () => generateAllOpeningsProgress(filteredRepertoires, "all"),
@@ -63,14 +77,9 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
   };
 
   const handleOpeningClick = (openingName: string) => {
-    const repertoireWithOpening = filteredRepertoires.find((rep) => {
-      if (!rep.moveNodes) return false;
-      const variants = MoveVariantNode.initMoveVariantNode(rep.moveNodes).getVariants();
-      return variants.some((v) => v.name === openingName);
-    });
-
-    if (repertoireWithOpening) {
-      goToTrainRepertoire(repertoireWithOpening._id, openingName);
+    const repertoireId = openingToRepertoireMap.get(openingName);
+    if (repertoireId) {
+      goToTrainRepertoire(repertoireId, openingName);
     }
   };
 
@@ -180,32 +189,72 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
                 <thead className="sticky top-0 bg-gray-900">
                   <tr className="border-b border-gray-700">
                     <th
-                      className="text-left py-2 px-2 text-gray-400 font-medium cursor-pointer hover:text-gray-200"
+                      className="text-left py-2 px-2 text-gray-400 font-medium cursor-pointer hover:text-gray-200 focus:outline-none focus:text-gray-200"
                       onClick={() => handleSort("opening")}
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleSort("opening");
+                        }
+                      }}
+                      role="button"
                     >
                       Opening {getSortIcon("opening")}
                     </th>
                     <th
-                      className="text-center py-2 px-2 text-gray-400 font-medium cursor-pointer hover:text-gray-200"
+                      className="text-center py-2 px-2 text-gray-400 font-medium cursor-pointer hover:text-gray-200 focus:outline-none focus:text-gray-200"
                       onClick={() => handleSort("totalVariants")}
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleSort("totalVariants");
+                        }
+                      }}
+                      role="button"
                     >
                       Total {getSortIcon("totalVariants")}
                     </th>
                     <th
-                      className="text-center py-2 px-2 text-gray-400 font-medium cursor-pointer hover:text-gray-200"
+                      className="text-center py-2 px-2 text-gray-400 font-medium cursor-pointer hover:text-gray-200 focus:outline-none focus:text-gray-200"
                       onClick={() => handleSort("mastered")}
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleSort("mastered");
+                        }
+                      }}
+                      role="button"
                     >
                       Mastered {getSortIcon("mastered")}
                     </th>
                     <th
-                      className="text-center py-2 px-2 text-gray-400 font-medium cursor-pointer hover:text-gray-200"
+                      className="text-center py-2 px-2 text-gray-400 font-medium cursor-pointer hover:text-gray-200 focus:outline-none focus:text-gray-200"
                       onClick={() => handleSort("withProblems")}
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleSort("withProblems");
+                        }
+                      }}
+                      role="button"
                     >
                       Problems {getSortIcon("withProblems")}
                     </th>
                     <th
-                      className="text-center py-2 px-2 text-gray-400 font-medium cursor-pointer hover:text-gray-200 w-40"
+                      className="text-center py-2 px-2 text-gray-400 font-medium cursor-pointer hover:text-gray-200 focus:outline-none focus:text-gray-200 w-40"
                       onClick={() => handleSort("ratio")}
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleSort("ratio");
+                        }
+                      }}
+                      role="button"
                     >
                       Progress {getSortIcon("ratio")}
                     </th>

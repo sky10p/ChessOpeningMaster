@@ -8,6 +8,8 @@ import {
   OpeningWithVariants,
   VariantWithErrors,
   OpeningProgressData,
+  OpeningWithUnreviewedVariants,
+  UnreviewedVariant,
 } from "./types";
 
 export const getRatioColor = (ratio: number): string => {
@@ -202,13 +204,17 @@ export const getMostRecentRepertoire = (
   filteredRepertoires: IRepertoireDashboard[]
 ): { name: string; date: Date } | null => {
   return filteredRepertoires.reduce((latest, rep) => {
-    const lastDate =
-      rep.variantsInfo && rep.variantsInfo[0]?.lastDate
-        ? new Date(rep.variantsInfo[0].lastDate)
-        : null;
-    if (!lastDate) return latest;
-    if (!latest || lastDate > latest.date) {
-      return { name: rep.name, date: lastDate };
+    if (!rep.variantsInfo || rep.variantsInfo.length === 0) return latest;
+
+    const maxDate = rep.variantsInfo.reduce((max, info) => {
+      if (!info.lastDate) return max;
+      const date = new Date(info.lastDate);
+      return !max || date > max ? date : max;
+    }, null as Date | null);
+
+    if (!maxDate) return latest;
+    if (!latest || maxDate > latest.date) {
+      return { name: rep.name, date: maxDate };
     }
     return latest;
   }, null as null | { name: string; date: Date });
@@ -250,4 +256,37 @@ export const generateAllOpeningsProgress = (
       withProblems: stats.withProblems,
       ratio: Math.round((stats.mastered / stats.total) * 100),
     }));
+};
+
+export const generateUnreviewedVariantsByOpening = (
+  filteredRepertoires: IRepertoireDashboard[],
+  topCount?: number
+): OpeningWithUnreviewedVariants[] => {
+  const unreviewedMap: Record<string, Map<string, UnreviewedVariant>> = {};
+
+  filteredRepertoires.forEach((rep) => {
+    const relevantVariants = getRelevantVariants(rep, "unreviewed");
+
+    relevantVariants.forEach((variant) => {
+      if (!unreviewedMap[variant.name]) {
+        unreviewedMap[variant.name] = new Map();
+      }
+      const key = `${rep._id}::${variant.fullName}`;
+      unreviewedMap[variant.name].set(key, {
+        fullName: variant.fullName,
+        repertoireId: rep._id,
+        repertoireName: rep.name,
+      });
+    });
+  });
+
+  const allOpenings = Object.entries(unreviewedMap)
+    .map(([opening, variantsMap]) => ({
+      opening,
+      count: variantsMap.size,
+      variants: Array.from(variantsMap.values()),
+    }))
+    .sort((a, b) => b.count - a.count);
+
+  return typeof topCount === "number" ? allOpenings.slice(0, topCount) : allOpenings;
 };
