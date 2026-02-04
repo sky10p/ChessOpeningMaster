@@ -1,40 +1,40 @@
-# Sincronía de variante y tablero
+# Variant and board synchronization
 
-## Objetivo
+## Goal
 
-Mantener la variante seleccionada si el árbol actual es compatible con esa variante. Cambiar de variante solo cuando el árbol ya no sea compatible, eligiendo la primera variante compatible según el orden disponible.
+Keep the selected variant when the current tree is compatible with it. Switch variants only when the tree is no longer compatible, choosing the first compatible variant in the available order.
 
-## Definiciones
+## Definitions
 
-- Árbol actual: secuencia de movimientos desde la raíz hasta el nodo actual.
-- Variante compatible: una variante cuya secuencia inicial coincide completamente con el árbol actual.
-- Variante seleccionada: la variante activa en la interfaz y usada para resaltar el siguiente movimiento.
+- Current tree: the sequence of moves from the root to the current node.
+- Compatible variant: a variant whose initial sequence fully matches the current tree.
+- Selected variant: the active variant in the UI and the one used to highlight the next move.
 
-## Reglas de selección
+## Selection rules
 
-1. Si existe una variante seleccionada y es compatible con el árbol actual, se mantiene.
-2. Si la variante seleccionada no es compatible, se elige la primera variante compatible.
-3. Si no existe ninguna variante compatible, se usa la variante inicial según el orden definido al cargar.
+1. If a selected variant exists and is compatible with the current tree, keep it.
+2. If the selected variant is incompatible, pick the first compatible variant.
+3. If no compatible variant exists, fall back to the initial variant based on load order.
 
-## Consecuencias en la navegación
+## Navigation consequences
 
-- Al avanzar un movimiento, la variante se recalcula con el nodo destino.
-- Al retroceder un movimiento, la variante se recalcula con el nodo padre.
-- Al saltar a un movimiento desde listas o paneles, se recalcula con ese nodo.
-- Al cambiar el historial raíz, la variante se recalcula usando la nueva raíz.
+- Advancing a move recalculates the variant using the target node.
+- Going back recalculates the variant using the parent node.
+- Jumping to a move from lists or panels recalculates using that node.
+- Replacing the root history recalculates using the new root.
 
-## Ejemplo práctico
+## Practical example
 
-- Variante seleccionada: Apertura Española (empieza por e4).
-- Si el usuario juega e4, la variante se mantiene.
-- Si el usuario juega d4, la variante seleccionada se considera incompatible y se cambia a la primera variante compatible con d4.
+- Selected variant: Spanish Opening (starts with e4).
+- If the user plays e4, the variant remains selected.
+- If the user plays d4, the selected variant becomes incompatible and switches to the first compatible variant with d4.
 
-## Prioridad de selección
+## Selection priority
 
-La primera variante compatible es la que aparece primero en la lista de variantes calculada para el repertorio.
+The first compatible variant is the first one in the computed variant list for the repertoire.
 
-## Notas de consistencia
+## Consistency notes
 
-La variante se evalúa siempre contra el nodo objetivo que representa la posición actual. Esto evita cambios por estados anteriores o efectos de actualización asíncrona del tablero.
+The variant is always evaluated against the target node representing the current position. This prevents changes due to stale state or async board updates.
 
-La selección de movimiento en el panel de variantes depende de que el `currentMoveNode` coincida por referencia con un nodo en la lista de movimientos de la variante seleccionada. Por eso, al recalcular variantes se refrescan los nodos para mantener la sincronía visual del movimiento resaltado.
+Move selection highlighting in the variants panel depends on `currentMoveNode` matching by reference with a node in the selected variant moves list. That is why variant recalculation refreshes nodes to keep the highlighted move in sync.

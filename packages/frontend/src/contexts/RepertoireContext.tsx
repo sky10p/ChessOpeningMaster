@@ -277,9 +277,7 @@ export const RepertoireContextProvider: React.FC<
 
       const nodeToEvaluate = targetNode ?? currentMove;
       const bestVariant = findBestVariantForNode(newVariants, nodeToEvaluate);
-      setSelectedVariant((prev) =>
-        prev?.fullName === bestVariant?.fullName ? prev : bestVariant
-      );
+      setSelectedVariant(bestVariant);
     },
     [moveHistory, currentMove, findBestVariantForNode]
   );
