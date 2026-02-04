@@ -4,7 +4,7 @@ import { useRepertoireContext } from "../../../contexts/RepertoireContext";
 import { useTrainRepertoireContext } from "../../../contexts/TrainRepertoireContext";
 import { useHeaderDispatch } from "../../../contexts/HeaderContext";
 import { useDialogContext } from "../../../contexts/DialogContext";
-import { TrainVariant } from "../../../models/chess.models";
+import { TrainVariant, Variant } from "../../../models/chess.models";
 import { getSpacedRepetitionVariants } from "../../../utils/chess/spacedRepetition/spacedRepetition";
 import { HintInfo } from "../../../components/design/chess/train/HintInfo";
 import BoardContainer from "../../../components/application/chess/board/BoardContainer";
@@ -76,7 +76,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
           showTrainVariantsDialog({
             title: "Select train variants",
             contentText: "Select the variants you want to train",
-            trainVariants: variants.map((v) => ({
+            trainVariants: variants.map((v: Variant) => ({
               variant: v,
               state: "inProgress",
             })),

@@ -649,4 +649,141 @@ describe("RepertoireContext - Enhanced Functionality", () => {
       expect(typeof result.current.setSelectedVariant).toBe("function");
     });
   });
+
+  describe("New variant creation", () => {
+    it("should create a new variant when move is incompatible with existing variants", async () => {
+      const Provider = createRepertoireProvider(
+        "white",
+        createInitialMoves() // Has variants for e4 and d4
+      );
+
+      const { result } = renderHook(() => useRepertoireContext(), {
+        wrapper: Provider,
+      });
+
+      await waitFor(() => {
+        expect(mockGetPositionComment).toHaveBeenCalled();
+      });
+
+      const initialVariantsCount = result.current.variants.length;
+      expect(initialVariantsCount).toBeGreaterThan(0);
+
+      // Add a move that doesn't match any existing variant (Nf3)
+      await act(async () => {
+        const move = createMockMove("Nf3", "g1f3");
+        result.current.addMove(move);
+      });
+
+      // Should create a new variant
+      expect(result.current.variants.length).toBeGreaterThan(initialVariantsCount);
+      expect(result.current.currentMoveNode.getMove().san).toBe("Nf3");
+      expect(result.current.selectedVariant).not.toBeNull();
+      
+      // The new variant should contain the new move
+      const newVariant = result.current.variants.find(v => 
+        v.moves.some(move => move.getMove().san === "Nf3")
+      );
+      expect(newVariant).toBeDefined();
+    });
+
+    it("should create variant when starting from empty repertoire", async () => {
+      // Start with completely empty repertoire
+      const Provider = createRepertoireProvider("white"); // No initial moves
+
+      const { result } = renderHook(() => useRepertoireContext(), {
+        wrapper: Provider,
+      });
+
+      await waitFor(() => {
+        expect(mockGetPositionComment).toHaveBeenCalled();
+      });
+
+      // Initially should have no variants
+      expect(result.current.variants.length).toBe(0);
+      expect(result.current.selectedVariant).toBeNull();
+
+      // Add first move
+      await act(async () => {
+        const move = createMockMove("e4", "e2e4");
+        result.current.addMove(move);
+      });
+
+      // Should create first variant
+      expect(result.current.variants.length).toBe(1);
+      expect(result.current.selectedVariant).not.toBeNull();
+      expect(result.current.currentMoveNode.getMove().san).toBe("e4");
+      
+      // Add a second, unrelated move that creates a new branch
+      await act(async () => {
+        result.current.prev(); // Go back to root
+      });
+      
+      await act(async () => {
+        const move = createMockMove("d4", "d2d4");
+        result.current.addMove(move);
+      });
+
+      // Should now have multiple variants
+      expect(result.current.variants.length).toBeGreaterThan(1);
+      expect(result.current.currentMoveNode.getMove().san).toBe("d4");
+      
+      // Should have variants for both e4 and d4
+      const hasE4Variant = result.current.variants.some(v => 
+        v.moves.some(move => move.getMove().san === "e4")
+      );
+      const hasD4Variant = result.current.variants.some(v => 
+        v.moves.some(move => move.getMove().san === "d4")
+      );
+      
+      expect(hasE4Variant).toBe(true);
+      expect(hasD4Variant).toBe(true);
+    });
+
+    it("should properly select variant when adding moves to existing branch", async () => {
+      const Provider = createRepertoireProvider(
+        "white",
+        createInitialMoves() // Has e4 -> e5 and d4 -> d5 branches
+      );
+
+      const { result } = renderHook(() => useRepertoireContext(), {
+        wrapper: Provider,
+      });
+
+      await waitFor(() => {
+        expect(mockGetPositionComment).toHaveBeenCalled();
+      });
+
+      // Navigate to e4
+      const root = result.current.moveHistory;
+      const e4Node = requireMoveNode(
+        findRootChildByVariantName(root, "Apertura Española")
+      );
+
+      await act(async () => {
+        result.current.goToMove(e4Node);
+      });
+
+      expect(result.current.currentMoveNode.getMove().san).toBe("e4");
+      
+      const initialVariantsCount = result.current.variants.length;
+
+      // Add a new move after e4 that's different from existing e5 (create new branch)
+      await act(async () => {
+        const move = createMockMove("e6", "e7e6");
+        result.current.addMove(move);
+      });
+
+      // Should create a new variant branch
+      expect(result.current.variants.length).toBeGreaterThanOrEqual(initialVariantsCount);
+      expect(result.current.currentMoveNode.getMove().san).toBe("e6");
+      
+      // Should find the appropriate variant for the e4 -> e6 line
+      const selectedVariant = result.current.selectedVariant;
+      expect(selectedVariant).not.toBeNull();
+      if (selectedVariant && selectedVariant.moves.length >= 2) {
+        expect(selectedVariant.moves[0].getMove().san).toBe("e4");
+        expect(selectedVariant.moves[1].getMove().san).toBe("e6");
+      }
+    });
+  });
 });

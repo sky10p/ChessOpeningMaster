@@ -59,7 +59,7 @@ export const useRepertoireInfo = () => {
       contentText: "Are you sure you want to delete this variant?",
       onConfirm: async () => {
         const variantsWithoutDeleted = variants.filter(
-          (v) => v.fullName !== variant.fullName
+          (v: Variant) => v.fullName !== variant.fullName
         );
         const movesWithoutVariant = variantsToMoves(variantsWithoutDeleted);
         await putRepertoire(
@@ -160,7 +160,7 @@ export const useRepertoireInfo = () => {
               contentText: "Are you sure you want to delete the selected variants?",
               onConfirm: async () => {
                 const variantsWithoutDeleted = variants.filter(
-                  (v) =>
+                  (v: Variant) =>
                     !selectedVariantsToDelete.some(
                       (variant) => variant.fullName === v.fullName
                     )
