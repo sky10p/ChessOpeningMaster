@@ -167,6 +167,51 @@ mongodb://localhost:27017/chess_opening_master
 - `docker-compose.yml` - MongoDB container setup
 - `packages/*/jest.config.js` - Jest configurations per package
 
+## Documentation
+
+### Architecture Documentation
+- [RepertoireContext Architecture Guide](src/doc/RepertoireContext-Architecture.md) - Detailed documentation of the main context system
+- [Variant Selection Logic](src/doc/Variant-Selection-Logic.md) - Complete guide to how chess opening variants are selected and managed
+- [Testing Strategy](src/doc/Testing-Strategy.md) - Comprehensive testing patterns, mock requirements, and test scenarios
+- [Troubleshooting Guide](src/doc/Troubleshooting-Guide.md) - Common issues, solutions, and debugging workflows
+
+### Additional Documentation
+- `src/doc/repertoire-variant-sync.md` - Existing variant synchronization documentation
+
+## Recent Major Changes (Important for Agents)
+
+### RepertoireContext Refactoring
+The RepertoireContext was refactored from a single large file into a modular directory structure:
+
+```
+packages/frontend/src/contexts/RepertoireContext/
+├── index.ts              # Clean exports
+├── types.ts              # Type definitions  
+├── utils.ts              # Utility functions
+└── RepertoireContext.tsx # Main implementation
+```
+
+**Critical**: Always import from the directory (`contexts/RepertoireContext`) not individual files.
+
+### Variant Selection Logic
+Implements sophisticated chess opening variant selection with these principles:
+- Keep selected variant when compatible with current position
+- Switch to first compatible variant when incompatible
+- Create new variants automatically when adding incompatible moves
+- Uses LAN (Logical Algebraic Notation) for move path matching
+
+### Testing Requirements
+- Chess.js mocks MUST include `lan` property in move objects
+- Use async/await properly with React Testing Library
+- 49 tests currently covering variant selection logic comprehensively
+- All tests passing across 340+ total tests in project
+
+### Key Technical Insights
+- `buildMovePath()` from common package is critical for variant matching
+- `isVariantCompatibleWithPath()` function uses LAN notation comparison
+- All navigation methods must call `updateVariants(targetNode)` 
+- The Chess.js mock requires SAN-to-LAN mapping for proper testing
+
 ## Pre-commit Verification
 
 Run this sequence before any commit:

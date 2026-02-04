@@ -1,0 +1,84 @@
+# Documentation Index
+
+This directory contains comprehensive documentation for the Chess Opening Master project, specifically designed to help AI agents understand the architecture and troubleshoot issues.
+
+## Documentation Files
+
+### 🏗️ [RepertoireContext Architecture Guide](RepertoireContext-Architecture.md)
+**Essential for understanding the core system**
+- Directory structure after refactoring
+- Key functions and their purposes
+- Integration points and dependencies
+- Migration notes from single-file to modular structure
+
+### 🔄 [Variant Selection Logic](Variant-Selection-Logic.md) 
+**Critical for understanding chess opening management**
+- Core algorithm for variant switching
+- Compatibility checking using LAN notation
+- Automatic variant creation scenarios
+- Debugging tips for variant-related issues
+
+### 🧪 [Testing Strategy](Testing-Strategy.md)
+**Must-read for test development and debugging**
+- Test file organization and patterns
+- Chess.js mock requirements (especially LAN properties)
+- Common test scenarios for variant logic
+- Mock data creation patterns
+
+### 🔧 [Troubleshooting Guide](Troubleshooting-Guide.md)
+**First stop when encountering issues**
+- Common TypeScript compilation errors
+- Runtime variant selection problems
+- Test failure diagnosis and solutions
+- Build and development environment issues
+
+## Quick Start for Agents
+
+### Understanding the Codebase
+1. Start with [AGENTS.md](../AGENTS.md) for project overview
+2. Read [RepertoireContext Architecture](RepertoireContext-Architecture.md) for core system understanding
+3. Review [Variant Selection Logic](Variant-Selection-Logic.md) for chess-specific behavior
+
+### Debugging Issues
+1. Check [Troubleshooting Guide](Troubleshooting-Guide.md) for common problems
+2. Review [Testing Strategy](Testing-Strategy.md) for test-related issues
+3. Use debug patterns documented in each guide
+
+### Making Changes
+1. Understand the variant selection algorithm before modifying navigation
+2. Update Chess.js mocks when adding new test moves
+3. Always test variant compatibility when changing move logic
+4. Follow the established directory structure for context organization
+
+## Key Technical Concepts
+
+### LAN (Logical Algebraic Notation)
+- Format: "e2e4", "g1f3", etc.
+- Used for move path compatibility checking
+- Required in Chess.js mock move objects
+- Critical for variant selection algorithm
+
+### Variant Compatibility
+- Variants must match move paths exactly using LAN notation
+- System automatically switches when incompatible
+- New variants created when no compatible variant exists
+
+### Navigation Flow
+- All navigation methods call `updateVariants(targetNode)`
+- Uses `buildMovePath()` from common package for path generation
+- Triggers auto-save and state synchronization
+
+## Architecture Highlights
+
+### Modular Structure
+The RepertoireContext was refactored into a clean directory structure with proper separation of concerns.
+
+### Comprehensive Testing
+49 tests specifically cover variant selection logic, with 340+ total tests across all packages.
+
+### Robust Error Handling
+Extensive troubleshooting documentation covers common issues and their solutions.
+
+---
+
+*This documentation is maintained to help AI agents quickly understand and work with the Chess Opening Master codebase. Update these files when making architectural changes.*
