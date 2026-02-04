@@ -1,6 +1,6 @@
 import React from "react";
 import { renderHook, act, waitFor } from "@testing-library/react";
-import { Move } from "chess.js";
+import { Chess, Move } from "chess.js";
 import { MemoryRouter } from "react-router-dom";
 import {
   RepertoireContextProvider,
@@ -9,7 +9,11 @@ import {
 import { AlertContextProvider } from "../AlertContext";
 import { DialogContextProvider } from "../DialogContext";
 import { HeaderContextProvider } from "../HeaderContext";
-import { BoardOrientation, IMoveNode } from "@chess-opening-master/common";
+import {
+  BoardOrientation,
+  IMoveNode,
+  MoveVariantNode,
+} from "@chess-opening-master/common";
 
 jest.mock("../../repository/positions/positions");
 jest.mock("../../repository/repertoires/repertoires");
@@ -45,6 +49,68 @@ const createMockMove = (san: string, lan?: string): Move => ({
   before: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
   after: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
 });
+
+const createMove = (
+  san: string,
+  previousSans: string[] = [],
+  lan?: string
+): Move => {
+  const chess = new Chess();
+  previousSans.forEach((moveSan) => {
+    chess.move(moveSan);
+  });
+  const move = chess.move(san);
+  if (!move) {
+    throw new Error("Invalid move");
+  }
+  if (lan) {
+    move.lan = lan;
+  }
+  return move;
+};
+
+const createInitialMoves = (): IMoveNode => ({
+  id: "initial",
+  move: null,
+  children: [
+    {
+      id: "e2e4",
+      move: createMove("e4", [], "e2e4"),
+      variantName: "Apertura Española",
+      children: [
+        {
+          id: "e7e5",
+          move: createMove("e5", ["e4"], "e7e5"),
+          children: [],
+        },
+      ],
+    },
+    {
+      id: "d2d4",
+      move: createMove("d4", [], "d2d4"),
+      variantName: "Gambito de Dama",
+      children: [
+        {
+          id: "d7d5",
+          move: createMove("d5", ["d4"], "d7d5"),
+          children: [],
+        },
+      ],
+    },
+  ],
+});
+
+const findRootChildByVariantName = (
+  root: MoveVariantNode,
+  variantName: string
+) => root.children.find((child) => child.variantName === variantName);
+
+const requireMoveNode = (node: MoveVariantNode | undefined) => {
+  if (!node) {
+    throw new Error("Move node not found");
+  }
+  return node;
+};
 
 const TestWrapper: React.FC<{ 
   children: React.ReactNode; 
@@ -213,6 +279,75 @@ describe("RepertoireContext - Enhanced Functionality", () => {
   });
 
   describe("Variant selection logic", () => {
+    it("should keep selected variant when move is compatible", async () => {
+      const Provider = createRepertoireProvider(
+        "white",
+        createInitialMoves()
+      );
+
+      const { result } = renderHook(() => useRepertoireContext(), {
+        wrapper: Provider,
+      });
+
+      await waitFor(() => {
+        expect(mockGetPositionComment).toHaveBeenCalled();
+      });
+
+      const root = result.current.moveHistory;
+      const e4Node = requireMoveNode(
+        findRootChildByVariantName(root, "Apertura Española")
+      );
+      const e5Node = requireMoveNode(e4Node.children[0]);
+
+      await act(async () => {
+        result.current.goToMove(e4Node);
+      });
+
+      const selectedBefore = result.current.selectedVariant?.name;
+
+      await act(async () => {
+        result.current.goToMove(e5Node);
+      });
+
+      expect(result.current.selectedVariant?.name).toBe(selectedBefore);
+      expect(result.current.selectedVariant?.name).toBe("Apertura Española");
+    });
+
+    it("should switch to first compatible variant when move is incompatible", async () => {
+      const Provider = createRepertoireProvider(
+        "white",
+        createInitialMoves()
+      );
+
+      const { result } = renderHook(() => useRepertoireContext(), {
+        wrapper: Provider,
+      });
+
+      await waitFor(() => {
+        expect(mockGetPositionComment).toHaveBeenCalled();
+      });
+
+      const root = result.current.moveHistory;
+      const e4Node = requireMoveNode(
+        findRootChildByVariantName(root, "Apertura Española")
+      );
+      const d4Node = requireMoveNode(
+        findRootChildByVariantName(root, "Gambito de Dama")
+      );
+
+      await act(async () => {
+        result.current.goToMove(e4Node);
+      });
+
+      expect(result.current.selectedVariant?.name).toBe("Apertura Española");
+
+      await act(async () => {
+        result.current.goToMove(d4Node);
+      });
+
+      expect(result.current.selectedVariant?.name).toBe("Gambito de Dama");
+    });
+
     it("should maintain selectedVariant state during operations", async () => {
       const Provider = createRepertoireProvider("white");
 

@@ -62,6 +62,23 @@ const createMockMoveNode = (id: string): MoveVariantNode => {
   return node;
 };
 
+const createMoveNodeWithSan = (id: string, san: string, lan: string): MoveVariantNode => {
+  const node = new MoveVariantNode();
+  node.id = id;
+  node.move = {
+    color: 'w',
+    piece: 'p',
+    from: 'e2',
+    to: 'e4',
+    san,
+    flags: 'b',
+    lan,
+    before: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+    after: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1',
+  };
+  return node;
+};
+
 const mockVariants: Variant[] = [
   {
     moves: [createMockMoveNode('move1')],
@@ -263,5 +280,32 @@ describe('RepertoireInfoPanel - Train Variant Action', () => {
       
       expect(moreOptionsButton).toBeInTheDocument();
     });
+  });
+});
+
+describe('RepertoireInfoPanel - Selected movement highlight', () => {
+  it('should highlight currentMoveNode in variant movements', () => {
+    const moveE4 = createMoveNodeWithSan('move-e4', 'e4', 'e2e4');
+    const moveD4 = createMoveNodeWithSan('move-d4', 'd4', 'd2d4');
+    const variant = {
+      moves: [moveE4, moveD4],
+      name: 'Main Line',
+      fullName: 'Main Line',
+      differentMoves: '',
+    };
+    const props = {
+      ...defaultProps,
+      variants: [variant],
+      selectedVariant: variant,
+      currentMoveNode: moveD4,
+    };
+
+    render(<RepertoireInfoPanel {...props} />);
+
+    const selectedMove = screen.getByText('d4').parentElement;
+    const unselectedMove = screen.getByText('e4').parentElement;
+
+    expect(selectedMove).toHaveClass('bg-blue-600');
+    expect(unselectedMove).not.toHaveClass('bg-blue-600');
   });
 });
