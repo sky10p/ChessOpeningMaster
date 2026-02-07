@@ -25,6 +25,13 @@ This directory contains comprehensive documentation for the Chess Opening Master
 - Common test scenarios for variant logic
 - Mock data creation patterns
 
+### ⚛️ [React Effect & Data Fetching Guide](React-Effect-Data-Fetching-Guide.md)
+**Required reading before introducing new `useEffect` logic**
+- When to avoid `useEffect` entirely
+- Safe data-fetching effect patterns
+- Dependency and cleanup requirements
+- Testing checklist for async effects
+
 ### 🔧 [Troubleshooting Guide](Troubleshooting-Guide.md)
 **First stop when encountering issues**
 - Common TypeScript compilation errors
@@ -49,6 +56,7 @@ This directory contains comprehensive documentation for the Chess Opening Master
 2. Update Chess.js mocks when adding new test moves
 3. Always test variant compatibility when changing move logic
 4. Follow the established directory structure for context organization
+5. Follow [React Effect & Data Fetching Guide](React-Effect-Data-Fetching-Guide.md) before adding new data-fetching effects
 
 ## Key Technical Concepts
 

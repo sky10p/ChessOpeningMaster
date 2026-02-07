@@ -148,6 +148,23 @@ packages/
 4. **Quote directory names** in cd commands: `cd "directory name"`
 5. **TypeScript strict mode** is enabled
 
+## React `useEffect` Quality Guidelines
+
+Default policy: use local documentation as the source of truth during implementation and review.
+- Primary: `src/doc/React-Effect-Data-Fetching-Guide.md`
+- External React link is optional and should only be used for occasional alignment, not on every task:
+  - https://react.dev/learn/you-might-not-need-an-effect#fetching-data
+
+Rules for this codebase:
+1. Do not use `useEffect` when logic can run during render (derived state, computed values) or in event handlers.
+2. Prefer existing data-loading abstractions first (route/page hooks, shared hooks, repository layer orchestration) before fetching directly inside a component effect.
+3. If data fetching in an effect is unavoidable, always prevent stale updates with cleanup (`ignore` flag and/or `AbortController`) and keep dependency arrays complete.
+4. Avoid fetch waterfalls by loading data at higher levels when possible and fetching independent resources in parallel.
+5. Model request lifecycle explicitly (`idle`/`loading`/`success`/`error`) and test each state.
+
+For detailed patterns and examples, see:
+- `src/doc/React-Effect-Data-Fetching-Guide.md`
+
 ## Database
 
 MongoDB is used with Docker Compose:
@@ -174,6 +191,7 @@ mongodb://localhost:27017/chess_opening_master
 - [Variant Selection Logic](src/doc/Variant-Selection-Logic.md) - Complete guide to how chess opening variants are selected and managed
 - [Testing Strategy](src/doc/Testing-Strategy.md) - Comprehensive testing patterns, mock requirements, and test scenarios
 - [Troubleshooting Guide](src/doc/Troubleshooting-Guide.md) - Common issues, solutions, and debugging workflows
+- [React Effect & Data Fetching Guide](src/doc/React-Effect-Data-Fetching-Guide.md) - Project rules for when to avoid `useEffect` and how to fetch safely when needed
 
 ### Additional Documentation
 - `src/doc/repertoire-variant-sync.md` - Existing variant synchronization documentation
