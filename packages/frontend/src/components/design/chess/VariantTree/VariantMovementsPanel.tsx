@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { MoveVariantNode } from "../../../../models/VariantNode";
 import { TextDialog } from "../../dialogs/TextDialog";
+import { ConfirmDialog } from "../../dialogs/ConfirmDialog";
 
 interface VariantMovementsPanelProps {
   moves: MoveVariantNode[];
@@ -57,6 +58,7 @@ export const VariantMovementsPanel: React.FC<VariantMovementsPanelProps> = ({
 }) => {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; node: MoveVariantNode | null }>({ x: 0, y: 0, node: null });
   const [contextRenameDialog, setContextRenameDialog] = useState<{ open: boolean; node: MoveVariantNode | null }>({ open: false, node: null });
+  const [contextDeleteDialog, setContextDeleteDialog] = useState<{ open: boolean; node: MoveVariantNode | null }>({ open: false, node: null });
 
   const handleContextMenu = (event: React.MouseEvent, node: MoveVariantNode) => {
     event.preventDefault();
@@ -74,6 +76,22 @@ export const VariantMovementsPanel: React.FC<VariantMovementsPanelProps> = ({
 
   const handleCloseRenameDialog = () => {
     setContextRenameDialog({ open: false, node: null });
+  };
+
+  const handleDeleteDialog = () => {
+    setContextDeleteDialog({ open: true, node: contextMenu.node });
+    handleCloseContextMenu();
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setContextDeleteDialog({ open: false, node: null });
+  };
+
+  const handleConfirmDeleteNode = () => {
+    if (contextDeleteDialog.node !== null) {
+      deleteMove(contextDeleteDialog.node);
+    }
+    handleCloseDeleteDialog();
   };
 
   const handleRenameNode = (newName: string) => {
@@ -135,7 +153,7 @@ export const VariantMovementsPanel: React.FC<VariantMovementsPanelProps> = ({
           style={{ top: contextMenu.y, left: contextMenu.x }}
           onMouseLeave={handleCloseContextMenu}
         >
-          <div className="p-2 cursor-pointer context-menu-item" onClick={() => { if (contextMenu.node) { deleteMove(contextMenu.node); } handleCloseContextMenu(); }}>Delete</div>
+          <div className="p-2 cursor-pointer context-menu-item" onClick={handleDeleteDialog}>Delete</div>
           <div className="p-2 cursor-pointer context-menu-item" onClick={handleRenameDialog}>Rename</div>
         </div>
       )}
@@ -146,6 +164,13 @@ export const VariantMovementsPanel: React.FC<VariantMovementsPanelProps> = ({
         title="Rename Move"
         contentText="Please enter the new name for the move:"
         onTextConfirm={handleRenameNode}
+      />
+      <ConfirmDialog
+        open={contextDeleteDialog.open}
+        onClose={handleCloseDeleteDialog}
+        title="Delete move"
+        contentText="Are you sure you want to delete this move and all following moves in this variant?"
+        onConfirm={handleConfirmDeleteNode}
       />
     </div>
   );

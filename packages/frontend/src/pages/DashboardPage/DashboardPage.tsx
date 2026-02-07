@@ -15,6 +15,7 @@ import { OverviewSection } from "./sections/OverviewSection";
 import { StudiesSection } from "./sections/StudiesSection";
 import { ErrorsSection } from "./sections/ErrorsSection";
 import { UnreviewedSection } from "./sections/UnreviewedSection";
+import { ArrowsRightLeftIcon } from "@heroicons/react/24/solid";
 
 export const DashboardPage = () => {
   const navigate = useNavigate();
@@ -100,50 +101,54 @@ export const DashboardPage = () => {
 
   return (
     <div className="container p-0 sm:p-4 w-full h-full bg-gradient-to-b from-gray-900 via-primary to-gray-900 rounded-lg shadow-2xl flex flex-col">
-      <nav className="flex flex-col sm:flex-row gap-2 sm:gap-4 p-2 sm:p-4 bg-primary z-20 sticky top-0 border-b border-gray-800">
+      <nav className="flex gap-2 sm:gap-4 p-2 sm:p-4 bg-primary z-20 sticky top-0 border-b border-gray-800 overflow-x-auto">
         <button
-          className={`px-4 py-2 rounded-t sm:rounded-l sm:rounded-t-none font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'dashboard' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
+          className={`flex-shrink-0 whitespace-nowrap px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-l sm:rounded-t-none text-sm sm:text-base font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'dashboard' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
           onClick={() => handleSectionChange('dashboard')}
         >
           Dashboard
         </button>
         <button
-          className={`px-4 py-2 rounded-t sm:rounded-l sm:rounded-t-none font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'overview' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
+          className={`flex-shrink-0 whitespace-nowrap px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-l sm:rounded-t-none text-sm sm:text-base font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'overview' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
           onClick={() => handleSectionChange('overview')}
         >
           Overview
         </button>
         <button
-          className={`px-4 py-2 rounded-t sm:rounded-l sm:rounded-t-none font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'repertoires' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
+          className={`flex-shrink-0 whitespace-nowrap px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-l sm:rounded-t-none text-sm sm:text-base font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'repertoires' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
           onClick={() => handleSectionChange('repertoires')}
         >
           Repertoires
         </button>
         <button
-          className={`px-4 py-2 rounded-t sm:rounded-l sm:rounded-t-none font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'openings' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
+          className={`flex-shrink-0 whitespace-nowrap px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-l sm:rounded-t-none text-sm sm:text-base font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'openings' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
           onClick={() => handleSectionChange('openings')}
         >
           Openings
         </button>
         <button
-          className={`px-4 py-2 rounded-t sm:rounded-l sm:rounded-t-none font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'studies' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
+          className={`flex-shrink-0 whitespace-nowrap px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-l sm:rounded-t-none text-sm sm:text-base font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'studies' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
           onClick={() => handleSectionChange('studies')}
         >
           Studies
         </button>
         <button
-          className={`px-4 py-2 rounded-t sm:rounded-l sm:rounded-t-none font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'errors' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
+          className={`flex-shrink-0 whitespace-nowrap px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-l sm:rounded-t-none text-sm sm:text-base font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'errors' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
           onClick={() => handleSectionChange('errors')}
         >
           Errors
         </button>
         <button
-          className={`px-4 py-2 rounded-t sm:rounded-l sm:rounded-t-none font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'unreviewed' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
+          className={`flex-shrink-0 whitespace-nowrap px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-l sm:rounded-t-none text-sm sm:text-base font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'unreviewed' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
           onClick={() => handleSectionChange('unreviewed')}
         >
           Unreviewed
         </button>
       </nav>
+      <div className="sm:hidden flex items-center justify-center gap-1 px-3 py-1.5 bg-primary/90 border-b border-gray-800 text-[11px] uppercase tracking-wide text-gray-400">
+        <ArrowsRightLeftIcon className="h-3.5 w-3.5 text-gray-500 animate-pulse" />
+        <span>Swipe left/right for tabs</span>
+      </div>
       <div className="flex-1 flex flex-col relative min-h-0">
         {selectedSection === 'dashboard' && (
           <DashboardSection
