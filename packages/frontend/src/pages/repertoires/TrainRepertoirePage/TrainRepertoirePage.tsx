@@ -34,7 +34,7 @@ const TrainRepertoirePage = () => {
       repertoireName={repertoire.name}
       initialMoves={repertoire.moveNodes}
       initialOrientation={repertoire.orientation ?? "white"}
-      updateRepertoire={refetch}
+      updateRepertoire={() => void refetch()}
     >
       <TrainRepertoireContextProvider>
         <TrainRepertoireViewContainer />

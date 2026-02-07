@@ -15,7 +15,14 @@ export const getFullInfoRepertoires = async (): Promise<IRepertoireDashboard[]> 
 
 export const getRepertoire = async (id: string) => {
   const response = await fetch(`${API_URL}/repertoires/${id}`);
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || `Request failed with status ${response.status}`);
+  }
   const data = await response.json();
+  if (!data?._id) {
+    throw new Error("Repertoire not found");
+  }
   return data;
 };
 
