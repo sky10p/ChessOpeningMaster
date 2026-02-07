@@ -1,5 +1,5 @@
 import { Chess, Move } from "chess.js";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { MoveVariantNode } from "../../models/VariantNode";
 import { Variant } from "../../models/chess.models";
@@ -20,6 +20,7 @@ import {
   RepertoireContextProps,
   RepertoireContextProviderProps,
 } from "./types";
+import { findMoveNodeByFen } from "./utils";
 
 const RepertoireContext = React.createContext<RepertoireContextProps | null>(
   null
@@ -88,6 +89,13 @@ export const RepertoireContextProvider: React.FC<
     return params.get("variantName");
   }, [location.search]);
 
+  const fenFromUrl = React.useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get("fen");
+  }, [location.search]);
+
+  const hasNavigatedToFen = useRef(false);
+
   const getInitialSelectedVariant = React.useCallback(
     (availableVariants: Variant[]): Variant | null => {
       if (availableVariants.length === 0) return null;
@@ -125,6 +133,7 @@ export const RepertoireContextProvider: React.FC<
   useEffect(() => {
     setOrientation(initialOrientation);
   }, [initialOrientation]);
+
   useEffect(() => {
     const loadComment = async () => {
       try {
@@ -237,6 +246,28 @@ export const RepertoireContextProvider: React.FC<
   }, [moveHistory, findBestVariantForNode]);
 
   useEffect(() => {
+    if (fenFromUrl) {
+      const allVariants = moveHistory.getVariants();
+      const foundMoveNode = findMoveNodeByFen(allVariants, fenFromUrl, variantNameFromUrl);
+
+      if (foundMoveNode) {
+        hasNavigatedToFen.current = true;
+        goToMove(foundMoveNode);
+        return;
+      }
+
+      if (allVariants.length > 0 && !hasNavigatedToFen.current) {
+        hasNavigatedToFen.current = true;
+        showAlert(
+          variantNameFromUrl
+            ? `FEN position not found in variant "${variantNameFromUrl}".`
+            : "FEN position not found in any variant.",
+          "warning"
+        );
+      }
+      return;
+    }
+
     setCurrentMove(moveHistory);
     updateVariants(moveHistory);
   }, [moveHistory]);
