@@ -25,11 +25,11 @@ const HelpInfo: React.FC<HelpInfoProps> = ({
   };
 
   return (
-    <div className="mb-4 p-4 rounded-lg">
+    <div className="w-full h-full p-4 rounded-lg border border-secondary bg-background">
       <div className="flex items-center justify-center space-x-2 mb-4">
         <button
           onClick={toggleVisibility}
-          className="p-2 bg-accent text-primary rounded-full hover:bg-yellow-500 transition-colors focus:outline-none"
+          className="p-2 bg-accent text-primary rounded-full hover:opacity-80 transition-colors focus:outline-none"
           aria-label="Toggle Available Moves"
         >
           {iconVisible ? (
@@ -38,7 +38,7 @@ const HelpInfo: React.FC<HelpInfoProps> = ({
             <ChevronDownIcon className="w-5 h-5" />
           )}
         </button>
-        <span className="text-base font-bold text-gray-200 dark:text-gray-300">
+        <span className="text-base font-bold text-textLight">
           Available Moves
         </span>
       </div>

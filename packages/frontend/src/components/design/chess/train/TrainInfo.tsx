@@ -55,22 +55,22 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
   };
 
   return (
-    <div className="shadow rounded-lg p-6 bg-gray-800">
+    <div className="w-full h-full rounded-lg border border-secondary bg-background p-4 sm:p-6">
       {lastTrainVariant && (
         <div className="mb-4">
-          <h2 className="text-lg font-semibold text-gray-200 dark:text-gray-300">Last Finished Variant</h2>
+          <h2 className="text-lg font-semibold text-textLight">Last Finished Variant</h2>
           <div className="flex justify-between items-center mt-2">
-            <span className="text-md text-gray-400 dark:text-gray-500">{lastTrainVariant.variant.fullName}</span>
+            <span className="text-md text-textDark">{lastTrainVariant.variant.fullName}</span>
             <div className="flex gap-2">
               <button
                 onClick={handleCopyPgn}
-                className="bg-accent text-primary px-3 py-1 rounded hover:bg-yellow-500 transition-colors"
+                className="bg-accent text-primary px-3 py-1 rounded hover:opacity-80 transition-colors"
               >
                 Copy PGN
               </button>
               <button
                 onClick={handleEditVariant}
-                className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors flex items-center gap-1"
+                className="bg-secondary text-textLight px-3 py-1 rounded hover:opacity-80 transition-colors flex items-center gap-1"
               >
                 <PencilIcon className="h-4 w-4" />
                 Edit
@@ -87,7 +87,7 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
             className="w-8 h-8 mr-2"
           />
         )}
-        <h3 className="text-xl font-bold text-gray-100 dark:text-gray-50">
+        <h3 className="text-xl font-bold text-textLight">
           {finishedTrain
             ? "Finished Training"
             : isYourTurn
@@ -96,17 +96,17 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
         </h3>
       </div>
       {!finishedTrain && (
-        <p className="text-gray-400 dark:text-gray-300 mb-4">
+        <p className="text-textDark mb-4">
           {isYourTurn
             ? "Play one of your allowed moves according to your repertoire."
             : "Wait for your opponent to play."}
         </p>
       )}
       <div className="mb-4">
-        <span className="text-sm text-gray-500 dark:text-gray-400">
+        <span className="text-sm text-textDark">
           {`${currentVariant} of ${totalVariants} variants`}
         </span>
-        <div className="w-full bg-gray-700 rounded-full h-2.5 dark:bg-gray-600 mt-1">
+        <div className="w-full bg-secondary rounded-full h-2.5 mt-1">
           <div
             className="bg-accent h-2.5 rounded-full"
             style={{ width: `${(currentVariant / totalVariants) * 100}%` }}
@@ -114,7 +114,7 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
         </div>
       </div>
       <div>
-        <h4 className="text-lg font-semibold text-gray-200 dark:text-gray-300 mb-2">
+        <h4 className="text-lg font-semibold text-textLight mb-2">
           Available Variants to Play
         </h4>
         <ul className="space-y-2">
@@ -122,7 +122,7 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
             <Disclosure key={index}>
               {({ open }) => (
                 <>
-                  <Disclosure.Button className="flex justify-between w-full px-4 py-2 text-left text-sm font-medium text-gray-100 dark:text-gray-200 bg-gray-700 dark:bg-gray-600 rounded-lg hover:bg-gray-600 dark:hover:bg-gray-500 focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75">
+                  <Disclosure.Button className="flex justify-between w-full px-4 py-2 text-left text-sm font-medium text-textLight bg-secondary rounded-lg hover:opacity-80 focus:outline-none focus-visible:ring focus-visible:ring-accent focus-visible:ring-opacity-75">
                     <span>{variant.variant.fullName}</span>
                     <ChevronUpIcon
                       className={`${
@@ -130,10 +130,10 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
                       } w-5 h-5 text-accent`}
                     />
                   </Disclosure.Button>
-                  <Disclosure.Panel className="px-4 pt-4 pb-2 text-sm text-gray-400 dark:text-gray-300">
+                  <Disclosure.Panel className="px-4 pt-4 pb-2 text-sm text-textDark">
                     <div className="flex flex-wrap gap-2">
                       {getMovementsFromVariant(variant, currentMoveNode).map((move, moveIndex) => (
-                        <span key={moveIndex} className="px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded">
+                        <span key={moveIndex} className="px-2 py-1 bg-background text-textLight rounded">
                           {move}
                         </span>
                       ))}

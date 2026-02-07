@@ -22,6 +22,7 @@ import { StockfishPanel } from "../../../components/design/stockfish/StockfishPa
 import { RepertoireInfo } from "../../../components/application/chess/board/RepertoireInfo";
 import { useFooterDispatch } from "../../../contexts/FooterContext";
 import { useKeyboardNavigation } from "../../../hooks/useKeyboardNavigation";
+import { RepertoireWorkspaceLayout } from "../shared/RepertoireWorkspaceLayout";
 
 type FooterSection = "variants" | "comments" | "statistics" | "stockfish";
 
@@ -147,34 +148,22 @@ const EditRepertoireViewContainer: React.FC = () => {
   }, []);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-12 w-full gap-4 bg-background text-textLight h-full">
-      <div className="col-span-12 sm:col-span-6  flex flex-col justify-center items-center">
-        <div className="flex justify-center w-full p-1 sm:p-4">
-          <h1 className="text-base sm:text-2xl font-bold">{repertoireName}</h1>
-        </div>
-        <div className="flex justify-center w-full sm:p-4 lg:max-h-[60vh] lg:max-w-[60vh]">
-          <BoardContainer />
-        </div>
-        <div className="flex justify-center w-full p-1 sm:p-4">
-          <BoardActionsContainer />
-        </div>
-      </div>
-
-      <div className="sm:hidden col-span-12 sm:col-span-6 flex flex-col items-start overflow-auto border border-secondary rounded bg-gray-800">
-        {panelSelected === "variants" && <VariantsInfo />}
-        {panelSelected === "comments" && <BoardCommentContainer />}
-        {panelSelected === "statistics" && (
-          <StatisticsPanel fen={chess.fen()} />
-        )}
-        {panelSelected === "stockfish" && (
-          <StockfishPanel fen={chess.fen()} numLines={3} />
-        )}
-      </div>
-
-      <div className="hidden sm:flex sm:col-span-6 flex-col items-start overflow-auto border border-secondary rounded bg-gray-800">
-        <RepertoireInfo />
-      </div>
-    </div>
+    <RepertoireWorkspaceLayout
+      title={repertoireName}
+      board={<BoardContainer />}
+      boardActions={<BoardActionsContainer />}
+      mobilePanel={
+        <>
+          {panelSelected === "variants" && <VariantsInfo />}
+          {panelSelected === "comments" && <BoardCommentContainer />}
+          {panelSelected === "statistics" && <StatisticsPanel fen={chess.fen()} />}
+          {panelSelected === "stockfish" && (
+            <StockfishPanel fen={chess.fen()} numLines={3} />
+          )}
+        </>
+      }
+      desktopPanel={<RepertoireInfo />}
+    />
   );
 };
 

@@ -19,6 +19,7 @@ import HelpInfo from "../../../components/design/chess/train/HelpInfo";
 import { CheckListIcon } from "../../../components/icons/CheckListIcon";
 import { ExamIcon } from "../../../components/icons/ExamIcon";
 import { useFooterDispatch } from "../../../contexts/FooterContext";
+import { RepertoireWorkspaceLayout } from "../shared/RepertoireWorkspaceLayout";
 
 const TrainRepertoireViewContainer: React.FC = () => {
   const [panelSelected, setPanelSelected] = React.useState<
@@ -118,6 +119,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
     trainVariants,
     chooseTrainVariantsToTrain,
     navigate,
+    location.search,
     repertoireId,
     variants,
   ]);
@@ -128,19 +130,19 @@ const TrainRepertoireViewContainer: React.FC = () => {
       {
         key: "info",
         label: "Train info",
-        icon: <InformationCircleIcon className="h-6 w-6 text-accent" />,
+        icon: <InformationCircleIcon className="h-6 w-6" />,
         onClick: () => setPanelSelected("info"),
       },
       {
         key: "trainComments",
         label: "Comments",
-        icon: <ChatBubbleLeftIcon className="h-6 w-6 text-accent" />,
+        icon: <ChatBubbleLeftIcon className="h-6 w-6" />,
         onClick: () => setPanelSelected("trainComments"),
       },
       {
         key: "help",
         label: "Help",
-        icon: <ClipboardDocumentIcon className="h-6 w-6 text-accent" />,
+        icon: <ClipboardDocumentIcon className="h-6 w-6" />,
         onClick: () => setPanelSelected("help"),
       },
     ];
@@ -157,31 +159,10 @@ const TrainRepertoireViewContainer: React.FC = () => {
     };
   }, [addIconFooter, removeIconFooter, setIsVisible]);
 
-  const renderPanelContent = useMemo(
+  const mobilePanelContent = useMemo(
     () => (
-      <div className="bg-gray-800 p-4 rounded shadow-md w-full h-full">
-        <div className="sm:hidden">
-          {panelSelected === "info" && (
-            <TrainInfo
-              currentMoveNode={currentMoveNode}
-              turn={turn}
-              isYourTurn={isYourTurn}
-              finishedTrain={finishedTrain}
-              trainVariants={trainVariants}
-              lastTrainVariant={lastTrainVariant}
-              repertoireId={repertoireId}
-            />
-          )}
-          {panelSelected === "help" && (
-            <HelpInfo allowedMoves={allowedMoves} isYourTurn={isYourTurn} />
-          )}
-          {panelSelected === "trainComments" && (
-            <HintInfo currentMoveNode={currentMoveNode} orientation={orientation} updateComment={updateComment} />
-          )}
-        </div>
-        <div className="hidden sm:flex flex-col space-y-4 h-full">
-          <div className="h-2/5"><HintInfo currentMoveNode={currentMoveNode} orientation={orientation} updateComment={updateComment} /></div>
-
+      <div className="w-full h-full p-4">
+        {panelSelected === "info" && (
           <TrainInfo
             currentMoveNode={currentMoveNode}
             turn={turn}
@@ -191,9 +172,17 @@ const TrainRepertoireViewContainer: React.FC = () => {
             lastTrainVariant={lastTrainVariant}
             repertoireId={repertoireId}
           />
-          
-          
-        </div>
+        )}
+        {panelSelected === "help" && (
+          <HelpInfo allowedMoves={allowedMoves} isYourTurn={isYourTurn} />
+        )}
+        {panelSelected === "trainComments" && (
+          <HintInfo
+            currentMoveNode={currentMoveNode}
+            orientation={orientation}
+            updateComment={updateComment}
+          />
+        )}
       </div>
     ),
     [
@@ -206,27 +195,52 @@ const TrainRepertoireViewContainer: React.FC = () => {
       lastTrainVariant,
       allowedMoves,
       repertoireId,
+      orientation,
+      updateComment,
+    ]
+  );
+
+  const desktopPanelContent = useMemo(
+    () => (
+      <div className="w-full h-full p-4 flex flex-col gap-4">
+        <div className="h-2/5 min-h-[200px]">
+          <HintInfo
+            currentMoveNode={currentMoveNode}
+            orientation={orientation}
+            updateComment={updateComment}
+          />
+        </div>
+        <TrainInfo
+          currentMoveNode={currentMoveNode}
+          turn={turn}
+          isYourTurn={isYourTurn}
+          finishedTrain={finishedTrain}
+          trainVariants={trainVariants}
+          lastTrainVariant={lastTrainVariant}
+          repertoireId={repertoireId}
+        />
+      </div>
+    ),
+    [
+      currentMoveNode,
+      orientation,
+      updateComment,
+      turn,
+      isYourTurn,
+      finishedTrain,
+      trainVariants,
+      lastTrainVariant,
+      repertoireId,
     ]
   );
 
   return (
-    <div className="container mx-auto p-1 sm:p-4 h-full bg-background text-textLight">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full">
-        <div className="flex flex-col items-center justify-center h-full">
-          <div className="flex justify-center mb-1 sm:mb-4">
-            <h5 className="text-base sm:text-xl font-bold text-textLight">
-              Training {repertoireName}
-            </h5>
-          </div>
-          <div className="flex justify-center w-full max-w-md">
-            <BoardContainer isTraining={true} />
-          </div>
-        </div>
-        <div className="flex flex-col items-start h-full overflow-auto border border-secondary rounded bg-gray-800">
-          {renderPanelContent}
-        </div>
-      </div>
-    </div>
+    <RepertoireWorkspaceLayout
+      title={`Training ${repertoireName}`}
+      board={<BoardContainer isTraining={true} />}
+      mobilePanel={mobilePanelContent}
+      desktopPanel={desktopPanelContent}
+    />
   );
 };
 
