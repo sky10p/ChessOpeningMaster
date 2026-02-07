@@ -61,7 +61,7 @@ export const HintInfo: React.FC<HintInfoProps> = ({
       }
     }
     setHints(comments);
-  }, [currentMoveNode]);
+  }, [currentMoveNode, orientation]);
 
   useEffect(() => {
     loadHints();
@@ -96,18 +96,18 @@ export const HintInfo: React.FC<HintInfoProps> = ({
   };
 
   return (
-    <div className="p-4 bg-gray-800 rounded shadow-md flex flex-col h-full">
+    <div className="p-4 bg-background rounded-lg border border-secondary flex flex-col h-full w-full">
       <div className="flex justify-between items-center mb-2">
-        <h6 className="text-lg font-semibold">Comments</h6>
+        <h6 className="text-lg font-semibold text-textLight">Comments</h6>
         <button
           onClick={handleUpdateComment}
-          className="px-3 py-1 bg-accent text-black rounded hover:bg-accent hover:opacity-80 text-sm"
+          className="px-3 py-1 bg-accent text-primary rounded hover:opacity-80 text-sm"
         >
           Update comment
         </button>
       </div>
       <Textarea
-        className="flex-grow p-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-accent overflow-auto"
+        className="flex-grow p-2 bg-secondary text-textLight rounded focus:outline-none focus:ring-2 focus:ring-accent overflow-auto"
         rows={10}
         value={hints.join("\n")}
         disabled
