@@ -2,6 +2,20 @@
 
 This directory contains reusable custom hooks for the Chess Opening Master application.
 
+## `useEffect` Guidance for Hook Authors
+
+Before adding a new effect, follow:
+- `src/doc/React-Effect-Data-Fetching-Guide.md`
+
+The project guide above is sufficient for routine work. Use the React docs only for occasional deep-dive alignment:
+- https://react.dev/learn/you-might-not-need-an-effect#fetching-data
+
+Quick rules:
+1. Do not use effects for derived state.
+2. Keep user-triggered logic in event handlers.
+3. Use effects only for external synchronization.
+4. For data fetching effects, include cleanup to avoid stale async updates.
+
 ## Available Hooks
 
 ### useFormState
