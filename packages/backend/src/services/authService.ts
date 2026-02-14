@@ -38,7 +38,7 @@ function comparePasswordHashes(storedHash: string, incomingHash: string): boolea
   if (storedBuffer.length !== incomingBuffer.length) {
     return false;
   }
-  return timingSafeEqual(Uint8Array.from(storedBuffer), Uint8Array.from(incomingBuffer));
+  return timingSafeEqual(storedBuffer as NodeJS.ArrayBufferView, incomingBuffer as NodeJS.ArrayBufferView);
 }
 
 function createPasswordSalt(): string {

@@ -6,6 +6,15 @@ import AdmZip from "adm-zip";
 
 const getUserFilter = (req: Request) => ({ userId: getRequestUserId(req) });
 
+type VariantInfoDocument = {
+  _id: ObjectId;
+  userId: string;
+  repertoireId: string;
+  variantName: string;
+  errors: number;
+  lastDate: Date;
+};
+
 export async function getRepertoires(req: Request, res: Response, next: NextFunction) {
   try {
     const db = getDB();
@@ -32,12 +41,12 @@ export async function getFullRepertoires(req: Request, res: Response, next: Next
     }
 
     const repertoireIds = repertoires.map((repertoire) => repertoire._id.toString());
-    const variantsInfo = await db
+    const variantsInfo = (await db
       .collection("variantsInfo")
       .find({ userId, repertoireId: { $in: repertoireIds } })
-      .toArray();
+      .toArray()) as VariantInfoDocument[];
 
-    const variantsInfoByRepertoireId = new Map<string, typeof variantsInfo>();
+    const variantsInfoByRepertoireId = new Map<string, VariantInfoDocument[]>();
     variantsInfo.forEach((variantInfo) => {
       const currentVariantsInfo = variantsInfoByRepertoireId.get(variantInfo.repertoireId) || [];
       currentVariantsInfo.push(variantInfo);
