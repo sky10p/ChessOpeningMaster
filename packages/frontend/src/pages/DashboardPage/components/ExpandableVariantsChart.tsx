@@ -73,8 +73,16 @@ export const ExpandableVariantsChart: React.FC<ExpandableVariantsChartProps> = (
             
             return (
               <div key={item.opening} className="border border-gray-700 rounded-lg overflow-hidden">
-                <button
+                <div
+                  role="button"
+                  tabIndex={0}
                   onClick={() => toggleOpening(item.opening)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      toggleOpening(item.opening);
+                    }
+                  }}
                   className="w-full px-3 py-2 flex items-center justify-between hover:bg-gray-800 transition-colors text-left"
                 >
                   <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -110,7 +118,7 @@ export const ExpandableVariantsChart: React.FC<ExpandableVariantsChartProps> = (
                       </div>
                     )}
                   </div>
-                </button>
+                </div>
                 
                 {isExpanded && (
                   <div className="px-3 py-2 bg-gray-800 border-t border-gray-700">
