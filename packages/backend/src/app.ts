@@ -15,11 +15,13 @@ const app = express();
 const port = process.env.BACKEND_PORT || 3001;
 const bodyParserLimit = process.env.BODY_PARSER_LIMIT || "100mb";
 const defaultCorsOrigins = ["http://localhost:3002", "http://127.0.0.1:3002"];
+const normalizeOrigin = (origin: string) => origin.trim().replace(/\/$/, "");
 const configuredCorsOrigins = (process.env.CORS_ORIGIN || "")
   .split(",")
-  .map((origin) => origin.trim())
+  .map((origin) => normalizeOrigin(origin))
   .filter(Boolean);
 const allowedCorsOrigins = configuredCorsOrigins.length > 0 ? configuredCorsOrigins : defaultCorsOrigins;
+const allowAllCorsOrigins = allowedCorsOrigins.includes("*");
 
 app.use(
   express.json({
@@ -40,7 +42,10 @@ app.use(
       if (!origin) {
         return callback(null, true);
       }
-      if (origin && allowedCorsOrigins.includes(origin)) {
+      if (allowAllCorsOrigins) {
+        return callback(null, true);
+      }
+      if (allowedCorsOrigins.includes(normalizeOrigin(origin))) {
         return callback(null, true);
       }
       return callback(new Error("Not allowed by CORS"));
