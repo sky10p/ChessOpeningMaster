@@ -1,15 +1,16 @@
 import { StudyGroup, Study, StudyEntry, StudySession } from "../../pages/StudiesPage/models";
 import { API_URL } from "../constants";
+import { apiFetch } from "../apiClient";
 
 
 export async function fetchStudyGroups(): Promise<StudyGroup[]> {
-  const res = await fetch(`${API_URL}/studies`);
+  const res = await apiFetch(`${API_URL}/studies`);
   const data = (await res.json()) as Array<{ _id: string; name: string; studies?: Study[] }>;
   return data.map(({ _id, name, studies }) => ({ id: _id, name, studies }));
 }
 
 export async function createStudyGroup(name: string): Promise<StudyGroup> {
-  const res = await fetch(`${API_URL}/studies`, {
+  const res = await apiFetch(`${API_URL}/studies`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name }),
@@ -18,7 +19,7 @@ export async function createStudyGroup(name: string): Promise<StudyGroup> {
 }
 
 export async function renameStudyGroup(id: string, name: string): Promise<void> {
-  await fetch(`${API_URL}/studies/${id}/name`, {
+  await apiFetch(`${API_URL}/studies/${id}/name`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name }),
@@ -26,13 +27,13 @@ export async function renameStudyGroup(id: string, name: string): Promise<void> 
 }
 
 export async function deleteStudyGroup(id: string): Promise<void> {
-  await fetch(`${API_URL}/studies/${id}`, {
+  await apiFetch(`${API_URL}/studies/${id}`, {
     method: "DELETE",
   });
 }
 
 export async function createStudy(groupId: string, name: string, tags: string[]): Promise<void> {
-  await fetch(`${API_URL}/studies/${groupId}/studies`, {
+  await apiFetch(`${API_URL}/studies/${groupId}/studies`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name, tags }),
@@ -43,7 +44,7 @@ export async function fetchStudy(
   groupId: string,
   studyId: string
 ): Promise<Study> {
-  const res = await fetch(`${API_URL}/studies/${groupId}/studies/${studyId}`);
+  const res = await apiFetch(`${API_URL}/studies/${groupId}/studies/${studyId}`);
   return res.json();
 }
 
@@ -51,7 +52,7 @@ export async function deleteStudy(
   groupId: string,
   studyId: string
 ): Promise<void> {
-  await fetch(
+  await apiFetch(
     `${API_URL}/studies/${groupId}/studies/${studyId}`,
     { method: 'DELETE' }
   );
@@ -62,7 +63,7 @@ export async function addStudyEntry(
   studyId: string,
   entry: Omit<StudyEntry, 'id'>
 ): Promise<StudyEntry> {
-  const res = await fetch(
+  const res = await apiFetch(
     `${API_URL}/studies/${groupId}/studies/${studyId}/entries`,
     {
       method: 'POST',
@@ -79,7 +80,7 @@ export async function editStudyEntry(
   entryId: string,
   data: Omit<StudyEntry, 'id'>
 ): Promise<void> {
-  await fetch(
+  await apiFetch(
     `${API_URL}/studies/${groupId}/studies/${studyId}/entries/${entryId}`,
     {
       method: 'PUT',
@@ -94,7 +95,7 @@ export async function deleteStudyEntry(
   studyId: string,
   entryId: string
 ): Promise<void> {
-  await fetch(
+  await apiFetch(
     `${API_URL}/studies/${groupId}/studies/${studyId}/entries/${entryId}`,
     { method: 'DELETE' }
   );
@@ -105,7 +106,7 @@ export async function addStudySession(
   studyId: string,
   session: Omit<StudySession, 'id'>
 ): Promise<StudySession> {
-  const res = await fetch(
+  const res = await apiFetch(
     `${API_URL}/studies/${groupId}/studies/${studyId}/sessions`,
     {
       method: 'POST',
@@ -121,7 +122,7 @@ export async function deleteStudySession(
   studyId: string,
   sessionId: string
 ): Promise<void> {
-  await fetch(
+  await apiFetch(
     `${API_URL}/studies/${groupId}/studies/${studyId}/sessions/${sessionId}`,
     { method: 'DELETE' }
   );

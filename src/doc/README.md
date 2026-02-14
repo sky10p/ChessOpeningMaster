@@ -32,6 +32,20 @@ This directory contains comprehensive documentation for the Chess Opening Master
 - Dependency and cleanup requirements
 - Testing checklist for async effects
 
+### 🔐 [User Auth Backend](User-Auth-Backend.md)
+**Required for backend features that read or write user data**
+- Auth endpoint behavior and lifecycle
+- Token and cookie model
+- Request user scoping rules for controllers
+- Migration and default-user compatibility behavior
+
+### 🧭 [User Auth Frontend](User-Auth-Frontend.md)
+**Required for frontend features that depend on authentication state**
+- App bootstrap auth/session flow
+- Login/register/default-user UX behavior
+- Route gating and logout behavior
+- API repository usage and credential handling
+
 ### 🔧 [Troubleshooting Guide](Troubleshooting-Guide.md)
 **First stop when encountering issues**
 - Common TypeScript compilation errors
@@ -45,6 +59,7 @@ This directory contains comprehensive documentation for the Chess Opening Master
 1. Start with [AGENTS.md](../AGENTS.md) for project overview
 2. Read [RepertoireContext Architecture](RepertoireContext-Architecture.md) for core system understanding
 3. Review [Variant Selection Logic](Variant-Selection-Logic.md) for chess-specific behavior
+4. Read [User Auth Backend](User-Auth-Backend.md) and [User Auth Frontend](User-Auth-Frontend.md) before changing user-related logic
 
 ### Debugging Issues
 1. Check [Troubleshooting Guide](Troubleshooting-Guide.md) for common problems

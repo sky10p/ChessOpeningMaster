@@ -14,7 +14,6 @@ import {
 import { normalizeDate } from '../../utils/dateUtils';
 import { extractId } from '../../utils/idUtils';
 import * as mongo from '../../db/mongo';
-import { Variant } from '@chess-opening-master/common';
 import { getRepertoireName } from '../repertoireService';
 import { getAllVariants } from '../variantsService';
 import { NewVariantPath, StudiedVariantPath, StudyPath } from '@chess-opening-master/common/src/types/Path';
@@ -59,6 +58,8 @@ jest.mock('../repertoireService', () => ({
 }));
 
 describe('pathService', () => {
+type Variant = { fullName: string; moves: unknown[]; name: string; differentMoves: string };
+
   interface MockDB {
     collection: jest.Mock;
     find: jest.Mock;
@@ -110,7 +111,7 @@ describe('pathService', () => {
         return mockDB;
       });
 
-      const result = await getActiveVariants();
+      const result = await getActiveVariants("user-1");
       
       expect(result).toEqual([]);
       expect(mockDB.collection).toHaveBeenCalledWith('variantsInfo');
@@ -158,7 +159,7 @@ describe('pathService', () => {
         return mockDB;
       });
 
-      const result = await getActiveVariants();
+      const result = await getActiveVariants("user-1");
       
       expect(result).toHaveLength(1);
       expect(result[0].variantName).toBe('Active Variant');
@@ -197,7 +198,7 @@ describe('pathService', () => {
       // Mock normalizeDate to return the expected format in tests
       (normalizeDate as jest.Mock).mockReturnValue('2023-01-01T00:00:00Z');
 
-      const result = await getActiveVariants();
+      const result = await getActiveVariants("user-1");
       
       expect(result).toHaveLength(1);
       expect(result[0]._id).toEqual({ $oid: '111111111111111111111111' });
@@ -285,7 +286,7 @@ describe('pathService', () => {
         return mockDB;
       });
 
-      const result = await getStudyGroups();
+      const result = await getStudyGroups("user-1");
       
       expect(result).toEqual([]);
       expect(mockDB.collection).toHaveBeenCalledWith('studies');
@@ -336,7 +337,7 @@ describe('pathService', () => {
         return mockDB;
       });
 
-      const result = await getStudyGroups();
+      const result = await getStudyGroups("user-1");
       
       expect(result).toHaveLength(2);
       expect(result[0].name).toBe('Study Group 1');
@@ -366,7 +367,7 @@ describe('pathService', () => {
         return mockDB;
       });
 
-      const result = await getStudyGroups();
+      const result = await getStudyGroups("user-1");
       
       expect(result).toHaveLength(1);
       expect(result[0].name).toBe('Unnamed Study Group');
@@ -470,7 +471,7 @@ describe('pathService', () => {
 
       (getRepertoireName as jest.Mock).mockResolvedValue('Test Repertoire');
 
-      const result = await createVariantPath(variant);
+      const result = await createVariantPath("user-1", variant);
       
       expect(result.type).toBe('variant');
       expect(result.id).toBe('111111111111111111111111');
@@ -529,7 +530,7 @@ describe('pathService', () => {
 
       (getRepertoireName as jest.Mock).mockResolvedValue('Test Repertoire');
 
-      const result = await createNewVariantPath(mockVariant, repertoireId);
+      const result = await createNewVariantPath("user-1", mockVariant, repertoireId);
       
       expect(result.type).toBe('newVariant');
       expect(result.repertoireId).toBe(repertoireId);
@@ -560,7 +561,7 @@ describe('pathService', () => {
         return mockDB;
       });
 
-      const result = await determineBestPath();
+      const result = await determineBestPath("user-1");
       
       expect(result).toEqual({ message: 'No variants or studies to review.' });
     });
@@ -594,7 +595,7 @@ describe('pathService', () => {
         return mockDB;
       });
 
-      const result = await determineBestPath();
+      const result = await determineBestPath("user-1");
       
       // Use type assertion to safely access properties
       const variantPath = result as StudiedVariantPath;
@@ -631,7 +632,7 @@ describe('pathService', () => {
         return mockDB;
       });
 
-      const result = await determineBestPath();
+      const result = await determineBestPath("user-1");
       
       // Use type assertion to safely access properties
       const newVariantPath = result as NewVariantPath;
@@ -674,7 +675,7 @@ describe('pathService', () => {
         return mockDB;
       });
 
-      const result = await determineBestPath();
+      const result = await determineBestPath("user-1");
       
       // Use type assertion to safely access properties
       const variantPath = result as StudiedVariantPath;
@@ -724,7 +725,7 @@ describe('pathService', () => {
       });
 
       try {
-        const result = await determineBestPath();
+        const result = await determineBestPath("user-1");
         
         // Use type assertion to safely access properties
         const studyPath = result as StudyPath;
@@ -770,7 +771,7 @@ describe('pathService', () => {
       });
 
       try {
-        const result = await determineBestPath();
+        const result = await determineBestPath("user-1");
         
         // Should fall back to error variant even though probability didn't match
         // Use type assertion to safely access properties
@@ -827,7 +828,7 @@ describe('pathService', () => {
       });
 
       try {
-        const result = await determineBestPath();
+        const result = await determineBestPath("user-1");
         
         // Use type assertion to safely access properties
         const newVariantPath = result as NewVariantPath;
@@ -878,7 +879,7 @@ describe('pathService', () => {
       });
 
       try {
-        const result = await determineBestPath();
+        const result = await determineBestPath("user-1");
         
         // Use type assertion to safely access properties
         const newVariantPath = result as NewVariantPath;

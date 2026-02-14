@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { getPositionComment, updatePositionComment, getPositionCommentsByFens } from "../services/positionCommentService";
+import { getRequestUserId } from "../utils/requestUser";
 
 export const getComment = async (req: Request, res: Response) => {
   try {
@@ -9,7 +10,7 @@ export const getComment = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "FEN position is required" });
     }
     
-    const comment = await getPositionComment(fen);
+    const comment = await getPositionComment(getRequestUserId(req), fen);
     
     if (comment === null) {
       return res.status(404).json({ error: "No comment found for position" });
@@ -34,7 +35,7 @@ export const updateComment = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Comment is required" });
     }
     
-    await updatePositionComment(fen, comment);
+    await updatePositionComment(getRequestUserId(req), fen, comment);
     
     return res.json({ fen, comment, message: "Comment updated successfully" });
   } catch (error) {
@@ -52,7 +53,7 @@ export const getCommentsByFens = async (req: Request, res: Response) => {
     
     const fensArray = Array.isArray(fens) ? fens as string[] : [fens as string];
     
-    const comments = await getPositionCommentsByFens(fensArray);
+    const comments = await getPositionCommentsByFens(getRequestUserId(req), fensArray);
     
     return res.json(comments);
   } catch (error) {

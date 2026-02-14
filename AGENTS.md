@@ -195,6 +195,32 @@ mongodb://localhost:27017/chess_opening_master
 
 ### Additional Documentation
 - `src/doc/repertoire-variant-sync.md` - Existing variant synchronization documentation
+- [User Auth Backend](src/doc/User-Auth-Backend.md) - Backend auth lifecycle, token model, and user-scoping rules
+- [User Auth Frontend](src/doc/User-Auth-Frontend.md) - Frontend auth bootstrap, route gating, and auth UX behavior
+
+## User Authentication and User Scope (Critical for Agents)
+
+Before implementing any feature that reads or writes domain data, follow these rules.
+
+### Backend rules
+- `/auth` endpoints are public and mounted before `authMiddleware`.
+- All domain routes are behind `authMiddleware`; user identity is attached to `req.userId`.
+- Controllers must read user via `getRequestUserId(req)` and scope all DB operations by `userId`.
+- New persisted documents must include `userId`.
+- If a new query is frequently filtered or uniquely constrained per user, include `userId` in indexes.
+- Keep compatibility with startup migration behavior (`ensureDefaultUserAndMigrateData`) for legacy data.
+
+### Frontend rules
+- Auth bootstrap state is owned by `App.tsx` (`getAuthConfig` + `getAuthSession`).
+- When auth is enabled and session is not authenticated, only auth routes should be reachable.
+- Use repository layer (`src/repository/auth/auth.ts`) for auth requests instead of raw `fetch`.
+- Preserve cookie-auth behavior by keeping credentialed requests.
+- Keep error handling aligned with `AuthRequestError` types (`authentication`, `network`, `server`, `unknown`).
+
+### Default-user mode
+- Controlled by backend flags (`ENABLE_AUTH`, `ALLOW_DEFAULT_USER`).
+- Frontend login page can switch to passwordless default-user login only when backend allows it.
+- Do not assume default-user mode in new features; always support normal authenticated users first.
 
 ## Recent Major Changes (Important for Agents)
 

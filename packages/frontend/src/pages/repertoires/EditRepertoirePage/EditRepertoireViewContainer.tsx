@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useRepertoireContext } from "../../../contexts/RepertoireContext";
 import { useHeaderDispatch } from "../../../contexts/HeaderContext";
 import { useMenuContext } from "../../../contexts/MenuContext";
-import { API_URL } from "../../../repository/constants";
+import { downloadRepertoireJson } from "../../../repository/repertoires/repertoires";
 import BoardContainer from "../../../components/application/chess/board/BoardContainer";
 import BoardActionsContainer from "../../../components/application/chess/board/BoardActionsContainer";
 import {
@@ -23,6 +23,7 @@ import { RepertoireInfo } from "../../../components/application/chess/board/Repe
 import { useFooterDispatch } from "../../../contexts/FooterContext";
 import { useKeyboardNavigation } from "../../../hooks/useKeyboardNavigation";
 import { RepertoireWorkspaceLayout } from "../shared/RepertoireWorkspaceLayout";
+import { useAlertContext } from "../../../contexts/AlertContext";
 
 type FooterSection = "variants" | "comments" | "statistics" | "stockfish";
 
@@ -45,6 +46,7 @@ const EditRepertoireViewContainer: React.FC = () => {
   } = useRepertoireContext();
   
   const { toggleMenu } = useMenuContext();
+  const { showAlert } = useAlertContext();
   const { addIcon: addIconHeader, removeIcon: removeIconHeader } =
     useHeaderDispatch();
   const {
@@ -78,8 +80,12 @@ const EditRepertoireViewContainer: React.FC = () => {
       },
       {
         name: "Download JSON",
-        action: () => {
-          window.open(`${API_URL}/repertoires/${repertoireId}/download`);
+        action: async () => {
+          try {
+            await downloadRepertoireJson(repertoireId, repertoireName);
+          } catch {
+            showAlert("Unable to download repertoire for current user.", "error");
+          }
         },
       },
     ]);

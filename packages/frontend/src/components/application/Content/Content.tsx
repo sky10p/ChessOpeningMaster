@@ -7,23 +7,40 @@ import { MainContainer } from "../../design/layouts/MainContainer";
 import { DashboardPage } from "../../../pages/DashboardPage/DashboardPage";
 import PathPage from "../../../pages/PathPage/PathPage";
 import StudiesPage from "../../../pages/StudiesPage/StudiesPage";
+import LoginPage from "../../../pages/auth/LoginPage";
+import RegisterPage from "../../../pages/auth/RegisterPage";
 
-const Content = () => {
+interface ContentProps {
+  authEnabled: boolean;
+  authenticated: boolean;
+  allowDefaultUser: boolean;
+  onAuthenticated: () => void;
+}
+
+const Content: React.FC<ContentProps> = ({ authEnabled, authenticated, allowDefaultUser, onAuthenticated }) => {
+  if (authEnabled && !authenticated) {
+    return (
+      <MainContainer>
+        <Routes>
+          <Route path="/login" element={<LoginPage allowDefaultUser={allowDefaultUser} onAuthenticated={onAuthenticated} />} />
+          <Route path="/register" element={<RegisterPage onAuthenticated={onAuthenticated} />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </MainContainer>
+    );
+  }
+
   return (
     <MainContainer>
       <Routes>
         <Route path="/create-repertoire" element={<CreateRepertoire />} />
         <Route path="/edit-repertoire" element={<div>Edit repertoire</div>} />
-        <Route
-          path="/remove-repertoire"
-          element={<div>Delete repertoire</div>}
-        />
+        <Route path="/remove-repertoire" element={<div>Delete repertoire</div>} />
         <Route path="/repertoire/:id" element={<EditRepertoirePage />} />
         <Route path="/repertoire/train/:id" element={<TrainRepertoirePage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/studies" element={<StudiesPage />} />
         <Route path="/path" element={<PathPage />} />
-
         <Route path="/" element={<Navigate to="/dashboard" />} />
       </Routes>
     </MainContainer>

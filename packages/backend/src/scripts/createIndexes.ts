@@ -1,4 +1,5 @@
 import { connectDB, getDB } from "../db/mongo";
+import { ensureDatabaseIndexes } from "../db/indexes";
 
 const createIndexes = async () => {
   try {
@@ -6,8 +7,8 @@ const createIndexes = async () => {
     await connectDB();
     const db = getDB();
     
-    console.log("Creating index for positions collection...");
-    await db.collection("positions").createIndex({ fen: 1 }, { unique: true });
+    console.log("Creating database indexes...");
+    await ensureDatabaseIndexes(db);
     
     console.log("Indexes created successfully!");
     process.exit(0);

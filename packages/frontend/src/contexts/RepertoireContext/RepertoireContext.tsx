@@ -1,5 +1,5 @@
 import { Chess, Move } from "chess.js";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { MoveVariantNode } from "../../models/VariantNode";
 import { Variant } from "../../models/chess.models";
@@ -20,6 +20,7 @@ import {
   RepertoireContextProps,
   RepertoireContextProviderProps,
 } from "./types";
+import { buildFenNodeIndex, normalizeFen } from "./utils";
 
 const RepertoireContext = React.createContext<RepertoireContextProps | null>(
   null
@@ -88,6 +89,21 @@ export const RepertoireContextProvider: React.FC<
     return params.get("variantName");
   }, [location.search]);
 
+  const fenFromUrl = React.useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get("fen");
+  }, [location.search]);
+
+  const handledFenNavigationKey = useRef<string | null>(null);
+  const fenNavigationKey = React.useMemo(
+    () => `${variantNameFromUrl ?? ""}|${fenFromUrl ?? ""}`,
+    [variantNameFromUrl, fenFromUrl]
+  );
+
+  const fenNodeIndex = React.useMemo(() => {
+    return buildFenNodeIndex(moveHistory.getVariants(), variantNameFromUrl);
+  }, [moveHistory, variantNameFromUrl]);
+
   const getInitialSelectedVariant = React.useCallback(
     (availableVariants: Variant[]): Variant | null => {
       if (availableVariants.length === 0) return null;
@@ -125,6 +141,7 @@ export const RepertoireContextProvider: React.FC<
   useEffect(() => {
     setOrientation(initialOrientation);
   }, [initialOrientation]);
+
   useEffect(() => {
     const loadComment = async () => {
       try {
@@ -189,7 +206,7 @@ export const RepertoireContextProvider: React.FC<
     return currentMove.children.find((child) => child.getMove().san === san);
   };
 
-  const buildMovePath = (moveNode: MoveVariantNode): Move[] => {
+  const buildMovePath = useCallback((moveNode: MoveVariantNode): Move[] => {
     const moves: Move[] = [];
     let currentNode = moveNode;
     while (currentNode.parent !== null) {
@@ -197,7 +214,7 @@ export const RepertoireContextProvider: React.FC<
       currentNode = currentNode.parent;
     }
     return moves.reverse();
-  };
+  }, []);
 
   const markChanges = () => setHasChanges(true);
 
@@ -226,7 +243,7 @@ export const RepertoireContextProvider: React.FC<
     if (compatibleVariant) return compatibleVariant;
 
     return getInitialSelectedVariant(variants);
-  }, [selectedVariant, currentMove, getInitialSelectedVariant, isVariantCompatibleWithPath]);
+  }, [selectedVariant, currentMove, getInitialSelectedVariant, isVariantCompatibleWithPath, buildMovePath]);
 
   const updateVariants = useCallback((targetNode?: MoveVariantNode) => {
     const newVariants = moveHistory.getVariants();
@@ -236,10 +253,68 @@ export const RepertoireContextProvider: React.FC<
     setSelectedVariant(bestVariant);
   }, [moveHistory, findBestVariantForNode]);
 
+  const goToMove = useCallback((moveNode: MoveVariantNode) => {
+    const newChess = new Chess();
+    const moves = buildMovePath(moveNode);
+    moves.forEach((move) => newChess.move(move));
+    setChess(newChess);
+    setCurrentMove(moveNode);
+    updateVariants(moveNode);
+  }, [buildMovePath, updateVariants]);
+
   useEffect(() => {
+    handledFenNavigationKey.current = null;
+  }, [fenNavigationKey]);
+
+  useEffect(() => {
+    if (fenFromUrl) {
+      return;
+    }
+
     setCurrentMove(moveHistory);
-    updateVariants(moveHistory);
-  }, [moveHistory]);
+    const allVariants = moveHistory.getVariants();
+    setVariants(allVariants);
+    setSelectedVariant(getInitialSelectedVariant(allVariants));
+  }, [fenFromUrl, moveHistory, getInitialSelectedVariant]);
+
+  useEffect(() => {
+    if (!fenFromUrl) {
+      return;
+    }
+
+    if (handledFenNavigationKey.current === fenNavigationKey) {
+      return;
+    }
+
+    const allVariants = moveHistory.getVariants();
+    if (allVariants.length === 0) {
+      return;
+    }
+
+    handledFenNavigationKey.current = fenNavigationKey;
+
+    const foundMoveNode = fenNodeIndex.get(normalizeFen(fenFromUrl));
+
+    if (foundMoveNode) {
+      goToMove(foundMoveNode);
+      return;
+    }
+
+    showAlert(
+      variantNameFromUrl
+        ? `FEN position not found in variant "${variantNameFromUrl}".`
+        : "FEN position not found in any variant.",
+      "warning"
+    );
+  }, [
+    fenFromUrl,
+    moveHistory,
+    variantNameFromUrl,
+    showAlert,
+    fenNodeIndex,
+    fenNavigationKey,
+    goToMove,
+  ]);
 
   const initBoard = () => {
     const newChess = new Chess();
@@ -331,14 +406,6 @@ export const RepertoireContextProvider: React.FC<
 
   const hasPrev = () => {
     return !!currentMove.parent;
-  };
-  const goToMove = (moveNode: MoveVariantNode) => {
-    const newChess = new Chess();
-    const moves = buildMovePath(moveNode);
-    moves.forEach((move) => newChess.move(move));
-    setChess(newChess);
-    setCurrentMove(moveNode);
-    updateVariants(moveNode);
   };
   const changeNameMove = (moveNode: MoveVariantNode, newName: string) => {
     moveNode.variantName = newName === "" ? undefined : newName;

@@ -42,7 +42,8 @@ describe("positions repository", () => {
       const result = await getPositionComment(testFen);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        `${API_URL}/positions/${encodedFen}`
+        `${API_URL}/positions/${encodedFen}`,
+        { credentials: "include" }
       );
       expect(result).toBe(mockComment);
     });
@@ -57,7 +58,8 @@ describe("positions repository", () => {
       const result = await getPositionComment(testFen);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        `${API_URL}/positions/${encodedFen}`
+        `${API_URL}/positions/${encodedFen}`,
+        { credentials: "include" }
       );
       expect(result).toBeNull();
     });
@@ -72,7 +74,8 @@ describe("positions repository", () => {
       const result = await getPositionComment(testFen);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        `${API_URL}/positions/${encodedFen}`
+        `${API_URL}/positions/${encodedFen}`,
+        { credentials: "include" }
       );
       expect(result).toBeNull();
       expect(console.error).toHaveBeenCalledWith(
@@ -88,7 +91,8 @@ describe("positions repository", () => {
       const result = await getPositionComment(testFen);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        `${API_URL}/positions/${encodedFen}`
+        `${API_URL}/positions/${encodedFen}`,
+        { credentials: "include" }
       );
       expect(result).toBeNull();
       expect(console.error).toHaveBeenCalledWith(
@@ -108,7 +112,8 @@ describe("positions repository", () => {
       const result = await getPositionComment(testFen);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        `${API_URL}/positions/${encodedFen}`
+        `${API_URL}/positions/${encodedFen}`,
+        { credentials: "include" }
       );
       expect(result).toBeNull();
       expect(console.error).toHaveBeenCalledWith(
@@ -132,7 +137,8 @@ describe("positions repository", () => {
       await getPositionComment(fenWithSpaces);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        `${API_URL}/positions/${expectedEncodedFen}`
+        `${API_URL}/positions/${expectedEncodedFen}`,
+        { credentials: "include" }
       );
     });
 
@@ -173,6 +179,7 @@ describe("positions repository", () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ comment: testComment }),
+          credentials: "include",
         }
       );
     });
@@ -341,7 +348,9 @@ describe("positions repository", () => {
       mockFetch.mockResolvedValue(mockResponse as Response);      const result = await getCommentsByFens(fens);
 
       const expectedUrl = createExpectedUrl(fens);
-      expect(mockFetch).toHaveBeenCalledWith(expectedUrl);
+      expect(mockFetch).toHaveBeenCalledWith(expectedUrl, {
+        credentials: "include",
+      });
       expect(result).toEqual(mockComments);
     });it("should return empty object when no FENs are provided", async () => {
       const result = await getCommentsByFens([]);
@@ -361,7 +370,9 @@ describe("positions repository", () => {
       mockFetch.mockResolvedValue(mockResponse as Response);      const result = await getCommentsByFens(fens);
 
       const expectedUrl = createExpectedUrl(fens);
-      expect(mockFetch).toHaveBeenCalledWith(expectedUrl);
+      expect(mockFetch).toHaveBeenCalledWith(expectedUrl, {
+        credentials: "include",
+      });
       expect(result).toEqual({});
     });    it("should handle network errors gracefully", async () => {
       const networkError = new Error("Network error");
@@ -417,7 +428,9 @@ describe("positions repository", () => {
       });
       mockFetch.mockResolvedValue(mockResponse as Response);      const result = await getCommentsByFens(testFens);
 
-      expect(mockFetch).toHaveBeenCalledWith(createExpectedUrl(testFens));
+      expect(mockFetch).toHaveBeenCalledWith(createExpectedUrl(testFens), {
+        credentials: "include",
+      });
       expect(result).toEqual(mockCommentsMap);
     });
 
@@ -434,7 +447,9 @@ describe("positions repository", () => {
       });
       mockFetch.mockResolvedValue(mockResponse as Response);      const result = await getCommentsByFens(singleFen);
 
-      expect(mockFetch).toHaveBeenCalledWith(createExpectedUrl(singleFen));
+      expect(mockFetch).toHaveBeenCalledWith(createExpectedUrl(singleFen), {
+        credentials: "include",
+      });
       expect(result).toEqual(mockCommentsMap);
     });    it("should handle empty FENs array", async () => {
       const result = await getCommentsByFens([]);
@@ -501,7 +516,9 @@ describe("positions repository", () => {
       mockFetch.mockResolvedValue(mockResponse as Response);
 
       await getCommentsByFens(fensWithSpaces);      const expectedUrl = createExpectedUrl(fensWithSpaces);
-      expect(mockFetch).toHaveBeenCalledWith(expectedUrl);
+      expect(mockFetch).toHaveBeenCalledWith(expectedUrl, {
+        credentials: "include",
+      });
     });    it("should handle malformed JSON response", async () => {
       const mockResponse = createMockResponse({
         ok: true,
@@ -534,7 +551,9 @@ describe("positions repository", () => {
       mockFetch.mockResolvedValue(mockResponse as Response);      const result = await getCommentsByFens(duplicateFens);
 
       const expectedUrl = createExpectedUrl(duplicateFens);
-      expect(mockFetch).toHaveBeenCalledWith(expectedUrl);
+      expect(mockFetch).toHaveBeenCalledWith(expectedUrl, {
+        credentials: "include",
+      });
       expect(result).toEqual(mockCommentsMap);
     });
   });

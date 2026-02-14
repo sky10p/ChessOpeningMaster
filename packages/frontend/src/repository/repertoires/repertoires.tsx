@@ -1,20 +1,85 @@
 import { BoardOrientation, IMoveNode, IRepertoireDashboard } from "@chess-opening-master/common";
 import { API_URL } from "../constants";
+import { apiFetch } from "../apiClient";
+
+const parseResponsePayload = async (response: Response) => {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+};
+
+const parseErrorMessage = (payload: unknown, fallback: string) => {
+  if (payload && typeof payload === "object" && "message" in payload) {
+    const message = (payload as { message?: unknown }).message;
+    if (typeof message === "string" && message.length > 0) {
+      return message;
+    }
+  }
+  return fallback;
+};
+
+const parseDownloadFileName = (response: Response, fallback: string): string => {
+  const disposition = response.headers.get("content-disposition");
+  if (!disposition) {
+    return fallback;
+  }
+
+  const utfMatch = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+  if (utfMatch?.[1]) {
+    return decodeURIComponent(utfMatch[1]);
+  }
+
+  const plainMatch = disposition.match(/filename="?([^";]+)"?/i);
+  if (plainMatch?.[1]) {
+    return plainMatch[1];
+  }
+
+  return fallback;
+};
+
+const triggerFileDownload = (blob: Blob, fileName: string): void => {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  link.click();
+  URL.revokeObjectURL(url);
+};
 
 export const getRepertoires = async () => {
-  const response = await fetch(`${API_URL}/repertoires`);
-  const data = await response.json();
+  const response = await apiFetch(`${API_URL}/repertoires`);
+  const data = await parseResponsePayload(response);
+
+  if (!response.ok) {
+    throw new Error(parseErrorMessage(data, "Unable to load repertoires"));
+  }
+
+  if (!Array.isArray(data)) {
+    throw new Error("Invalid repertoires response");
+  }
+
   return data;
 };
 
 export const getFullInfoRepertoires = async (): Promise<IRepertoireDashboard[]> => {
-  const response = await fetch(`${API_URL}/repertoires/full`);
-  const data = await response.json();
+  const response = await apiFetch(`${API_URL}/repertoires/full`);
+  const data = await parseResponsePayload(response);
+
+  if (!response.ok) {
+    throw new Error(parseErrorMessage(data, "Unable to load repertoires"));
+  }
+
+  if (!Array.isArray(data)) {
+    throw new Error("Invalid repertoires response");
+  }
+
   return data;
 }
 
 export const getRepertoire = async (id: string) => {
-  const response = await fetch(`${API_URL}/repertoires/${id}`);
+  const response = await apiFetch(`${API_URL}/repertoires/${id}`);
   if (!response.ok) {
     const message = await response.text();
     throw new Error(message || `Request failed with status ${response.status}`);
@@ -27,7 +92,7 @@ export const getRepertoire = async (id: string) => {
 };
 
 export const createRepertoire = async (nameRepertory: string, moveNodes?: IMoveNode) => {
-  const response = await fetch(`${API_URL}/repertoires`, {
+  const response = await apiFetch(`${API_URL}/repertoires`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -39,7 +104,7 @@ export const createRepertoire = async (nameRepertory: string, moveNodes?: IMoveN
 };
 
 export const duplicateRepertoire = async (id: string, nameRepertory: string) => {
-  const response = await fetch(`${API_URL}/repertoires/${id}/duplicate`, {
+  const response = await apiFetch(`${API_URL}/repertoires/${id}/duplicate`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -51,7 +116,7 @@ export const duplicateRepertoire = async (id: string, nameRepertory: string) => 
 }
 
 export const putRepertoire = async (id: string, nameRepertory: string, moveNodes: IMoveNode, orientation: BoardOrientation) => {
-  const response = await fetch(`${API_URL}/repertoires/${id}`, {
+  const response = await apiFetch(`${API_URL}/repertoires/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -63,7 +128,7 @@ export const putRepertoire = async (id: string, nameRepertory: string, moveNodes
 };
 
 export const putRepertoireName = async (id: string, nameRepertory: string) => {
-  const response = await fetch(`${API_URL}/repertoires/${id}/name`, {
+  const response = await apiFetch(`${API_URL}/repertoires/${id}/name`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -75,7 +140,7 @@ export const putRepertoireName = async (id: string, nameRepertory: string) => {
 };
 
 export const putRepertoireOrderUp = async (id: string) => {
-  const response = await fetch(`${API_URL}/repertoires/${id}/order/up`, {
+  const response = await apiFetch(`${API_URL}/repertoires/${id}/order/up`, {
     method: "PATCH",
   });
   const data = await response.json();
@@ -83,7 +148,7 @@ export const putRepertoireOrderUp = async (id: string) => {
 };
 
 export const deleteRepertoire = async (id: string) => {
-  const response = await fetch(`${API_URL}/repertoires/${id}`, {
+  const response = await apiFetch(`${API_URL}/repertoires/${id}`, {
     method: "DELETE",
   });
   const data = await response.json();
@@ -91,7 +156,7 @@ export const deleteRepertoire = async (id: string) => {
 };
 
 export const enableRepertoire = async (id: string) => {
-  const response = await fetch(`${API_URL}/repertoires/${id}/enable`, {
+  const response = await apiFetch(`${API_URL}/repertoires/${id}/enable`, {
     method: "PUT",
   });
   const data = await response.json();
@@ -99,10 +164,30 @@ export const enableRepertoire = async (id: string) => {
 };
 
 export const disableRepertoire = async (id: string) => {
-  const response = await fetch(`${API_URL}/repertoires/${id}/disable`, {
+  const response = await apiFetch(`${API_URL}/repertoires/${id}/disable`, {
     method: "PUT",
   });
   const data = await response.json();
   return data;
+};
+
+export const downloadRepertoiresBackup = async (): Promise<void> => {
+  const response = await apiFetch(`${API_URL}/repertoires/download`);
+  if (!response.ok) {
+    throw new Error("Unable to download repertoires");
+  }
+  const blob = await response.blob();
+  const fileName = parseDownloadFileName(response, "chess-openings-backup.zip");
+  triggerFileDownload(blob, fileName);
+};
+
+export const downloadRepertoireJson = async (id: string, repertoireName: string): Promise<void> => {
+  const response = await apiFetch(`${API_URL}/repertoires/${id}/download`);
+  if (!response.ok) {
+    throw new Error("Unable to download repertoire");
+  }
+  const blob = await response.blob();
+  const fileName = parseDownloadFileName(response, `${repertoireName || "repertoire"}.json`);
+  triggerFileDownload(blob, fileName);
 };
 

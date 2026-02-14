@@ -256,11 +256,12 @@ describe("positionCommentService", () => {
     it("should return null if no position is found", async () => {
       mockPositionsFindOne.mockResolvedValue(null);
 
-      const comment = await getPositionComment("some-fen-position");
+      const comment = await getPositionComment("user-1", "some-fen-position");
 
       expect(comment).toBeNull();
       expect(mockPositionsFindOne).toHaveBeenCalledWith({
         fen: "some-fen-position",
+        userId: "user-1",
       });
     });
 
@@ -272,17 +273,18 @@ describe("positionCommentService", () => {
         updatedAt: new Date(),
       });
 
-      const comment = await getPositionComment("some-fen-position");
+      const comment = await getPositionComment("user-1", "some-fen-position");
 
       expect(comment).toBe("This is a test comment");
       expect(mockPositionsFindOne).toHaveBeenCalledWith({
         fen: "some-fen-position",
+        userId: "user-1",
       });
     });
   });
   describe("getPositionCommentsByFens", () => {
     it("should return an empty object if no FENs are provided", async () => {
-      const comments = await getPositionCommentsByFens([]);
+      const comments = await getPositionCommentsByFens("user-1", []);
 
       expect(comments).toEqual({});
       expect(mockPositionsFind).not.toHaveBeenCalled();
@@ -299,7 +301,7 @@ describe("positionCommentService", () => {
         ]),
       });
 
-      const comments = await getPositionCommentsByFens([fen1, fen2]);
+      const comments = await getPositionCommentsByFens("user-1", [fen1, fen2]);
 
       expect(comments).toEqual({
         [fen1]: "Comment for FEN 1",
@@ -307,6 +309,7 @@ describe("positionCommentService", () => {
       });
       expect(mockPositionsFind).toHaveBeenCalledWith({
         fen: { $in: [fen1, fen2] },
+        userId: "user-1",
       });
     });
 
@@ -325,13 +328,14 @@ describe("positionCommentService", () => {
         ]),
       });
 
-      const comments = await getPositionCommentsByFens([fen1, fen2, fen3]);
+      const comments = await getPositionCommentsByFens("user-1", [fen1, fen2, fen3]);
 
       expect(comments).toEqual({
         [fen1]: "Comment for FEN 1",
       });
       expect(mockPositionsFind).toHaveBeenCalledWith({
         fen: { $in: [fen1, fen2, fen3] },
+        userId: "user-1",
       });
     });
 
@@ -345,13 +349,14 @@ describe("positionCommentService", () => {
           ]),
       });
 
-      const comments = await getPositionCommentsByFens([fen]);
+      const comments = await getPositionCommentsByFens("user-1", [fen]);
 
       expect(comments).toEqual({
         [fen]: "Single comment",
       });
       expect(mockPositionsFind).toHaveBeenCalledWith({
         fen: { $in: [fen] },
+        userId: "user-1",
       });
     });
 
@@ -364,16 +369,17 @@ describe("positionCommentService", () => {
         toArray: jest.fn().mockResolvedValue([]),
       });
 
-      const comments = await getPositionCommentsByFens([fen1, fen2]);
+      const comments = await getPositionCommentsByFens("user-1", [fen1, fen2]);
 
       expect(comments).toEqual({});
       expect(mockPositionsFind).toHaveBeenCalledWith({
         fen: { $in: [fen1, fen2] },
+        userId: "user-1",
       });
     });
 
     it("should skip early return when array is empty", async () => {
-      const comments = await getPositionCommentsByFens([]);
+      const comments = await getPositionCommentsByFens("user-1", []);
 
       expect(comments).toEqual({});
       expect(mockPositionsFind).not.toHaveBeenCalled();

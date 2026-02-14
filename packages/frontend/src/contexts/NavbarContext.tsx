@@ -1,6 +1,7 @@
 import React, { useCallback, useReducer } from "react";
 import { getRepertoires } from "../repository/repertoires/repertoires";
 import { IRepertoire } from "@chess-opening-master/common";
+import { useAlertContext } from "./AlertContext";
 
 // Define initial state and reducer
 const initialState = {
@@ -52,11 +53,18 @@ export const useNavbarDispatch = () => {
 
 export const NavbarContextProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
     const [state, dispatch] = useReducer(reducer, initialState);
+    const { showAlert } = useAlertContext();
 
-    const updateRepertoires = async () => {
-        const repertoires = await getRepertoires();
-        dispatch({ type: 'SET_REPERTOIRES', payload: repertoires });
-    };
+    const updateRepertoires = useCallback(async () => {
+        try {
+            const repertoires = await getRepertoires();
+            dispatch({ type: 'SET_REPERTOIRES', payload: repertoires });
+        } catch (error) {
+            console.error("Failed to load repertoires", error);
+            showAlert("Unable to load repertoires.", "error");
+            dispatch({ type: 'SET_REPERTOIRES', payload: [] });
+        }
+    }, [showAlert]);
 
     const setOpen = useCallback((open: boolean) => {
         dispatch({ type: 'SET_OPEN', payload: open });
@@ -64,7 +72,7 @@ export const NavbarContextProvider: React.FC<{children: React.ReactNode}> = ({ c
 
     React.useEffect(() => {
         updateRepertoires();
-    }, []);
+    }, [updateRepertoires]);
 
     return (
         <NavbarStateContext.Provider value={state}>

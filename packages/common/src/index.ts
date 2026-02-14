@@ -3,5 +3,18 @@ export { IRepertoire, IRepertoireDashboard } from "./types/Repertoire";
 export { BoardOrientation, Turn } from "./types/Orientation";
 export { TrainVariantInfo, Variant } from "./types/Variants";
 export { MoveVariantNode } from "./types/MoveVariantNode";
-export { Path, StudyPath, StudiedVariantPath, NewVariantPath, EmptyPath, PathCategory } from "./types/Path";
+export {
+  Path,
+  StudyPath,
+  StudiedVariantPath,
+  NewVariantPath,
+  EmptyPath,
+  PathCategory,
+} from "./types/Path";
 export { getOrientationAwareFen } from "./utils/fenUtils";
+export {
+  PASSWORD_MIN_LENGTH,
+  PASSWORD_POLICY_MESSAGE,
+  validatePasswordStrength,
+  PasswordValidationResult,
+} from "./utils/passwordPolicy";

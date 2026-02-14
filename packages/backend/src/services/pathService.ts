@@ -14,7 +14,6 @@ import { getRepertoireName } from "./repertoireService";
 import { extractId } from "../utils/idUtils";
 import { Document, ObjectId } from "mongodb";
 import { getAllVariants } from "./variantsService";
-import { Variant } from "@chess-opening-master/common";
 
 // Type Definitions
 
@@ -79,17 +78,17 @@ const PROBABILITIES = {
 /**
  * Retrieves active variants from the database (non-disabled variants)
  */
-export const getActiveVariants = async (): Promise<VariantInfo[]> => {
+export const getActiveVariants = async (userId: string): Promise<VariantInfo[]> => {
   const db = getDB();
 
   const allVariantsInfo = await db
     .collection<VariantInfoDocument>("variantsInfo")
-    .find({})
+    .find({ userId })
     .toArray();
 
   const normalizedVariants = allVariantsInfo.map(normalizeVariantInfo);
   const repertoireIds = extractUniqueRepertoireIds(normalizedVariants);
-  const activeRepertoireIds = await filterActiveRepertoireIds(repertoireIds);
+  const activeRepertoireIds = await filterActiveRepertoireIds(userId, repertoireIds);
 
   return normalizedVariants.filter((variant) =>
     activeRepertoireIds.includes(variant.repertoireId)
@@ -123,6 +122,7 @@ function extractUniqueRepertoireIds(variants: VariantInfo[]): string[] {
  * Filters repertoire IDs to include only active (non-disabled) ones
  */
 async function filterActiveRepertoireIds(
+  userId: string,
   repertoireIds: string[]
 ): Promise<string[]> {
   const db = getDB();
@@ -130,7 +130,7 @@ async function filterActiveRepertoireIds(
   const repertoires = await db
     .collection("repertoires")
     .find(
-      { _id: { $in: repertoireIds.map((id) => new ObjectId(id)) } },
+      { _id: { $in: repertoireIds.map((id) => new ObjectId(id)) }, userId },
       { projection: { _id: 1, disabled: 1 } }
     )
     .toArray();
@@ -178,11 +178,11 @@ function findOldestVariant(variants: VariantInfo[]): VariantInfo {
 /**
  * Retrieves all study groups from the database
  */
-export const getStudyGroups = async (): Promise<StudyGroup[]> => {
+export const getStudyGroups = async (userId: string): Promise<StudyGroup[]> => {
   const db = getDB();
   const studyDocs = await db
     .collection<StudyGroupDocument>("studies")
-    .find({})
+    .find({ userId })
     .toArray();
 
   return studyDocs.map(mapStudyDocToStudyGroup);
@@ -269,6 +269,7 @@ function findMostRecentSession(sessions: StudySession[]): StudySession {
  * Creates a path object for a studied variant
  */
 export const createVariantPath = async (
+  userId: string,
   variant: VariantInfo
 ): Promise<StudiedVariantPath> => {
   const variantId = extractId(variant._id);
@@ -277,7 +278,7 @@ export const createVariantPath = async (
     type: "variant",
     id: variantId,
     repertoireId: variant.repertoireId,
-    repertoireName: await getRepertoireName(variant.repertoireId),
+    repertoireName: await getRepertoireName(userId, variant.repertoireId),
     name: variant.variantName,
     errors: variant.errors,
     lastDate: variant.lastDate,
@@ -301,13 +302,14 @@ export const createStudyPath = (study: StudyToReview): StudyPath => {
  * Creates a path object for a new variant
  */
 export const createNewVariantPath = async (
-  variant: Variant,
+  userId: string,
+  variant: { fullName: string },
   repertoireId: string
 ): Promise<NewVariantPath> => {
   return {
     type: "newVariant",
     repertoireId,
-    repertoireName: await getRepertoireName(repertoireId),
+    repertoireName: await getRepertoireName(userId, repertoireId),
     name: variant.fullName,
   };
 };
@@ -325,11 +327,12 @@ function createEmptyPath(): EmptyPath {
  * Determines the best path for review based on various criteria
  */
 export const determineBestPath = async (
+  userId: string,
   category?: PathCategory
 ): Promise<Path> => {
   // Get all needed data
-  const { newVariants, studiedVariants } = await getAllVariants();
-  const studyGroups = await getStudyGroups();
+  const { newVariants, studiedVariants } = await getAllVariants(userId);
+  const studyGroups = await getStudyGroups(userId);
 
   // Convert studied variants to VariantInfo array
   const activeVariants: VariantInfo[] = studiedVariants.map((variant) => ({
@@ -361,11 +364,12 @@ export const determineBestPath = async (
   const randomValue = Math.random() * 100;
 
   if (category) {
-    return await selectPathBasedOnCategory(category, categories);
+    return await selectPathBasedOnCategory(userId, category, categories);
   }
 
   // Apply selection logic based on probabilities and availability
   return await selectPathBasedOnProbability(
+    userId,
     randomValue,
     categories.variantsWithErrors,
     categories.newVariants,
@@ -437,6 +441,7 @@ function areAllCategoriesEmpty(categories: {
  * Selects a path based on the specified category
  */
 async function selectPathBasedOnCategory(
+  userId: string,
   category: string,
   categories: {
     variantsWithErrors: VariantInfo[];
@@ -456,7 +461,7 @@ async function selectPathBasedOnCategory(
       if (!variantToReview) {
         return createEmptyPath();
       }
-      return await createVariantPath(variantToReview);
+      return await createVariantPath(userId, variantToReview);
     }
     case "newVariants": {
       if (categories.newVariants.length === 0) {
@@ -468,7 +473,7 @@ async function selectPathBasedOnCategory(
       if (categories.oldVariants.length === 0) {
         return createEmptyPath();
       }
-      return await createVariantPath(findOldestVariant(categories.oldVariants));
+      return await createVariantPath(userId, findOldestVariant(categories.oldVariants));
     }
     case "studyToReview": {
       if (!categories.studyToReview) {
@@ -485,6 +490,7 @@ async function selectPathBasedOnCategory(
  * Selects a path based on probability thresholds and available content
  */
 async function selectPathBasedOnProbability(
+  userId: string,
   randomValue: number,
   variantsWithErrors: VariantInfo[],
   newVariants: NewVariantPath[],
@@ -500,7 +506,7 @@ async function selectPathBasedOnProbability(
   // 60% - Select a variant with errors
   if (randomValue < ERROR_VARIANT_THRESHOLD && variantsWithErrors.length > 0) {
     const selectedVariant = findVariantWithMostErrors(variantsWithErrors);
-    return await createVariantPath(selectedVariant);
+    return await createVariantPath(userId, selectedVariant);
   }
 
   // 30% - Select a new variant
@@ -515,7 +521,7 @@ async function selectPathBasedOnProbability(
     variantsWithErrors.length === 0
   ) {
     const oldestVariant = findOldestVariant(oldVariants);
-    return await createVariantPath(oldestVariant);
+    return await createVariantPath(userId, oldestVariant);
   }
 
   // 5% - Select a study to review
@@ -525,6 +531,7 @@ async function selectPathBasedOnProbability(
 
   // Fallback logic if the random selection doesn't find a match
   return await fallbackPathSelection(
+    userId,
     variantsWithErrors,
     newVariants,
     oldVariants,
@@ -551,6 +558,7 @@ function findVariantWithMostErrors(variants: VariantInfo[]): VariantInfo {
  * Fallback selection when probabilistic selection fails
  */
 async function fallbackPathSelection(
+  userId: string,
   variantsWithErrors: VariantInfo[],
   newVariants: NewVariantPath[],
   oldVariants: VariantInfo[],
@@ -559,7 +567,7 @@ async function fallbackPathSelection(
   // Try each category in priority order
   if (variantsWithErrors.length > 0) {
     const selectedVariant = findVariantWithMostErrors(variantsWithErrors);
-    return await createVariantPath(selectedVariant);
+    return await createVariantPath(userId, selectedVariant);
   }
 
   if (newVariants.length > 0) {
@@ -568,7 +576,7 @@ async function fallbackPathSelection(
 
   if (oldVariants.length > 0 && variantsWithErrors.length === 0) {
     const oldestVariant = findOldestVariant(oldVariants);
-    return await createVariantPath(oldestVariant);
+    return await createVariantPath(userId, oldestVariant);
   }
 
   if (studyToReview) {

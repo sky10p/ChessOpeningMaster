@@ -74,7 +74,7 @@ describe('variantsService', () => {
         return mockDB;
       });
 
-      const result = await getAllVariants();
+      const result = await getAllVariants("user-1");
       
       expect(result.newVariants).toEqual([]);
       expect(result.studiedVariants).toEqual([]);
@@ -126,7 +126,7 @@ describe('variantsService', () => {
         getVariants: mockGetVariants
       });
 
-      const result = await getAllVariants();
+      const result = await getAllVariants("user-1");
       
       expect(result.studiedVariants).toHaveLength(1);
       expect(result.studiedVariants[0].name).toBe('Gambito escocés (4. ...Bc5 9. ...d6)');
@@ -162,7 +162,7 @@ describe('variantsService', () => {
         return mockDB;
       });
 
-      const result = await getAllVariants();
+      const result = await getAllVariants("user-1");
       
       expect(result.studiedVariants).toHaveLength(0);
       expect(result.newVariants).toHaveLength(0);
@@ -202,7 +202,7 @@ describe('variantsService', () => {
         return mockDB;
       });
 
-      const result = await getAllVariants();
+      const result = await getAllVariants("user-1");
       
       expect(result.studiedVariants).toHaveLength(0);
       expect(result.newVariants).toHaveLength(0);

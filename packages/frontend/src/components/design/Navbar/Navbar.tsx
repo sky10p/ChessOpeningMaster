@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { XMarkIcon, EllipsisVerticalIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon, EllipsisVerticalIcon, ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
 import chessNavbarBackground from "../../../assets/chess-navbar-background.jpg";
 import { NavbarLink } from "./model";
 import { ChartPieIcon, StarIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
@@ -11,9 +11,11 @@ interface NavbarProps {
   setOpen: (open: boolean) => void;
   mainActions: NavbarLink[];
   secondaryActions: NavbarLink[];
+  showLogout?: boolean;
+  onLogout?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, secondaryActions }) => {
+export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, secondaryActions, showLogout = false, onLogout }) => {
   const [favouritesOpen, setFavouritesOpen] = React.useState(true);
   
   return (
@@ -52,15 +54,29 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
           <nav className="mt-6 px-3 space-y-1.5">
             {/* Main navigation links */}
             {mainActions.map((link) => (
-              <Link
-                key={link.id}
-                to={link.url}
-                className="nav-link group"
-                onClick={() => setOpen(false)}
-              >
-                <span className="text-amber-400 mr-3">{link.icon}</span>
-                <span>{link.name}</span>
-              </Link>
+              link.onClick ? (
+                <button
+                  key={link.id}
+                  className="nav-link group w-full text-left"
+                  onClick={() => {
+                    link.onClick?.();
+                    setOpen(false);
+                  }}
+                >
+                  <span className="text-amber-400 mr-3">{link.icon}</span>
+                  <span>{link.name}</span>
+                </button>
+              ) : (
+                <Link
+                  key={link.id}
+                  to={link.url}
+                  className="nav-link group"
+                  onClick={() => setOpen(false)}
+                >
+                  <span className="text-amber-400 mr-3">{link.icon}</span>
+                  <span>{link.name}</span>
+                </Link>
+              )
             ))}
             
             <div className="border-t border-slate-700/70 my-4"></div>
@@ -133,6 +149,18 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
               <AcademicCapIcon className="h-5 w-5 text-emerald-400 mr-3" />
               <span>Studies</span>
             </Link>
+            {showLogout ? (
+              <button
+                className="nav-link group mt-2 w-full text-left"
+                onClick={() => {
+                  onLogout?.();
+                  setOpen(false);
+                }}
+              >
+                <ArrowRightOnRectangleIcon className="h-5 w-5 text-red-400 mr-3" />
+                <span>Logout</span>
+              </button>
+            ) : null}
           </nav>
           
           {/* Footer section */}

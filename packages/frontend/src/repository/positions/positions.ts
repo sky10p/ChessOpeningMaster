@@ -1,10 +1,11 @@
 import { API_URL } from "../constants";
+import { apiFetch } from "../apiClient";
 
 export const getPositionComment = async (
   fen: string
 ): Promise<string | null> => {
   try {
-    const response = await fetch(
+    const response = await apiFetch(
       `${API_URL}/positions/${encodeURIComponent(fen)}`
     );
 
@@ -29,7 +30,7 @@ export const updatePositionComment = async (
   comment: string
 ): Promise<void> => {
   try {
-    const response = await fetch(
+    const response = await apiFetch(
       `${API_URL}/positions/${encodeURIComponent(fen)}`,
       {
         method: "PUT",
@@ -60,7 +61,7 @@ export const getCommentsByFens = async (
     const queryParams = new URLSearchParams();
     fens.forEach(fen => queryParams.append('fens', fen));
     
-    const response = await fetch(`${API_URL}/positions/comments?${queryParams.toString()}`);
+    const response = await apiFetch(`${API_URL}/positions/comments?${queryParams.toString()}`);
     if (!response.ok) {
       console.error("Error fetching position comments:", new Error(`HTTP ${response.status}`));
       return {};
