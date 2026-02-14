@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+if [ -z "${BASH_VERSION:-}" ]; then
+  exec bash "$0" "$@"
+fi
 set -euo pipefail
 
 SERVICE_NAME="chess-opening-master-backend.service"
@@ -45,6 +48,38 @@ require_cmd() {
     log "Missing command: $1"
     exit 1
   fi
+}
+
+service_exists() {
+  local service_name="$1"
+  systemctl list-unit-files --type=service --no-legend --no-pager 2>/dev/null | awk '{print $1}' | grep -Fxq "$service_name"
+}
+
+detect_backend_service() {
+  if service_exists "$SERVICE_NAME"; then
+    return
+  fi
+
+  local detected_service
+  detected_service="$(systemctl list-unit-files --type=service --no-legend --no-pager 2>/dev/null \
+    | awk '{print $1}' \
+    | grep -Ei 'chess|backend' \
+    | grep -Ei 'backend|api|server' \
+    | head -n 1 || true)"
+
+  if [[ -n "$detected_service" ]]; then
+    log "Default service not found. Auto-detected service: $detected_service"
+    SERVICE_NAME="$detected_service"
+    return
+  fi
+
+  log "Service not found: $SERVICE_NAME"
+  log "Available service candidates:"
+  systemctl list-unit-files --type=service --no-legend --no-pager 2>/dev/null \
+    | awk '{print $1}' \
+    | grep -Ei 'chess|backend|api|server' || true
+  log "Run again with: --service <your-service-name>.service"
+  exit 1
 }
 
 detect_nginx_site() {
@@ -173,16 +208,12 @@ main() {
   fi
 
   detect_nginx_site
+  detect_backend_service
 
   log "Service: $SERVICE_NAME"
   log "App root: $APP_ROOT"
   log "Nginx site: $NGINX_SITE"
   log "client_max_body_size: $CLIENT_MAX_BODY_SIZE"
-
-  if ! systemctl list-unit-files | grep -q "^${SERVICE_NAME}"; then
-    log "Service not found: $SERVICE_NAME"
-    exit 1
-  fi
 
   if ! systemctl list-unit-files | grep -q '^nginx.service'; then
     log "nginx service not found"
