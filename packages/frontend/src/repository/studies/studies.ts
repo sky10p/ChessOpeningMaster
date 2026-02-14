@@ -1,5 +1,5 @@
 import { StudyGroup, Study, StudyEntry, StudySession } from "../../pages/StudiesPage/models";
-import { API_URL } from "../constants"
+import { API_URL } from "../constants";
 import { apiFetch } from "../apiClient";
 
 

@@ -1,4 +1,4 @@
-import { API_URL } from "../constants"
+import { API_URL } from "../constants";
 import { apiFetch } from "../apiClient";
 
 export const getPositionComment = async (

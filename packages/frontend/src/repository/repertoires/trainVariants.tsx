@@ -1,5 +1,5 @@
 import { TrainVariantInfo } from "@chess-opening-master/common";
-import { API_URL } from "../constants"
+import { API_URL } from "../constants";
 import { apiFetch } from "../apiClient";
 
 export const saveTrainVariantInfo = async (

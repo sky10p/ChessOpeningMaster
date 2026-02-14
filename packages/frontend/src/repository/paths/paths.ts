@@ -1,5 +1,5 @@
 import { Path, PathCategory } from "@chess-opening-master/common";
-import { API_URL } from "../constants"
+import { API_URL } from "../constants";
 import { apiFetch } from "../apiClient";
 
 export async function fetchPath(category?: PathCategory): Promise<Path> {

@@ -1,5 +1,5 @@
 import { BoardOrientation, IMoveNode, IRepertoireDashboard } from "@chess-opening-master/common";
-import { API_URL } from "../constants"
+import { API_URL } from "../constants";
 import { apiFetch } from "../apiClient";
 
 const parseDownloadFileName = (response: Response, fallback: string): string => {
