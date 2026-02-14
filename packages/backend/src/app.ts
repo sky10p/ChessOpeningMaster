@@ -13,6 +13,7 @@ import { ensureDatabaseIndexes } from "./db/indexes";
 
 const app = express();
 const port = process.env.BACKEND_PORT || 3001;
+const bodyParserLimit = process.env.BODY_PARSER_LIMIT || "100mb";
 const defaultCorsOrigins = ["http://localhost:3002", "http://127.0.0.1:3002"];
 const configuredCorsOrigins = (process.env.CORS_ORIGIN || "")
   .split(",")
@@ -22,8 +23,14 @@ const allowedCorsOrigins = configuredCorsOrigins.length > 0 ? configuredCorsOrig
 
 app.use(
   express.json({
-    limit: "100mb",
+    limit: bodyParserLimit,
     type: ["application/json", "text/plain"],
+  })
+);
+app.use(
+  express.urlencoded({
+    extended: true,
+    limit: bodyParserLimit,
   })
 );
 app.use(
