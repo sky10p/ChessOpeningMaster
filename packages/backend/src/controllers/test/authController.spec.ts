@@ -5,6 +5,8 @@ import * as authService from "../../services/authService";
 jest.mock("../../services/authService");
 
 describe("auth routes", () => {
+  const allowedOrigin = "http://localhost:3002";
+
   beforeEach(() => {
     jest.clearAllMocks();
     (authService.isAuthEnabled as jest.Mock).mockReturnValue(true);
@@ -13,7 +15,7 @@ describe("auth routes", () => {
   });
 
   it("returns auth config", async () => {
-    const response = await request(app).get("/auth/config");
+    const response = await request(app).get("/auth/config").set("Origin", allowedOrigin);
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ enabled: true, allowDefaultUser: true, defaultUsername: "default" });
   });
@@ -21,14 +23,20 @@ describe("auth routes", () => {
   it("registers user", async () => {
     (authService.createUser as jest.Mock).mockResolvedValue("1");
     (authService.loginUser as jest.Mock).mockResolvedValue({ token: "token", userId: "1" });
-    const response = await request(app).post("/auth/register").send({ username: "a", password: "StrongPass1!" });
+    const response = await request(app)
+      .post("/auth/register")
+      .set("Origin", allowedOrigin)
+      .send({ username: "a", password: "StrongPass1!" });
     expect(response.status).toBe(201);
     expect(response.body).toEqual({ userId: "1" });
     expect(response.headers["set-cookie"]).toEqual(expect.arrayContaining([expect.stringContaining("chess_opening_master_auth=")]));
   });
 
   it("rejects weak passwords during registration", async () => {
-    const response = await request(app).post("/auth/register").send({ username: "a", password: "b" });
+    const response = await request(app)
+      .post("/auth/register")
+      .set("Origin", allowedOrigin)
+      .send({ username: "a", password: "b" });
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual({
@@ -39,7 +47,7 @@ describe("auth routes", () => {
 
   it("logs in with default user when allowed", async () => {
     (authService.loginDefaultUserWithoutPassword as jest.Mock).mockResolvedValue({ token: "token", userId: "1" });
-    const response = await request(app).post("/auth/default-login").send({});
+    const response = await request(app).post("/auth/default-login").set("Origin", allowedOrigin).send({});
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ userId: "1" });
     expect(response.headers["set-cookie"]).toEqual(expect.arrayContaining([expect.stringContaining("chess_opening_master_auth=")]));
@@ -47,7 +55,7 @@ describe("auth routes", () => {
 
   it("returns 404 for default login when disabled", async () => {
     (authService.isDefaultUserAccessAllowed as jest.Mock).mockReturnValue(false);
-    const response = await request(app).post("/auth/default-login").send({});
+    const response = await request(app).post("/auth/default-login").set("Origin", allowedOrigin).send({});
     expect(response.status).toBe(404);
   });
 
@@ -55,6 +63,7 @@ describe("auth routes", () => {
     (authService.revokeToken as jest.Mock).mockResolvedValue(undefined);
     const response = await request(app)
       .post("/auth/logout")
+      .set("Origin", allowedOrigin)
       .set("Cookie", "chess_opening_master_auth=token-value")
       .send({});
 
@@ -66,6 +75,7 @@ describe("auth routes", () => {
     (authService.getUserByToken as jest.Mock).mockResolvedValue("1");
     const response = await request(app)
       .get("/auth/session")
+      .set("Origin", allowedOrigin)
       .set("Cookie", "chess_opening_master_auth=token-value");
 
     expect(response.status).toBe(200);
@@ -76,6 +86,7 @@ describe("auth routes", () => {
     (authService.getUserByToken as jest.Mock).mockResolvedValue(null);
     const response = await request(app)
       .get("/auth/session")
+      .set("Origin", allowedOrigin)
       .set("Cookie", "chess_opening_master_auth=token-value");
 
     expect(response.status).toBe(200);

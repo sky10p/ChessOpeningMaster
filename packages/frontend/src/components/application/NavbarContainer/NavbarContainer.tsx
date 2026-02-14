@@ -37,7 +37,7 @@ const NavbarContainer: React.FC<NavbarContainerProps> = ({ authEnabled, onLogged
   const { pathname } = useLocation();
   useEffect(() => {
     updateRepertoires();
-  }, []);
+  }, [updateRepertoires]);
 
   const handleLogout = async () => {
     if (authEnabled) {

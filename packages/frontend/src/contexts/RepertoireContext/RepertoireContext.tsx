@@ -206,7 +206,7 @@ export const RepertoireContextProvider: React.FC<
     return currentMove.children.find((child) => child.getMove().san === san);
   };
 
-  const buildMovePath = (moveNode: MoveVariantNode): Move[] => {
+  const buildMovePath = useCallback((moveNode: MoveVariantNode): Move[] => {
     const moves: Move[] = [];
     let currentNode = moveNode;
     while (currentNode.parent !== null) {
@@ -214,7 +214,7 @@ export const RepertoireContextProvider: React.FC<
       currentNode = currentNode.parent;
     }
     return moves.reverse();
-  };
+  }, []);
 
   const markChanges = () => setHasChanges(true);
 
@@ -243,7 +243,7 @@ export const RepertoireContextProvider: React.FC<
     if (compatibleVariant) return compatibleVariant;
 
     return getInitialSelectedVariant(variants);
-  }, [selectedVariant, currentMove, getInitialSelectedVariant, isVariantCompatibleWithPath]);
+  }, [selectedVariant, currentMove, getInitialSelectedVariant, isVariantCompatibleWithPath, buildMovePath]);
 
   const updateVariants = useCallback((targetNode?: MoveVariantNode) => {
     const newVariants = moveHistory.getVariants();
@@ -253,36 +253,21 @@ export const RepertoireContextProvider: React.FC<
     setSelectedVariant(bestVariant);
   }, [moveHistory, findBestVariantForNode]);
 
+  const goToMove = useCallback((moveNode: MoveVariantNode) => {
+    const newChess = new Chess();
+    const moves = buildMovePath(moveNode);
+    moves.forEach((move) => newChess.move(move));
+    setChess(newChess);
+    setCurrentMove(moveNode);
+    updateVariants(moveNode);
+  }, [buildMovePath, updateVariants]);
+
   useEffect(() => {
     handledFenNavigationKey.current = null;
   }, [fenNavigationKey]);
 
   useEffect(() => {
     if (fenFromUrl) {
-      if (handledFenNavigationKey.current === fenNavigationKey) {
-        return;
-      }
-
-      const allVariants = moveHistory.getVariants();
-      if (allVariants.length === 0) {
-        return;
-      }
-
-      handledFenNavigationKey.current = fenNavigationKey;
-
-      const foundMoveNode = fenNodeIndex.get(normalizeFen(fenFromUrl));
-
-      if (foundMoveNode) {
-        goToMove(foundMoveNode);
-        return;
-      }
-
-      showAlert(
-        variantNameFromUrl
-          ? `FEN position not found in variant "${variantNameFromUrl}".`
-          : "FEN position not found in any variant.",
-        "warning"
-      );
       return;
     }
 
@@ -290,14 +275,45 @@ export const RepertoireContextProvider: React.FC<
     const allVariants = moveHistory.getVariants();
     setVariants(allVariants);
     setSelectedVariant(getInitialSelectedVariant(allVariants));
+  }, [fenFromUrl, moveHistory, getInitialSelectedVariant]);
+
+  useEffect(() => {
+    if (!fenFromUrl) {
+      return;
+    }
+
+    if (handledFenNavigationKey.current === fenNavigationKey) {
+      return;
+    }
+
+    const allVariants = moveHistory.getVariants();
+    if (allVariants.length === 0) {
+      return;
+    }
+
+    handledFenNavigationKey.current = fenNavigationKey;
+
+    const foundMoveNode = fenNodeIndex.get(normalizeFen(fenFromUrl));
+
+    if (foundMoveNode) {
+      goToMove(foundMoveNode);
+      return;
+    }
+
+    showAlert(
+      variantNameFromUrl
+        ? `FEN position not found in variant "${variantNameFromUrl}".`
+        : "FEN position not found in any variant.",
+      "warning"
+    );
   }, [
     fenFromUrl,
     moveHistory,
     variantNameFromUrl,
     showAlert,
-    getInitialSelectedVariant,
     fenNodeIndex,
     fenNavigationKey,
+    goToMove,
   ]);
 
   const initBoard = () => {
@@ -390,14 +406,6 @@ export const RepertoireContextProvider: React.FC<
 
   const hasPrev = () => {
     return !!currentMove.parent;
-  };
-  const goToMove = (moveNode: MoveVariantNode) => {
-    const newChess = new Chess();
-    const moves = buildMovePath(moveNode);
-    moves.forEach((move) => newChess.move(move));
-    setChess(newChess);
-    setCurrentMove(moveNode);
-    updateVariants(moveNode);
   };
   const changeNameMove = (moveNode: MoveVariantNode, newName: string) => {
     moveNode.variantName = newName === "" ? undefined : newName;

@@ -18,6 +18,14 @@ const maxAttempts = parseEnvNumber(process.env.AUTH_LOGIN_RATE_LIMIT_MAX_ATTEMPT
 
 const attemptsByIp = new Map<string, RateLimitEntry>();
 
+const cleanupExpiredEntries = (now: number) => {
+  for (const [ip, entry] of attemptsByIp.entries()) {
+    if (now - entry.windowStart >= windowMs) {
+      attemptsByIp.delete(ip);
+    }
+  }
+};
+
 const getClientIp = (req: Request) => {
   const forwardedFor = req.headers["x-forwarded-for"];
   if (typeof forwardedFor === "string" && forwardedFor.length > 0) {
@@ -29,6 +37,8 @@ const getClientIp = (req: Request) => {
 export const authLoginRateLimit = (req: Request, res: Response, next: NextFunction) => {
   const ip = getClientIp(req);
   const now = Date.now();
+
+  cleanupExpiredEntries(now);
 
   const current = attemptsByIp.get(ip);
   if (!current || now - current.windowStart >= windowMs) {

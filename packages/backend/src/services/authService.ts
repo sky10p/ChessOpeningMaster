@@ -1,4 +1,4 @@
-import { randomBytes, pbkdf2Sync } from "crypto";
+import { randomBytes, pbkdf2Sync, timingSafeEqual } from "crypto";
 import { getDB } from "../db/mongo";
 
 const DEFAULT_USERNAME = process.env.DEFAULT_USER_USERNAME || "default";
@@ -32,6 +32,15 @@ function hashPassword(password: string, salt: string): string {
   return pbkdf2Sync(password, salt, 10000, 64, "sha512").toString("hex");
 }
 
+function comparePasswordHashes(storedHash: string, incomingHash: string): boolean {
+  const storedBuffer = Buffer.from(storedHash, "hex");
+  const incomingBuffer = Buffer.from(incomingHash, "hex");
+  if (storedBuffer.length !== incomingBuffer.length) {
+    return false;
+  }
+  return timingSafeEqual(Uint8Array.from(storedBuffer), Uint8Array.from(incomingBuffer));
+}
+
 function createPasswordSalt(): string {
   return randomBytes(16).toString("hex");
 }
@@ -63,7 +72,7 @@ export async function loginUser(username: string, password: string): Promise<{ t
   }
 
   const incomingHash = hashPassword(password, user.passwordSalt);
-  if (incomingHash !== user.passwordHash) {
+  if (!comparePasswordHashes(user.passwordHash, incomingHash)) {
     return null;
   }
 

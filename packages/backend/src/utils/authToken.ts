@@ -4,7 +4,19 @@ import { getAuthTokenTtlMs } from "../services/authService";
 export const AUTH_COOKIE_NAME = "chess_opening_master_auth";
 
 const cookieSecure = process.env.NODE_ENV === "production";
-const cookieSameSite: "lax" | "none" = cookieSecure ? "none" : "lax";
+
+const getCookieSameSite = (): "lax" | "none" | "strict" => {
+  const configuredValue = (process.env.AUTH_COOKIE_SAME_SITE || "").toLowerCase();
+  if (configuredValue === "none" && cookieSecure) {
+    return "none";
+  }
+  if (configuredValue === "strict") {
+    return "strict";
+  }
+  return "lax";
+};
+
+const cookieSameSite = getCookieSameSite();
 
 const splitCookieHeader = (cookieHeader: string): string[] => cookieHeader.split(";");
 

@@ -53,14 +53,14 @@ export const useNavbarDispatch = () => {
 export const NavbarContextProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
     const [state, dispatch] = useReducer(reducer, initialState);
 
-    const updateRepertoires = async () => {
+    const updateRepertoires = useCallback(async () => {
         try {
             const repertoires = await getRepertoires();
             dispatch({ type: 'SET_REPERTOIRES', payload: repertoires });
         } catch {
             dispatch({ type: 'SET_REPERTOIRES', payload: [] });
         }
-    };
+    }, []);
 
     const setOpen = useCallback((open: boolean) => {
         dispatch({ type: 'SET_OPEN', payload: open });
@@ -68,7 +68,7 @@ export const NavbarContextProvider: React.FC<{children: React.ReactNode}> = ({ c
 
     React.useEffect(() => {
         updateRepertoires();
-    }, []);
+    }, [updateRepertoires]);
 
     return (
         <NavbarStateContext.Provider value={state}>
