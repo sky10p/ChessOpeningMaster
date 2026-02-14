@@ -287,13 +287,15 @@ export const RepertoireContextProvider: React.FC<
     }
 
     setCurrentMove(moveHistory);
-    updateVariants(moveHistory);
+    const allVariants = moveHistory.getVariants();
+    setVariants(allVariants);
+    setSelectedVariant(getInitialSelectedVariant(allVariants));
   }, [
     fenFromUrl,
     moveHistory,
     variantNameFromUrl,
     showAlert,
-    updateVariants,
+    getInitialSelectedVariant,
     fenNodeIndex,
     fenNavigationKey,
   ]);
