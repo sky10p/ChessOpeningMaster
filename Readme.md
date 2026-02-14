@@ -12,6 +12,9 @@ ChessKeep is an application that allows you to manage your chess opening reperto
 
 * Manage repertoires (create, edit, and delete).
 * Order repertoires.
+* User authentication with cookie-based sessions.
+* Optional default local user access for development or local-only usage.
+* User-scoped data isolation across repertoires, studies, positions, and variants info.
 * In repertoire editing:
     * Rename names at a specific position (automatic creation of variations).
     * Delete positions.
@@ -20,6 +23,24 @@ ChessKeep is an application that allows you to manage your chess opening reperto
     * View trained variations.
     * Choose which variations to train.
     * View comments.
+
+## User Authentication
+
+ChessKeep supports optional authentication and per-user data isolation.
+
+- Backend flow and rules: [src/doc/User-Auth-Backend.md](src/doc/User-Auth-Backend.md)
+- Frontend flow and UX behavior: [src/doc/User-Auth-Frontend.md](src/doc/User-Auth-Frontend.md)
+
+### Auth environment variables
+
+- `ENABLE_AUTH` (`true` to enable auth)
+- `ALLOW_DEFAULT_USER` (`true` to allow passwordless local default-user login)
+- `DEFAULT_USER_USERNAME` (default user name, default: `default`)
+- `DEFAULT_USER_PASSWORD` (default user password if user must be created)
+- `AUTH_TOKEN_TTL_SECONDS` (session token expiration in seconds)
+- `AUTH_COOKIE_SAME_SITE` (`lax`, `strict`, `none`)
+
+When auth is enabled, frontend displays login/register pages and backend scopes data by `userId` on protected routes.
 
 ## Installation Requirements
 
