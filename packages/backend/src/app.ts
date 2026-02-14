@@ -16,12 +16,15 @@ const port = process.env.BACKEND_PORT || 3001;
 const bodyParserLimit = process.env.BODY_PARSER_LIMIT || "100mb";
 const defaultCorsOrigins = ["http://localhost:3002", "http://127.0.0.1:3002"];
 const normalizeOrigin = (origin: string) => origin.trim().replace(/\/$/, "");
+const patternToRegex = (pattern: string) =>
+  new RegExp(`^${pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*")}$`);
 const configuredCorsOrigins = (process.env.CORS_ORIGIN || "")
   .split(",")
   .map((origin) => normalizeOrigin(origin))
   .filter(Boolean);
 const allowedCorsOrigins = configuredCorsOrigins.length > 0 ? configuredCorsOrigins : defaultCorsOrigins;
 const allowAllCorsOrigins = allowedCorsOrigins.includes("*");
+const wildcardCorsOrigins = allowedCorsOrigins.filter((origin) => origin.includes("*")).map(patternToRegex);
 
 app.use(
   express.json({
@@ -45,7 +48,11 @@ app.use(
       if (allowAllCorsOrigins) {
         return callback(null, true);
       }
-      if (allowedCorsOrigins.includes(normalizeOrigin(origin))) {
+      const normalizedOrigin = normalizeOrigin(origin);
+      if (allowedCorsOrigins.includes(normalizedOrigin)) {
+        return callback(null, true);
+      }
+      if (wildcardCorsOrigins.some((originPattern) => originPattern.test(normalizedOrigin))) {
         return callback(null, true);
       }
       return callback(new Error("Not allowed by CORS"));
