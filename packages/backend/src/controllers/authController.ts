@@ -12,6 +12,36 @@ import {
 } from "../services/authService";
 import { clearAuthCookie, getTokenFromRequest, setAuthCookie } from "../utils/authToken";
 
+const MIN_USERNAME_LENGTH = 3;
+const MAX_USERNAME_LENGTH = 32;
+const USERNAME_PATTERN = /^[a-zA-Z0-9]+$/;
+const RESERVED_USERNAMES = new Set(["admin", "root", "system", "default"]);
+
+function validateUsername(username: unknown): string | null {
+  if (typeof username !== "string") {
+    return "Username and password are required";
+  }
+
+  const normalizedUsername = username.trim();
+  if (!normalizedUsername) {
+    return "Username and password are required";
+  }
+
+  if (normalizedUsername.length < MIN_USERNAME_LENGTH || normalizedUsername.length > MAX_USERNAME_LENGTH) {
+    return `Username must be between ${MIN_USERNAME_LENGTH} and ${MAX_USERNAME_LENGTH} characters`;
+  }
+
+  if (!USERNAME_PATTERN.test(normalizedUsername)) {
+    return "Username must contain only letters and numbers";
+  }
+
+  if (RESERVED_USERNAMES.has(normalizedUsername.toLowerCase())) {
+    return "This username is reserved";
+  }
+
+  return null;
+}
+
 export async function getAuthConfig(req: Request, res: Response) {
   return res.json({
     enabled: isAuthEnabled(),
@@ -27,7 +57,13 @@ export async function register(req: Request, res: Response) {
 
   const { username, password } = req.body;
 
-  if (!username || !password) {
+  const usernameValidationMessage = validateUsername(username);
+  if (usernameValidationMessage) {
+    return res.status(400).json({ message: usernameValidationMessage });
+  }
+  const normalizedUsername = username.trim();
+
+  if (!password) {
     return res.status(400).json({ message: "Username and password are required" });
   }
 
@@ -37,8 +73,8 @@ export async function register(req: Request, res: Response) {
   }
 
   try {
-    await createUser(username, password);
-    const loginResult = await loginUser(username, password);
+    await createUser(normalizedUsername, password);
+    const loginResult = await loginUser(normalizedUsername, password);
     if (!loginResult) {
       return res.status(500).json({ message: "Failed to register" });
     }

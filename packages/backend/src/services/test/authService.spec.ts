@@ -198,6 +198,10 @@ describe("authService", () => {
   it("creates default user and migrates legacy data", async () => {
     usersCollection.findOne.mockResolvedValueOnce(null);
     usersCollection.insertOne.mockResolvedValue({ insertedId: objectId("default-user") });
+    repertoiresCollection.findOne.mockResolvedValue({ _id: objectId("legacy-repertoire") });
+    studiesCollection.findOne.mockResolvedValue(null);
+    positionsCollection.findOne.mockResolvedValue(null);
+    variantsInfoCollection.findOne.mockResolvedValue(null);
     repertoiresCollection.updateMany.mockResolvedValue({ modifiedCount: 1 });
     studiesCollection.updateMany.mockResolvedValue({ modifiedCount: 1 });
     positionsCollection.updateMany.mockResolvedValue({ modifiedCount: 1 });
@@ -223,6 +227,22 @@ describe("authService", () => {
       { userId: { $exists: false } },
       { $set: { userId: "default-user" } }
     );
+  });
+
+  it("skips legacy migration updates when all documents already contain userId", async () => {
+    usersCollection.findOne.mockResolvedValue({ _id: objectId("default-user") });
+    repertoiresCollection.findOne.mockResolvedValue(null);
+    studiesCollection.findOne.mockResolvedValue(null);
+    positionsCollection.findOne.mockResolvedValue(null);
+    variantsInfoCollection.findOne.mockResolvedValue(null);
+
+    const defaultUserId = await ensureDefaultUserAndMigrateData();
+
+    expect(defaultUserId).toBe("default-user");
+    expect(repertoiresCollection.updateMany).not.toHaveBeenCalled();
+    expect(studiesCollection.updateMany).not.toHaveBeenCalled();
+    expect(positionsCollection.updateMany).not.toHaveBeenCalled();
+    expect(variantsInfoCollection.updateMany).not.toHaveBeenCalled();
   });
 
   it("returns positive auth token ttl in milliseconds", () => {

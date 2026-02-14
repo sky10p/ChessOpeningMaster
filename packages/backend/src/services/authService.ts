@@ -121,6 +121,20 @@ export async function revokeToken(token: string): Promise<void> {
   await db.collection("authTokens").deleteOne({ token });
 }
 
+async function hasLegacyDocumentsWithoutUserId(): Promise<boolean> {
+  const db = getDB();
+  const filter = { userId: { $exists: false } };
+
+  const [repertoireDoc, studyDoc, positionDoc, variantInfoDoc] = await Promise.all([
+    db.collection("repertoires").findOne(filter, { projection: { _id: 1 } }),
+    db.collection("studies").findOne(filter, { projection: { _id: 1 } }),
+    db.collection("positions").findOne(filter, { projection: { _id: 1 } }),
+    db.collection("variantsInfo").findOne(filter, { projection: { _id: 1 } }),
+  ]);
+
+  return Boolean(repertoireDoc || studyDoc || positionDoc || variantInfoDoc);
+}
+
 export async function ensureDefaultUserAndMigrateData(): Promise<string> {
   const db = getDB();
   let defaultUser = await db.collection("users").findOne({ username: DEFAULT_USERNAME });
@@ -138,6 +152,11 @@ export async function ensureDefaultUserAndMigrateData(): Promise<string> {
   }
 
   const defaultUserId = defaultUser._id.toString();
+
+  const hasLegacyDocuments = await hasLegacyDocumentsWithoutUserId();
+  if (!hasLegacyDocuments) {
+    return defaultUserId;
+  }
 
   await Promise.all([
     db.collection("repertoires").updateMany({ userId: { $exists: false } }, { $set: { userId: defaultUserId } }),

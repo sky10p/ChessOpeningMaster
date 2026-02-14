@@ -1,4 +1,35 @@
-import { Db } from "mongodb";
+import { CreateIndexesOptions, Db, IndexSpecification } from "mongodb";
+
+const isRecoverableIndexError = (error: unknown): boolean => {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const mongoError = error as { codeName?: string; code?: number };
+
+  return (
+    mongoError.codeName === "IndexOptionsConflict" ||
+    mongoError.codeName === "IndexKeySpecsConflict" ||
+    mongoError.codeName === "IndexAlreadyExists" ||
+    mongoError.code === 85 ||
+    mongoError.code === 86
+  );
+};
+
+const createIndexSafely = async (
+  db: Db,
+  collectionName: string,
+  key: IndexSpecification,
+  options?: CreateIndexesOptions
+): Promise<void> => {
+  try {
+    await db.collection(collectionName).createIndex(key, options);
+  } catch (error) {
+    if (!isRecoverableIndexError(error)) {
+      throw error;
+    }
+  }
+};
 
 export async function ensureDatabaseIndexes(db: Db): Promise<void> {
   const positionsCollection = db.collection("positions");
@@ -12,15 +43,15 @@ export async function ensureDatabaseIndexes(db: Db): Promise<void> {
   }
 
   await Promise.all([
-    positionsCollection.createIndex({ fen: 1, userId: 1 }, { unique: true }),
-    db.collection("users").createIndex({ username: 1 }, { unique: true }),
-    db.collection("authTokens").createIndex({ token: 1 }, { unique: true }),
-    db.collection("authTokens").createIndex({ userId: 1 }),
-    db.collection("authTokens").createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
-    db.collection("repertoires").createIndex({ userId: 1 }),
-    db.collection("studies").createIndex({ userId: 1 }),
-    db.collection("positions").createIndex({ userId: 1 }),
-    db.collection("variantsInfo").createIndex({ userId: 1 }),
-    db.collection("variantsInfo").createIndex({ repertoireId: 1, userId: 1 }),
+    createIndexSafely(db, "positions", { fen: 1, userId: 1 }, { unique: true }),
+    createIndexSafely(db, "users", { username: 1 }, { unique: true }),
+    createIndexSafely(db, "authTokens", { token: 1 }, { unique: true }),
+    createIndexSafely(db, "authTokens", { userId: 1 }),
+    createIndexSafely(db, "authTokens", { expiresAt: 1 }, { expireAfterSeconds: 0 }),
+    createIndexSafely(db, "repertoires", { userId: 1 }),
+    createIndexSafely(db, "studies", { userId: 1 }),
+    createIndexSafely(db, "positions", { userId: 1 }),
+    createIndexSafely(db, "variantsInfo", { userId: 1 }),
+    createIndexSafely(db, "variantsInfo", { repertoireId: 1, userId: 1 }),
   ]);
 }
