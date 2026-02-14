@@ -1,11 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import { getDB } from "../db/mongo";
+import { getRequestUserId } from "../utils/requestUser";
 import { ObjectId } from "mongodb";
+
+const getUserFilter = (req: Request) => ({ userId: getRequestUserId(req) });
 
 export async function getStudies(req: Request, res: Response, next: NextFunction) {
   try {
     const db = getDB();
-    const groups = await db.collection("studies").find({}).toArray();
+    const groups = await db.collection("studies").find(getUserFilter(req)).toArray();
     res.json(groups);
   } catch (err) {
     next(err);
@@ -16,8 +19,8 @@ export async function createStudyGroup(req: Request, res: Response, next: NextFu
   try {
     const { name } = req.body;
     const db = getDB();
-    const result = await db.collection("studies").insertOne({ name, studies: [] });
-    const group = await db.collection("studies").findOne({ _id: result.insertedId });
+    const result = await db.collection("studies").insertOne({ name, studies: [], ...getUserFilter(req) });
+    const group = await db.collection("studies").findOne({ _id: result.insertedId, ...getUserFilter(req) });
     res.json(group);
   } catch (err) {
     next(err);
@@ -29,7 +32,7 @@ export async function updateStudyGroupName(req: Request, res: Response, next: Ne
     const { id } = req.params;
     const { name } = req.body;
     const db = getDB();
-    await db.collection("studies").updateOne({ _id: new ObjectId(id) }, { $set: { name } });
+    await db.collection("studies").updateOne({ _id: new ObjectId(id), ...getUserFilter(req) }, { $set: { name } });
     res.sendStatus(200);
   } catch (err) {
     next(err);
@@ -40,7 +43,7 @@ export async function deleteStudyGroup(req: Request, res: Response, next: NextFu
   try {
     const { id } = req.params;
     const db = getDB();
-    await db.collection("studies").deleteOne({ _id: new ObjectId(id) });
+    await db.collection("studies").deleteOne({ _id: new ObjectId(id), ...getUserFilter(req) });
     res.sendStatus(200);
   } catch (err) {
     next(err);
@@ -54,10 +57,7 @@ export async function createStudy(req: Request, res: Response, next: NextFunctio
     const db = getDB();
     const studyId = new ObjectId().toString();
     const newStudy = { id: studyId, name, tags, entries: [], sessions: [] };
-    await db.collection("studies").updateOne(
-      { _id: new ObjectId(groupId) },
-      { $push: { studies: newStudy } }
-    );
+    await db.collection("studies").updateOne({ _id: new ObjectId(groupId), ...getUserFilter(req) }, { $push: { studies: newStudy } });
     res.json(newStudy);
   } catch (err) {
     next(err);
@@ -68,7 +68,7 @@ export async function getStudy(req: Request, res: Response, next: NextFunction) 
   try {
     const { groupId, studyId } = req.params;
     const db = getDB();
-    const group = await db.collection("studies").findOne({ _id: new ObjectId(groupId) });
+    const group = await db.collection("studies").findOne({ _id: new ObjectId(groupId), ...getUserFilter(req) });
     if (!group) return res.status(404).json({ message: "Study group not found" });
     const study = (group.studies || []).find((s: { id: string }) => s.id === studyId);
     if (!study) return res.status(404).json({ message: "Study not found" });
@@ -82,10 +82,7 @@ export async function deleteStudy(req: Request, res: Response, next: NextFunctio
   try {
     const { groupId, studyId } = req.params;
     const db = getDB();
-    const result = await db.collection("studies").updateOne(
-      { _id: new ObjectId(groupId) },
-      { $pull: { studies: { id: studyId } } }
-    );
+    const result = await db.collection("studies").updateOne({ _id: new ObjectId(groupId), ...getUserFilter(req) }, { $pull: { studies: { id: studyId } } });
     if (result.modifiedCount > 0) {
       res.sendStatus(200);
     } else {
@@ -104,7 +101,7 @@ export async function createStudyEntry(req: Request, res: Response, next: NextFu
     const entryId = new ObjectId().toString();
     const newEntry = { id: entryId, title, externalUrl, description };
     await db.collection("studies").updateOne(
-      { _id: new ObjectId(groupId), "studies.id": studyId },
+      { _id: new ObjectId(groupId), "studies.id": studyId, ...getUserFilter(req) },
       { $push: { "studies.$.entries": newEntry } }
     );
     res.json(newEntry);
@@ -119,19 +116,16 @@ export async function updateStudyEntry(req: Request, res: Response, next: NextFu
     const { title, externalUrl, description } = req.body;
     const db = getDB();
     await db.collection("studies").updateOne(
-      { _id: new ObjectId(groupId) },
+      { _id: new ObjectId(groupId), ...getUserFilter(req) },
       {
         $set: {
           "studies.$[study].entries.$[entry].title": title,
           "studies.$[study].entries.$[entry].externalUrl": externalUrl,
           "studies.$[study].entries.$[entry].description": description,
-        }
+        },
       },
       {
-        arrayFilters: [
-          { "study.id": studyId },
-          { "entry.id": entryId }
-        ]
+        arrayFilters: [{ "study.id": studyId }, { "entry.id": entryId }],
       }
     );
     res.sendStatus(200);
@@ -145,7 +139,7 @@ export async function deleteStudyEntry(req: Request, res: Response, next: NextFu
     const { groupId, studyId, entryId } = req.params;
     const db = getDB();
     await db.collection("studies").updateOne(
-      { _id: new ObjectId(groupId) },
+      { _id: new ObjectId(groupId), ...getUserFilter(req) },
       { $pull: { "studies.$[study].entries": { id: entryId } } },
       { arrayFilters: [{ "study.id": studyId }] }
     );
@@ -163,7 +157,7 @@ export async function createStudySession(req: Request, res: Response, next: Next
     const sessionId = new ObjectId().toString();
     const newSession = { id: sessionId, start, duration, manual: manual || false, comment: comment || undefined };
     await db.collection("studies").updateOne(
-      { _id: new ObjectId(groupId), "studies.id": studyId },
+      { _id: new ObjectId(groupId), "studies.id": studyId, ...getUserFilter(req) },
       { $push: { "studies.$.sessions": newSession } }
     );
     res.json(newSession);
@@ -177,7 +171,7 @@ export async function deleteStudySession(req: Request, res: Response, next: Next
     const { groupId, studyId, sessionId } = req.params;
     const db = getDB();
     await db.collection("studies").updateOne(
-      { _id: new ObjectId(groupId), "studies.id": studyId },
+      { _id: new ObjectId(groupId), "studies.id": studyId, ...getUserFilter(req) },
       { $pull: { "studies.$.sessions": { id: sessionId } } }
     );
     res.sendStatus(200);

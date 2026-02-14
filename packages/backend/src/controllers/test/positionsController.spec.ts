@@ -24,7 +24,7 @@ describe("positionsController", () => {
     mockJson = jest.fn();
     mockStatus = jest.fn().mockReturnThis();
     
-    mockRequest = {};
+    mockRequest = { userId: "user-1" };
     mockResponse = {
       json: mockJson,
       status: mockStatus,
@@ -41,7 +41,7 @@ describe("positionsController", () => {
 
       await getComment(mockRequest as Request, mockResponse as Response);
 
-      expect(mockGetPositionComment).toHaveBeenCalledWith(testFen);
+      expect(mockGetPositionComment).toHaveBeenCalledWith("user-1", testFen);
       expect(mockJson).toHaveBeenCalledWith({ fen: testFen, comment: testComment });
       expect(mockStatus).not.toHaveBeenCalled();
     });
@@ -54,7 +54,7 @@ describe("positionsController", () => {
 
       await getComment(mockRequest as Request, mockResponse as Response);
 
-      expect(mockGetPositionComment).toHaveBeenCalledWith(testFen);
+      expect(mockGetPositionComment).toHaveBeenCalledWith("user-1", testFen);
       expect(mockStatus).toHaveBeenCalledWith(404);
       expect(mockJson).toHaveBeenCalledWith({ error: "No comment found for position" });
     });
@@ -77,7 +77,7 @@ describe("positionsController", () => {
 
       await getComment(mockRequest as Request, mockResponse as Response);
 
-      expect(mockGetPositionComment).toHaveBeenCalledWith(testFen);
+      expect(mockGetPositionComment).toHaveBeenCalledWith("user-1", testFen);
       expect(mockStatus).toHaveBeenCalledWith(500);
       expect(mockJson).toHaveBeenCalledWith({ error: "Failed to fetch position comment" });
     });
@@ -94,7 +94,7 @@ describe("positionsController", () => {
 
       await updateComment(mockRequest as Request, mockResponse as Response);
 
-      expect(mockUpdatePositionComment).toHaveBeenCalledWith(testFen, testComment);
+      expect(mockUpdatePositionComment).toHaveBeenCalledWith("user-1", testFen, testComment);
       expect(mockJson).toHaveBeenCalledWith({ 
         fen: testFen, 
         comment: testComment, 
@@ -136,7 +136,7 @@ describe("positionsController", () => {
 
       await updateComment(mockRequest as Request, mockResponse as Response);
 
-      expect(mockUpdatePositionComment).toHaveBeenCalledWith(testFen, "");
+      expect(mockUpdatePositionComment).toHaveBeenCalledWith("user-1", testFen, "");
       expect(mockJson).toHaveBeenCalledWith({ 
         fen: testFen, 
         comment: "", 
@@ -154,7 +154,7 @@ describe("positionsController", () => {
 
       await updateComment(mockRequest as Request, mockResponse as Response);
 
-      expect(mockUpdatePositionComment).toHaveBeenCalledWith(testFen, testComment);
+      expect(mockUpdatePositionComment).toHaveBeenCalledWith("user-1", testFen, testComment);
       expect(mockStatus).toHaveBeenCalledWith(500);
       expect(mockJson).toHaveBeenCalledWith({ error: "Failed to update position comment" });
     });
@@ -176,7 +176,7 @@ describe("positionsController", () => {
 
       await getCommentsByFens(mockRequest as Request, mockResponse as Response);
 
-      expect(mockGetPositionCommentsByFens).toHaveBeenCalledWith(testFens);
+      expect(mockGetPositionCommentsByFens).toHaveBeenCalledWith("user-1", testFens);
       expect(mockJson).toHaveBeenCalledWith(mockCommentsMap);
       expect(mockStatus).not.toHaveBeenCalled();
     });
@@ -192,7 +192,7 @@ describe("positionsController", () => {
 
       await getCommentsByFens(mockRequest as Request, mockResponse as Response);
 
-      expect(mockGetPositionCommentsByFens).toHaveBeenCalledWith([testFen]);
+      expect(mockGetPositionCommentsByFens).toHaveBeenCalledWith("user-1", [testFen]);
       expect(mockJson).toHaveBeenCalledWith(mockCommentsMap);
     });
 
@@ -217,7 +217,7 @@ describe("positionsController", () => {
 
       await getCommentsByFens(mockRequest as Request, mockResponse as Response);
 
-      expect(mockGetPositionCommentsByFens).toHaveBeenCalledWith(testFens);
+      expect(mockGetPositionCommentsByFens).toHaveBeenCalledWith("user-1", testFens);
       expect(mockJson).toHaveBeenCalledWith({});
     });
 
@@ -231,7 +231,7 @@ describe("positionsController", () => {
 
       await getCommentsByFens(mockRequest as Request, mockResponse as Response);
 
-      expect(mockGetPositionCommentsByFens).toHaveBeenCalledWith(testFens);
+      expect(mockGetPositionCommentsByFens).toHaveBeenCalledWith("user-1", testFens);
       expect(mockStatus).toHaveBeenCalledWith(500);
       expect(mockJson).toHaveBeenCalledWith({ error: "Failed to fetch position comments" });
     });
@@ -242,7 +242,7 @@ describe("positionsController", () => {
 
       await getCommentsByFens(mockRequest as Request, mockResponse as Response);
 
-      expect(mockGetPositionCommentsByFens).toHaveBeenCalledWith([]);
+      expect(mockGetPositionCommentsByFens).toHaveBeenCalledWith("user-1", []);
       expect(mockJson).toHaveBeenCalledWith({});
     });
   });

@@ -1,5 +1,5 @@
 import React from "react";
-import { Bars3Icon, CloudArrowUpIcon } from "@heroicons/react/24/outline";
+import { ArrowRightOnRectangleIcon, Bars3Icon, CloudArrowUpIcon } from "@heroicons/react/24/outline";
 import { HeaderIcon } from "./models";
 import { CloudDoneIcon } from "../../icons/CloudDoneIcon";
 
@@ -7,9 +7,11 @@ interface HeaderProps {
   setOpenNavbar: (open: boolean) => void;
   isSaving: boolean;
   icons: HeaderIcon[];
+  showLogout?: boolean;
+  onLogout?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ setOpenNavbar, isSaving, icons }) => {
+const Header: React.FC<HeaderProps> = ({ setOpenNavbar, isSaving, icons, showLogout = false, onLogout }) => {
   return (
     <header className="relative bg-gradient-to-r from-slate-800 to-slate-900 shadow-md border-b border-slate-700">
       <div className="max-w-7xl mx-auto flex items-center justify-between p-3 px-4">
@@ -51,6 +53,15 @@ const Header: React.FC<HeaderProps> = ({ setOpenNavbar, isSaving, icons }) => {
                 {icon.icon}
               </button>
             ))}
+            {showLogout ? (
+              <button
+                onClick={onLogout}
+                className="inline-flex items-center gap-1 rounded-md border border-slate-500 px-2 py-1 text-xs text-slate-200 transition-all duration-200 hover:border-amber-400 hover:text-amber-300"
+              >
+                <ArrowRightOnRectangleIcon className="h-4 w-4" />
+                Logout
+              </button>
+            ) : null}
           </div>
         </div>
       </div>

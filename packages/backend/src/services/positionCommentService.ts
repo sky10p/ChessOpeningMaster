@@ -5,6 +5,7 @@ import { getDB } from "../db/mongo";
 
 
 export const getPositionCommentsByFens = async (
+  userId: string,
   fens: string[]
 ): Promise<Record<string, string>> => {
   if (fens.length === 0) {
@@ -14,7 +15,7 @@ export const getPositionCommentsByFens = async (
   const db = getDB();
   const positions = await db
     .collection("positions")
-    .find({ fen: { $in: fens } })
+    .find({ fen: { $in: fens }, userId })
     .toArray();
 
   const commentsMap: Record<string, string> = {};
@@ -28,15 +29,17 @@ export const getPositionCommentsByFens = async (
 };
 
 export const getPositionComment = async (
+  userId: string,
   fen: string
 ): Promise<string | null> => {
   const db = getDB();
-  const position = await db.collection("positions").findOne({ fen });
+  const position = await db.collection("positions").findOne({ fen, userId });
 
   return position ? position.comment : null;
 };
 
 export const updatePositionComment = async (
+  userId: string,
   fen: string,
   comment: string
 ): Promise<void> => {
@@ -44,7 +47,7 @@ export const updatePositionComment = async (
   const positionsCollection = db.collection("positions");
 
   await positionsCollection.updateOne(
-    { fen },
+    { fen, userId },
     {
       $set: {
         comment,
@@ -52,6 +55,7 @@ export const updatePositionComment = async (
       },
       $setOnInsert: {
         createdAt: new Date(),
+        userId,
       },
     },
     { upsert: true }

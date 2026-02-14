@@ -5,7 +5,10 @@ import repertoiresRouter from "./routes/repertoires";
 import studiesRouter from "./routes/studies";
 import paths from "./routes/paths";
 import positionsRouter from "./routes/positionComments";
+import authRouter from "./routes/auth";
 import errorHandler from "./middleware/errorHandler";
+import { authMiddleware } from "./middleware/auth";
+import { ensureDefaultUserAndMigrateData } from "./services/authService";
 
 const app = express();
 const port = process.env.BACKEND_PORT || 3001;
@@ -18,6 +21,8 @@ app.use(
 );
 app.use(cors());
 
+app.use("/auth", authRouter);
+app.use(authMiddleware);
 app.use("/repertoires", repertoiresRouter);
 app.use("/studies", studiesRouter);
 app.use("/paths", paths);
@@ -28,7 +33,8 @@ app.use(errorHandler);
 export default app;
 
 if (require.main === module) {
-  connectDB().then(() => {
+  connectDB().then(async () => {
+    await ensureDefaultUserAndMigrateData();
     app.listen(port, () => {
       console.log(`Server listening at http://localhost:${port}`);
     });

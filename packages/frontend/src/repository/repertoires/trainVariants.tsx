@@ -1,10 +1,11 @@
 import { TrainVariantInfo } from "@chess-opening-master/common";
-import { API_URL } from "../constants";
+import { API_URL } from "../constants"
+import { apiFetch } from "../apiClient";
 
 export const saveTrainVariantInfo = async (
   trainVariantInfo: Omit<TrainVariantInfo, "lastDate">
 ) => {
-  const response = await fetch(
+  const response = await apiFetch(
     `${API_URL}/repertoires/${trainVariantInfo.repertoireId}/variantsInfo`,
     {
       method: "POST",
@@ -22,7 +23,7 @@ export const saveTrainVariantInfo = async (
 export const getTrainVariantInfo = async (
   repertoireId: string
 ): Promise<TrainVariantInfo[]> => {
-  const response = await fetch(`${API_URL}/repertoires/${repertoireId}/variantsInfo`);
+  const response = await apiFetch(`${API_URL}/repertoires/${repertoireId}/variantsInfo`);
   if (!response.ok) {
     throw new Error("Failed to get train variant info");
   }

@@ -7,17 +7,17 @@ interface VariantResult {
   studiedVariants: StudiedVariantPath[];
 }
 
-export const getAllVariants = async (): Promise<VariantResult> => {
+export const getAllVariants = async (userId: string): Promise<VariantResult> => {
   const db = getDB();
   
   const activeRepertoires = await db
     .collection("repertoires")
-    .find({ disabled: { $ne: true } })
+    .find({ disabled: { $ne: true }, userId })
     .toArray();
   
   const variantsInfoRecords = await db
     .collection<VariantInfo>("variantsInfo")
-    .find({})
+    .find({ userId })
     .toArray();
   
   const variantsInfoMap = new Map<string, VariantInfo>();
