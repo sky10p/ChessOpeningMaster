@@ -14,15 +14,16 @@ interface ContentProps {
   authEnabled: boolean;
   authenticated: boolean;
   allowDefaultUser: boolean;
+  onAuthenticated: () => void;
 }
 
-const Content: React.FC<ContentProps> = ({ authEnabled, authenticated, allowDefaultUser }) => {
+const Content: React.FC<ContentProps> = ({ authEnabled, authenticated, allowDefaultUser, onAuthenticated }) => {
   if (authEnabled && !authenticated) {
     return (
       <MainContainer>
         <Routes>
-          <Route path="/login" element={<LoginPage allowDefaultUser={allowDefaultUser} />} />
-          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/login" element={<LoginPage allowDefaultUser={allowDefaultUser} onAuthenticated={onAuthenticated} />} />
+          <Route path="/register" element={<RegisterPage onAuthenticated={onAuthenticated} />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </MainContainer>

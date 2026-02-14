@@ -2,6 +2,24 @@ import { BoardOrientation, IMoveNode, IRepertoireDashboard } from "@chess-openin
 import { API_URL } from "../constants";
 import { apiFetch } from "../apiClient";
 
+const parseResponsePayload = async (response: Response) => {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+};
+
+const parseErrorMessage = (payload: unknown, fallback: string) => {
+  if (payload && typeof payload === "object" && "message" in payload) {
+    const message = (payload as { message?: unknown }).message;
+    if (typeof message === "string" && message.length > 0) {
+      return message;
+    }
+  }
+  return fallback;
+};
+
 const parseDownloadFileName = (response: Response, fallback: string): string => {
   const disposition = response.headers.get("content-disposition");
   if (!disposition) {
@@ -32,13 +50,31 @@ const triggerFileDownload = (blob: Blob, fileName: string): void => {
 
 export const getRepertoires = async () => {
   const response = await apiFetch(`${API_URL}/repertoires`);
-  const data = await response.json();
+  const data = await parseResponsePayload(response);
+
+  if (!response.ok) {
+    throw new Error(parseErrorMessage(data, "Unable to load repertoires"));
+  }
+
+  if (!Array.isArray(data)) {
+    throw new Error("Invalid repertoires response");
+  }
+
   return data;
 };
 
 export const getFullInfoRepertoires = async (): Promise<IRepertoireDashboard[]> => {
   const response = await apiFetch(`${API_URL}/repertoires/full`);
-  const data = await response.json();
+  const data = await parseResponsePayload(response);
+
+  if (!response.ok) {
+    throw new Error(parseErrorMessage(data, "Unable to load repertoires"));
+  }
+
+  if (!Array.isArray(data)) {
+    throw new Error("Invalid repertoires response");
+  }
+
   return data;
 }
 

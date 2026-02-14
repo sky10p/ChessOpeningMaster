@@ -1,9 +1,13 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { register } from "../../repository/auth/auth";
-import { setAuthToken } from "../../repository/apiClient";
+import { PASSWORD_POLICY_MESSAGE, validatePasswordStrength } from "@chess-opening-master/common";
+import { AuthRequestError, register } from "../../repository/auth/auth";
 
-const RegisterPage: React.FC = () => {
+interface RegisterPageProps {
+  onAuthenticated: () => void;
+}
+
+const RegisterPage: React.FC<RegisterPageProps> = ({ onAuthenticated }) => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -22,14 +26,19 @@ const RegisterPage: React.FC = () => {
       setError("Passwords do not match");
       return;
     }
+    const passwordValidationResult = validatePasswordStrength(password);
+    if (!passwordValidationResult.isValid) {
+      setError(passwordValidationResult.message);
+      return;
+    }
     setIsSubmitting(true);
     try {
-      const authResult = await register(username, password);
-      setAuthToken(authResult.token);
+      await register(username, password);
+      onAuthenticated();
       navigate("/dashboard");
-      window.location.reload();
-    } catch {
-      setError("Unable to register user");
+    } catch (error) {
+      console.error("Failed to register user", error);
+      setError(error instanceof AuthRequestError ? error.message : "Unable to register user");
     } finally {
       setIsSubmitting(false);
     }
@@ -55,6 +64,7 @@ const RegisterPage: React.FC = () => {
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
         />
+        <p className="text-xs text-slate-600">{PASSWORD_POLICY_MESSAGE}</p>
         <input
           className="rounded-lg border border-slate-400 bg-white p-3 text-slate-900 placeholder-slate-500 focus:border-slate-700 focus:outline-none"
           type="password"

@@ -11,4 +11,5 @@ export interface AuthToken {
   userId: string;
   token: string;
   createdAt: Date;
+  expiresAt: Date;
 }

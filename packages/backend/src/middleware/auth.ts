@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { getDefaultUserId, getUserByToken, isAuthEnabled } from "../services/authService";
+import { getTokenFromRequest } from "../utils/authToken";
 
 export async function authMiddleware(req: Request, res: Response, next: NextFunction) {
   try {
@@ -8,12 +9,10 @@ export async function authMiddleware(req: Request, res: Response, next: NextFunc
       return next();
     }
 
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    const token = getTokenFromRequest(req);
+    if (!token) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-
-    const token = authHeader.slice(7);
     const userId = await getUserByToken(token);
 
     if (!userId) {

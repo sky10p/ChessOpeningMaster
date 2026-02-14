@@ -13,22 +13,22 @@ import { useDialogContext } from "../../../contexts/DialogContext";
 
 import { useMenuContext } from "../../../contexts/MenuContext";
 import { Navbar } from "../../design/Navbar/Navbar";
-import { API_URL } from "../../../repository/constants";
 import { useNavbarDispatch, useNavbarState } from "../../../contexts/NavbarContext";
 import { IRepertoire } from "@chess-opening-master/common";
-import { clearAuthToken } from "../../../repository/apiClient";
 import { logout } from "../../../repository/auth/auth";
 import { useAlertContext } from "../../../contexts/AlertContext";
 
 
 interface NavbarContainerProps {
   authEnabled: boolean;
+  onLoggedOut: () => void;
 }
 
 const shouldShowDownloadRepertoires = process.env.SHOW_DOWNLOAD_REPERTOIRES !== "false";
 
-const NavbarContainer: React.FC<NavbarContainerProps> = ({ authEnabled }) => {
+const NavbarContainer: React.FC<NavbarContainerProps> = ({ authEnabled, onLoggedOut }) => {
   const { open, repertoires } = useNavbarState();
+  const safeRepertoires = Array.isArray(repertoires) ? repertoires : [];
   const {setOpen, updateRepertoires} = useNavbarDispatch();
   const { showConfirmDialog, showTextDialog } = useDialogContext();
   const { showAlert } = useAlertContext();
@@ -43,9 +43,8 @@ const NavbarContainer: React.FC<NavbarContainerProps> = ({ authEnabled }) => {
     if (authEnabled) {
       await logout().catch(() => undefined);
     }
-    clearAuthToken();
+    onLoggedOut();
     navigate("/login");
-    window.location.reload();
   };
 
   const handleEdit = (repertoire: IRepertoire) => {
@@ -102,13 +101,13 @@ const NavbarContainer: React.FC<NavbarContainerProps> = ({ authEnabled }) => {
   return <Navbar open={open} setOpen={setOpen}
   mainActions={[
     ...(shouldShowDownloadRepertoires
-      ? [{id: "download_repertoires", name: "Download Repertoires", url: `${API_URL}/repertoires/download`, onClick: handleDownloadRepertoires, icon: <ArrowDownTrayIcon className="h-6 w-6 mr-2" />}]
+      ? [{id: "download_repertoires", name: "Download Repertoires", url: "#", onClick: handleDownloadRepertoires, icon: <ArrowDownTrayIcon className="h-6 w-6 mr-2" />}]
       : []),
     { id: "create_repertoire", name: "Create Repertoire", url: "/create-repertoire", icon: <PlusIcon className="h-6 w-6 mr-2" /> },
   ]}
   showLogout={authEnabled}
   onLogout={handleLogout}
-  secondaryActions={repertoires.map((repertoire) => ({
+  secondaryActions={safeRepertoires.map((repertoire) => ({
     id: repertoire._id,
     name: repertoire.name,
     url: `/repertoire/${repertoire._id}`,

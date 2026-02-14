@@ -54,8 +54,12 @@ export const NavbarContextProvider: React.FC<{children: React.ReactNode}> = ({ c
     const [state, dispatch] = useReducer(reducer, initialState);
 
     const updateRepertoires = async () => {
-        const repertoires = await getRepertoires();
-        dispatch({ type: 'SET_REPERTOIRES', payload: repertoires });
+        try {
+            const repertoires = await getRepertoires();
+            dispatch({ type: 'SET_REPERTOIRES', payload: repertoires });
+        } catch {
+            dispatch({ type: 'SET_REPERTOIRES', payload: [] });
+        }
     };
 
     const setOpen = useCallback((open: boolean) => {

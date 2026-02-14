@@ -20,7 +20,7 @@ import {
   RepertoireContextProps,
   RepertoireContextProviderProps,
 } from "./types";
-import { findMoveNodeByFen } from "./utils";
+import { buildFenNodeIndex, normalizeFen } from "./utils";
 
 const RepertoireContext = React.createContext<RepertoireContextProps | null>(
   null
@@ -94,7 +94,15 @@ export const RepertoireContextProvider: React.FC<
     return params.get("fen");
   }, [location.search]);
 
-  const hasNavigatedToFen = useRef(false);
+  const handledFenNavigationKey = useRef<string | null>(null);
+  const fenNavigationKey = React.useMemo(
+    () => `${variantNameFromUrl ?? ""}|${fenFromUrl ?? ""}`,
+    [variantNameFromUrl, fenFromUrl]
+  );
+
+  const fenNodeIndex = React.useMemo(() => {
+    return buildFenNodeIndex(moveHistory.getVariants(), variantNameFromUrl);
+  }, [moveHistory, variantNameFromUrl]);
 
   const getInitialSelectedVariant = React.useCallback(
     (availableVariants: Variant[]): Variant | null => {
@@ -246,31 +254,49 @@ export const RepertoireContextProvider: React.FC<
   }, [moveHistory, findBestVariantForNode]);
 
   useEffect(() => {
+    handledFenNavigationKey.current = null;
+  }, [fenNavigationKey]);
+
+  useEffect(() => {
     if (fenFromUrl) {
+      if (handledFenNavigationKey.current === fenNavigationKey) {
+        return;
+      }
+
       const allVariants = moveHistory.getVariants();
-      const foundMoveNode = findMoveNodeByFen(allVariants, fenFromUrl, variantNameFromUrl);
+      if (allVariants.length === 0) {
+        return;
+      }
+
+      handledFenNavigationKey.current = fenNavigationKey;
+
+      const foundMoveNode = fenNodeIndex.get(normalizeFen(fenFromUrl));
 
       if (foundMoveNode) {
-        hasNavigatedToFen.current = true;
         goToMove(foundMoveNode);
         return;
       }
 
-      if (allVariants.length > 0 && !hasNavigatedToFen.current) {
-        hasNavigatedToFen.current = true;
-        showAlert(
-          variantNameFromUrl
-            ? `FEN position not found in variant "${variantNameFromUrl}".`
-            : "FEN position not found in any variant.",
-          "warning"
-        );
-      }
+      showAlert(
+        variantNameFromUrl
+          ? `FEN position not found in variant "${variantNameFromUrl}".`
+          : "FEN position not found in any variant.",
+        "warning"
+      );
       return;
     }
 
     setCurrentMove(moveHistory);
     updateVariants(moveHistory);
-  }, [moveHistory]);
+  }, [
+    fenFromUrl,
+    moveHistory,
+    variantNameFromUrl,
+    showAlert,
+    updateVariants,
+    fenNodeIndex,
+    fenNavigationKey,
+  ]);
 
   const initBoard = () => {
     const newChess = new Chess();

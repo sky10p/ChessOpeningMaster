@@ -24,33 +24,32 @@ export async function getRepertoires(req: Request, res: Response, next: NextFunc
 export async function getFullRepertoires(req: Request, res: Response, next: NextFunction) {
   try {
     const db = getDB();
-    const repertoires = await db
-      .collection("repertoires")
-      .aggregate([
-        { $match: getUserFilter(req) },
-        { $sort: { order: 1 } },
-        {
-          $lookup: {
-            from: "variantsInfo",
-            let: { repertoireId: { $toString: "$_id" }, userId: "$userId" },
-            pipeline: [
-              {
-                $match: {
-                  $expr: {
-                    $and: [
-                      { $eq: ["$repertoireId", "$$repertoireId"] },
-                      { $eq: ["$userId", "$$userId"] },
-                    ],
-                  },
-                },
-              },
-            ],
-            as: "variantsInfo",
-          },
-        },
-      ])
+    const userId = getRequestUserId(req);
+    const repertoires = await db.collection("repertoires").find({ userId }).sort({ order: 1 }).toArray();
+
+    if (repertoires.length === 0) {
+      return res.json([]);
+    }
+
+    const repertoireIds = repertoires.map((repertoire) => repertoire._id.toString());
+    const variantsInfo = await db
+      .collection("variantsInfo")
+      .find({ userId, repertoireId: { $in: repertoireIds } })
       .toArray();
-    res.json(repertoires);
+
+    const variantsInfoByRepertoireId = new Map<string, typeof variantsInfo>();
+    variantsInfo.forEach((variantInfo) => {
+      const currentVariantsInfo = variantsInfoByRepertoireId.get(variantInfo.repertoireId) || [];
+      currentVariantsInfo.push(variantInfo);
+      variantsInfoByRepertoireId.set(variantInfo.repertoireId, currentVariantsInfo);
+    });
+
+    const fullRepertoires = repertoires.map((repertoire) => ({
+      ...repertoire,
+      variantsInfo: variantsInfoByRepertoireId.get(repertoire._id.toString()) || [],
+    }));
+
+    res.json(fullRepertoires);
   } catch (err) {
     next(err);
   }

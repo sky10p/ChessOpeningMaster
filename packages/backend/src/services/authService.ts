@@ -3,6 +3,22 @@ import { getDB } from "../db/mongo";
 
 const DEFAULT_USERNAME = process.env.DEFAULT_USER_USERNAME || "default";
 const DEFAULT_PASSWORD = process.env.DEFAULT_USER_PASSWORD || randomBytes(32).toString("hex");
+const AUTH_TOKEN_TTL_SECONDS = Number(process.env.AUTH_TOKEN_TTL_SECONDS || "2592000");
+
+function getAuthTokenTtlSeconds(): number {
+  if (!Number.isFinite(AUTH_TOKEN_TTL_SECONDS) || AUTH_TOKEN_TTL_SECONDS <= 0) {
+    return 2592000;
+  }
+  return Math.floor(AUTH_TOKEN_TTL_SECONDS);
+}
+
+function getTokenExpirationDate(): Date {
+  return new Date(Date.now() + getAuthTokenTtlSeconds() * 1000);
+}
+
+export function getAuthTokenTtlMs(): number {
+  return getAuthTokenTtlSeconds() * 1000;
+}
 
 export function isAuthEnabled(): boolean {
   return process.env.ENABLE_AUTH === "true";
@@ -62,10 +78,13 @@ export async function loginDefaultUserWithoutPassword(): Promise<{ token: string
 async function createAuthToken(userId: string): Promise<{ token: string; userId: string }> {
   const db = getDB();
   const token = randomBytes(48).toString("hex");
+  const createdAt = new Date();
+  const expiresAt = getTokenExpirationDate();
   await db.collection("authTokens").insertOne({
     userId,
     token,
-    createdAt: new Date(),
+    createdAt,
+    expiresAt,
   });
 
   return { token, userId };
@@ -73,7 +92,18 @@ async function createAuthToken(userId: string): Promise<{ token: string; userId:
 
 export async function getUserByToken(token: string): Promise<string | null> {
   const db = getDB();
-  const authToken = await db.collection("authTokens").findOne({ token });
+  const now = new Date();
+  const authToken = await db.collection("authTokens").findOne({
+    token,
+    expiresAt: { $gt: now },
+  });
+
+  if (!authToken) {
+    await db.collection("authTokens").deleteMany({
+      $or: [{ token, expiresAt: { $lte: now } }, { token, expiresAt: { $exists: false } }],
+    });
+  }
+
   return authToken ? authToken.userId : null;
 }
 

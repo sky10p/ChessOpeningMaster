@@ -3,7 +3,34 @@ import type { MoveVariantNode } from "../../models/VariantNode";
 import type { Variant } from "../../models/chess.models";
 
 export const normalizeFen = (fen: string): string => {
-  return fen.split(" ").slice(0, 4).join(" ");
+  const [piecePlacement = "", activeColor = "", castlingAvailability = "", enPassantTarget = ""] = fen.split(" ");
+  return [piecePlacement, activeColor, castlingAvailability, enPassantTarget].join(" ");
+};
+
+export const buildFenNodeIndex = (
+  variants: Variant[],
+  variantName?: string | null
+): Map<string, MoveVariantNode> => {
+  const targetVariants = variantName
+    ? variants.filter(
+        (v) => v.name === variantName || v.fullName === variantName
+      )
+    : variants;
+
+  const fenNodeIndex = new Map<string, MoveVariantNode>();
+
+  for (const variant of targetVariants) {
+    const tempChess = new Chess();
+    for (const moveNode of variant.moves) {
+      tempChess.move(moveNode.getMove());
+      const normalizedFen = normalizeFen(tempChess.fen());
+      if (!fenNodeIndex.has(normalizedFen)) {
+        fenNodeIndex.set(normalizedFen, moveNode);
+      }
+    }
+  }
+
+  return fenNodeIndex;
 };
 
 export const findMoveNodeByFen = (
@@ -11,25 +38,8 @@ export const findMoveNodeByFen = (
   fen: string,
   variantName?: string | null
 ): MoveVariantNode | null => {
-  const targetVariants = variantName
-    ? variants.filter(
-        (v) => v.name === variantName || v.fullName === variantName
-      )
-    : variants;
-
-  const normalizedTarget = normalizeFen(fen);
-
-  for (const variant of targetVariants) {
-    const tempChess = new Chess();
-    for (const moveNode of variant.moves) {
-      tempChess.move(moveNode.getMove());
-      if (normalizeFen(tempChess.fen()) === normalizedTarget) {
-        return moveNode;
-      }
-    }
-  }
-
-  return null;
+  const fenNodeIndex = buildFenNodeIndex(variants, variantName);
+  return fenNodeIndex.get(normalizeFen(fen)) ?? null;
 };
 
 export const isVariantCompatibleWithNode = (

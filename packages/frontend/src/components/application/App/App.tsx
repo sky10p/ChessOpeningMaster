@@ -7,13 +7,13 @@ import NavbarContainer from "../NavbarContainer/NavbarContainer";
 import { AppContext } from "../../../contexts/AppContext";
 import { initializeStockfish } from "../../../workers/stockfishWorker";
 import useViewportHeight from "../../../hooks/useViewHeight";
-import { getAuthConfig } from "../../../repository/auth/auth";
-import { getAuthToken } from "../../../repository/apiClient";
+import { getAuthConfig, getAuthSession } from "../../../repository/auth/auth";
 
 const App: React.FC = (): React.ReactElement => {
   useViewportHeight();
   const [authEnabled, setAuthEnabled] = useState(false);
   const [allowDefaultUser, setAllowDefaultUser] = useState(false);
+  const [authenticated, setAuthenticated] = useState(false);
   const [authLoaded, setAuthLoaded] = useState(false);
 
   useEffect(() => {
@@ -23,20 +23,39 @@ const App: React.FC = (): React.ReactElement => {
   useEffect(() => {
     let ignore = false;
 
-    getAuthConfig()
-      .then((config) => {
-        if (!ignore) {
-          setAuthEnabled(config.enabled);
-          setAllowDefaultUser(config.allowDefaultUser);
-          setAuthLoaded(true);
+    const loadAuthState = async () => {
+      try {
+        const config = await getAuthConfig();
+        if (ignore) {
+          return;
         }
-      })
-      .catch(() => {
+
+        setAuthEnabled(config.enabled);
+        setAllowDefaultUser(config.allowDefaultUser);
+
+        if (!config.enabled) {
+          setAuthenticated(true);
+          setAuthLoaded(true);
+          return;
+        }
+
+        const session = await getAuthSession();
+        if (ignore) {
+          return;
+        }
+
+        setAuthenticated(session.authenticated);
+        setAuthLoaded(true);
+      } catch {
         if (!ignore) {
           setAuthEnabled(false);
+          setAuthenticated(true);
           setAuthLoaded(true);
         }
-      });
+      }
+    };
+
+    loadAuthState();
 
     return () => {
       ignore = true;
@@ -47,19 +66,18 @@ const App: React.FC = (): React.ReactElement => {
     return <div className="p-6">Loading...</div>;
   }
 
-  const authenticated = !authEnabled || Boolean(getAuthToken());
-
   return (
     <BrowserRouter>
       <AppContext>
         <div className="flex flex-col h-screen-dynamic">
-          {authenticated ? <HeaderContainer authEnabled={authEnabled} /> : null}
+          {authenticated ? <HeaderContainer authEnabled={authEnabled} onLoggedOut={() => setAuthenticated(false)} /> : null}
           <div className="flex flex-col flex-grow overflow-auto h-full">
-            {authenticated ? <NavbarContainer authEnabled={authEnabled} /> : null}
+            {authenticated ? <NavbarContainer authEnabled={authEnabled} onLoggedOut={() => setAuthenticated(false)} /> : null}
             <Content
               authEnabled={authEnabled}
               authenticated={authenticated}
               allowDefaultUser={allowDefaultUser}
+              onAuthenticated={() => setAuthenticated(true)}
             />
           </div>
           {authenticated ? <FooterContainer /> : null}

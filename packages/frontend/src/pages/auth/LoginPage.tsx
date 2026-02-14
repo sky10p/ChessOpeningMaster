@@ -1,13 +1,34 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { login, loginWithDefaultUser } from "../../repository/auth/auth";
-import { setAuthToken } from "../../repository/apiClient";
+import { AuthRequestError, login, loginWithDefaultUser } from "../../repository/auth/auth";
 
 interface LoginPageProps {
   allowDefaultUser: boolean;
+  onAuthenticated: () => void;
 }
 
-const LoginPage: React.FC<LoginPageProps> = ({ allowDefaultUser }) => {
+const getLoginErrorMessage = (error: unknown, useDefaultUser: boolean): string => {
+  if (error instanceof AuthRequestError) {
+    if (error.type === "network") {
+      return "Network error. Check your connection and try again.";
+    }
+    if (error.type === "server") {
+      return "Server error. Please try again in a moment.";
+    }
+    if (error.type === "authentication") {
+      return useDefaultUser ? "Default user access is unavailable" : "Invalid username or password";
+    }
+    return useDefaultUser ? "Default user access is unavailable" : "Unable to sign in. Please try again.";
+  }
+
+  if (error instanceof TypeError) {
+    return "Network error. Check your connection and try again.";
+  }
+
+  return useDefaultUser ? "Default user access is unavailable" : "Unable to sign in. Please try again.";
+};
+
+const LoginPage: React.FC<LoginPageProps> = ({ allowDefaultUser, onAuthenticated }) => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -37,12 +58,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ allowDefaultUser }) => {
 
     setIsSubmitting(true);
     try {
-      const authResult = useDefaultUser ? await loginWithDefaultUser() : await login(username, password);
-      setAuthToken(authResult.token);
+      await (useDefaultUser ? loginWithDefaultUser() : login(username, password));
+      onAuthenticated();
       navigate("/dashboard");
-      window.location.reload();
-    } catch {
-      setError(useDefaultUser ? "Default user access is unavailable" : "Invalid username or password");
+    } catch (error) {
+      setError(getLoginErrorMessage(error, useDefaultUser));
     } finally {
       setIsSubmitting(false);
     }

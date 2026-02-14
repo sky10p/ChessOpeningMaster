@@ -7,4 +7,4 @@ const envApiUrl = process.env.API_URL || "";
 const envUsesLocalhost = envApiUrl.includes("localhost") || envApiUrl.includes("127.0.0.1");
 const shouldUseDynamicHost = Boolean(browserHostname) && !localHosts.has(browserHostname) && envUsesLocalhost;
 
-export const API_URL = shouldUseDynamicHost ? dynamicApiUrl : envApiUrl || dynamicApiUrl || "http://localhost:3000";
+export const API_URL = shouldUseDynamicHost ? dynamicApiUrl : envApiUrl || dynamicApiUrl || "http://localhost:3001";
