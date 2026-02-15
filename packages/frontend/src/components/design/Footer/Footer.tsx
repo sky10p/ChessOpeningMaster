@@ -19,10 +19,10 @@ const Footer: React.FC<FooterProps> = ({
   };
 
   return (
-    <footer className='md:hidden'>
+    <footer className='md:hidden sticky bottom-0 z-50'>
       {isVisible && icons.length > 0 && (
         <TabGroup selectedIndex={selectedIndex} onChange={handleChange}>
-          <TabList className="flex justify-around bg-gray-800 p-2">
+          <TabList className="flex justify-around bg-gray-800 p-2 border-t border-secondary">
             {icons.map((icon) => (
               <Tab key={icon.key} className={({ selected }) =>
                 selected ? 'text-accent' : 'text-white'

@@ -46,6 +46,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
     lastTrainVariant,
     pendingVariantReview,
     submitPendingVariantReview,
+    markHintUsed,
   } = useTrainRepertoireContext();
   const [selectedRating, setSelectedRating] = React.useState<ReviewRating>("good");
   const [isSavingRating, setIsSavingRating] = React.useState(false);
@@ -176,7 +177,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
 
   const mobilePanelContent = useMemo(
     () => (
-      <div className="w-full h-full p-4">
+      <div className="w-full h-full min-h-0 p-4 overflow-y-auto">
         {panelSelected === "info" && (
           <TrainInfo
             currentMoveNode={currentMoveNode}
@@ -186,10 +187,16 @@ const TrainRepertoireViewContainer: React.FC = () => {
             trainVariants={trainVariants}
             lastTrainVariant={lastTrainVariant}
             repertoireId={repertoireId}
+            onHintReveal={markHintUsed}
           />
         )}
         {panelSelected === "help" && (
-          <HelpInfo allowedMoves={allowedMoves} isYourTurn={isYourTurn} />
+          <HelpInfo
+            allowedMoves={allowedMoves}
+            isYourTurn={isYourTurn}
+            currentMoveNode={currentMoveNode}
+            onHintReveal={markHintUsed}
+          />
         )}
         {panelSelected === "trainComments" && (
           <HintInfo
@@ -233,6 +240,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
           trainVariants={trainVariants}
           lastTrainVariant={lastTrainVariant}
           repertoireId={repertoireId}
+          onHintReveal={markHintUsed}
         />
       </div>
     ),
