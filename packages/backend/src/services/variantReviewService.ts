@@ -117,7 +117,7 @@ export async function saveVariantReview(input: SaveVariantReviewInput): Promise<
     dueBeforeReviewAt: existing?.dueAt
       ? new Date(existing.dueAt)
       : existing?.lastDate
-        ? new Date(existing.lastDate as unknown as string | Date)
+        ? new Date(existing.lastDate)
         : null,
     nextDueAt: schedule.dueAt,
     schedulerVersion: getSchedulerVersion(),

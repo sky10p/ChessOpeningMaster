@@ -7,6 +7,15 @@ import { saveVariantReview } from "../repository/repertoires/trainVariants";
 import { ReviewRating, Turn } from "@chess-opening-master/common";
 import { useLocation } from "react-router-dom";
 import { suggestReviewRating } from "../utils/chess/spacedRepetition/reviewRating";
+import {
+  buildVariantStartState,
+  getAllowedMovesFromTrainVariants,
+  getDefaultTrainVariants,
+  getOpeningNameFromVariant,
+  removePendingReviewByVariantName,
+  removeVariantFromStartFens,
+  removeVariantFromStartTimes,
+} from "./TrainRepertoireContext.utils";
 
 export type PendingVariantReview = {
   variantName: string;
@@ -78,17 +87,11 @@ export const TrainRepertoireContextProvider: React.FC<
   const variantNames = variantNamesParam
     ? new Set(variantNamesParam.split("|").filter(Boolean))
     : undefined;
-  const defaultTrainVariants: TrainVariant[] = variants
-    .filter((v) => {
-      if (variantNames && variantNames.size > 0) {
-        return variantNames.has(v.fullName) || variantNames.has(v.name);
-      }
-      return !variantName || v.fullName === variantName || v.name === variantName;
-    })
-    .map((v) => ({
-      variant: v,
-      state: "inProgress",
-    }));
+  const defaultTrainVariants: TrainVariant[] = getDefaultTrainVariants(
+    variants,
+    variantName,
+    variantNames
+  );
   const [allowedMoves, setAllowedMoves] = React.useState<MoveVariantNode[]>([]);
   const [trainVariants, setTrainVariants] =
     React.useState<TrainVariant[]>(defaultTrainVariants);
@@ -97,24 +100,9 @@ export const TrainRepertoireContextProvider: React.FC<
   const [lastErrors, setLastErrors] = React.useState<number>(0);
   const [lastIgnoredErrors, setLastIgnoredErrors] = React.useState<number>(0);
   const [pendingReviews, setPendingReviews] = React.useState<PendingVariantReview[]>([]);
-  const [variantStartFens, setVariantStartFens] = React.useState<Record<string, string>>(
-    () =>
-      Object.fromEntries(
-        defaultTrainVariants.map((trainVariant) => [
-          trainVariant.variant.fullName,
-          chess.fen(),
-        ])
-      )
-  );
-  const [variantStartTimes, setVariantStartTimes] = React.useState<Record<string, number>>(
-    () =>
-      Object.fromEntries(
-        defaultTrainVariants.map((trainVariant) => [
-          trainVariant.variant.fullName,
-          Date.now(),
-        ])
-      )
-  );
+  const [variantStartFens, setVariantStartFens] = React.useState<Record<string, string>>({});
+  const [variantStartTimes, setVariantStartTimes] = React.useState<Record<string, number>>({});
+  const submittingReviewKeyRef = React.useRef<string | null>(null);
 
   const playOpponentMove = async () => {
     await sleep(1000);
@@ -127,22 +115,13 @@ export const TrainRepertoireContextProvider: React.FC<
     setTrainVariants(selectedTrainVariants);
     initBoard();
     const startFen = chess.fen();
-    setVariantStartTimes(
-      Object.fromEntries(
-        selectedTrainVariants.map((trainVariant) => [
-          trainVariant.variant.fullName,
-          nowMs,
-        ])
-      )
+    const { startTimes, startFens } = buildVariantStartState(
+      selectedTrainVariants,
+      nowMs,
+      startFen
     );
-    setVariantStartFens(
-      Object.fromEntries(
-        selectedTrainVariants.map((trainVariant) => [
-          trainVariant.variant.fullName,
-          startFen,
-        ])
-      )
-    );
+    setVariantStartTimes(startTimes);
+    setVariantStartFens(startFens);
     setPendingReviews([]);
     setLastErrors(0);
     setLastIgnoredErrors(0);
@@ -153,20 +132,36 @@ export const TrainRepertoireContextProvider: React.FC<
     if (!pendingReview) {
       return;
     }
-    await saveVariantReview(repertoireId, {
-      variantName: pendingReview.variantName,
-      openingName: pendingReview.openingName,
-      startingFen: pendingReview.startingFen,
-      rating,
-      suggestedRating: pendingReview.suggestedRating,
-      acceptedSuggested: rating === pendingReview.suggestedRating,
-      wrongMoves: pendingReview.wrongMoves,
-      ignoredWrongMoves: pendingReview.ignoredWrongMoves,
-      hintsUsed: pendingReview.hintsUsed,
-      timeSpentSec: pendingReview.timeSpentSec,
-      orientation,
-    });
-    setPendingReviews((previousPendingReviews) => previousPendingReviews.slice(1));
+    const reviewKey = `${pendingReview.variantName}::${pendingReview.startingFen}`;
+    if (submittingReviewKeyRef.current === reviewKey) {
+      return;
+    }
+    submittingReviewKeyRef.current = reviewKey;
+    try {
+      await saveVariantReview(repertoireId, {
+        variantName: pendingReview.variantName,
+        openingName: pendingReview.openingName,
+        startingFen: pendingReview.startingFen,
+        rating,
+        suggestedRating: pendingReview.suggestedRating,
+        acceptedSuggested: rating === pendingReview.suggestedRating,
+        wrongMoves: pendingReview.wrongMoves,
+        ignoredWrongMoves: pendingReview.ignoredWrongMoves,
+        hintsUsed: pendingReview.hintsUsed,
+        timeSpentSec: pendingReview.timeSpentSec,
+        orientation,
+      });
+      setPendingReviews((previousPendingReviews) =>
+        removePendingReviewByVariantName(
+          previousPendingReviews,
+          pendingReview.variantName
+        )
+      );
+    } finally {
+      if (submittingReviewKeyRef.current === reviewKey) {
+        submittingReviewKeyRef.current = null;
+      }
+    }
   };
 
   useEffect(() => {
@@ -176,21 +171,10 @@ export const TrainRepertoireContextProvider: React.FC<
 
   useEffect(() => {
     const turnNumber = currentMoveNode.position;
-    const allowedMovesFromVariants = trainVariants
-      .filter((trainVariant) => {
-        return trainVariant.state === "inProgress";
-      })
-      .map((trainVariant) => {
-        return trainVariant.variant.moves[turnNumber];
-      })
-      .reduce((uniqueAllowedMoves, trainVariant) => {
-        if (trainVariant) {
-          uniqueAllowedMoves.add(trainVariant);
-        }
-        return uniqueAllowedMoves;
-      }, new Set<MoveVariantNode>());
-
-    const newAllowedMoves = [...allowedMovesFromVariants];
+    const newAllowedMoves = getAllowedMovesFromTrainVariants(
+      trainVariants,
+      turnNumber
+    );
     if (!deepEqual(newAllowedMoves, allowedMoves)) {
       setAllowedMoves(newAllowedMoves);
     }
@@ -274,14 +258,16 @@ export const TrainRepertoireContextProvider: React.FC<
           ];
         });
         setVariantStartTimes((previousStartTimes) => {
-          const nextStartTimes = { ...previousStartTimes };
-          delete nextStartTimes[finishedVariantName];
-          return nextStartTimes;
+          return removeVariantFromStartTimes(
+            previousStartTimes,
+            finishedVariantName
+          );
         });
         setVariantStartFens((previousStartFens) => {
-          const nextStartFens = { ...previousStartFens };
-          delete nextStartFens[finishedVariantName];
-          return nextStartFens;
+          return removeVariantFromStartFens(
+            previousStartFens,
+            finishedVariantName
+          );
         });
         setLastErrors(0);
         setLastIgnoredErrors(0);
@@ -335,8 +321,3 @@ export const TrainRepertoireContextProvider: React.FC<
     </TrainRepertoireContext.Provider>
   );
 };
-
-function getOpeningNameFromVariant(variantName: string): string {
-  const openingName = variantName.split(":")[0]?.trim();
-  return openingName || variantName;
-}

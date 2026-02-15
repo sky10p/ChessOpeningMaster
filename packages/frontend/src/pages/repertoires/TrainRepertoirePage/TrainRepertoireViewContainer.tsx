@@ -250,6 +250,9 @@ const TrainRepertoireViewContainer: React.FC = () => {
   );
 
   const handleReviewRating = async (rating: ReviewRating) => {
+    if (isSavingRating || !pendingVariantReview) {
+      return;
+    }
     try {
       setIsSavingRating(true);
       await submitPendingVariantReview(rating);

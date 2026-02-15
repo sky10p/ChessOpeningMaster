@@ -1,17 +1,33 @@
 import { ReviewRating } from "@chess-opening-master/common";
 
+const normalizeNonNegativeInt = (value: number): number => {
+  if (!Number.isFinite(value)) {
+    return 0;
+  }
+  return Math.max(0, Math.floor(value));
+};
+
 export const suggestReviewRating = (
   wrongMoves: number,
   hintsUsed: number,
   timeSpentSec: number
 ): ReviewRating => {
-  if (wrongMoves >= 3) {
+  const normalizedWrongMoves = normalizeNonNegativeInt(wrongMoves);
+  const normalizedHintsUsed = normalizeNonNegativeInt(hintsUsed);
+  const normalizedTimeSpentSec = normalizeNonNegativeInt(timeSpentSec);
+
+  if (normalizedWrongMoves >= 3) {
     return "again";
   }
-  if (wrongMoves >= 2 || hintsUsed >= 2) {
+  if (normalizedWrongMoves >= 2 || normalizedHintsUsed >= 2) {
     return "hard";
   }
-  if (wrongMoves === 0 && hintsUsed === 0 && timeSpentSec > 0 && timeSpentSec <= 45) {
+  if (
+    normalizedWrongMoves === 0 &&
+    normalizedHintsUsed === 0 &&
+    normalizedTimeSpentSec > 0 &&
+    normalizedTimeSpentSec <= 45
+  ) {
     return "easy";
   }
   return "good";
