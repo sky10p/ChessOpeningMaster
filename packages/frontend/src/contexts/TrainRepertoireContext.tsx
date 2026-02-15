@@ -6,8 +6,8 @@ import { deepEqual } from "../utils/deepEqual";
 import { saveVariantReview } from "../repository/repertoires/trainVariants";
 import { ReviewRating, Turn } from "@chess-opening-master/common";
 import { useLocation } from "react-router-dom";
-import { suggestReviewRating } from "../utils/chess/spacedRepetition/reviewRating";
 import {
+  buildPendingVariantReview,
   buildVariantStartState,
   getAllowedMovesFromTrainVariants,
   getDefaultTrainVariants,
@@ -230,11 +230,6 @@ export const TrainRepertoireContextProvider: React.FC<
         const startedAtMs = variantStartTimes[finishedVariantName] ?? nowMs;
         const startingFen = variantStartFens[finishedVariantName] || chess.fen();
         const timeSpentSec = Math.max(1, Math.floor((nowMs - startedAtMs) / 1000));
-        const suggestedRating = suggestReviewRating(
-          lastErrors + lastIgnoredErrors,
-          0,
-          timeSpentSec
-        );
         setPendingReviews((previousPendingReviews) => {
           if (
             previousPendingReviews.some(
@@ -245,7 +240,7 @@ export const TrainRepertoireContextProvider: React.FC<
           }
           return [
             ...previousPendingReviews,
-            {
+            buildPendingVariantReview({
               variantName: finishedVariantName,
               openingName,
               startingFen,
@@ -253,8 +248,7 @@ export const TrainRepertoireContextProvider: React.FC<
               ignoredWrongMoves: lastIgnoredErrors,
               hintsUsed: 0,
               timeSpentSec,
-              suggestedRating,
-            },
+            }),
           ];
         });
         setVariantStartTimes((previousStartTimes) => {

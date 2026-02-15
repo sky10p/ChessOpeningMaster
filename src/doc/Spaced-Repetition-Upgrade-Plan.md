@@ -84,6 +84,12 @@ Update `ensureDatabaseIndexes`:
 - `variantReviewHistory`: `{ userId: 1, reviewedDayKey: 1 }`
 - `variantReviewHistory`: `{ userId: 1, openingName: 1, orientation: 1 }`
 
+Operational notes:
+
+- duplicate `variantsInfo` rows for `{ userId, repertoireId, variantName }` are removed before creating the unique index,
+- duplicate cleanup validates/coerces `_id` values to `ObjectId` and skips invalid entries,
+- cleanup logs deleted duplicate counts (and per-group failures) for audit/debug visibility.
+
 ## Scheduling Algorithm
 
 Use a rating-based scheduler (SM-2-compatible first, FSRS migration-ready later).
@@ -128,6 +134,7 @@ Set:
 - `lastReviewedAt = now`
 - `lastReviewedDayKey = todayDayKey`
 - `lastRating = rating`
+- `difficulty = max(1, round2(6 - ease))`, where `6` is the v1 difficulty baseline chosen so lower `ease` maps to higher difficulty while remaining in a positive range.
 
 Implementation note:
 
@@ -142,6 +149,12 @@ Input metrics from train session:
 - `ignoredWrongMoves`
 - `hintsUsed`
 - `timeSpentSec`
+
+Metric semantics:
+
+- suggestion logic uses `wrongMoves + ignoredWrongMoves` as total error pressure,
+- persisted review payload keeps `wrongMoves` and `ignoredWrongMoves` as separate fields for analytics,
+- this keeps suggestion behavior aligned with user-visible mistakes while preserving split metrics in history.
 
 Suggested mapping:
 

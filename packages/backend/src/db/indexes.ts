@@ -45,13 +45,41 @@ const normalizeIndexKey = (key: Record<string, unknown> | undefined): string => 
   );
 };
 
+const toObjectId = (value: unknown): ObjectId | null => {
+  if (value instanceof ObjectId) {
+    return value;
+  }
+  if (typeof value === "string" && ObjectId.isValid(value)) {
+    return new ObjectId(value);
+  }
+  return null;
+};
+
+const getDistinctObjectIds = (values: unknown[]): ObjectId[] => {
+  const seen = new Set<string>();
+  const result: ObjectId[] = [];
+  values.forEach((value) => {
+    const objectId = toObjectId(value);
+    if (!objectId) {
+      return;
+    }
+    const key = objectId.toHexString();
+    if (seen.has(key)) {
+      return;
+    }
+    seen.add(key);
+    result.push(objectId);
+  });
+  return result;
+};
+
 const removeDuplicateVariantInfoRecords = async (db: Db): Promise<void> => {
   const duplicateGroups = await db
     .collection("variantsInfo")
     .aggregate<{
       _id: { userId: string; repertoireId: string; variantName: string };
-      ids: ObjectId[];
-      keepId: ObjectId;
+      ids: unknown[];
+      keepId: unknown;
       count: number;
     }>([
       {
@@ -75,12 +103,32 @@ const removeDuplicateVariantInfoRecords = async (db: Db): Promise<void> => {
     .toArray();
 
   for (const group of duplicateGroups) {
-    const keepIdString = String(group.keepId);
-    const duplicateIds = group.ids.filter((id) => String(id) !== keepIdString);
-    if (duplicateIds.length === 0) {
-      continue;
+    try {
+      const keepId = toObjectId(group.keepId);
+      const ids = getDistinctObjectIds(group.ids);
+      const duplicateIds = keepId
+        ? ids.filter((id) => id.toHexString() !== keepId.toHexString())
+        : ids;
+      if (duplicateIds.length === 0) {
+        continue;
+      }
+      const deleteResult = await db
+        .collection("variantsInfo")
+        .deleteMany({ _id: { $in: duplicateIds } });
+      console.info("Removed duplicate variantsInfo records", {
+        userId: group._id.userId,
+        repertoireId: group._id.repertoireId,
+        variantName: group._id.variantName,
+        deletedCount: deleteResult.deletedCount,
+      });
+    } catch (error) {
+      console.error("Failed to remove duplicate variantsInfo records", {
+        userId: group._id.userId,
+        repertoireId: group._id.repertoireId,
+        variantName: group._id.variantName,
+        error,
+      });
     }
-    await db.collection("variantsInfo").deleteMany({ _id: { $in: duplicateIds } });
   }
 };
 

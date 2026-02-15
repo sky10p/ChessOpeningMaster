@@ -24,6 +24,7 @@ export interface SchedulerSeed {
 const MIN_EASE = 1.3;
 const MAX_EASE = 2.8;
 const DEFAULT_EASE = 2.3;
+const DIFFICULTY_BASELINE = 6;
 const SCHEDULER_VERSION = "sm2-v1";
 
 function clamp(value: number, min: number, max: number): number {
@@ -155,7 +156,7 @@ export function computeNextSchedule(
   }
 
   const stability = intervalDays;
-  const difficulty = Math.max(1, Number((6 - ease).toFixed(2)));
+  const difficulty = Math.max(1, Number((DIFFICULTY_BASELINE - ease).toFixed(2)));
 
   return {
     dueAt,

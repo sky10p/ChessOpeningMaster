@@ -1,5 +1,7 @@
 import { MoveVariantNode } from "../models/VariantNode";
 import { TrainVariant, Variant } from "../models/chess.models";
+import { ReviewRating } from "@chess-opening-master/common";
+import { suggestReviewRating } from "../utils/chess/spacedRepetition/reviewRating";
 
 export const getDefaultTrainVariants = (
   variants: Variant[],
@@ -99,4 +101,58 @@ export const removePendingReviewByVariantName = <T extends { variantName: string
 export const getOpeningNameFromVariant = (variantName: string): string => {
   const openingName = variantName.split(":")[0]?.trim();
   return openingName || variantName;
+};
+
+export const getTotalTrainingErrors = (
+  wrongMoves: number,
+  ignoredWrongMoves: number
+): number => {
+  return wrongMoves + ignoredWrongMoves;
+};
+
+export const buildPendingVariantReview = (params: {
+  variantName: string;
+  openingName: string;
+  startingFen: string;
+  wrongMoves: number;
+  ignoredWrongMoves: number;
+  hintsUsed: number;
+  timeSpentSec: number;
+  suggestedRating?: ReviewRating;
+}): {
+  variantName: string;
+  openingName: string;
+  startingFen: string;
+  wrongMoves: number;
+  ignoredWrongMoves: number;
+  hintsUsed: number;
+  timeSpentSec: number;
+  suggestedRating: ReviewRating;
+} => {
+  const {
+    variantName,
+    openingName,
+    startingFen,
+    wrongMoves,
+    ignoredWrongMoves,
+    hintsUsed,
+    timeSpentSec,
+    suggestedRating,
+  } = params;
+  return {
+    variantName,
+    openingName,
+    startingFen,
+    wrongMoves,
+    ignoredWrongMoves,
+    hintsUsed,
+    timeSpentSec,
+    suggestedRating:
+      suggestedRating ??
+      suggestReviewRating(
+        getTotalTrainingErrors(wrongMoves, ignoredWrongMoves),
+        hintsUsed,
+        timeSpentSec
+      ),
+  };
 };
