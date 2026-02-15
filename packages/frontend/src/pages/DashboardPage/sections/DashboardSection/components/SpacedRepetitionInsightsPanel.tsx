@@ -20,6 +20,7 @@ import {
   ArrowTopRightOnSquareIcon,
   QuestionMarkCircleIcon,
 } from "@heroicons/react/24/outline";
+import { getTodayPlanProgress } from "../../../../../utils/path/todayPlanProgress";
 
 interface SpacedRepetitionInsightsPanelProps {
   plan: PathPlanSummary | null;
@@ -141,6 +142,7 @@ export const SpacedRepetitionInsightsPanel: React.FC<SpacedRepetitionInsightsPan
     () => mapUpcomingOpenings(plan?.upcomingOpenings || []),
     [plan]
   );
+  const todayProgress = useMemo(() => getTodayPlanProgress(plan), [plan]);
 
   const nextVariants = (plan?.nextVariants || []).slice(0, 6);
   const dueThisWeek = dueLoadData.slice(0, 7).reduce((sum, entry) => sum + entry.dueCount, 0);
@@ -202,6 +204,44 @@ export const SpacedRepetitionInsightsPanel: React.FC<SpacedRepetitionInsightsPan
               valueClassName="text-blue-300"
               helpText="Recommended new variants to add today after accounting for due workload and New/Day limit."
             />
+          </div>
+
+          <div className="bg-gray-800 rounded-lg p-3">
+            <h4 className="text-sm font-semibold text-gray-200 mb-2">Today vs Plan</h4>
+            <div className="grid grid-cols-2 gap-2 text-center">
+              <div className="rounded bg-gray-700/70 px-2 py-2">
+                <div className="text-[11px] text-gray-400">Reviews (due)</div>
+                <div className="text-lg font-semibold text-cyan-300">
+                  {todayProgress.completedReviewsToday} / {todayProgress.reviewTargetToday}
+                </div>
+              </div>
+              <div className="rounded bg-gray-700/70 px-2 py-2">
+                <div className="text-[11px] text-gray-400">New learned (first-time)</div>
+                <div className="text-lg font-semibold text-blue-300">
+                  {todayProgress.completedNewToday} / {todayProgress.newTargetToday}
+                </div>
+              </div>
+            </div>
+            <div className="mt-2 grid grid-cols-3 gap-2 text-center">
+              <div className="rounded bg-gray-700/70 px-2 py-2">
+                <div className="text-[11px] text-gray-400">Target</div>
+                <div className="text-lg font-semibold text-cyan-300">{todayProgress.plannedTodayTarget}</div>
+              </div>
+              <div className="rounded bg-gray-700/70 px-2 py-2">
+                <div className="text-[11px] text-gray-400">Completed</div>
+                <div className="text-lg font-semibold text-emerald-300">{todayProgress.completedToday}</div>
+              </div>
+              <div className="rounded bg-gray-700/70 px-2 py-2">
+                <div className="text-[11px] text-gray-400">Remaining</div>
+                <div className="text-lg font-semibold text-blue-300">{todayProgress.remainingToTarget}</div>
+              </div>
+            </div>
+            <div className="mt-2 text-xs text-gray-400">
+              Reviews remaining: {todayProgress.remainingReviewsTarget} · New remaining: {todayProgress.remainingNewTarget}
+            </div>
+            <div className={`mt-1 text-sm ${todayProgress.exceededTarget ? "text-emerald-300" : "text-gray-300"}`}>
+              {todayProgress.todayPlanMessage}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">

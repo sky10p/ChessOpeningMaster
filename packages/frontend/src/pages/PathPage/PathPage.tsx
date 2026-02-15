@@ -22,7 +22,7 @@ import {
   ReviewRating,
 } from "@chess-opening-master/common";
 import { isEmptyPath, isNewVariantPath, isStudiedVariantPath, isStudyPath } from "./helpers";
-import { getTodayPlanProgress } from "./todayPlanProgress";
+import { getTodayPlanProgress } from "../../utils/path/todayPlanProgress";
 
 type FilterOrientation = BoardOrientation | "all";
 type PathView = "lesson" | "forecast";
