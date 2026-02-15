@@ -18,7 +18,7 @@ import {
 } from "@chess-opening-master/common";
 import { getRepertoireName } from "./repertoireService";
 import { extractId } from "../utils/idUtils";
-import { Document, ObjectId } from "mongodb";
+import { Document, Filter, ObjectId } from "mongodb";
 import { getAllVariants } from "./variantsService";
 import { ReviewRating } from "@chess-opening-master/common";
 
@@ -29,7 +29,7 @@ export interface VariantInfoDocument {
   repertoireId: string;
   variantName: string;
   errors: number;
-  lastDate: string | { $date: string };
+  lastDate: string | Date | { $date: string };
   dueAt?: string | Date | { $date: string };
   lastReviewedDayKey?: string;
   openingName?: string;
@@ -135,7 +135,9 @@ function normalizeVariantInfo(variant: VariantInfoDocument): VariantInfo {
     lastDate:
       typeof variant.lastDate === "string"
         ? new Date(variant.lastDate)
-        : new Date(variant.lastDate.$date),
+        : variant.lastDate instanceof Date
+          ? variant.lastDate
+          : new Date(variant.lastDate.$date),
     dueAt: variant.dueAt
       ? typeof variant.dueAt === "string"
         ? new Date(variant.dueAt)
@@ -425,7 +427,7 @@ export const determineBestPath = async (
   }
 
   if (category) {
-    return await selectPathBasedOnCategory(userId, category, categories);
+    return await selectPathBasedOnCategory(userId, category, categories, filters);
   }
   return await selectPathDeterministically(
     userId,
@@ -606,7 +608,8 @@ async function selectPathBasedOnCategory(
     oldVariants: VariantInfo[];
     dueVariants: VariantInfo[];
     studyToReview: StudyToReview | null;
-  }
+  },
+  filters?: PathSelectionFilters
 ): Promise<Path> {
   switch (category) {
     case "variantsWithErrors": {
@@ -634,6 +637,9 @@ async function selectPathBasedOnCategory(
       return await createVariantPath(userId, findOldestVariant(categories.oldVariants));
     }
     case "studyToReview": {
+      if (hasAnyVariantFilter(filters)) {
+        return createEmptyPath();
+      }
       if (!categories.studyToReview) {
         return createEmptyPath();
       }
@@ -754,11 +760,6 @@ function sortTopFenCount(
       return a.fen.localeCompare(b.fen);
     })
     .slice(0, limit);
-}
-
-function isWithinDateRange(dayKey: string, rangeStart: Date, rangeEnd: Date): boolean {
-  const dayDate = new Date(`${dayKey}T00:00:00.000Z`);
-  return dayDate >= rangeStart && dayDate <= rangeEnd;
 }
 
 function deriveOpeningNameFromVariant(variantName: string): string {
@@ -957,25 +958,33 @@ export const getPathAnalytics = async (
   const defaultStart = addUtcDays(defaultEnd, -29);
   const rangeStart = parseDateOnly(filters?.dateFrom, defaultStart);
   const rangeEnd = parseDateOnly(filters?.dateTo, defaultEnd);
-  const allReviews = await db
+  const rangeEndExclusive = addUtcDays(rangeEnd, 1);
+  const reviewQuery: Filter<ReviewHistoryDocument> = {
+    userId,
+    reviewedAt: {
+      $gte: rangeStart,
+      $lt: rangeEndExclusive,
+    },
+  };
+  if (filters?.orientation) {
+    reviewQuery.orientation = filters.orientation;
+  }
+  const openingName = filters?.openingName?.trim();
+  if (openingName) {
+    const openingRegex = new RegExp(escapeRegex(openingName), "i");
+    reviewQuery.$or = [
+      { openingName: { $regex: openingRegex } },
+      { variantName: { $regex: openingRegex } },
+    ];
+  }
+  const fen = filters?.fen?.trim();
+  if (fen) {
+    reviewQuery.startingFen = { $regex: new RegExp(escapeRegex(fen), "i") };
+  }
+  const filteredReviews = await db
     .collection<ReviewHistoryDocument>("variantReviewHistory")
-    .find({ userId })
+    .find(reviewQuery)
     .toArray();
-  const filteredReviews = allReviews.filter((review) => {
-    const reviewDayKey = getReviewDayKey(review);
-    if (!isWithinDateRange(reviewDayKey, rangeStart, rangeEnd)) {
-      return false;
-    }
-    return matchesVariantFilters(
-      {
-        variantName: review.variantName,
-        openingName: review.openingName,
-        startingFen: review.startingFen,
-        orientation: review.orientation,
-      },
-      filters
-    );
-  });
   const ratingBreakdown: Record<ReviewRating, number> = {
     again: 0,
     hard: 0,
@@ -1158,4 +1167,8 @@ function weightedRandomSelection<T, R>(
 
   // Fallback to first item (shouldn't reach here if weights are positive)
   return extractItem(items[0]);
+}
+
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }

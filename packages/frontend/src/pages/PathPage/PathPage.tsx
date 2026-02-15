@@ -90,7 +90,12 @@ interface MetricInfoTooltipProps {
 
 const MetricInfoTooltip: React.FC<MetricInfoTooltipProps> = ({ text }) => (
   <span className="group relative inline-flex items-center">
-    <button type="button" className="text-gray-500 hover:text-gray-300 focus:outline-none">
+    <button
+      type="button"
+      aria-label="Metric info"
+      title="Metric info"
+      className="text-gray-500 hover:text-gray-300 focus:outline-none"
+    >
       <QuestionMarkCircleIcon className="h-4 w-4" />
     </button>
     <span className="pointer-events-none absolute left-0 top-full z-20 mt-2 hidden w-64 rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-xs text-gray-200 shadow-xl group-hover:block group-focus-within:block">

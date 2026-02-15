@@ -97,6 +97,15 @@ export const TrainRepertoireContextProvider: React.FC<
   const [lastErrors, setLastErrors] = React.useState<number>(0);
   const [lastIgnoredErrors, setLastIgnoredErrors] = React.useState<number>(0);
   const [pendingReviews, setPendingReviews] = React.useState<PendingVariantReview[]>([]);
+  const [variantStartFens, setVariantStartFens] = React.useState<Record<string, string>>(
+    () =>
+      Object.fromEntries(
+        defaultTrainVariants.map((trainVariant) => [
+          trainVariant.variant.fullName,
+          chess.fen(),
+        ])
+      )
+  );
   const [variantStartTimes, setVariantStartTimes] = React.useState<Record<string, number>>(
     () =>
       Object.fromEntries(
@@ -116,6 +125,8 @@ export const TrainRepertoireContextProvider: React.FC<
   const chooseTrainVariantsToTrain = (selectedTrainVariants: TrainVariant[]) => {
     const nowMs = Date.now();
     setTrainVariants(selectedTrainVariants);
+    initBoard();
+    const startFen = chess.fen();
     setVariantStartTimes(
       Object.fromEntries(
         selectedTrainVariants.map((trainVariant) => [
@@ -124,10 +135,17 @@ export const TrainRepertoireContextProvider: React.FC<
         ])
       )
     );
+    setVariantStartFens(
+      Object.fromEntries(
+        selectedTrainVariants.map((trainVariant) => [
+          trainVariant.variant.fullName,
+          startFen,
+        ])
+      )
+    );
     setPendingReviews([]);
     setLastErrors(0);
     setLastIgnoredErrors(0);
-    initBoard();
   };
 
   const submitPendingVariantReview = async (rating: ReviewRating) => {
@@ -226,6 +244,7 @@ export const TrainRepertoireContextProvider: React.FC<
         const finishedVariantName = trainVariant.variant.fullName;
         const openingName = getOpeningNameFromVariant(finishedVariantName);
         const startedAtMs = variantStartTimes[finishedVariantName] ?? nowMs;
+        const startingFen = variantStartFens[finishedVariantName] || chess.fen();
         const timeSpentSec = Math.max(1, Math.floor((nowMs - startedAtMs) / 1000));
         const suggestedRating = suggestReviewRating(
           lastErrors + lastIgnoredErrors,
@@ -245,7 +264,7 @@ export const TrainRepertoireContextProvider: React.FC<
             {
               variantName: finishedVariantName,
               openingName,
-              startingFen: chess.fen(),
+              startingFen,
               wrongMoves: lastErrors,
               ignoredWrongMoves: lastIgnoredErrors,
               hintsUsed: 0,
@@ -258,6 +277,11 @@ export const TrainRepertoireContextProvider: React.FC<
           const nextStartTimes = { ...previousStartTimes };
           delete nextStartTimes[finishedVariantName];
           return nextStartTimes;
+        });
+        setVariantStartFens((previousStartFens) => {
+          const nextStartFens = { ...previousStartFens };
+          delete nextStartFens[finishedVariantName];
+          return nextStartFens;
         });
         setLastErrors(0);
         setLastIgnoredErrors(0);

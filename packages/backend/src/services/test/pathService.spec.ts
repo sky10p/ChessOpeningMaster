@@ -8,6 +8,8 @@ import {
   createStudyPath,
   createNewVariantPath,
   determineBestPath,
+  getPathPlan,
+  getPathAnalytics,
   StudyToReview,
   StudyGroup
 } from '../pathService';
@@ -890,6 +892,237 @@ type Variant = { fullName: string; moves: unknown[]; name: string; differentMove
         global.Date = originalDate;
         mockRandom.mockRestore();
       }
+    });
+  });
+
+  describe('getPathPlan', () => {
+    it('should return zeroed summary for empty data', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-02-15T10:00:00.000Z'));
+
+      (getAllVariants as jest.Mock).mockResolvedValue({
+        newVariants: [],
+        studiedVariants: [],
+      });
+
+      try {
+        const result = await getPathPlan('user-1');
+
+        expect(result.todayKey).toBe('2026-02-15');
+        expect(result.overdueCount).toBe(0);
+        expect(result.dueTodayCount).toBe(0);
+        expect(result.reviewDueCount).toBe(0);
+        expect(result.completedTodayCount).toBe(0);
+        expect(result.suggestedNewToday).toBe(0);
+        expect(result.forecastDays).toHaveLength(14);
+        expect(result.nextVariants).toHaveLength(0);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('should bucket overdue vs due-today and apply orientation/opening/fen filters', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-02-15T10:00:00.000Z'));
+
+      (getAllVariants as jest.Mock).mockResolvedValue({
+        newVariants: [
+          {
+            type: 'newVariant',
+            repertoireId: 'r1',
+            repertoireName: 'Rep 1',
+            name: 'Sicilian: New A',
+            openingName: 'Sicilian Defense',
+            orientation: 'white',
+            startingFen: 'rnbqkbnr/pppppppp/8/8',
+          },
+          {
+            type: 'newVariant',
+            repertoireId: 'r2',
+            repertoireName: 'Rep 2',
+            name: 'French: New B',
+            openingName: 'French Defense',
+            orientation: 'black',
+            startingFen: 'irrelevant',
+          },
+        ],
+        studiedVariants: [
+          {
+            type: 'variant',
+            id: 'v-overdue',
+            repertoireId: 'r1',
+            repertoireName: 'Rep 1',
+            name: 'Sicilian: Mainline',
+            errors: 1,
+            lastDate: '2026-02-10T00:00:00.000Z',
+            dueAt: '2026-02-14T00:00:00.000Z',
+            lastReviewedDayKey: '2026-02-10',
+            openingName: 'Sicilian Defense',
+            orientation: 'white',
+            startingFen: 'rnbqkbnr/pppppppp/8/8',
+          },
+          {
+            type: 'variant',
+            id: 'v-today',
+            repertoireId: 'r1',
+            repertoireName: 'Rep 1',
+            name: 'Sicilian: Anti',
+            errors: 0,
+            lastDate: '2026-02-13T00:00:00.000Z',
+            dueAt: '2026-02-15T00:00:00.000Z',
+            lastReviewedDayKey: '2026-02-13',
+            openingName: 'Sicilian Defense',
+            orientation: 'white',
+            startingFen: 'rnbqkbnr/pppppppp/8/8',
+          },
+          {
+            type: 'variant',
+            id: 'v-completed-today',
+            repertoireId: 'r1',
+            repertoireName: 'Rep 1',
+            name: 'Sicilian: Done',
+            errors: 0,
+            lastDate: '2026-02-15T08:00:00.000Z',
+            dueAt: '2026-02-15T00:00:00.000Z',
+            lastReviewedDayKey: '2026-02-15',
+            openingName: 'Sicilian Defense',
+            orientation: 'white',
+            startingFen: 'rnbqkbnr/pppppppp/8/8',
+          },
+        ],
+      });
+
+      try {
+        const result = await getPathPlan('user-1', {
+          orientation: 'white',
+          openingName: 'sicilian',
+          fen: 'rnbqkbnr',
+          dailyNewLimit: 3,
+        });
+
+        expect(result.overdueCount).toBe(1);
+        expect(result.dueTodayCount).toBe(1);
+        expect(result.reviewDueCount).toBe(2);
+        expect(result.completedTodayCount).toBe(1);
+        expect(result.newVariantsAvailable).toBe(1);
+        expect(result.suggestedNewToday).toBe(1);
+        expect(result.nextVariants.map((entry) => entry.variantName)).toEqual([
+          'Sicilian: Mainline',
+          'Sicilian: Anti',
+        ]);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+  });
+
+  describe('getPathAnalytics', () => {
+    it('should query by date boundaries and aggregate filtered review metrics', async () => {
+      jest.useFakeTimers().setSystemTime(new Date('2026-02-15T10:00:00.000Z'));
+
+      const findMock = jest.fn().mockReturnValue({
+        toArray: jest.fn().mockResolvedValue([
+          {
+            userId: 'user-1',
+            repertoireId: 'r1',
+            variantName: 'Sicilian: Mainline',
+            reviewedAt: '2026-02-15T00:00:00.000Z',
+            reviewedDayKey: '2026-02-15',
+            rating: 'good',
+            openingName: 'Sicilian Defense',
+            startingFen: 'fen-a',
+            orientation: 'white',
+          },
+          {
+            userId: 'user-1',
+            repertoireId: 'r1',
+            variantName: 'Sicilian: Najdorf',
+            reviewedAt: '2026-02-15T12:30:00.000Z',
+            reviewedDayKey: '2026-02-15',
+            rating: 'again',
+            openingName: 'Sicilian Defense',
+            startingFen: 'fen-a',
+            orientation: 'white',
+          },
+          {
+            userId: 'user-1',
+            repertoireId: 'r1',
+            variantName: 'Sicilian: Closed',
+            reviewedAt: '2026-02-14T11:00:00.000Z',
+            reviewedDayKey: '2026-02-14',
+            rating: 'easy',
+            openingName: 'Sicilian Defense',
+            startingFen: 'fen-b',
+            orientation: 'white',
+          },
+        ]),
+      });
+
+      mockDB.collection.mockImplementation((collectionName: string) => {
+        if (collectionName === 'variantReviewHistory') {
+          return {
+            find: findMock,
+          };
+        }
+        return mockDB;
+      });
+
+      try {
+        const result = await getPathAnalytics('user-1', {
+          dateFrom: '2026-02-14',
+          dateTo: '2026-02-15',
+          orientation: 'white',
+          openingName: 'sicilian',
+          fen: 'fen',
+        });
+
+        expect(findMock).toHaveBeenCalledTimes(1);
+        const queryArg = findMock.mock.calls[0][0];
+        expect(queryArg.userId).toBe('user-1');
+        expect(queryArg.orientation).toBe('white');
+        expect(queryArg.reviewedAt.$gte.toISOString()).toBe('2026-02-14T00:00:00.000Z');
+        expect(queryArg.reviewedAt.$lt.toISOString()).toBe('2026-02-16T00:00:00.000Z');
+        expect(queryArg.$or).toHaveLength(2);
+        expect(queryArg.startingFen.$regex).toBeInstanceOf(RegExp);
+
+        expect(result.rangeStart).toBe('2026-02-14');
+        expect(result.rangeEnd).toBe('2026-02-15');
+        expect(result.totalReviews).toBe(3);
+        expect(result.ratingBreakdown.again).toBe(1);
+        expect(result.ratingBreakdown.good).toBe(1);
+        expect(result.ratingBreakdown.easy).toBe(1);
+        expect(result.dailyReviews).toEqual([
+          { date: '2026-02-14', count: 1 },
+          { date: '2026-02-15', count: 2 },
+        ]);
+        expect(result.topOpenings[0]).toEqual({ name: 'Sicilian Defense', count: 3 });
+        expect(result.topFens[0]).toEqual({ fen: 'fen-a', count: 2 });
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('should return zero daily counts for date range with no reviews', async () => {
+      mockDB.collection.mockImplementation((collectionName: string) => {
+        if (collectionName === 'variantReviewHistory') {
+          return {
+            find: jest.fn().mockReturnValue({
+              toArray: jest.fn().mockResolvedValue([]),
+            }),
+          };
+        }
+        return mockDB;
+      });
+
+      const result = await getPathAnalytics('user-1', {
+        dateFrom: '2026-01-01',
+        dateTo: '2026-01-03',
+      });
+
+      expect(result.totalReviews).toBe(0);
+      expect(result.dailyReviews).toEqual([
+        { date: '2026-01-01', count: 0 },
+        { date: '2026-01-02', count: 0 },
+        { date: '2026-01-03', count: 0 },
+      ]);
     });
   });
 });

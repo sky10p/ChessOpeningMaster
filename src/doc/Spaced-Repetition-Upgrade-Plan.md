@@ -32,7 +32,7 @@ Add fields:
 
 - `dueAt: Date`
 - `lastReviewedAt: Date`
-- `lastReviewedDayKey: string` (`YYYY-MM-DD` in user timezone)
+- `lastReviewedDayKey: string` (`YYYY-MM-DD` in UTC)
 - `state: "new" | "learning" | "review"`
 - `stability: number`
 - `difficulty: number`
@@ -100,7 +100,7 @@ Use a rating-based scheduler (SM-2-compatible first, FSRS migration-ready later)
 After every review:
 
 - `intervalDays = max(1, computedIntervalDays)`
-- `dueAt` must be at least next local day boundary in user timezone.
+- `dueAt` must be at least the next UTC day boundary.
 - Candidate selection must exclude variants where `lastReviewedDayKey === todayDayKey`.
 
 ## Suggested update logic (v1)
@@ -124,10 +124,15 @@ After every review:
 
 Set:
 
-- `dueAt = startOfLocalDay(today + intervalDays)`
+- `dueAt = startOfUtcDay(today + intervalDays)`
 - `lastReviewedAt = now`
 - `lastReviewedDayKey = todayDayKey`
 - `lastRating = rating`
+
+Implementation note:
+
+- Current scheduling/path logic uses UTC day keys (`toISOString().slice(0, 10)`) and UTC-midnight bucketing.
+- If user-timezone semantics are introduced later, update both scheduler calculations and query/filter boundaries consistently.
 
 ## Auto-suggest rating
 

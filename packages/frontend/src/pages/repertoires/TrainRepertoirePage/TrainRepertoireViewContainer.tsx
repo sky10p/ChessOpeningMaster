@@ -22,6 +22,7 @@ import { useFooterDispatch } from "../../../contexts/FooterContext";
 import { RepertoireWorkspaceLayout } from "../shared/RepertoireWorkspaceLayout";
 import { ReviewRating } from "@chess-opening-master/common";
 import { useAlertContext } from "../../../contexts/AlertContext";
+import { ReviewRatingDialog } from "../../../components/design/dialogs/ReviewRatingDialog";
 
 const TrainRepertoireViewContainer: React.FC = () => {
   const [panelSelected, setPanelSelected] = React.useState<
@@ -259,6 +260,13 @@ const TrainRepertoireViewContainer: React.FC = () => {
     }
   };
 
+  const handleReviewDialogClose = () => {
+    if (isSavingRating || !pendingVariantReview) {
+      return;
+    }
+    void handleReviewRating(selectedRating);
+  };
+
   return (
     <>
       <RepertoireWorkspaceLayout
@@ -267,43 +275,17 @@ const TrainRepertoireViewContainer: React.FC = () => {
         mobilePanel={mobilePanelContent}
         desktopPanel={desktopPanelContent}
       />
-      {pendingVariantReview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="w-full max-w-xl rounded-lg border border-slate-700 bg-slate-900 p-5 shadow-2xl">
-            <h3 className="text-lg font-semibold text-slate-100">Rate This Review</h3>
-            <p className="mt-1 text-sm text-slate-300">{pendingVariantReview.variantName}</p>
-            <div className="mt-3 grid grid-cols-2 gap-2 text-sm text-slate-300">
-              <div>Wrong moves: {pendingVariantReview.wrongMoves}</div>
-              <div>Ignored errors: {pendingVariantReview.ignoredWrongMoves}</div>
-              <div>Hints used: {pendingVariantReview.hintsUsed}</div>
-              <div>Time: {pendingVariantReview.timeSpentSec}s</div>
-            </div>
-            <p className="mt-3 text-sm text-slate-200">
-              Suggested: <span className="font-semibold">{pendingVariantReview.suggestedRating}</span>
-            </p>
-            <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {(["again", "hard", "good", "easy"] as ReviewRating[]).map((rating) => (
-                <button
-                  key={rating}
-                  type="button"
-                  disabled={isSavingRating}
-                  onClick={() => {
-                    setSelectedRating(rating);
-                    void handleReviewRating(rating);
-                  }}
-                  className={`rounded px-3 py-2 text-sm font-semibold transition ${
-                    selectedRating === rating
-                      ? "bg-blue-600 text-white"
-                      : "bg-slate-800 text-slate-200 hover:bg-slate-700"
-                  } ${isSavingRating ? "cursor-not-allowed opacity-60" : ""}`}
-                >
-                  {rating}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      <ReviewRatingDialog
+        open={Boolean(pendingVariantReview)}
+        pendingVariantReview={pendingVariantReview}
+        selectedRating={selectedRating}
+        isSavingRating={isSavingRating}
+        onClose={handleReviewDialogClose}
+        onSelectRating={(rating) => {
+          setSelectedRating(rating);
+          void handleReviewRating(rating);
+        }}
+      />
     </>
   );
 };
