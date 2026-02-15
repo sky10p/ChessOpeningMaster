@@ -46,12 +46,33 @@ This directory contains comprehensive documentation for the Chess Opening Master
 - Route gating and logout behavior
 - API repository usage and credential handling
 
+### 📘 [PathPage and Next Lesson Logic](PathPage-Next-Lesson-Logic.md)
+**Required for changes to `/path`, `usePaths`, or path-selection backend logic**
+- `/path` page behavior and action flow
+- `GET /paths` category and no-category behavior
+- Deterministic due-first selection and category rules
+- Weighted new-variant selection details and fallback order
+
+### 🧠 [Spaced Repetition Upgrade Plan](Spaced-Repetition-Upgrade-Plan.md)
+**Required for migration from legacy `errors + lastDate` scheduling to rating-based SRS**
+- No same-day repeat rules
+- `Again/Hard/Good/Easy` rating workflow and auto-suggestion
+- Path planning/analytics API and UI design
+- Phased rollout and acceptance criteria
+
 ### 🔧 [Troubleshooting Guide](Troubleshooting-Guide.md)
 **First stop when encountering issues**
 - Common TypeScript compilation errors
 - Runtime variant selection problems
 - Test failure diagnosis and solutions
 - Build and development environment issues
+
+### [Dashboard Spaced Repetition Insights](Dashboard-Spaced-Repetition-Insights.md)
+**Required for Dashboard `Path Insights` tab and charts that consume path/spaced-repetition insights**
+- Dashboard insights architecture and data flow
+- Mapping Dashboard filters to path-insight filters
+- Due-load, rating, opening-forecast, and next-variant chart behavior
+- Testing expectations for mocked insights data
 
 ## Quick Start for Agents
 
@@ -60,6 +81,8 @@ This directory contains comprehensive documentation for the Chess Opening Master
 2. Read [RepertoireContext Architecture](RepertoireContext-Architecture.md) for core system understanding
 3. Review [Variant Selection Logic](Variant-Selection-Logic.md) for chess-specific behavior
 4. Read [User Auth Backend](User-Auth-Backend.md) and [User Auth Frontend](User-Auth-Frontend.md) before changing user-related logic
+5. Read [PathPage and Next Lesson Logic](PathPage-Next-Lesson-Logic.md) before changing `/path` or next-lesson selection
+6. Read [Spaced Repetition Upgrade Plan](Spaced-Repetition-Upgrade-Plan.md) before changing training scheduling model
 
 ### Debugging Issues
 1. Check [Troubleshooting Guide](Troubleshooting-Guide.md) for common problems
@@ -72,6 +95,9 @@ This directory contains comprehensive documentation for the Chess Opening Master
 3. Always test variant compatibility when changing move logic
 4. Follow the established directory structure for context organization
 5. Follow [React Effect & Data Fetching Guide](React-Effect-Data-Fetching-Guide.md) before adding new data-fetching effects
+6. Validate selection behavior with [PathPage and Next Lesson Logic](PathPage-Next-Lesson-Logic.md) before changing path rules
+7. Follow [Spaced Repetition Upgrade Plan](Spaced-Repetition-Upgrade-Plan.md) for scheduler/rating migrations
+8. Read [Dashboard Spaced Repetition Insights](Dashboard-Spaced-Repetition-Insights.md) before changing Dashboard SRS/path charts
 
 ## Key Technical Concepts
 
@@ -105,3 +131,5 @@ Extensive troubleshooting documentation covers common issues and their solutions
 ---
 
 *This documentation is maintained to help AI agents quickly understand and work with the Chess Opening Master codebase. Update these files when making architectural changes.*
+
+

@@ -1,4 +1,4 @@
-import { TrainVariantInfo } from "@chess-opening-master/common";
+import { TrainVariantInfo, VariantReviewInput } from "@chess-opening-master/common";
 import { API_URL } from "../constants";
 import { apiFetch } from "../apiClient";
 
@@ -30,6 +30,26 @@ export const getTrainVariantInfo = async (
   const data = await response.json();
   return data.map((info: TrainVariantInfo) => ({
     ...info,
-    lastDate: new Date(info.lastDate)
+    lastDate: new Date(info.lastDate),
+    dueAt: info.dueAt ? new Date(info.dueAt) : undefined,
+    lastReviewedAt: info.lastReviewedAt ? new Date(info.lastReviewedAt) : undefined,
+    suspendedUntil: info.suspendedUntil ? new Date(info.suspendedUntil) : undefined,
   }));
+};
+
+export const saveVariantReview = async (
+  repertoireId: string,
+  payload: VariantReviewInput
+) => {
+  const response = await apiFetch(`${API_URL}/repertoires/${repertoireId}/variant-reviews`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to save variant review");
+  }
+  return response.json();
 };

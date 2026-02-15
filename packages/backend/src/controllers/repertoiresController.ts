@@ -3,6 +3,8 @@ import { ObjectId } from "mongodb";
 import { getDB } from "../db/mongo";
 import { getRequestUserId } from "../utils/requestUser";
 import AdmZip from "adm-zip";
+import { inferSuggestedRatingFromLegacyErrors, parseReviewRating } from "../services/spacedRepetitionService";
+import { saveVariantReview } from "../services/variantReviewService";
 
 const getUserFilter = (req: Request) => ({ userId: getRequestUserId(req) });
 
@@ -159,26 +161,73 @@ export async function getVariantsInfo(req: Request, res: Response, next: NextFun
 export async function postVariantsInfo(req: Request, res: Response, next: NextFunction) {
   try {
     const { id } = req.params;
-    const { variantName, errors } = req.body;
-    const db = getDB();
-    const trainVariantsInfo = await db.collection("variantsInfo").findOne({ repertoireId: id, variantName, ...getUserFilter(req) });
-    if (!trainVariantsInfo) {
-      const newVariantInfo = { repertoireId: id, variantName, errors, lastDate: new Date(), ...getUserFilter(req) };
-      await db.collection("variantsInfo").insertOne(newVariantInfo);
-      return res.status(201).json(newVariantInfo);
+    const variantName = typeof req.body?.variantName === "string" ? req.body.variantName.trim() : "";
+    const legacyErrors = Number.isFinite(req.body?.errors) ? Math.max(0, Math.floor(req.body.errors)) : 0;
+    if (!variantName) {
+      return res.status(400).json({ message: "variantName is required" });
     }
-    const currentDate = new Date();
-    const lastDate = new Date(trainVariantsInfo.lastDate);
-    const shouldUpdate = errors > trainVariantsInfo.errors || (errors <= trainVariantsInfo.errors && currentDate > lastDate);
-    if (!shouldUpdate) {
-      return res.status(200).json({ message: "No update needed" });
+    const suggestedRating = inferSuggestedRatingFromLegacyErrors(legacyErrors);
+    const parsedRating = parseReviewRating(req.body?.rating);
+    const rating = parsedRating || suggestedRating;
+    const result = await saveVariantReview({
+      userId: getRequestUserId(req),
+      repertoireId: id,
+      variantName,
+      rating,
+      suggestedRating,
+      acceptedSuggested: rating === suggestedRating,
+      wrongMoves: legacyErrors,
+      ignoredWrongMoves: Number.isFinite(req.body?.ignoredWrongMoves) ? req.body.ignoredWrongMoves : 0,
+      hintsUsed: Number.isFinite(req.body?.hintsUsed) ? req.body.hintsUsed : 0,
+      timeSpentSec: Number.isFinite(req.body?.timeSpentSec) ? req.body.timeSpentSec : 0,
+      startingFen: typeof req.body?.startingFen === "string" ? req.body.startingFen : undefined,
+      openingName: typeof req.body?.openingName === "string" ? req.body.openingName : undefined,
+      orientation:
+        req.body?.orientation === "white" || req.body?.orientation === "black"
+          ? req.body.orientation
+          : undefined,
+    });
+    res.status(200).json(result.variantInfo);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function postVariantReview(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { id } = req.params;
+    const variantName = typeof req.body?.variantName === "string" ? req.body.variantName.trim() : "";
+    if (!variantName) {
+      return res.status(400).json({ message: "variantName is required" });
     }
-    const updatedVariants = await db.collection("variantsInfo").findOneAndUpdate(
-      { _id: new ObjectId(trainVariantsInfo._id) },
-      { $set: { repertoireId: id, variantName, errors, lastDate: currentDate } },
-      { returnDocument: "after" }
-    );
-    res.json(updatedVariants);
+
+    const parsedRating = parseReviewRating(req.body?.rating);
+    if (!parsedRating) {
+      return res.status(400).json({ message: "rating must be one of: again, hard, good, easy" });
+    }
+
+    const parsedSuggestedRating = parseReviewRating(req.body?.suggestedRating);
+    const result = await saveVariantReview({
+      userId: getRequestUserId(req),
+      repertoireId: id,
+      variantName,
+      rating: parsedRating,
+      suggestedRating: parsedSuggestedRating || undefined,
+      acceptedSuggested:
+        typeof req.body?.acceptedSuggested === "boolean" ? req.body.acceptedSuggested : undefined,
+      wrongMoves: Number.isFinite(req.body?.wrongMoves) ? req.body.wrongMoves : undefined,
+      ignoredWrongMoves: Number.isFinite(req.body?.ignoredWrongMoves) ? req.body.ignoredWrongMoves : undefined,
+      hintsUsed: Number.isFinite(req.body?.hintsUsed) ? req.body.hintsUsed : undefined,
+      timeSpentSec: Number.isFinite(req.body?.timeSpentSec) ? req.body.timeSpentSec : undefined,
+      startingFen: typeof req.body?.startingFen === "string" ? req.body.startingFen : undefined,
+      openingName: typeof req.body?.openingName === "string" ? req.body.openingName : undefined,
+      orientation:
+        req.body?.orientation === "white" || req.body?.orientation === "black"
+          ? req.body.orientation
+          : undefined,
+    });
+
+    res.status(201).json(result);
   } catch (err) {
     next(err);
   }

@@ -9,6 +9,7 @@ import {
   duplicateRepertoire,
   getVariantsInfo,
   postVariantsInfo,
+  postVariantReview,
   updateRepertoire,
   updateRepertoireName,
   moveRepertoireOrderUp,
@@ -29,6 +30,7 @@ router.post("/", createRepertoire);
 router.post("/:id/duplicate", duplicateRepertoire);
 router.get("/:id/variantsInfo", getVariantsInfo);
 router.post("/:id/variantsInfo", postVariantsInfo);
+router.post("/:id/variant-reviews", postVariantReview);
 router.delete("/:id/variantsInfo", deleteVariantInfo);
 router.put("/:id", updateRepertoire);
 router.put("/:id/name", updateRepertoireName);

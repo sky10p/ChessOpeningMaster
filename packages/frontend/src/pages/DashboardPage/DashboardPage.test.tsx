@@ -7,6 +7,7 @@ import { DashboardPage } from "./DashboardPage";
 import "@testing-library/jest-dom";
 import { IRepertoireDashboard } from "@chess-opening-master/common";
 import { Color, Square, PieceSymbol } from "chess.js";
+import * as pathInsightsHookModule from "./sections/DashboardSection/hooks/usePathInsights";
 
 class ResizeObserver {
     observe() {}
@@ -30,6 +31,34 @@ const mockRepertoires: IRepertoireDashboard[] = [
 
 describe("DashboardPage", () => {
   beforeEach(() => {
+    jest.spyOn(pathInsightsHookModule, "usePathInsights").mockReturnValue({
+      pathPlan: {
+        todayKey: "2026-02-15",
+        overdueCount: 0,
+        dueTodayCount: 0,
+        reviewDueCount: 0,
+        completedTodayCount: 0,
+        newVariantsAvailable: 0,
+        suggestedNewToday: 0,
+        estimatedTodayTotal: 0,
+        upcoming: [],
+        forecastDays: [],
+        nextVariants: [],
+        upcomingOpenings: [],
+      },
+      pathAnalytics: {
+        rangeStart: "2026-01-17",
+        rangeEnd: "2026-02-15",
+        totalReviews: 0,
+        ratingBreakdown: { again: 0, hard: 0, good: 0, easy: 0 },
+        dailyReviews: [],
+        topOpenings: [],
+        topFens: [],
+      },
+      loadingPathInsights: false,
+      pathInsightsError: null,
+    });
+
     jest.spyOn(useDashboardModule, "useDashboard").mockReturnValue({
       repertoires: mockRepertoires,
       setRepertoires: jest.fn(),
@@ -45,6 +74,7 @@ describe("DashboardPage", () => {
     );
     expect(screen.getByRole("button", { name: /dashboard/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /openings/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /path insights/i })).toBeInTheDocument();
   });
 
   it("shows Dashboard section by default", () => {
@@ -64,6 +94,17 @@ describe("DashboardPage", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: /openings/i }));
     expect(screen.getByText(/browse your prepared openings/i)).toBeInTheDocument();
+  });
+
+  it("switches to Path Insights section when tab is clicked", () => {
+    render(
+      <BrowserRouter>
+        <DashboardPage />
+      </BrowserRouter>
+    );
+    fireEvent.click(screen.getByRole("button", { name: /path insights/i }));
+    expect(screen.getByText(/forecast your review queue/i)).toBeInTheDocument();
+    expect(screen.getByText(/spaced repetition insights/i)).toBeInTheDocument();
   });
 });
 

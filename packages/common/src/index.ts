@@ -1,7 +1,14 @@
 export { IMoveNode } from "./types/MoveNode";
 export { IRepertoire, IRepertoireDashboard } from "./types/Repertoire";
 export { BoardOrientation, Turn } from "./types/Orientation";
-export { TrainVariantInfo, Variant } from "./types/Variants";
+export {
+  TrainVariantInfo,
+  Variant,
+  ReviewRating,
+  SchedulerState,
+  VariantReviewInput,
+  VariantReviewRecord,
+} from "./types/Variants";
 export { MoveVariantNode } from "./types/MoveVariantNode";
 export {
   Path,
@@ -10,6 +17,15 @@ export {
   NewVariantPath,
   EmptyPath,
   PathCategory,
+  PathSelectionFilters,
+  PathPlanPoint,
+  PathForecastVariant,
+  PathForecastDay,
+  PathPlanSummary,
+  PathDailyReviewPoint,
+  PathNamedCount,
+  PathFenCount,
+  PathAnalyticsSummary,
 } from "./types/Path";
 export { getOrientationAwareFen } from "./utils/fenUtils";
 export {

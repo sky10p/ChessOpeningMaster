@@ -42,6 +42,33 @@ ChessKeep supports optional authentication and per-user data isolation.
 
 When auth is enabled, frontend displays login/register pages and backend scopes data by `userId` on protected routes.
 
+## PathPage and Next Lesson
+
+The `/path` page is a two-view learning center (`Next lesson` + `Path forecast`) backed by:
+
+- `GET /paths`
+- `GET /paths/plan`
+- `GET /paths/analytics`
+
+- Full behavior and rules: [src/doc/PathPage-Next-Lesson-Logic.md](src/doc/PathPage-Next-Lesson-Logic.md)
+- Category filters (`variantsWithErrors`, `newVariants`, `oldVariants`, `studyToReview`) force deterministic selection.
+- Without a category, backend applies deterministic due-first selection with no same-day repeat enforcement.
+- Result types returned to frontend are `variant`, `newVariant`, `study`, or an empty message.
+
+## Dashboard Spaced Repetition Insights
+
+Dashboard now includes a dedicated `Path Insights` tab with:
+
+- due-load preview for the next 14 days,
+- likely next variants,
+- rating distribution (`again/hard/good/easy`),
+- openings entering the short-term queue,
+- inline metric tooltips for `Overdue`, `Due next 7d`, `Suggested new`, and `New/Day`.
+
+Documentation:
+
+- [src/doc/Dashboard-Spaced-Repetition-Insights.md](src/doc/Dashboard-Spaced-Repetition-Insights.md)
+
 ## Installation Requirements
 
 * Web server such as nginx.

@@ -4,6 +4,8 @@ type MockCollection = {
   indexes: jest.Mock;
   dropIndex: jest.Mock;
   createIndex: jest.Mock;
+  aggregate: jest.Mock;
+  deleteMany: jest.Mock;
 };
 
 type MockDb = {
@@ -14,6 +16,10 @@ const createCollection = (): MockCollection => ({
   indexes: jest.fn().mockResolvedValue([]),
   dropIndex: jest.fn().mockResolvedValue(undefined),
   createIndex: jest.fn().mockResolvedValue("ok"),
+  aggregate: jest.fn().mockReturnValue({
+    toArray: jest.fn().mockResolvedValue([]),
+  }),
+  deleteMany: jest.fn().mockResolvedValue({ deletedCount: 0 }),
 });
 
 describe("ensureDatabaseIndexes", () => {
@@ -23,6 +29,7 @@ describe("ensureDatabaseIndexes", () => {
   let repertoiresCollection: MockCollection;
   let studiesCollection: MockCollection;
   let variantsInfoCollection: MockCollection;
+  let variantReviewHistoryCollection: MockCollection;
   let mockDb: MockDb;
 
   beforeEach(() => {
@@ -32,6 +39,7 @@ describe("ensureDatabaseIndexes", () => {
     repertoiresCollection = createCollection();
     studiesCollection = createCollection();
     variantsInfoCollection = createCollection();
+    variantReviewHistoryCollection = createCollection();
 
     mockDb = {
       collection: jest.fn((name: string) => {
@@ -41,6 +49,7 @@ describe("ensureDatabaseIndexes", () => {
         if (name === "repertoires") return repertoiresCollection;
         if (name === "studies") return studiesCollection;
         if (name === "variantsInfo") return variantsInfoCollection;
+        if (name === "variantReviewHistory") return variantReviewHistoryCollection;
         throw new Error(`Unexpected collection ${name}`);
       }),
     };

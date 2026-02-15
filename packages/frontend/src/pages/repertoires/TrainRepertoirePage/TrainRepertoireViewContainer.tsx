@@ -20,6 +20,9 @@ import { CheckListIcon } from "../../../components/icons/CheckListIcon";
 import { ExamIcon } from "../../../components/icons/ExamIcon";
 import { useFooterDispatch } from "../../../contexts/FooterContext";
 import { RepertoireWorkspaceLayout } from "../shared/RepertoireWorkspaceLayout";
+import { ReviewRating } from "@chess-opening-master/common";
+import { useAlertContext } from "../../../contexts/AlertContext";
+import { ReviewRatingDialog } from "../../../components/design/dialogs/ReviewRatingDialog";
 
 const TrainRepertoireViewContainer: React.FC = () => {
   const [panelSelected, setPanelSelected] = React.useState<
@@ -30,6 +33,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
   const { repertoireId, repertoireName, currentMoveNode, orientation, variants, updateComment } =
     useRepertoireContext();
   const { showTrainVariantsDialog, showNumberDialog } = useDialogContext();
+  const { showAlert } = useAlertContext();
   const { addIcon: addIconHeader, removeIcon: removeIconHeader } =
     useHeaderDispatch();
   const {
@@ -40,12 +44,23 @@ const TrainRepertoireViewContainer: React.FC = () => {
     turn,
     finishedTrain,
     lastTrainVariant,
+    pendingVariantReview,
+    submitPendingVariantReview,
   } = useTrainRepertoireContext();
+  const [selectedRating, setSelectedRating] = React.useState<ReviewRating>("good");
+  const [isSavingRating, setIsSavingRating] = React.useState(false);
   const {
     addIcon: addIconFooter,
     removeIcon: removeIconFooter,
     setIsVisible,
   } = useFooterDispatch();
+
+  useEffect(() => {
+    if (!pendingVariantReview) {
+      return;
+    }
+    setSelectedRating(pendingVariantReview.suggestedRating);
+  }, [pendingVariantReview]);
 
   useEffect(() => {
     const headerIcons = [
@@ -234,13 +249,47 @@ const TrainRepertoireViewContainer: React.FC = () => {
     ]
   );
 
+  const handleReviewRating = async (rating: ReviewRating) => {
+    if (isSavingRating || !pendingVariantReview) {
+      return;
+    }
+    try {
+      setIsSavingRating(true);
+      await submitPendingVariantReview(rating);
+    } catch (error) {
+      showAlert("Failed to save review rating", "error", 1800);
+    } finally {
+      setIsSavingRating(false);
+    }
+  };
+
+  const handleReviewDialogClose = () => {
+    if (isSavingRating || !pendingVariantReview) {
+      return;
+    }
+    void handleReviewRating(selectedRating);
+  };
+
   return (
-    <RepertoireWorkspaceLayout
-      title={`Training ${repertoireName}`}
-      board={<BoardContainer isTraining={true} />}
-      mobilePanel={mobilePanelContent}
-      desktopPanel={desktopPanelContent}
-    />
+    <>
+      <RepertoireWorkspaceLayout
+        title={`Training ${repertoireName}`}
+        board={<BoardContainer isTraining={true} />}
+        mobilePanel={mobilePanelContent}
+        desktopPanel={desktopPanelContent}
+      />
+      <ReviewRatingDialog
+        open={Boolean(pendingVariantReview)}
+        pendingVariantReview={pendingVariantReview}
+        selectedRating={selectedRating}
+        isSavingRating={isSavingRating}
+        onClose={handleReviewDialogClose}
+        onSelectRating={(rating) => {
+          setSelectedRating(rating);
+          void handleReviewRating(rating);
+        }}
+      />
+    </>
   );
 };
 
