@@ -41,6 +41,7 @@ export const getAllVariants = async (userId: string): Promise<VariantResult> => 
         const variantInfo = variantsInfoMap.get(variant.fullName);
         
         if (variantInfo) {
+          const openingName = deriveOpeningName(variant.fullName);
           studiedVariants.push({
               type: "variant",
               id: variantInfo._id.toString(),
@@ -49,18 +50,33 @@ export const getAllVariants = async (userId: string): Promise<VariantResult> => 
               name: variant.fullName,
               errors: variantInfo.errors || 0,
               lastDate: variantInfo.lastDate,
+              dueAt: variantInfo.dueAt,
+              lastReviewedDayKey: variantInfo.lastReviewedDayKey,
+              lastRating: variantInfo.lastRating ?? null,
+              orientation: repertoire.orientation,
+              openingName: variantInfo.openingName || openingName,
+              startingFen: variantInfo.startingFen,
           });
         }
       } else {
+        const openingName = deriveOpeningName(variant.fullName);
         newVariants.push({
             type: "newVariant",
             repertoireId: String(repertoire._id),
             repertoireName: repertoire.name,
-            name: variant.fullName
+            name: variant.fullName,
+            orientation: repertoire.orientation,
+            openingName,
         });
       }
     });
   }
 
   return { newVariants, studiedVariants };
+}
+
+function deriveOpeningName(variantName: string): string {
+  const segments = variantName.split(":");
+  const opening = segments[0]?.trim();
+  return opening || variantName;
 }

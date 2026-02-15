@@ -23,6 +23,7 @@ describe("ensureDatabaseIndexes", () => {
   let repertoiresCollection: MockCollection;
   let studiesCollection: MockCollection;
   let variantsInfoCollection: MockCollection;
+  let variantReviewHistoryCollection: MockCollection;
   let mockDb: MockDb;
 
   beforeEach(() => {
@@ -32,6 +33,7 @@ describe("ensureDatabaseIndexes", () => {
     repertoiresCollection = createCollection();
     studiesCollection = createCollection();
     variantsInfoCollection = createCollection();
+    variantReviewHistoryCollection = createCollection();
 
     mockDb = {
       collection: jest.fn((name: string) => {
@@ -41,6 +43,7 @@ describe("ensureDatabaseIndexes", () => {
         if (name === "repertoires") return repertoiresCollection;
         if (name === "studies") return studiesCollection;
         if (name === "variantsInfo") return variantsInfoCollection;
+        if (name === "variantReviewHistory") return variantReviewHistoryCollection;
         throw new Error(`Unexpected collection ${name}`);
       }),
     };

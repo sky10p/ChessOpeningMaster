@@ -53,5 +53,11 @@ export async function ensureDatabaseIndexes(db: Db): Promise<void> {
     createIndexSafely(db, "positions", { userId: 1 }),
     createIndexSafely(db, "variantsInfo", { userId: 1 }),
     createIndexSafely(db, "variantsInfo", { repertoireId: 1, userId: 1 }),
+    createIndexSafely(db, "variantsInfo", { userId: 1, repertoireId: 1, variantName: 1 }),
+    createIndexSafely(db, "variantsInfo", { userId: 1, dueAt: 1 }),
+    createIndexSafely(db, "variantsInfo", { userId: 1, lastReviewedDayKey: 1 }),
+    createIndexSafely(db, "variantReviewHistory", { userId: 1, reviewedAt: -1 }),
+    createIndexSafely(db, "variantReviewHistory", { userId: 1, reviewedDayKey: 1 }),
+    createIndexSafely(db, "variantReviewHistory", { userId: 1, openingName: 1, orientation: 1 }),
   ]);
 }

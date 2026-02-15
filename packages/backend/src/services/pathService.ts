@@ -9,11 +9,18 @@ import {
   EmptyPath,
   StudyPath,
   PathCategory,
-} from "@chess-opening-master/common/src/types/Path";
+  PathSelectionFilters,
+  PathPlanSummary,
+  PathAnalyticsSummary,
+  PathPlanPoint,
+  PathForecastDay,
+  PathForecastVariant,
+} from "@chess-opening-master/common";
 import { getRepertoireName } from "./repertoireService";
 import { extractId } from "../utils/idUtils";
 import { Document, ObjectId } from "mongodb";
 import { getAllVariants } from "./variantsService";
+import { ReviewRating } from "@chess-opening-master/common";
 
 // Type Definitions
 
@@ -23,6 +30,11 @@ export interface VariantInfoDocument {
   variantName: string;
   errors: number;
   lastDate: string | { $date: string };
+  dueAt?: string | Date | { $date: string };
+  lastReviewedDayKey?: string;
+  openingName?: string;
+  startingFen?: string;
+  orientation?: "white" | "black";
 }
 
 export interface StudyToReview {
@@ -65,13 +77,29 @@ interface RepertoireWeight {
   weight: number;
 }
 
-// Constants for path selection probabilities
-const PROBABILITIES = {
-  ERROR_VARIANT_THRESHOLD: 60, // 0-60%
-  NEW_VARIANT_THRESHOLD: 90, // 60-90%
-  OLD_VARIANT_THRESHOLD: 95, // 90-95%
-  // STUDY_REVIEW_THRESHOLD would be 100 (95-100%)
-};
+export interface PathInsightsFilters extends PathSelectionFilters {
+  dateFrom?: string;
+  dateTo?: string;
+  dailyNewLimit?: number;
+}
+
+interface ReviewHistoryDocument extends Document {
+  userId: string;
+  repertoireId: string;
+  variantName: string;
+  reviewedAt: Date | string | { $date: string };
+  reviewedDayKey?: string;
+  rating: ReviewRating;
+  openingName?: string;
+  startingFen?: string;
+  orientation?: "white" | "black";
+}
+
+interface ForecastDayBucket {
+  dueCount: number;
+  openingCounts: Map<string, number>;
+  variants: StudiedVariantPath[];
+}
 
 // Variant data retrieval functions
 
@@ -108,6 +136,17 @@ function normalizeVariantInfo(variant: VariantInfoDocument): VariantInfo {
       typeof variant.lastDate === "string"
         ? new Date(variant.lastDate)
         : new Date(variant.lastDate.$date),
+    dueAt: variant.dueAt
+      ? typeof variant.dueAt === "string"
+        ? new Date(variant.dueAt)
+        : variant.dueAt instanceof Date
+          ? variant.dueAt
+          : new Date(variant.dueAt.$date)
+      : undefined,
+    lastReviewedDayKey: variant.lastReviewedDayKey,
+    openingName: variant.openingName,
+    startingFen: variant.startingFen,
+    orientation: variant.orientation,
   };
 }
 
@@ -282,6 +321,12 @@ export const createVariantPath = async (
     name: variant.variantName,
     errors: variant.errors,
     lastDate: variant.lastDate,
+    dueAt: variant.dueAt,
+    lastReviewedDayKey: variant.lastReviewedDayKey,
+    lastRating: variant.lastRating ?? null,
+    orientation: variant.orientation,
+    openingName: variant.openingName,
+    startingFen: variant.startingFen,
   };
 };
 
@@ -328,14 +373,17 @@ function createEmptyPath(): EmptyPath {
  */
 export const determineBestPath = async (
   userId: string,
-  category?: PathCategory
+  category?: PathCategory,
+  filters?: PathSelectionFilters
 ): Promise<Path> => {
   // Get all needed data
   const { newVariants, studiedVariants } = await getAllVariants(userId);
   const studyGroups = await getStudyGroups(userId);
 
   // Convert studied variants to VariantInfo array
-  const activeVariants: VariantInfo[] = studiedVariants.map((variant) => ({
+  const activeVariants: VariantInfo[] = studiedVariants
+    .filter((variant) => matchesVariantFilters(variant, filters))
+    .map((variant) => ({
     _id: { $oid: variant.id },
     repertoireId: variant.repertoireId,
     variantName: variant.name,
@@ -344,15 +392,31 @@ export const determineBestPath = async (
       typeof variant.lastDate === "string"
         ? new Date(variant.lastDate)
         : (variant.lastDate as Date),
+    dueAt:
+      variant.dueAt instanceof Date
+        ? variant.dueAt
+        : typeof variant.dueAt === "string"
+          ? new Date(variant.dueAt)
+          : undefined,
+    lastReviewedDayKey: variant.lastReviewedDayKey,
+    lastRating: variant.lastRating ?? null,
+    openingName: variant.openingName,
+    startingFen: variant.startingFen,
+    orientation: variant.orientation,
   }));
+  const filteredNewVariants = newVariants.filter((variant) =>
+    matchesVariantFilters(variant, filters)
+  );
 
   // Define the categories of content to review
   const threeMonthsAgo = getDateThreeMonthsAgo();
+  const now = new Date();
   const categories = categorizeContent(
     activeVariants,
-    newVariants,
+    filteredNewVariants,
     studyGroups,
-    threeMonthsAgo
+    threeMonthsAgo,
+    now
   );
 
   // If nothing to review at all, return empty path
@@ -360,21 +424,17 @@ export const determineBestPath = async (
     return createEmptyPath();
   }
 
-  // Choose a path with probabilistic selection
-  const randomValue = Math.random() * 100;
-
   if (category) {
     return await selectPathBasedOnCategory(userId, category, categories);
   }
-
-  // Apply selection logic based on probabilities and availability
-  return await selectPathBasedOnProbability(
+  return await selectPathDeterministically(
     userId,
-    randomValue,
     categories.variantsWithErrors,
     categories.newVariants,
+    categories.dueVariants,
     categories.oldVariants,
-    categories.studyToReview
+    categories.studyToReview,
+    filters
   );
 };
 
@@ -394,16 +454,21 @@ function categorizeContent(
   activeVariants: VariantInfo[],
   newVariants: NewVariantPath[],
   studyGroups: StudyGroup[],
-  threeMonthsAgo: Date
+  threeMonthsAgo: Date,
+  now: Date
 ) {
+  const eligibleVariants = activeVariants.filter(
+    (variant) => isVariantDueForPathSelection(variant, now) && !wasReviewedToday(variant, now)
+  );
   // Group variants with errors
-  const variantsWithErrors = activeVariants.filter((v) => v.errors > 0);
+  const variantsWithErrors = eligibleVariants.filter((v) => v.errors > 0);
 
   // Find old variants (not reviewed in >3 months)
-  const oldVariants = activeVariants.filter((variant) => {
+  const oldVariants = eligibleVariants.filter((variant) => {
     const lastReviewDate = new Date(normalizeDate(variant.lastDate));
     return lastReviewDate < threeMonthsAgo && variant.errors === 0;
   });
+  const dueVariants = eligibleVariants.filter((variant) => variant.errors === 0);
 
   // Find studies to review
   const studyToReview = findStudyToReview(studyGroups);
@@ -411,6 +476,7 @@ function categorizeContent(
   return {
     variantsWithErrors,
     oldVariants,
+    dueVariants,
     newVariants,
     studyToReview,
     hasVariantsWithErrors: variantsWithErrors.length > 0,
@@ -418,6 +484,97 @@ function categorizeContent(
     hasOldVariants: oldVariants.length > 0,
     hasStudyToReview: studyToReview !== null,
   };
+}
+
+function matchesVariantFilters(
+  variant: {
+    name?: string;
+    variantName?: string;
+    openingName?: string;
+    startingFen?: string;
+    orientation?: "white" | "black";
+  },
+  filters?: PathSelectionFilters
+): boolean {
+  if (!filters) {
+    return true;
+  }
+  const openingName = filters.openingName?.trim().toLowerCase();
+  const fen = filters.fen?.trim().toLowerCase();
+  if (filters.orientation && variant.orientation !== filters.orientation) {
+    return false;
+  }
+  if (openingName) {
+    const candidateOpeningName = (variant.openingName || variant.variantName || variant.name || "").toLowerCase();
+    if (!candidateOpeningName.includes(openingName)) {
+      return false;
+    }
+  }
+  if (fen) {
+    const candidateFen = (variant.startingFen || "").toLowerCase();
+    if (!candidateFen.includes(fen)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function getUtcDayKey(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+function toDateOrNull(value: unknown): Date | null {
+  if (!value) {
+    return null;
+  }
+  if (value instanceof Date) {
+    return value;
+  }
+  if (typeof value === "string") {
+    const parsedDate = new Date(value);
+    return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+  }
+  if (typeof value === "object" && "$date" in (value as Record<string, unknown>)) {
+    const dateValue = (value as { $date: string }).$date;
+    const parsedDate = new Date(dateValue);
+    return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+  }
+  return null;
+}
+
+function wasReviewedToday(
+  variant: { lastReviewedDayKey?: string; lastDate: unknown },
+  now: Date
+): boolean {
+  const todayKey = getUtcDayKey(now);
+  if (variant.lastReviewedDayKey) {
+    return variant.lastReviewedDayKey === todayKey;
+  }
+  const lastDate = toDateOrNull(variant.lastDate);
+  if (!lastDate) {
+    return false;
+  }
+  return getUtcDayKey(lastDate) === todayKey;
+}
+
+function isVariantDueForPathSelection(
+  variant: { suspendedUntil?: unknown; dueAt?: unknown },
+  now: Date
+): boolean {
+  if (variant.suspendedUntil) {
+    const suspendedUntilDate = toDateOrNull(variant.suspendedUntil);
+    if (suspendedUntilDate && suspendedUntilDate > now) {
+      return false;
+    }
+  }
+  if (!variant.dueAt) {
+    return true;
+  }
+  const dueAtDate = toDateOrNull(variant.dueAt);
+  if (!dueAtDate) {
+    return true;
+  }
+  return dueAtDate <= now;
 }
 
 /**
@@ -447,6 +604,7 @@ async function selectPathBasedOnCategory(
     variantsWithErrors: VariantInfo[];
     newVariants: NewVariantPath[];
     oldVariants: VariantInfo[];
+    dueVariants: VariantInfo[];
     studyToReview: StudyToReview | null;
   }
 ): Promise<Path> {
@@ -486,58 +644,384 @@ async function selectPathBasedOnCategory(
   }
 }
 
-/**
- * Selects a path based on probability thresholds and available content
- */
-async function selectPathBasedOnProbability(
+function findEarliestDueVariant(variants: VariantInfo[]): VariantInfo {
+  return variants.reduce((prev, curr) => {
+    const prevDueAt = toDateOrNull(prev.dueAt) || new Date(normalizeDate(prev.lastDate));
+    const currDueAt = toDateOrNull(curr.dueAt) || new Date(normalizeDate(curr.lastDate));
+    if (currDueAt.getTime() === prevDueAt.getTime()) {
+      const prevDate = new Date(normalizeDate(prev.lastDate));
+      const currDate = new Date(normalizeDate(curr.lastDate));
+      return currDate < prevDate ? curr : prev;
+    }
+    return currDueAt < prevDueAt ? curr : prev;
+  }, variants[0]);
+}
+
+async function selectPathDeterministically(
   userId: string,
-  randomValue: number,
   variantsWithErrors: VariantInfo[],
   newVariants: NewVariantPath[],
+  dueVariants: VariantInfo[],
   oldVariants: VariantInfo[],
-  studyToReview: StudyToReview | null
+  studyToReview: StudyToReview | null,
+  filters?: PathSelectionFilters
 ): Promise<Path> {
-  const {
-    ERROR_VARIANT_THRESHOLD,
-    NEW_VARIANT_THRESHOLD,
-    OLD_VARIANT_THRESHOLD,
-  } = PROBABILITIES;
-
-  // 60% - Select a variant with errors
-  if (randomValue < ERROR_VARIANT_THRESHOLD && variantsWithErrors.length > 0) {
+  if (variantsWithErrors.length > 0) {
     const selectedVariant = findVariantWithMostErrors(variantsWithErrors);
-    return await createVariantPath(userId, selectedVariant);
+    return createVariantPath(userId, selectedVariant);
   }
-
-  // 30% - Select a new variant
-  if (randomValue < NEW_VARIANT_THRESHOLD && newVariants.length > 0) {
+  if (dueVariants.length > 0) {
+    const dueVariant = findEarliestDueVariant(dueVariants);
+    return createVariantPath(userId, dueVariant);
+  }
+  if (newVariants.length > 0) {
     return selectNewVariant(newVariants);
   }
-
-  // 5% - Select an old variant (>3 months without review)
-  if (
-    randomValue < OLD_VARIANT_THRESHOLD &&
-    oldVariants.length > 0 &&
-    variantsWithErrors.length === 0
-  ) {
+  if (oldVariants.length > 0) {
     const oldestVariant = findOldestVariant(oldVariants);
-    return await createVariantPath(userId, oldestVariant);
+    return createVariantPath(userId, oldestVariant);
   }
-
-  // 5% - Select a study to review
-  if (studyToReview) {
+  if (studyToReview && !hasAnyVariantFilter(filters)) {
     return createStudyPath(studyToReview);
   }
-
-  // Fallback logic if the random selection doesn't find a match
-  return await fallbackPathSelection(
-    userId,
-    variantsWithErrors,
-    newVariants,
-    oldVariants,
-    studyToReview
-  );
+  return createEmptyPath();
 }
+
+function hasAnyVariantFilter(filters?: PathSelectionFilters): boolean {
+  if (!filters) {
+    return false;
+  }
+  return Boolean(filters.orientation || filters.openingName || filters.fen);
+}
+
+function toSafeNonNegativeInt(value: number | undefined, fallback: number): number {
+  if (!Number.isFinite(value)) {
+    return fallback;
+  }
+  return Math.max(0, Math.floor(value as number));
+}
+
+function toUtcMidnight(date: Date): Date {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+}
+
+function addUtcDays(date: Date, days: number): Date {
+  return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
+}
+
+function parseDateOnly(value: string | undefined, fallback: Date): Date {
+  if (!value) {
+    return fallback;
+  }
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return fallback;
+  }
+  return toUtcMidnight(parsed);
+}
+
+function getReviewDayKey(review: ReviewHistoryDocument): string {
+  if (review.reviewedDayKey) {
+    return review.reviewedDayKey;
+  }
+  const reviewedAt = toDateOrNull(review.reviewedAt) || new Date();
+  return getUtcDayKey(reviewedAt);
+}
+
+function sortTopNamedCount(
+  entries: Array<{ name: string; count: number }>,
+  limit: number
+): Array<{ name: string; count: number }> {
+  return entries
+    .sort((a, b) => {
+      if (b.count !== a.count) {
+        return b.count - a.count;
+      }
+      return a.name.localeCompare(b.name);
+    })
+    .slice(0, limit);
+}
+
+function sortTopFenCount(
+  entries: Array<{ fen: string; count: number }>,
+  limit: number
+): Array<{ fen: string; count: number }> {
+  return entries
+    .sort((a, b) => {
+      if (b.count !== a.count) {
+        return b.count - a.count;
+      }
+      return a.fen.localeCompare(b.fen);
+    })
+    .slice(0, limit);
+}
+
+function isWithinDateRange(dayKey: string, rangeStart: Date, rangeEnd: Date): boolean {
+  const dayDate = new Date(`${dayKey}T00:00:00.000Z`);
+  return dayDate >= rangeStart && dayDate <= rangeEnd;
+}
+
+function deriveOpeningNameFromVariant(variantName: string): string {
+  const openingName = variantName.split(":")[0]?.trim();
+  return openingName || variantName;
+}
+
+function resolveRawDueDay(
+  variant: { dueAt?: unknown; lastDate?: unknown },
+  fallbackDay: Date
+): Date {
+  const fallbackDate = toDateOrNull(variant.lastDate) || fallbackDay;
+  const dueDate = toDateOrNull(variant.dueAt) || fallbackDate;
+  return toUtcMidnight(dueDate);
+}
+
+function resolveForecastDueDay(
+  variant: { dueAt?: unknown; lastDate?: unknown },
+  today: Date
+): Date {
+  const dueDay = resolveRawDueDay(variant, today);
+  if (dueDay < today) {
+    return today;
+  }
+  return dueDay;
+}
+
+function mapToForecastVariant(
+  variant: StudiedVariantPath,
+  dueDay: Date
+): PathForecastVariant {
+  return {
+    variantName: variant.name,
+    repertoireId: variant.repertoireId,
+    repertoireName: variant.repertoireName,
+    dueDate: getUtcDayKey(dueDay),
+    openingName: (variant.openingName || deriveOpeningNameFromVariant(variant.name)).trim(),
+    orientation: variant.orientation,
+    errors: variant.errors,
+  };
+}
+
+function sortDueVariantCandidates(
+  left: StudiedVariantPath,
+  right: StudiedVariantPath,
+  today: Date
+): number {
+  const leftDueDay = resolveRawDueDay(left, today);
+  const rightDueDay = resolveRawDueDay(right, today);
+  if (leftDueDay.getTime() !== rightDueDay.getTime()) {
+    return leftDueDay.getTime() - rightDueDay.getTime();
+  }
+  if (right.errors !== left.errors) {
+    return right.errors - left.errors;
+  }
+  const leftLastDate = toDateOrNull(left.lastDate) || today;
+  const rightLastDate = toDateOrNull(right.lastDate) || today;
+  return leftLastDate.getTime() - rightLastDate.getTime();
+}
+
+function buildForecastDays(
+  dueVariants: StudiedVariantPath[],
+  today: Date,
+  horizonDays: number
+): PathForecastDay[] {
+  const dayBuckets = new Map<string, ForecastDayBucket>();
+  for (let offset = 0; offset < horizonDays; offset += 1) {
+    const day = addUtcDays(today, offset);
+    dayBuckets.set(getUtcDayKey(day), {
+      dueCount: 0,
+      openingCounts: new Map<string, number>(),
+      variants: [],
+    });
+  }
+  for (const variant of dueVariants) {
+    const dueDay = resolveForecastDueDay(variant, today);
+    const dueDayKey = getUtcDayKey(dueDay);
+    if (!dayBuckets.has(dueDayKey)) {
+      continue;
+    }
+    const bucket = dayBuckets.get(dueDayKey);
+    if (!bucket) {
+      continue;
+    }
+    bucket.dueCount += 1;
+    const openingName = (variant.openingName || deriveOpeningNameFromVariant(variant.name)).trim();
+    bucket.openingCounts.set(openingName, (bucket.openingCounts.get(openingName) || 0) + 1);
+    if (bucket.variants.length < 4) {
+      bucket.variants.push(variant);
+    }
+  }
+  return Array.from(dayBuckets.entries()).map(([date, bucket]) => ({
+    date,
+    dueCount: bucket.dueCount,
+    topOpenings: sortTopNamedCount(
+      Array.from(bucket.openingCounts.entries()).map(([name, count]) => ({ name, count })),
+      2
+    ),
+    variants: bucket.variants.map((variant) =>
+      mapToForecastVariant(variant, resolveForecastDueDay(variant, today))
+    ),
+  }));
+}
+
+export const getPathPlan = async (
+  userId: string,
+  filters?: PathInsightsFilters
+): Promise<PathPlanSummary> => {
+  const now = new Date();
+  const today = toUtcMidnight(now);
+  const todayKey = getUtcDayKey(today);
+  const dailyNewLimit = toSafeNonNegativeInt(filters?.dailyNewLimit, 5);
+  const { newVariants, studiedVariants } = await getAllVariants(userId);
+  const filteredNewVariants = newVariants.filter((variant) =>
+    matchesVariantFilters(variant, filters)
+  );
+  const filteredStudiedVariants = studiedVariants.filter((variant) =>
+    matchesVariantFilters(variant, filters)
+  );
+  const dueEligibleVariants = filteredStudiedVariants
+    .filter(
+      (variant) => isVariantDueForPathSelection(variant, now) && !wasReviewedToday(variant, now)
+    )
+    .sort((left, right) => sortDueVariantCandidates(left, right, today));
+  let overdueCount = 0;
+  let dueTodayCount = 0;
+  const upcomingCountMap = new Map<string, number>();
+  for (const variant of dueEligibleVariants) {
+    const dueDay = resolveRawDueDay(variant, today);
+    const dueDayKey = getUtcDayKey(dueDay);
+    if (dueDay < today) {
+      overdueCount += 1;
+    } else if (dueDayKey === todayKey) {
+      dueTodayCount += 1;
+    }
+  }
+  for (let dayOffset = 1; dayOffset <= 14; dayOffset += 1) {
+    const day = addUtcDays(today, dayOffset);
+    upcomingCountMap.set(getUtcDayKey(day), 0);
+  }
+  for (const variant of filteredStudiedVariants) {
+    const dueDate = toDateOrNull(variant.dueAt);
+    if (!dueDate) {
+      continue;
+    }
+    const dueDayKey = getUtcDayKey(toUtcMidnight(dueDate));
+    if (upcomingCountMap.has(dueDayKey)) {
+      upcomingCountMap.set(dueDayKey, (upcomingCountMap.get(dueDayKey) || 0) + 1);
+    }
+  }
+  const completedTodayCount = filteredStudiedVariants.filter((variant) => wasReviewedToday(variant, now)).length;
+  const reviewDueCount = overdueCount + dueTodayCount;
+  const suggestedNewToday = Math.min(dailyNewLimit, filteredNewVariants.length);
+  const upcoming: PathPlanPoint[] = Array.from(upcomingCountMap.entries()).map(
+    ([date, dueCount]) => ({
+      date,
+      dueCount,
+    })
+  );
+  const nextVariants = dueEligibleVariants
+    .slice(0, 12)
+    .map((variant) => mapToForecastVariant(variant, resolveForecastDueDay(variant, today)));
+  const openingCounts = new Map<string, number>();
+  for (const variant of dueEligibleVariants) {
+    const openingName = (variant.openingName || deriveOpeningNameFromVariant(variant.name)).trim();
+    openingCounts.set(openingName, (openingCounts.get(openingName) || 0) + 1);
+  }
+  const upcomingOpenings = sortTopNamedCount(
+    Array.from(openingCounts.entries()).map(([name, count]) => ({ name, count })),
+    6
+  );
+  const forecastDays = buildForecastDays(dueEligibleVariants, today, 14);
+  return {
+    todayKey,
+    overdueCount,
+    dueTodayCount,
+    reviewDueCount,
+    completedTodayCount,
+    newVariantsAvailable: filteredNewVariants.length,
+    suggestedNewToday,
+    estimatedTodayTotal: reviewDueCount + suggestedNewToday,
+    upcoming,
+    forecastDays,
+    nextVariants,
+    upcomingOpenings,
+  };
+};
+
+export const getPathAnalytics = async (
+  userId: string,
+  filters?: PathInsightsFilters
+): Promise<PathAnalyticsSummary> => {
+  const db = getDB();
+  const now = new Date();
+  const defaultEnd = toUtcMidnight(now);
+  const defaultStart = addUtcDays(defaultEnd, -29);
+  const rangeStart = parseDateOnly(filters?.dateFrom, defaultStart);
+  const rangeEnd = parseDateOnly(filters?.dateTo, defaultEnd);
+  const allReviews = await db
+    .collection<ReviewHistoryDocument>("variantReviewHistory")
+    .find({ userId })
+    .toArray();
+  const filteredReviews = allReviews.filter((review) => {
+    const reviewDayKey = getReviewDayKey(review);
+    if (!isWithinDateRange(reviewDayKey, rangeStart, rangeEnd)) {
+      return false;
+    }
+    return matchesVariantFilters(
+      {
+        variantName: review.variantName,
+        openingName: review.openingName,
+        startingFen: review.startingFen,
+        orientation: review.orientation,
+      },
+      filters
+    );
+  });
+  const ratingBreakdown: Record<ReviewRating, number> = {
+    again: 0,
+    hard: 0,
+    good: 0,
+    easy: 0,
+  };
+  const dailyReviewMap = new Map<string, number>();
+  const openingMap = new Map<string, number>();
+  const fenMap = new Map<string, number>();
+  for (let day = new Date(rangeStart); day <= rangeEnd; day = addUtcDays(day, 1)) {
+    dailyReviewMap.set(getUtcDayKey(day), 0);
+  }
+  for (const review of filteredReviews) {
+    if (review.rating in ratingBreakdown) {
+      ratingBreakdown[review.rating] += 1;
+    }
+    const reviewDayKey = getReviewDayKey(review);
+    if (dailyReviewMap.has(reviewDayKey)) {
+      dailyReviewMap.set(reviewDayKey, (dailyReviewMap.get(reviewDayKey) || 0) + 1);
+    }
+    const openingName = (review.openingName || review.variantName || "Unknown").trim();
+    openingMap.set(openingName, (openingMap.get(openingName) || 0) + 1);
+    if (review.startingFen && review.startingFen.trim()) {
+      const fen = review.startingFen.trim();
+      fenMap.set(fen, (fenMap.get(fen) || 0) + 1);
+    }
+  }
+  return {
+    rangeStart: getUtcDayKey(rangeStart),
+    rangeEnd: getUtcDayKey(rangeEnd),
+    totalReviews: filteredReviews.length,
+    ratingBreakdown,
+    dailyReviews: Array.from(dailyReviewMap.entries()).map(([date, count]) => ({
+      date,
+      count,
+    })),
+    topOpenings: sortTopNamedCount(
+      Array.from(openingMap.entries()).map(([name, count]) => ({ name, count })),
+      5
+    ),
+    topFens: sortTopFenCount(
+      Array.from(fenMap.entries()).map(([fen, count]) => ({ fen, count })),
+      5
+    ),
+  };
+};
 
 /**
  * Finds the variant with the most errors, or if tied, the oldest one
@@ -552,38 +1036,6 @@ function findVariantWithMostErrors(variants: VariantInfo[]): VariantInfo {
     }
     return prev;
   }, variants[0]);
-}
-
-/**
- * Fallback selection when probabilistic selection fails
- */
-async function fallbackPathSelection(
-  userId: string,
-  variantsWithErrors: VariantInfo[],
-  newVariants: NewVariantPath[],
-  oldVariants: VariantInfo[],
-  studyToReview: StudyToReview | null
-): Promise<Path> {
-  // Try each category in priority order
-  if (variantsWithErrors.length > 0) {
-    const selectedVariant = findVariantWithMostErrors(variantsWithErrors);
-    return await createVariantPath(userId, selectedVariant);
-  }
-
-  if (newVariants.length > 0) {
-    return selectNewVariant(newVariants);
-  }
-
-  if (oldVariants.length > 0 && variantsWithErrors.length === 0) {
-    const oldestVariant = findOldestVariant(oldVariants);
-    return await createVariantPath(userId, oldestVariant);
-  }
-
-  if (studyToReview) {
-    return createStudyPath(studyToReview);
-  }
-
-  return createEmptyPath();
 }
 
 /**

@@ -6,3 +6,4 @@ export { ReviewActivityChart } from "./ReviewActivityChart";
 export { ProgressSummary } from "./ProgressSummary";
 export { InvalidOrientationWarning } from "./InvalidOrientationWarning";
 export { OpeningsProgressCard } from "./OpeningsProgressCard";
+export { SpacedRepetitionInsightsPanel } from "./SpacedRepetitionInsightsPanel";

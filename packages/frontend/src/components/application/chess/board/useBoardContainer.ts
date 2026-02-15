@@ -90,6 +90,9 @@ export const useBoardContainer = (isTraining: boolean) => {
   };
 
   const handleIgnoreError = () => {
+    trainRepertoireContext?.setLastIgnoredErrors(
+      trainRepertoireContext.lastIgnoredErrors + 1
+    );
     setErrorDialogOpen(false);
     unselectPiece();
   };

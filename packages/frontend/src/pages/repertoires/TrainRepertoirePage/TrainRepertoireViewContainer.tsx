@@ -20,6 +20,8 @@ import { CheckListIcon } from "../../../components/icons/CheckListIcon";
 import { ExamIcon } from "../../../components/icons/ExamIcon";
 import { useFooterDispatch } from "../../../contexts/FooterContext";
 import { RepertoireWorkspaceLayout } from "../shared/RepertoireWorkspaceLayout";
+import { ReviewRating } from "@chess-opening-master/common";
+import { useAlertContext } from "../../../contexts/AlertContext";
 
 const TrainRepertoireViewContainer: React.FC = () => {
   const [panelSelected, setPanelSelected] = React.useState<
@@ -30,6 +32,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
   const { repertoireId, repertoireName, currentMoveNode, orientation, variants, updateComment } =
     useRepertoireContext();
   const { showTrainVariantsDialog, showNumberDialog } = useDialogContext();
+  const { showAlert } = useAlertContext();
   const { addIcon: addIconHeader, removeIcon: removeIconHeader } =
     useHeaderDispatch();
   const {
@@ -40,12 +43,23 @@ const TrainRepertoireViewContainer: React.FC = () => {
     turn,
     finishedTrain,
     lastTrainVariant,
+    pendingVariantReview,
+    submitPendingVariantReview,
   } = useTrainRepertoireContext();
+  const [selectedRating, setSelectedRating] = React.useState<ReviewRating>("good");
+  const [isSavingRating, setIsSavingRating] = React.useState(false);
   const {
     addIcon: addIconFooter,
     removeIcon: removeIconFooter,
     setIsVisible,
   } = useFooterDispatch();
+
+  useEffect(() => {
+    if (!pendingVariantReview) {
+      return;
+    }
+    setSelectedRating(pendingVariantReview.suggestedRating);
+  }, [pendingVariantReview]);
 
   useEffect(() => {
     const headerIcons = [
@@ -234,13 +248,63 @@ const TrainRepertoireViewContainer: React.FC = () => {
     ]
   );
 
+  const handleReviewRating = async (rating: ReviewRating) => {
+    try {
+      setIsSavingRating(true);
+      await submitPendingVariantReview(rating);
+    } catch (error) {
+      showAlert("Failed to save review rating", "error", 1800);
+    } finally {
+      setIsSavingRating(false);
+    }
+  };
+
   return (
-    <RepertoireWorkspaceLayout
-      title={`Training ${repertoireName}`}
-      board={<BoardContainer isTraining={true} />}
-      mobilePanel={mobilePanelContent}
-      desktopPanel={desktopPanelContent}
-    />
+    <>
+      <RepertoireWorkspaceLayout
+        title={`Training ${repertoireName}`}
+        board={<BoardContainer isTraining={true} />}
+        mobilePanel={mobilePanelContent}
+        desktopPanel={desktopPanelContent}
+      />
+      {pendingVariantReview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="w-full max-w-xl rounded-lg border border-slate-700 bg-slate-900 p-5 shadow-2xl">
+            <h3 className="text-lg font-semibold text-slate-100">Rate This Review</h3>
+            <p className="mt-1 text-sm text-slate-300">{pendingVariantReview.variantName}</p>
+            <div className="mt-3 grid grid-cols-2 gap-2 text-sm text-slate-300">
+              <div>Wrong moves: {pendingVariantReview.wrongMoves}</div>
+              <div>Ignored errors: {pendingVariantReview.ignoredWrongMoves}</div>
+              <div>Hints used: {pendingVariantReview.hintsUsed}</div>
+              <div>Time: {pendingVariantReview.timeSpentSec}s</div>
+            </div>
+            <p className="mt-3 text-sm text-slate-200">
+              Suggested: <span className="font-semibold">{pendingVariantReview.suggestedRating}</span>
+            </p>
+            <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {(["again", "hard", "good", "easy"] as ReviewRating[]).map((rating) => (
+                <button
+                  key={rating}
+                  type="button"
+                  disabled={isSavingRating}
+                  onClick={() => {
+                    setSelectedRating(rating);
+                    void handleReviewRating(rating);
+                  }}
+                  className={`rounded px-3 py-2 text-sm font-semibold transition ${
+                    selectedRating === rating
+                      ? "bg-blue-600 text-white"
+                      : "bg-slate-800 text-slate-200 hover:bg-slate-700"
+                  } ${isSavingRating ? "cursor-not-allowed opacity-60" : ""}`}
+                >
+                  {rating}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

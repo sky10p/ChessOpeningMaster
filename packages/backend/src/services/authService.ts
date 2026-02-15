@@ -125,14 +125,15 @@ async function hasLegacyDocumentsWithoutUserId(): Promise<boolean> {
   const db = getDB();
   const filter = { userId: { $exists: false } };
 
-  const [repertoireDoc, studyDoc, positionDoc, variantInfoDoc] = await Promise.all([
+  const [repertoireDoc, studyDoc, positionDoc, variantInfoDoc, variantReviewDoc] = await Promise.all([
     db.collection("repertoires").findOne(filter, { projection: { _id: 1 } }),
     db.collection("studies").findOne(filter, { projection: { _id: 1 } }),
     db.collection("positions").findOne(filter, { projection: { _id: 1 } }),
     db.collection("variantsInfo").findOne(filter, { projection: { _id: 1 } }),
+    db.collection("variantReviewHistory").findOne(filter, { projection: { _id: 1 } }),
   ]);
 
-  return Boolean(repertoireDoc || studyDoc || positionDoc || variantInfoDoc);
+  return Boolean(repertoireDoc || studyDoc || positionDoc || variantInfoDoc || variantReviewDoc);
 }
 
 export async function ensureDefaultUserAndMigrateData(): Promise<string> {
@@ -163,6 +164,7 @@ export async function ensureDefaultUserAndMigrateData(): Promise<string> {
     db.collection("studies").updateMany({ userId: { $exists: false } }, { $set: { userId: defaultUserId } }),
     db.collection("positions").updateMany({ userId: { $exists: false } }, { $set: { userId: defaultUserId } }),
     db.collection("variantsInfo").updateMany({ userId: { $exists: false } }, { $set: { userId: defaultUserId } }),
+    db.collection("variantReviewHistory").updateMany({ userId: { $exists: false } }, { $set: { userId: defaultUserId } }),
   ]);
 
   return defaultUserId;

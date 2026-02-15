@@ -28,6 +28,7 @@ const mockNavigate = jest.fn();
 const mockGoToRepertoire = jest.fn();
 const mockGoToTrainRepertoire = jest.fn();
 const mockLoadPath = jest.fn();
+const mockLoadInsights = jest.fn();
 const mockRemoveVariantFromPath = jest.fn();
 const mockShowConfirmDialog = jest.fn();
 
@@ -36,7 +37,33 @@ const mockUsePaths = {
   loading: false,
   error: null,
   loadPath: mockLoadPath,
+  loadInsights: mockLoadInsights,
   removeVariantFromPath: mockRemoveVariantFromPath,
+  plan: {
+    todayKey: "2026-02-15",
+    overdueCount: 0,
+    dueTodayCount: 0,
+    reviewDueCount: 0,
+    completedTodayCount: 0,
+    newVariantsAvailable: 0,
+    suggestedNewToday: 0,
+    estimatedTodayTotal: 0,
+    upcoming: [],
+    forecastDays: [],
+    nextVariants: [],
+    upcomingOpenings: [],
+  },
+  analytics: {
+    rangeStart: "2026-01-17",
+    rangeEnd: "2026-02-15",
+    totalReviews: 0,
+    ratingBreakdown: { again: 0, hard: 0, good: 0, easy: 0 },
+    dailyReviews: [],
+    topOpenings: [],
+    topFens: [],
+  },
+  insightsLoading: false,
+  insightsError: null,
 };
 
 const mockUseDialogContext = {

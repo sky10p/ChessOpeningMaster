@@ -8,6 +8,8 @@ const SPACED_REPETITION_CONFIG = {
   ERROR_FACTOR: 0.5
 };
 
+const toUtcDayKey = (date: Date): string => date.toISOString().slice(0, 10);
+
 export const getSpacedRepetitionVariants = async (
   count: number,
   repertoireId: string,
@@ -20,6 +22,8 @@ export const getSpacedRepetitionVariants = async (
   const newVariants: TrainVariant[] = [];
   const reviewedVariants: Array<{ variant: TrainVariant; score: number }> = [];
   const now = Date.now();
+  const nowDate = new Date(now);
+  const todayDayKey = toUtcDayKey(nowDate);
   const { NEW_VARIANTS_RATIO, BASE_INTERVAL_DAYS, ERROR_FACTOR } = SPACED_REPETITION_CONFIG;
 
   for (const variant of variants) {
@@ -30,8 +34,10 @@ export const getSpacedRepetitionVariants = async (
       continue;
     }
     const errors = info.errors ?? 0;
+    const lastReviewDayKey = info.lastReviewedDayKey || toUtcDayKey(info.lastDate);
+    if (lastReviewDayKey === todayDayKey) continue;
+    if (info.dueAt && new Date(info.dueAt).getTime() > now) continue;
     const daysSinceLastReview = (now - info.lastDate.getTime()) / (1000 * 60 * 60 * 24);
-    if (daysSinceLastReview < 1) continue;
     const difficulty = 1 + errors * ERROR_FACTOR;
     const expectedInterval = BASE_INTERVAL_DAYS * difficulty;
     const thresholdFactor = 0.75 + Math.random() * 0.15;

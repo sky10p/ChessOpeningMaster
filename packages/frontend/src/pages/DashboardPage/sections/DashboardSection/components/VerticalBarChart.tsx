@@ -69,7 +69,7 @@ export const VerticalBarChart: React.FC<VerticalBarChartProps> = ({
               tick={({ x, y, payload }) => {
                 const name = payload.value;
                 const display =
-                  name.length > 28 ? name.slice(0, 25) + "…" : name;
+                  name.length > 28 ? name.slice(0, 25) + "..." : name;
                 return (
                   <g transform={`translate(${x},${y})`}>
                     <text
@@ -112,3 +112,4 @@ export const VerticalBarChart: React.FC<VerticalBarChartProps> = ({
     </div>
   );
 };
+

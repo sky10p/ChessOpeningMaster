@@ -45,6 +45,7 @@ describe("authService", () => {
   let studiesCollection: MockCollection;
   let positionsCollection: MockCollection;
   let variantsInfoCollection: MockCollection;
+  let variantReviewHistoryCollection: MockCollection;
   let mockDb: MockDb;
 
   beforeEach(() => {
@@ -54,6 +55,7 @@ describe("authService", () => {
     studiesCollection = createMockCollection();
     positionsCollection = createMockCollection();
     variantsInfoCollection = createMockCollection();
+    variantReviewHistoryCollection = createMockCollection();
 
     mockDb = {
       collection: jest.fn((name: string) => {
@@ -74,6 +76,9 @@ describe("authService", () => {
         }
         if (name === "variantsInfo") {
           return variantsInfoCollection;
+        }
+        if (name === "variantReviewHistory") {
+          return variantReviewHistoryCollection;
         }
         throw new Error(`Unexpected collection ${name}`);
       }),
@@ -202,10 +207,12 @@ describe("authService", () => {
     studiesCollection.findOne.mockResolvedValue(null);
     positionsCollection.findOne.mockResolvedValue(null);
     variantsInfoCollection.findOne.mockResolvedValue(null);
+    variantReviewHistoryCollection.findOne.mockResolvedValue(null);
     repertoiresCollection.updateMany.mockResolvedValue({ modifiedCount: 1 });
     studiesCollection.updateMany.mockResolvedValue({ modifiedCount: 1 });
     positionsCollection.updateMany.mockResolvedValue({ modifiedCount: 1 });
     variantsInfoCollection.updateMany.mockResolvedValue({ modifiedCount: 1 });
+    variantReviewHistoryCollection.updateMany.mockResolvedValue({ modifiedCount: 1 });
 
     const defaultUserId = await ensureDefaultUserAndMigrateData();
 
@@ -227,6 +234,10 @@ describe("authService", () => {
       { userId: { $exists: false } },
       { $set: { userId: "default-user" } }
     );
+    expect(variantReviewHistoryCollection.updateMany).toHaveBeenCalledWith(
+      { userId: { $exists: false } },
+      { $set: { userId: "default-user" } }
+    );
   });
 
   it("skips legacy migration updates when all documents already contain userId", async () => {
@@ -235,6 +246,7 @@ describe("authService", () => {
     studiesCollection.findOne.mockResolvedValue(null);
     positionsCollection.findOne.mockResolvedValue(null);
     variantsInfoCollection.findOne.mockResolvedValue(null);
+    variantReviewHistoryCollection.findOne.mockResolvedValue(null);
 
     const defaultUserId = await ensureDefaultUserAndMigrateData();
 
@@ -243,6 +255,7 @@ describe("authService", () => {
     expect(studiesCollection.updateMany).not.toHaveBeenCalled();
     expect(positionsCollection.updateMany).not.toHaveBeenCalled();
     expect(variantsInfoCollection.updateMany).not.toHaveBeenCalled();
+    expect(variantReviewHistoryCollection.updateMany).not.toHaveBeenCalled();
   });
 
   it("returns positive auth token ttl in milliseconds", () => {

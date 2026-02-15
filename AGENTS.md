@@ -192,11 +192,26 @@ mongodb://localhost:27017/chess_opening_master
 - [Testing Strategy](src/doc/Testing-Strategy.md) - Comprehensive testing patterns, mock requirements, and test scenarios
 - [Troubleshooting Guide](src/doc/Troubleshooting-Guide.md) - Common issues, solutions, and debugging workflows
 - [React Effect & Data Fetching Guide](src/doc/React-Effect-Data-Fetching-Guide.md) - Project rules for when to avoid `useEffect` and how to fetch safely when needed
+- [PathPage and Next Lesson Logic](src/doc/PathPage-Next-Lesson-Logic.md) - End-to-end `/path` behavior and backend next-lesson selection rules
+- [Spaced Repetition Upgrade Plan](src/doc/Spaced-Repetition-Upgrade-Plan.md) - Rating-based scheduler migration plan with no same-day repeats and Path analytics
+- [Dashboard Spaced Repetition Insights](src/doc/Dashboard-Spaced-Repetition-Insights.md) - Dashboard charts and data flow based on path plan/analytics insights
 
 ### Additional Documentation
 - `src/doc/repertoire-variant-sync.md` - Existing variant synchronization documentation
 - [User Auth Backend](src/doc/User-Auth-Backend.md) - Backend auth lifecycle, token model, and user-scoping rules
 - [User Auth Frontend](src/doc/User-Auth-Frontend.md) - Frontend auth bootstrap, route gating, and auth UX behavior
+
+## PathPage and Next Lesson Rules (Critical for Agents)
+
+Before changing `PathPage`, `usePaths`, `/paths`, or `pathService`, read `src/doc/PathPage-Next-Lesson-Logic.md`.
+
+Core rules to preserve:
+- `/path` calls `GET /paths`, `GET /paths/plan`, and `GET /paths/analytics` on mount and when filters change.
+- `category` query enables deterministic selection (`variantsWithErrors`, `newVariants`, `oldVariants`, `studyToReview`).
+- No category query uses deterministic due-first priority in `pathService` (errors -> due -> new -> old -> study when applicable).
+- Same-day repeats are blocked by `lastReviewedDayKey` checks for path selection.
+- Removing a variant from path deletes its `variantsInfo` record and reloads path in the active filter.
+- All path selection is user-scoped; do not bypass `getRequestUserId(req)` filtering.
 
 ## User Authentication and User Scope (Critical for Agents)
 
