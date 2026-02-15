@@ -122,7 +122,7 @@ export const SpacedRepetitionInsightsPanel: React.FC<SpacedRepetitionInsightsPan
 
   const dueLoadData = useMemo<DueLoadItem[]>(
     () =>
-      (plan?.upcoming || []).slice(0, 14).map((entry) => ({
+      (plan?.forecastDays || []).slice(0, 14).map((entry) => ({
         date: entry.date.slice(5),
         dueCount: entry.dueCount,
       })),

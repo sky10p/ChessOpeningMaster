@@ -1024,6 +1024,20 @@ type Variant = { fullName: string; moves: unknown[]; name: string; differentMove
           },
           {
             type: 'variant',
+            id: 'v-future',
+            repertoireId: 'r1',
+            repertoireName: 'Rep 1',
+            name: 'Sicilian: Future',
+            errors: 0,
+            lastDate: '2026-02-14T00:00:00.000Z',
+            dueAt: '2026-02-18T00:00:00.000Z',
+            lastReviewedDayKey: '2026-02-14',
+            openingName: 'Sicilian Defense',
+            orientation: 'white',
+            startingFen: 'rnbqkbnr/pppppppp/8/8',
+          },
+          {
+            type: 'variant',
             id: 'v-completed-today',
             repertoireId: 'r1',
             repertoireName: 'Rep 1',
@@ -1059,6 +1073,7 @@ type Variant = { fullName: string; moves: unknown[]; name: string; differentMove
           'Sicilian: Mainline',
           'Sicilian: Anti',
         ]);
+        expect(result.forecastDays.find((day) => day.date === '2026-02-18')?.dueCount).toBe(1);
       } finally {
         jest.useRealTimers();
       }

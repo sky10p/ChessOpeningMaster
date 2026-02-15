@@ -882,6 +882,13 @@ export const getPathPlan = async (
   const filteredStudiedVariants = studiedVariants.filter((variant) =>
     matchesVariantFilters(variant, filters)
   );
+  const forecastHorizonEnd = addUtcDays(today, 13);
+  const forecastEligibleVariants = filteredStudiedVariants
+    .filter((variant) => {
+      const forecastDueDay = resolveForecastDueDay(variant, today);
+      return forecastDueDay <= forecastHorizonEnd;
+    })
+    .sort((left, right) => sortDueVariantCandidates(left, right, today));
   const dueEligibleVariants = filteredStudiedVariants
     .filter(
       (variant) => isVariantDueForPathSelection(variant, now) && !wasReviewedToday(variant, now)
@@ -969,7 +976,7 @@ export const getPathPlan = async (
     Array.from(openingCounts.entries()).map(([name, count]) => ({ name, count })),
     6
   );
-  const forecastDays = buildForecastDays(dueEligibleVariants, today, 14);
+  const forecastDays = buildForecastDays(forecastEligibleVariants, today, 14);
   return {
     todayKey,
     overdueCount,

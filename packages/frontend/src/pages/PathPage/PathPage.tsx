@@ -674,6 +674,20 @@ const PathPage: React.FC = () => {
                 <div className="bg-gray-900 border border-red-900 rounded-xl p-4 text-red-400">{insightsError}</div>
               )}
 
+              {!insightsLoading && analytics && (
+                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4">
+                  <div className="text-sm text-gray-300 mb-2">Recent review quality ({analytics.rangeStart} to {analytics.rangeEnd})</div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {ratingOrder.map((rating) => (
+                      <div key={rating} className="rounded bg-gray-800 px-3 py-2 text-center">
+                        <div className={`text-sm capitalize ${ratingColorClass[rating]}`}>{rating}</div>
+                        <div className="text-lg text-gray-100 font-semibold">{analytics.ratingBreakdown[rating]}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {!insightsLoading && plan && (
                 <>
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -759,20 +773,6 @@ const PathPage: React.FC = () => {
                     </div>
                   </div>
                 </>
-              )}
-
-              {!insightsLoading && analytics && (
-                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4">
-                  <div className="text-sm text-gray-300 mb-2">Recent review quality ({analytics.rangeStart} to {analytics.rangeEnd})</div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {ratingOrder.map((rating) => (
-                      <div key={rating} className="rounded bg-gray-800 px-3 py-2 text-center">
-                        <div className={`text-sm capitalize ${ratingColorClass[rating]}`}>{rating}</div>
-                        <div className="text-lg text-gray-100 font-semibold">{analytics.ratingBreakdown[rating]}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
               )}
             </div>
           )}
