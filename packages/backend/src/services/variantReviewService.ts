@@ -3,6 +3,7 @@ import { ReviewRating } from "@chess-opening-master/common";
 import { computeNextSchedule, getSchedulerVersion, inferSuggestedRatingFromMetrics } from "./spacedRepetitionService";
 import { VariantReviewHistory } from "../models/VariantReviewHistory";
 import { VariantInfo } from "../models/VariantInfo";
+import { ObjectId } from "mongodb";
 
 type VariantInfoDocument = VariantInfo & {
   userId: string;
@@ -31,10 +32,38 @@ function normalizeNonNegativeInt(value: number | undefined): number {
   return Math.max(0, Math.floor(value as number));
 }
 
+interface ErrorWithStatus extends Error {
+  status?: number;
+}
+
+function createNotFoundError(message: string): ErrorWithStatus {
+  const error = new Error(message) as ErrorWithStatus;
+  error.status = 404;
+  return error;
+}
+
+async function ensureRepertoireBelongsToUser(
+  userId: string,
+  repertoireId: string
+): Promise<void> {
+  if (!ObjectId.isValid(repertoireId)) {
+    throw createNotFoundError("Repertoire not found");
+  }
+  const db = getDB();
+  const repertoire = await db.collection("repertoires").findOne({
+    _id: new ObjectId(repertoireId),
+    userId,
+  });
+  if (!repertoire) {
+    throw createNotFoundError("Repertoire not found");
+  }
+}
+
 export async function saveVariantReview(input: SaveVariantReviewInput): Promise<{
   variantInfo: VariantInfoDocument;
   review: VariantReviewHistory;
 }> {
+  await ensureRepertoireBelongsToUser(input.userId, input.repertoireId);
   const db = getDB();
   const now = new Date();
   const filter = {

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { useRepertoireContext } from "./RepertoireContext";
 import { MoveVariantNode } from "../models/VariantNode";
 import { TrainVariant } from "../models/chess.models";
@@ -104,13 +104,13 @@ export const TrainRepertoireContextProvider: React.FC<
   const [variantStartTimes, setVariantStartTimes] = React.useState<Record<string, number>>({});
   const submittingReviewKeyRef = React.useRef<string | null>(null);
 
-  const playOpponentMove = async () => {
+  const playOpponentMove = useCallback(async () => {
     await sleep(1000);
     const randomMove = Math.floor(Math.random() * allowedMoves.length);
     goToMove(allowedMoves[randomMove]);
-  };
+  }, [allowedMoves, goToMove]);
 
-  const chooseTrainVariantsToTrain = (selectedTrainVariants: TrainVariant[]) => {
+  const chooseTrainVariantsToTrain = useCallback((selectedTrainVariants: TrainVariant[]) => {
     const nowMs = Date.now();
     setTrainVariants(selectedTrainVariants);
     initBoard();
@@ -125,9 +125,9 @@ export const TrainRepertoireContextProvider: React.FC<
     setPendingReviews([]);
     setLastErrors(0);
     setLastIgnoredErrors(0);
-  };
+  }, [chess, initBoard]);
 
-  const submitPendingVariantReview = async (rating: ReviewRating) => {
+  const submitPendingVariantReview = useCallback(async (rating: ReviewRating) => {
     const pendingReview = pendingReviews[0];
     if (!pendingReview) {
       return;
@@ -162,7 +162,7 @@ export const TrainRepertoireContextProvider: React.FC<
         submittingReviewKeyRef.current = null;
       }
     }
-  };
+  }, [orientation, pendingReviews, repertoireId]);
 
   useEffect(() => {
     setTurn(currentMoveNode.move?.color === "w" ? "black" : "white");
@@ -306,6 +306,8 @@ export const TrainRepertoireContextProvider: React.FC<
       setLastIgnoredErrors,
       pendingReviews,
       submitPendingVariantReview,
+      repertoireId,
+      orientation,
     ]
   );
 

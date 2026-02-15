@@ -773,9 +773,15 @@ function resolveRawDueDay(
   variant: { dueAt?: unknown; lastDate?: unknown },
   fallbackDay: Date
 ): Date {
-  const fallbackDate = toDateOrNull(variant.lastDate) || fallbackDay;
-  const dueDate = toDateOrNull(variant.dueAt) || fallbackDate;
-  return toUtcMidnight(dueDate);
+  const dueDate = toDateOrNull(variant.dueAt);
+  if (dueDate) {
+    return toUtcMidnight(dueDate);
+  }
+  const lastDate = toDateOrNull(variant.lastDate);
+  if (lastDate) {
+    return toUtcMidnight(lastDate);
+  }
+  return toUtcMidnight(fallbackDay);
 }
 
 function resolveForecastDueDay(
