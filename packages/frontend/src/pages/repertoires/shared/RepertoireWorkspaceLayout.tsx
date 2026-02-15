@@ -27,7 +27,7 @@ export const RepertoireWorkspaceLayout: React.FC<
         )}
       </div>
 
-      <div className="sm:hidden col-span-12 sm:col-span-6 flex flex-col items-start overflow-auto border border-secondary rounded bg-gray-800">
+      <div className="sm:hidden col-span-12 sm:col-span-6 flex flex-col items-start min-h-0 overflow-hidden border border-secondary rounded bg-gray-800">
         {mobilePanel}
       </div>
 

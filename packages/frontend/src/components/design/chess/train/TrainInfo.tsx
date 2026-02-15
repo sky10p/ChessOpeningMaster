@@ -18,6 +18,7 @@ interface TrainInfoProps {
   lastTrainVariant: TrainVariant | undefined;
   currentMoveNode: MoveVariantNode;
   repertoireId: string;
+  onHintReveal: () => void;
 }
 
 const TrainInfo: React.FC<TrainInfoProps> = ({
@@ -27,7 +28,8 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
   finishedTrain,
   lastTrainVariant,
   currentMoveNode,
-  repertoireId
+  repertoireId,
+  onHintReveal,
 }) => {
 
   const { goToRepertoire } = useNavigationUtils();
@@ -55,7 +57,7 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
   };
 
   return (
-    <div className="w-full h-full rounded-lg border border-secondary bg-background p-4 sm:p-6">
+    <div className="w-full rounded-lg border border-secondary bg-background p-4 sm:p-6 sm:h-full">
       {lastTrainVariant && (
         <div className="mb-4">
           <h2 className="text-lg font-semibold text-textLight">Last Finished Variant</h2>
@@ -117,12 +119,19 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
         <h4 className="text-lg font-semibold text-textLight mb-2">
           Available Variants to Play
         </h4>
-        <ul className="space-y-2">
+        <ul className="space-y-2 max-h-56 overflow-y-auto pr-1 sm:max-h-none sm:overflow-visible">
           {availableVariants.map((variant, index) => (
-            <Disclosure key={index}>
+            <Disclosure key={`${variant.variant.fullName}-${currentMoveNode.id}-${currentMoveNode.position}-${index}`}>
               {({ open }) => (
                 <>
-                  <Disclosure.Button className="flex justify-between w-full px-4 py-2 text-left text-sm font-medium text-textLight bg-secondary rounded-lg hover:opacity-80 focus:outline-none focus-visible:ring focus-visible:ring-accent focus-visible:ring-opacity-75">
+                  <Disclosure.Button
+                    onClick={() => {
+                      if (!open) {
+                        onHintReveal();
+                      }
+                    }}
+                    className="flex justify-between w-full px-4 py-2 text-left text-sm font-medium text-textLight bg-secondary rounded-lg hover:opacity-80 focus:outline-none focus-visible:ring focus-visible:ring-accent focus-visible:ring-opacity-75"
+                  >
                     <span>{variant.variant.fullName}</span>
                     <ChevronUpIcon
                       className={`${

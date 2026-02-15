@@ -54,6 +54,7 @@ const defaultProps = {
   lastTrainVariant: createMockTrainVariant('finished', 'Italian Game'),
   currentMoveNode: mockCurrentMoveNode,
   repertoireId: 'test-repertoire-id',
+  onHintReveal: jest.fn(),
 };
 
 describe('TrainInfo', () => {
@@ -196,6 +197,36 @@ describe('TrainInfo', () => {
     expect(screen.getByText('e4')).toBeInTheDocument();
     expect(screen.getByText('e5')).toBeInTheDocument();
     expect(screen.getByText('Nf3')).toBeInTheDocument();
+  });
+
+  it('calls onHintReveal when expanding available variant moves', () => {
+    render(<TrainInfo {...defaultProps} />);
+
+    const frenchDefenseButton = screen.getByText('French Defense');
+    fireEvent.click(frenchDefenseButton);
+
+    expect(defaultProps.onHintReveal).toHaveBeenCalledTimes(1);
+  });
+
+  it('collapses expanded moves after next move is played', () => {
+    const { rerender } = render(<TrainInfo {...defaultProps} />);
+
+    const frenchDefenseButton = screen.getByText('French Defense');
+    fireEvent.click(frenchDefenseButton);
+    expect(screen.getByText('e4')).toBeInTheDocument();
+
+    const nextMoveNode = new MoveVariantNode();
+    nextMoveNode.id = 'next-node';
+    nextMoveNode.position = 1;
+
+    rerender(
+      <TrainInfo
+        {...defaultProps}
+        currentMoveNode={nextMoveNode}
+      />
+    );
+
+    expect(screen.queryByText('e4')).not.toBeInTheDocument();
   });
 
   it('handles edge case with no available variants', () => {

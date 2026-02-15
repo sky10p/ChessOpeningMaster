@@ -40,6 +40,8 @@ interface TrainRepertoireContextProps {
   setLastErrors: (errors: number) => void;
   lastIgnoredErrors: number;
   setLastIgnoredErrors: (errors: number) => void;
+  lastHintsUsed: number;
+  markHintUsed: () => void;
   pendingVariantReview: PendingVariantReview | null;
   submitPendingVariantReview: (rating: ReviewRating) => Promise<void>;
 }
@@ -99,6 +101,7 @@ export const TrainRepertoireContextProvider: React.FC<
     React.useState<TrainVariant>();
   const [lastErrors, setLastErrors] = React.useState<number>(0);
   const [lastIgnoredErrors, setLastIgnoredErrors] = React.useState<number>(0);
+  const [lastHintsUsed, setLastHintsUsed] = React.useState<number>(0);
   const [pendingReviews, setPendingReviews] = React.useState<PendingVariantReview[]>([]);
   const [variantStartFens, setVariantStartFens] = React.useState<Record<string, string>>({});
   const [variantStartTimes, setVariantStartTimes] = React.useState<Record<string, number>>({});
@@ -125,7 +128,12 @@ export const TrainRepertoireContextProvider: React.FC<
     setPendingReviews([]);
     setLastErrors(0);
     setLastIgnoredErrors(0);
+    setLastHintsUsed(0);
   }, [chess, initBoard]);
+
+  const markHintUsed = useCallback(() => {
+    setLastHintsUsed((previousHintsUsed) => previousHintsUsed + 1);
+  }, []);
 
   const submitPendingVariantReview = useCallback(async (rating: ReviewRating) => {
     const pendingReview = pendingReviews[0];
@@ -246,7 +254,7 @@ export const TrainRepertoireContextProvider: React.FC<
               startingFen,
               wrongMoves: lastErrors,
               ignoredWrongMoves: lastIgnoredErrors,
-              hintsUsed: 0,
+              hintsUsed: lastHintsUsed,
               timeSpentSec,
             }),
           ];
@@ -265,6 +273,7 @@ export const TrainRepertoireContextProvider: React.FC<
         });
         setLastErrors(0);
         setLastIgnoredErrors(0);
+        setLastHintsUsed(0);
         return { ...trainVariant, state: "finished" } as TrainVariant;
       }
       return trainVariant;
@@ -290,6 +299,8 @@ export const TrainRepertoireContextProvider: React.FC<
       setLastErrors,
       lastIgnoredErrors,
       setLastIgnoredErrors,
+      lastHintsUsed,
+      markHintUsed,
       pendingVariantReview: pendingReviews[0] || null,
       submitPendingVariantReview,
     }),
@@ -304,6 +315,8 @@ export const TrainRepertoireContextProvider: React.FC<
       setLastErrors,
       lastIgnoredErrors,
       setLastIgnoredErrors,
+      lastHintsUsed,
+      markHintUsed,
       pendingReviews,
       submitPendingVariantReview,
       repertoireId,
