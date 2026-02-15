@@ -101,6 +101,7 @@ export async function saveVariantReview(input: SaveVariantReviewInput): Promise<
     userId: input.userId,
     repertoireId: input.repertoireId,
     variantName: input.variantName,
+    isFirstReview: !existing,
     reviewedAt: now,
     reviewedDayKey: schedule.lastReviewedDayKey,
     rating: input.rating,
@@ -113,7 +114,11 @@ export async function saveVariantReview(input: SaveVariantReviewInput): Promise<
     startingFen: input.startingFen,
     openingName: input.openingName,
     orientation: input.orientation,
-    dueBeforeReviewAt: existing?.dueAt ? new Date(existing.dueAt) : null,
+    dueBeforeReviewAt: existing?.dueAt
+      ? new Date(existing.dueAt)
+      : existing?.lastDate
+        ? new Date(existing.lastDate as unknown as string | Date)
+        : null,
     nextDueAt: schedule.dueAt,
     schedulerVersion: getSchedulerVersion(),
   };

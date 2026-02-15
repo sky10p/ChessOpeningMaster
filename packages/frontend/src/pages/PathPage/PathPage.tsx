@@ -22,6 +22,7 @@ import {
   ReviewRating,
 } from "@chess-opening-master/common";
 import { isEmptyPath, isNewVariantPath, isStudiedVariantPath, isStudyPath } from "./helpers";
+import { getTodayPlanProgress } from "./todayPlanProgress";
 
 type FilterOrientation = BoardOrientation | "all";
 type PathView = "lesson" | "forecast";
@@ -34,6 +35,8 @@ type PathFiltersState = {
   dateTo: string;
   dailyNewLimit: string;
 };
+
+const DEFAULT_DAILY_NEW_LIMIT = 5;
 
 const formatDate = (date: string | Date): string => {
   const newDate = new Date(date);
@@ -64,7 +67,7 @@ const defaultFilters = (): PathFiltersState => ({
   fen: "",
   dateFrom: getDateKeyDaysAgo(29),
   dateTo: getTodayDateKey(),
-  dailyNewLimit: "5",
+  dailyNewLimit: String(DEFAULT_DAILY_NEW_LIMIT),
 });
 
 const categoryLabels: Record<PathCategory | "all", string> = {
@@ -163,7 +166,10 @@ const PathPage: React.FC = () => {
     if (apiFilters.fen) {
       tags.push("FEN filter");
     }
-    if (apiFilters.dailyNewLimit !== undefined) {
+    if (
+      apiFilters.dailyNewLimit !== undefined &&
+      apiFilters.dailyNewLimit !== DEFAULT_DAILY_NEW_LIMIT
+    ) {
       tags.push(`New/day cap: ${apiFilters.dailyNewLimit}`);
     }
     return tags;
@@ -223,6 +229,19 @@ const PathPage: React.FC = () => {
   const maxForecastDayLoad = Math.max(...forecastDays.map((entry) => entry.dueCount), 1);
   const nextSevenDueCount = forecastDays.slice(0, 7).reduce((sum, entry) => sum + entry.dueCount, 0);
   const hasForecastLoad = forecastDays.some((entry) => entry.dueCount > 0);
+  const {
+    reviewTargetToday,
+    newTargetToday,
+    plannedTodayTarget,
+    completedReviewsToday,
+    completedNewToday,
+    completedToday,
+    remainingToTarget,
+    remainingReviewsTarget,
+    remainingNewTarget,
+    exceededTarget,
+    todayPlanMessage,
+  } = useMemo(() => getTodayPlanProgress(plan), [plan]);
 
   const renderTopNamedCounts = (entries: PathNamedCount[], emptyMessage: string) => {
     if (entries.length === 0) {
@@ -600,6 +619,43 @@ const PathPage: React.FC = () => {
                     >
                       Open forecast
                     </button>
+                  </div>
+
+                  <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex flex-col gap-2">
+                    <div className="text-sm text-gray-200 font-semibold">Today vs plan</div>
+                    <div className="grid grid-cols-2 gap-2 text-center">
+                      <div className="rounded bg-gray-800 px-2 py-2">
+                        <div className="text-[11px] text-gray-400">Reviews (due)</div>
+                        <div className="text-lg font-semibold text-cyan-300">{completedReviewsToday} / {reviewTargetToday}</div>
+                      </div>
+                      <div className="rounded bg-gray-800 px-2 py-2">
+                        <div className="text-[11px] text-gray-400">New learned (first-time)</div>
+                        <div className="text-lg font-semibold text-blue-300">{completedNewToday} / {newTargetToday}</div>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div className="rounded bg-gray-800 px-2 py-2">
+                        <div className="text-[11px] text-gray-400">Target</div>
+                        <div className="text-lg font-semibold text-cyan-300">{plannedTodayTarget}</div>
+                      </div>
+                      <div className="rounded bg-gray-800 px-2 py-2">
+                        <div className="text-[11px] text-gray-400">Completed</div>
+                        <div className="text-lg font-semibold text-emerald-300">{completedToday}</div>
+                      </div>
+                      <div className="rounded bg-gray-800 px-2 py-2">
+                        <div className="text-[11px] text-gray-400">Remaining</div>
+                        <div className="text-lg font-semibold text-blue-300">{remainingToTarget}</div>
+                      </div>
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      Reviews remaining: {remainingReviewsTarget} · New remaining: {remainingNewTarget}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      New learned increases only when a variant is reviewed for the first time in this filter scope.
+                    </div>
+                    <div className={`text-sm ${exceededTarget ? "text-emerald-300" : "text-gray-300"}`}>
+                      {todayPlanMessage}
+                    </div>
                   </div>
                 </div>
               </div>

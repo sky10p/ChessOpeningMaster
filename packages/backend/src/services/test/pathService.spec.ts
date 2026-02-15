@@ -899,6 +899,17 @@ type Variant = { fullName: string; moves: unknown[]; name: string; differentMove
     it('should return zeroed summary for empty data', async () => {
       jest.useFakeTimers().setSystemTime(new Date('2026-02-15T10:00:00.000Z'));
 
+      mockDB.collection.mockImplementation((collectionName: string) => {
+        if (collectionName === 'variantReviewHistory') {
+          return {
+            find: jest.fn().mockReturnValue({
+              toArray: jest.fn().mockResolvedValue([]),
+            }),
+          };
+        }
+        return mockDB;
+      });
+
       (getAllVariants as jest.Mock).mockResolvedValue({
         newVariants: [],
         studiedVariants: [],
@@ -912,6 +923,8 @@ type Variant = { fullName: string; moves: unknown[]; name: string; differentMove
         expect(result.dueTodayCount).toBe(0);
         expect(result.reviewDueCount).toBe(0);
         expect(result.completedTodayCount).toBe(0);
+        expect(result.completedDueToday).toBe(0);
+        expect(result.completedNewToday).toBe(0);
         expect(result.suggestedNewToday).toBe(0);
         expect(result.forecastDays).toHaveLength(14);
         expect(result.nextVariants).toHaveLength(0);
@@ -922,6 +935,42 @@ type Variant = { fullName: string; moves: unknown[]; name: string; differentMove
 
     it('should bucket overdue vs due-today and apply orientation/opening/fen filters', async () => {
       jest.useFakeTimers().setSystemTime(new Date('2026-02-15T10:00:00.000Z'));
+
+      mockDB.collection.mockImplementation((collectionName: string) => {
+        if (collectionName === 'variantReviewHistory') {
+          return {
+            find: jest.fn().mockReturnValue({
+              toArray: jest.fn().mockResolvedValue([
+                {
+                  userId: 'user-1',
+                  repertoireId: 'r1',
+                  variantName: 'Sicilian: Mainline',
+                  reviewedAt: '2026-02-15T03:00:00.000Z',
+                  reviewedDayKey: '2026-02-15',
+                  rating: 'good',
+                  openingName: 'Sicilian Defense',
+                  startingFen: 'rnbqkbnr/pppppppp/8/8',
+                  orientation: 'white',
+                  dueBeforeReviewAt: '2026-02-14T00:00:00.000Z',
+                },
+                {
+                  userId: 'user-1',
+                  repertoireId: 'r1',
+                  variantName: 'Sicilian: New A',
+                  reviewedAt: '2026-02-15T04:00:00.000Z',
+                  reviewedDayKey: '2026-02-15',
+                  rating: 'hard',
+                  openingName: 'Sicilian Defense',
+                  startingFen: 'rnbqkbnr/pppppppp/8/8',
+                  orientation: 'white',
+                  dueBeforeReviewAt: null,
+                },
+              ]),
+            }),
+          };
+        }
+        return mockDB;
+      });
 
       (getAllVariants as jest.Mock).mockResolvedValue({
         newVariants: [
@@ -1001,7 +1050,9 @@ type Variant = { fullName: string; moves: unknown[]; name: string; differentMove
         expect(result.overdueCount).toBe(1);
         expect(result.dueTodayCount).toBe(1);
         expect(result.reviewDueCount).toBe(2);
-        expect(result.completedTodayCount).toBe(1);
+        expect(result.completedTodayCount).toBe(2);
+        expect(result.completedDueToday).toBe(1);
+        expect(result.completedNewToday).toBe(1);
         expect(result.newVariantsAvailable).toBe(1);
         expect(result.suggestedNewToday).toBe(1);
         expect(result.nextVariants.map((entry) => entry.variantName)).toEqual([

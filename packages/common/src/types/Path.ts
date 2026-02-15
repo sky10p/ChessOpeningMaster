@@ -78,6 +78,8 @@ export interface PathPlanSummary {
   dueTodayCount: number;
   reviewDueCount: number;
   completedTodayCount: number;
+  completedDueToday?: number;
+  completedNewToday?: number;
   newVariantsAvailable: number;
   suggestedNewToday: number;
   estimatedTodayTotal: number;

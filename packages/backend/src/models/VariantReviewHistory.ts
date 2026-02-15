@@ -4,6 +4,7 @@ export interface VariantReviewHistory {
   userId: string;
   repertoireId: string;
   variantName: string;
+  isFirstReview: boolean;
   reviewedAt: Date;
   reviewedDayKey: string;
   rating: ReviewRating;

@@ -87,9 +87,11 @@ interface ReviewHistoryDocument extends Document {
   userId: string;
   repertoireId: string;
   variantName: string;
+  isFirstReview?: boolean;
   reviewedAt: Date | string | { $date: string };
   reviewedDayKey?: string;
   rating: ReviewRating;
+  dueBeforeReviewAt?: Date | string | { $date: string } | null;
   openingName?: string;
   startingFen?: string;
   orientation?: "white" | "black";
@@ -868,6 +870,7 @@ export const getPathPlan = async (
   userId: string,
   filters?: PathInsightsFilters
 ): Promise<PathPlanSummary> => {
+  const db = getDB();
   const now = new Date();
   const today = toUtcMidnight(now);
   const todayKey = getUtcDayKey(today);
@@ -910,7 +913,42 @@ export const getPathPlan = async (
       upcomingCountMap.set(dueDayKey, (upcomingCountMap.get(dueDayKey) || 0) + 1);
     }
   }
-  const completedTodayCount = filteredStudiedVariants.filter((variant) => wasReviewedToday(variant, now)).length;
+  const tomorrow = addUtcDays(today, 1);
+  const todayReviewQuery: Filter<ReviewHistoryDocument> = {
+    userId,
+    reviewedAt: {
+      $gte: today,
+      $lt: tomorrow,
+    },
+  };
+  if (filters?.orientation) {
+    todayReviewQuery.orientation = filters.orientation;
+  }
+  const openingNameFilter = filters?.openingName?.trim();
+  if (openingNameFilter) {
+    const openingRegex = new RegExp(escapeRegex(openingNameFilter), "i");
+    todayReviewQuery.$or = [
+      { openingName: { $regex: openingRegex } },
+      { variantName: { $regex: openingRegex } },
+    ];
+  }
+  const fenFilter = filters?.fen?.trim();
+  if (fenFilter) {
+    todayReviewQuery.startingFen = { $regex: new RegExp(escapeRegex(fenFilter), "i") };
+  }
+  const reviewsToday = await db
+    .collection<ReviewHistoryDocument>("variantReviewHistory")
+    .find(todayReviewQuery)
+    .toArray();
+
+  const completedNewToday = reviewsToday.filter((review) => {
+    if (typeof review.isFirstReview === "boolean") {
+      return review.isFirstReview;
+    }
+    return toDateOrNull(review.dueBeforeReviewAt) === null;
+  }).length;
+  const completedDueToday = reviewsToday.length - completedNewToday;
+  const completedTodayCount = completedDueToday + completedNewToday;
   const reviewDueCount = overdueCount + dueTodayCount;
   const suggestedNewToday = Math.min(dailyNewLimit, filteredNewVariants.length);
   const upcoming: PathPlanPoint[] = Array.from(upcomingCountMap.entries()).map(
@@ -938,6 +976,8 @@ export const getPathPlan = async (
     dueTodayCount,
     reviewDueCount,
     completedTodayCount,
+    completedDueToday,
+    completedNewToday,
     newVariantsAvailable: filteredNewVariants.length,
     suggestedNewToday,
     estimatedTodayTotal: reviewDueCount + suggestedNewToday,

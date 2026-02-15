@@ -4,6 +4,8 @@ type MockCollection = {
   indexes: jest.Mock;
   dropIndex: jest.Mock;
   createIndex: jest.Mock;
+  aggregate: jest.Mock;
+  deleteMany: jest.Mock;
 };
 
 type MockDb = {
@@ -14,6 +16,10 @@ const createCollection = (): MockCollection => ({
   indexes: jest.fn().mockResolvedValue([]),
   dropIndex: jest.fn().mockResolvedValue(undefined),
   createIndex: jest.fn().mockResolvedValue("ok"),
+  aggregate: jest.fn().mockReturnValue({
+    toArray: jest.fn().mockResolvedValue([]),
+  }),
+  deleteMany: jest.fn().mockResolvedValue({ deletedCount: 0 }),
 });
 
 describe("ensureDatabaseIndexes", () => {
