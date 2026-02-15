@@ -219,6 +219,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
       repertoireId,
       orientation,
       updateComment,
+      markHintUsed,
     ]
   );
 
@@ -254,6 +255,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
       trainVariants,
       lastTrainVariant,
       repertoireId,
+      markHintUsed,
     ]
   );
 
