@@ -172,5 +172,10 @@ export async function ensureDatabaseIndexes(db: Db): Promise<void> {
     createIndexSafely(db, "variantReviewHistory", { userId: 1, reviewedAt: -1 }),
     createIndexSafely(db, "variantReviewHistory", { userId: 1, reviewedDayKey: 1 }),
     createIndexSafely(db, "variantReviewHistory", { userId: 1, openingName: 1, orientation: 1 }),
+    createIndexSafely(db, "linkedGameAccounts", { userId: 1, provider: 1 }, { unique: true }),
+    createIndexSafely(db, "importedGames", { userId: 1, dedupeKey: 1 }, { unique: true }),
+    createIndexSafely(db, "importedGames", { userId: 1, playedAt: -1 }),
+    createIndexSafely(db, "importedGames", { userId: 1, "openingDetection.lineKey": 1 }),
+    createIndexSafely(db, "trainingPlans", { userId: 1, generatedAtDate: -1 }),
   ]);
 }

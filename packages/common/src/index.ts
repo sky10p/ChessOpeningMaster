@@ -34,3 +34,20 @@ export {
   validatePasswordStrength,
   PasswordValidationResult,
 } from "./utils/passwordPolicy";
+
+export {
+  GameSource,
+  LinkedAccountProvider,
+  SyncStatus,
+  LinkedGameAccount,
+  ImportedGame,
+  OpeningDetection,
+  OpeningMapping,
+  ImportSummary,
+  GameStatsFilters,
+  LineStudyCandidate,
+  GamesStatsSummary,
+  TrainingPlanWeights,
+  TrainingPlanItem,
+  TrainingPlan,
+} from "./types/GameImports";
