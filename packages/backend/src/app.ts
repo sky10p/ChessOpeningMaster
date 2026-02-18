@@ -6,10 +6,12 @@ import studiesRouter from "./routes/studies";
 import paths from "./routes/paths";
 import positionsRouter from "./routes/positionComments";
 import authRouter from "./routes/auth";
+import gamesRouter from "./routes/games";
 import errorHandler from "./middleware/errorHandler";
 import { authMiddleware } from "./middleware/auth";
 import { ensureDefaultUserAndMigrateData } from "./services/authService";
 import { ensureDatabaseIndexes } from "./db/indexes";
+import { startGamesAutoSyncScheduler } from "./services/games/autoSyncScheduler";
 
 const app = express();
 const port = process.env.BACKEND_PORT || 3001;
@@ -56,6 +58,7 @@ app.use("/repertoires", repertoiresRouter);
 app.use("/studies", studiesRouter);
 app.use("/paths", paths);
 app.use("/positions", positionsRouter);
+app.use("/games", gamesRouter);
 
 app.use(errorHandler);
 
@@ -65,6 +68,7 @@ if (require.main === module) {
   connectDB().then(async () => {
     await ensureDatabaseIndexes(getDB());
     await ensureDefaultUserAndMigrateData();
+    startGamesAutoSyncScheduler();
     app.listen(port, () => {
       console.log(`Server listening at http://localhost:${port}`);
     });

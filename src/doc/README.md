@@ -60,6 +60,12 @@ This directory contains comprehensive documentation for the Chess Opening Master
 - Path planning/analytics API and UI design
 - Phased rollout and acceptance criteria
 
+### ♟️ [Game Imports and Training Plan Guide](Game-Imports-Guide.md)
+**How to link providers, import PGN games, and use My Games insights/training plan**
+- Linked account setup and sync
+- Manual PGN paste/upload flow
+- Opening mapping and training plan usage
+
 ### 🔧 [Troubleshooting Guide](Troubleshooting-Guide.md)
 **First stop when encountering issues**
 - Common TypeScript compilation errors
