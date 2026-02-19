@@ -187,6 +187,12 @@ type RepertoireMetadata = {
   variants: RepertoireVariant[];
 };
 
+type RepertoireMetadataCacheKey = BoardOrientation | "all";
+
+type ImportBatchCache = {
+  repertoireMetadataByScope: Map<RepertoireMetadataCacheKey, Map<string, RepertoireMetadata>>;
+};
+
 type VariantTrainingSignal = {
   errors: number;
   dueAt?: Date;
@@ -269,6 +275,50 @@ const buildRepertoireMetadataById = (
     });
   });
   return metadataById;
+};
+
+const getRepertoireMetadataCacheKey = (orientation?: BoardOrientation): RepertoireMetadataCacheKey => (
+  orientation || "all"
+);
+
+const loadRepertoireMetadataById = async (
+  userId: string,
+  orientation?: BoardOrientation
+): Promise<Map<string, RepertoireMetadata>> => {
+  const db = getDB();
+  const repertoires = await db.collection("repertoires")
+    .find({
+      userId,
+      ...(orientation ? { orientation } : {}),
+    })
+    .project({ _id: 1, name: 1, moveNodes: 1, orientation: 1 })
+    .toArray();
+  return buildRepertoireMetadataById(
+    repertoires.map((repertoire) => ({
+      _id: repertoire._id,
+      name: repertoire.name,
+      moveNodes: repertoire.moveNodes,
+      orientation: repertoire.orientation,
+    }))
+  );
+};
+
+const getRepertoireMetadataById = async (
+  userId: string,
+  orientation: BoardOrientation | undefined,
+  importBatchCache?: ImportBatchCache
+): Promise<Map<string, RepertoireMetadata>> => {
+  if (!importBatchCache) {
+    return loadRepertoireMetadataById(userId, orientation);
+  }
+  const cacheKey = getRepertoireMetadataCacheKey(orientation);
+  const cached = importBatchCache.repertoireMetadataByScope.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+  const loaded = await loadRepertoireMetadataById(userId, orientation);
+  importBatchCache.repertoireMetadataByScope.set(cacheKey, loaded);
+  return loaded;
 };
 
 const buildVariantTrainingKey = (repertoireId: string, variantName: string): string => `${repertoireId}::${variantName.trim().toLowerCase()}`;
@@ -357,31 +407,15 @@ async function buildOpeningMapping(
   openingName: string | undefined,
   eco: string | undefined,
   lineMovesSan: string[],
-  tags?: string[]
+  tags?: string[],
+  importBatchCache?: ImportBatchCache
 ): Promise<OpeningMapping> {
-  const db = getDB();
-  const repertoires = await db.collection("repertoires")
-    .find({
-      userId,
-      ...(orientation ? { orientation } : {}),
-    })
-    .project({ _id: 1, name: 1, moveNodes: 1, orientation: 1 })
-    .toArray();
-  const repertoireMetadataById = buildRepertoireMetadataById(
-    repertoires.map((repertoire) => ({
-      _id: repertoire._id,
-      name: repertoire.name,
-      moveNodes: repertoire.moveNodes,
-      orientation: repertoire.orientation,
-    }))
-  );
+  const repertoireMetadataById = await getRepertoireMetadataById(userId, orientation, importBatchCache);
   let best: OpeningMapping = { confidence: 0, strategy: "none", requiresManualReview: true };
 
-  repertoires.forEach((repertoire) => {
-    const repertoireId = repertoire._id.toString();
-    const metadata = repertoireMetadataById.get(repertoireId);
-    const repName = metadata?.repertoireName || String(repertoire.name || "");
-    const bestVariantByLine = metadata ? getBestVariantMatch(metadata.variants, lineMovesSan) : null;
+  repertoireMetadataById.forEach((metadata, repertoireId) => {
+    const repName = metadata.repertoireName || "";
+    const bestVariantByLine = getBestVariantMatch(metadata.variants, lineMovesSan);
     const bestVariantByName = metadata
       ? metadata.variants
         .map((variant) => ({
@@ -535,6 +569,9 @@ export async function importGamesForUser(userId: string, input: ProviderImportIn
     ? true
     : (await gamesCollection.findOne({ userId, source: input.source }, { projection: { _id: 1 } })) !== null;
   const syncSince = hasExistingGamesForSource ? linked?.lastSyncAt : undefined;
+  const importBatchCache: ImportBatchCache = {
+    repertoireMetadataByScope: new Map<RepertoireMetadataCacheKey, Map<string, RepertoireMetadata>>(),
+  };
 
   try {
     if (input.source !== "manual") {
@@ -571,7 +608,8 @@ export async function importGamesForUser(userId: string, input: ProviderImportIn
           openingDetection.openingName,
           openingDetection.eco,
           openingDetection.lineMovesSan,
-          input.tags
+          input.tags,
+          importBatchCache
         );
         const resolvedOpeningName = openingDetection.openingName || openingMapping.variantName || openingMapping.repertoireName;
         const result = toNormalizedResult(game.headers.Result);
@@ -603,8 +641,19 @@ export async function importGamesForUser(userId: string, input: ProviderImportIn
         };
         await gamesCollection.insertOne(doc);
         importedCount += 1;
-      } catch {
+      } catch (error) {
         failedCount += 1;
+        console.error("Game import failed", {
+          userId,
+          source: input.source,
+          providerGameId: game.providerGameId,
+          white: game.headers.White || "Unknown",
+          black: game.headers.Black || "Unknown",
+          gameDate: game.headers.UTCDate || game.headers.Date,
+          result: game.headers.Result,
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+        });
       }
     }
 
@@ -1219,9 +1268,33 @@ const buildPriority = (line: LineStudyCandidate, weights: TrainingPlanWeights, r
   );
 };
 
-export async function generateTrainingPlan(userId: string, weights?: Partial<TrainingPlanWeights>): Promise<TrainingPlan> {
+const toTrainingStatsFilters = (filters?: ImportedGamesFilters): GameStatsFilters => ({
+  source: filters?.source,
+  color: filters?.color,
+  dateFrom: filters?.dateFrom,
+  dateTo: filters?.dateTo,
+  timeControlBucket: filters?.timeControlBucket,
+  openingQuery: filters?.openingQuery,
+  mapped: filters?.mapped,
+});
+
+const hasActiveImportedFilters = (filters?: ImportedGamesFilters): boolean => Boolean(
+  filters?.source
+  || filters?.color
+  || filters?.dateFrom
+  || filters?.dateTo
+  || filters?.timeControlBucket
+  || filters?.openingQuery
+  || (filters?.mapped && filters.mapped !== "all")
+);
+
+export async function generateTrainingPlan(
+  userId: string,
+  weights?: Partial<TrainingPlanWeights>,
+  filters?: ImportedGamesFilters
+): Promise<TrainingPlan> {
   const mergedWeights: TrainingPlanWeights = { ...DEFAULT_TRAINING_PLAN_WEIGHTS, ...weights };
-  const stats = await getGamesStats(userId, {});
+  const stats = await getGamesStats(userId, toTrainingStatsFilters(filters));
   const db = getDB();
   const matchedLines = stats.linesToStudy.filter((line) => line.mappedGames > 0 && Boolean(line.variantName || line.repertoireName));
   const trainingErrorMatchedLines = matchedLines.filter((line) => (line.trainingErrors || 0) > 0);
@@ -1287,15 +1360,15 @@ export async function generateTrainingPlan(userId: string, weights?: Partial<Tra
   return plan;
 }
 
-export async function getLatestTrainingPlan(userId: string): Promise<TrainingPlan | null> {
+export async function getLatestTrainingPlan(userId: string, filters?: ImportedGamesFilters): Promise<TrainingPlan | null> {
   const db = getDB();
   const plan = await db.collection<TrainingPlanDocument>("trainingPlans").findOne({ userId }, { sort: { generatedAtDate: -1 } });
   if (!plan) {
     return null;
   }
-  const stats = await getGamesStats(userId, {});
+  const stats = await getGamesStats(userId, toTrainingStatsFilters(filters));
   const lineByKey = new Map(stats.linesToStudy.map((line) => [line.lineKey, line]));
-  const items = plan.items.map((item) => {
+  const hydratedItems = plan.items.map((item) => {
     const line = lineByKey.get(item.lineKey);
     const priority = typeof item.priority === "number" ? item.priority : 0;
     return {
@@ -1319,6 +1392,9 @@ export async function getLatestTrainingPlan(userId: string): Promise<TrainingPla
       done: Boolean(item.done),
     };
   });
+  const items = hasActiveImportedFilters(filters)
+    ? hydratedItems.filter((item) => lineByKey.has(item.lineKey))
+    : hydratedItems;
   return {
     id: plan.id,
     generatedAt: plan.generatedAt,

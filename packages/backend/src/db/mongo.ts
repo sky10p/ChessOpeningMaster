@@ -13,6 +13,13 @@ export async function connectDB() {
   return client;
 }
 
+export async function disconnectDB() {
+  if (isConnected) {
+    await client.close();
+    isConnected = false;
+  }
+}
+
 export function getDB(dbName = "chess-opening-master") {
   return client.db(dbName);
 }

@@ -139,18 +139,21 @@ export const getGamesStats = async (query?: GamesStatsQuery): Promise<GamesStats
   return parseJson<GamesStatsSummary>(response);
 };
 
-export const generateTrainingPlan = async (weights?: Partial<TrainingPlanWeights>): Promise<TrainingPlan> => {
+export const generateTrainingPlan = async (
+  weights?: Partial<TrainingPlanWeights>,
+  filters?: Omit<ImportedGamesQuery, "limit">
+): Promise<TrainingPlan> => {
   const response = await apiFetch(`${API_URL}/games/training-plan`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ weights }),
+    body: JSON.stringify({ weights, filters }),
   });
   await ensureOk(response, "Failed to generate training plan");
   return parseJson<TrainingPlan>(response);
 };
 
-export const getTrainingPlan = async (): Promise<TrainingPlan | null> => {
-  const response = await apiFetch(`${API_URL}/games/training-plan`);
+export const getTrainingPlan = async (filters?: Omit<ImportedGamesQuery, "limit">): Promise<TrainingPlan | null> => {
+  const response = await apiFetch(`${API_URL}/games/training-plan${toSearchParams(filters)}`);
   if (response.status === 404) {
     return null;
   }

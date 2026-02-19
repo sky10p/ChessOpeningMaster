@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
-import { connectDB, getDB } from "./db/mongo";
+import { connectDB, disconnectDB, getDB } from "./db/mongo";
+import { Server } from "http";
 import repertoiresRouter from "./routes/repertoires";
 import studiesRouter from "./routes/studies";
 import paths from "./routes/paths";
@@ -64,13 +65,68 @@ app.use(errorHandler);
 
 export default app;
 
+const closeHttpServer = async (server: Server): Promise<void> => {
+  await new Promise<void>((resolve, reject) => {
+    server.close((error) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      resolve();
+    });
+  });
+};
+
 if (require.main === module) {
-  connectDB().then(async () => {
+  const run = async () => {
+    await connectDB();
     await ensureDatabaseIndexes(getDB());
     await ensureDefaultUserAndMigrateData();
-    startGamesAutoSyncScheduler();
-    app.listen(port, () => {
+    const scheduler = startGamesAutoSyncScheduler();
+    const server = app.listen(port, () => {
       console.log(`Server listening at http://localhost:${port}`);
     });
+
+    let shuttingDown = false;
+    const handleShutdown = (signal: NodeJS.Signals) => {
+      if (shuttingDown) {
+        return;
+      }
+      shuttingDown = true;
+      void (async () => {
+        let exitCode = 0;
+        try {
+          const completed = await scheduler.stop();
+          if (!completed) {
+            console.warn("Games auto-sync shutdown timed out");
+          }
+        } catch (error) {
+          exitCode = 1;
+          console.error("Failed to stop games auto-sync scheduler", error);
+        }
+        try {
+          await closeHttpServer(server);
+        } catch (error) {
+          exitCode = 1;
+          console.error("Failed to close HTTP server", error);
+        }
+        try {
+          await disconnectDB();
+        } catch (error) {
+          exitCode = 1;
+          console.error("Failed to disconnect database", error);
+        }
+        process.exit(exitCode);
+      })();
+      console.log(`Received ${signal}, shutting down gracefully`);
+    };
+
+    process.on("SIGINT", () => handleShutdown("SIGINT"));
+    process.on("SIGTERM", () => handleShutdown("SIGTERM"));
+  };
+
+  run().catch((error) => {
+    console.error("Backend startup failed", error);
+    process.exit(1);
   });
 }

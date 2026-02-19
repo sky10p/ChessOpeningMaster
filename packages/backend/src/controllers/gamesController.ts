@@ -15,30 +15,32 @@ import {
   upsertLinkedAccount,
 } from "../services/games/gameImportService";
 
-const parseImportedGamesFilters = (req: Request): ImportedGamesFilters => {
-  const source = req.query.source === "lichess" || req.query.source === "chesscom" || req.query.source === "manual"
-    ? req.query.source
+const parseImportedGamesFiltersFromValue = (value: Record<string, unknown>): ImportedGamesFilters => {
+  const source = value.source === "lichess" || value.source === "chesscom" || value.source === "manual"
+    ? value.source
     : undefined;
-  const color = req.query.color === "white" || req.query.color === "black"
-    ? req.query.color
+  const color = value.color === "white" || value.color === "black"
+    ? value.color
     : undefined;
-  const mapped = req.query.mapped === "mapped" || req.query.mapped === "unmapped" || req.query.mapped === "all"
-    ? req.query.mapped
+  const mapped = value.mapped === "mapped" || value.mapped === "unmapped" || value.mapped === "all"
+    ? value.mapped
     : undefined;
   const timeControlBucket =
-    req.query.timeControlBucket === "bullet" || req.query.timeControlBucket === "blitz" || req.query.timeControlBucket === "rapid" || req.query.timeControlBucket === "classical"
-      ? req.query.timeControlBucket
+    value.timeControlBucket === "bullet" || value.timeControlBucket === "blitz" || value.timeControlBucket === "rapid" || value.timeControlBucket === "classical"
+      ? value.timeControlBucket
       : undefined;
   return {
     source,
     color,
-    dateFrom: typeof req.query.dateFrom === "string" ? req.query.dateFrom : undefined,
-    dateTo: typeof req.query.dateTo === "string" ? req.query.dateTo : undefined,
+    dateFrom: typeof value.dateFrom === "string" ? value.dateFrom : undefined,
+    dateTo: typeof value.dateTo === "string" ? value.dateTo : undefined,
     timeControlBucket,
-    openingQuery: typeof req.query.openingQuery === "string" ? req.query.openingQuery : undefined,
+    openingQuery: typeof value.openingQuery === "string" ? value.openingQuery : undefined,
     mapped,
   };
 };
+
+const parseImportedGamesFilters = (req: Request): ImportedGamesFilters => parseImportedGamesFiltersFromValue(req.query as Record<string, unknown>);
 
 export async function getLinkedAccounts(req: Request, res: Response, next: NextFunction) {
   try {
@@ -159,7 +161,11 @@ export async function getGamesStatsSummary(req: Request, res: Response, next: Ne
 
 export async function postGenerateTrainingPlan(req: Request, res: Response, next: NextFunction) {
   try {
-    const plan = await generateTrainingPlan(getRequestUserId(req), req.body?.weights);
+    const plan = await generateTrainingPlan(
+      getRequestUserId(req),
+      req.body?.weights,
+      parseImportedGamesFiltersFromValue((req.body?.filters || {}) as Record<string, unknown>)
+    );
     res.status(201).json(plan);
   } catch (error) {
     next(error);
@@ -168,7 +174,7 @@ export async function postGenerateTrainingPlan(req: Request, res: Response, next
 
 export async function getTrainingPlan(req: Request, res: Response, next: NextFunction) {
   try {
-    const plan = await getLatestTrainingPlan(getRequestUserId(req));
+    const plan = await getLatestTrainingPlan(getRequestUserId(req), parseImportedGamesFilters(req));
     if (!plan) {
       return res.status(404).json({ message: "No training plan generated" });
     }
