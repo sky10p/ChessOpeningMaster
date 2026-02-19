@@ -10,12 +10,22 @@ type GamesFiltersBarProps = {
 };
 
 const GamesFiltersBar: React.FC<GamesFiltersBarProps> = ({ filtersDraft, setFiltersDraft, applyFilters, resetFilters }) => (
-  <section className="hidden sm:block p-3 border-b border-slate-800 bg-slate-900/70">
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-2">
+  <section className="hidden sm:block px-4 py-2.5 border-b border-slate-800 bg-slate-900/60">
+    <div className="flex flex-wrap items-end gap-2">
       <GamesFiltersFields filtersDraft={filtersDraft} setFiltersDraft={setFiltersDraft} />
-      <div className="flex gap-2">
-        <button className="flex-1 px-3 py-2 rounded bg-blue-600 text-sm" onClick={applyFilters}>Apply</button>
-        <button className="flex-1 px-3 py-2 rounded bg-slate-700 text-sm" onClick={resetFilters}>Reset</button>
+      <div className="flex gap-1.5 ml-auto shrink-0">
+        <button
+          className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium transition-colors"
+          onClick={applyFilters}
+        >
+          Apply
+        </button>
+        <button
+          className="px-4 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs font-medium transition-colors border border-slate-600"
+          onClick={resetFilters}
+        >
+          Reset
+        </button>
       </div>
     </div>
   </section>

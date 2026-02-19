@@ -1,5 +1,14 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  ArrowPathIcon,
+  ChartBarIcon,
+  AcademicCapIcon,
+  CloudArrowDownIcon,
+  CircleStackIcon,
+  FunnelIcon,
+  SparklesIcon,
+} from "@heroicons/react/24/outline";
 import { providerOptions, tabs } from "./constants";
 import GamesFiltersBar from "./components/GamesFiltersBar";
 import GamesFiltersDrawer from "./components/GamesFiltersDrawer";
@@ -11,6 +20,13 @@ import InsightsTab from "./tabs/InsightsTab";
 import SyncTab from "./tabs/SyncTab";
 import TrainingTab from "./tabs/TrainingTab";
 import { GamesTab } from "./types";
+
+const TAB_ICONS: Record<GamesTab, React.ReactNode> = {
+  insights: <ChartBarIcon className="w-4 h-4" />,
+  training: <AcademicCapIcon className="w-4 h-4" />,
+  sync: <CloudArrowDownIcon className="w-4 h-4" />,
+  data: <CircleStackIcon className="w-4 h-4" />,
+};
 
 const GamesPage: React.FC = () => {
   const navigate = useNavigate();
@@ -87,41 +103,95 @@ const GamesPage: React.FC = () => {
     navigate(`/repertoire/train/${repertoireId}${variantQuery}`);
   }, [navigate]);
 
+  const showFilters = selectedTab !== "sync";
+
   return (
-    <div className="w-full h-full min-h-0 self-stretch bg-gradient-to-b from-slate-950 via-slate-900 to-primary rounded-none sm:rounded-lg shadow-2xl flex flex-col overflow-hidden">
-      <header className="p-3 sm:p-4 bg-primary/95 backdrop-blur border-b border-slate-800 sticky top-0 z-20">
-        <div className="flex flex-wrap items-start sm:items-center justify-between gap-3">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-100">My Games Intelligence</h1>
-            <p className="text-xs sm:text-sm text-slate-300">Clear performance by variant, focused training, and full data control.</p>
-          </div>
-          <div className="flex w-full sm:w-auto gap-2">
-            <button className="flex-1 sm:flex-none px-3 py-2 bg-slate-700 hover:bg-slate-600 text-sm rounded" onClick={() => { void loadData(); }}>Refresh</button>
-            <button className="flex-1 sm:flex-none px-3 py-2 bg-blue-600 hover:bg-blue-500 text-sm rounded" onClick={regeneratePlan}>Regenerate Plan</button>
+    <div className="w-full h-full min-h-0 self-stretch bg-slate-950 rounded-none sm:rounded-xl shadow-2xl flex flex-col overflow-hidden border border-slate-800/60">
+
+      {/* ── Header ── */}
+      <header className="shrink-0 px-4 py-3 bg-slate-900 border-b border-slate-800">
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="text-base font-semibold text-slate-100">Games Intelligence</h1>
+
+          <div className="flex items-center gap-2">
+            <button
+              title="Refresh data"
+              onClick={() => { void loadData(); }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors border border-slate-700"
+            >
+              <ArrowPathIcon className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
+
+            <button
+              title="Regenerate training plan"
+              onClick={regeneratePlan}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium transition-colors"
+            >
+              <SparklesIcon className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Regenerate Plan</span>
+              <span className="sm:hidden">Plan</span>
+            </button>
           </div>
         </div>
-        {loading ? <p className="text-xs text-slate-400 mt-2">Loading latest data...</p> : null}
-        {message ? <div className="mt-3 bg-slate-900/80 border border-slate-700 rounded p-2 text-sm text-slate-200">{message}</div> : null}
+
+        {message ? (
+          <div className="mt-2 rounded-lg bg-slate-800/80 border border-slate-700 px-3 py-2 text-xs text-slate-200">{message}</div>
+        ) : null}
       </header>
 
-      <nav className="flex gap-2 p-3 bg-primary/90 border-b border-slate-800 overflow-x-auto">
-        {tabs.map((tab) => (
-          <button key={tab.id} className={`flex-shrink-0 rounded-md px-3 py-2 text-left transition-colors ${selectedTab === tab.id ? "bg-blue-600 text-white shadow" : "bg-slate-800 text-slate-300 hover:bg-slate-700"}`} onClick={() => setSelectedTab(tab.id)}>
-            <p className="text-sm font-semibold">{tab.label}</p>
-          </button>
-        ))}
-      </nav>
+      {/* ── Tab bar ── */}
+      <div className="shrink-0 flex items-stretch bg-slate-900 border-b border-slate-800 overflow-x-auto scrollbar-none">
+        {tabs.map((tab) => {
+          const active = selectedTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setSelectedTab(tab.id)}
+              className={`
+                flex items-center gap-1.5 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors border-b-2
+                ${active
+                  ? "border-blue-500 text-blue-400 bg-slate-800/60"
+                  : "border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
+                }
+              `}
+            >
+              {TAB_ICONS[tab.id]}
+              {tab.label}
+            </button>
+          );
+        })}
 
-      {selectedTab !== "sync" ? (
-        <section className="sm:hidden px-3 py-2 border-b border-slate-800 bg-slate-900/70 flex items-center justify-between">
-          <p className="text-xs text-slate-300">{activeFiltersCount > 0 ? `${activeFiltersCount} active filters` : "No active filters"}</p>
-          <button className="px-3 py-1.5 rounded bg-slate-700 text-xs text-slate-100" onClick={() => setShowMobileFilters(true)}>Filters</button>
-        </section>
+        {showFilters ? (
+          <div className="sm:hidden ml-auto flex items-center pr-3">
+            <button
+              onClick={() => setShowMobileFilters(true)}
+              className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition-colors"
+            >
+              <FunnelIcon className="w-3.5 h-3.5" />
+              Filters
+              {activeFiltersCount > 0 ? (
+                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-blue-500 text-white text-[10px] flex items-center justify-center font-bold">
+                  {activeFiltersCount}
+                </span>
+              ) : null}
+            </button>
+          </div>
+        ) : null}
+      </div>
+
+      {/* ── Desktop filter bar ── */}
+      {showFilters ? (
+        <GamesFiltersBar
+          filtersDraft={filtersDraft}
+          setFiltersDraft={setFiltersDraft}
+          applyFilters={applyFilters}
+          resetFilters={resetFilters}
+        />
       ) : null}
 
-      {selectedTab !== "sync" ? <GamesFiltersBar filtersDraft={filtersDraft} setFiltersDraft={setFiltersDraft} applyFilters={applyFilters} resetFilters={resetFilters} /> : null}
-
-      {selectedTab !== "sync" ? (
+      {/* ── Mobile filter drawer ── */}
+      {showFilters ? (
         <GamesFiltersDrawer
           show={showMobileFilters}
           filtersDraft={filtersDraft}
@@ -132,7 +202,11 @@ const GamesPage: React.FC = () => {
         />
       ) : null}
 
-      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-3 pb-20 pt-3 sm:p-4 space-y-4 sm:space-y-6" style={{ WebkitOverflowScrolling: "touch" }}>
+      {/* ── Tab content ── */}
+      <div
+        className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-3 pb-20 pt-4 sm:px-5 sm:pb-10 space-y-4 sm:space-y-5"
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
         {selectedTab === "insights" ? (
           <InsightsTab
             stats={stats}

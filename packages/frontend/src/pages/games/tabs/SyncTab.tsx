@@ -1,4 +1,5 @@
 import React from "react";
+import { CloudArrowDownIcon } from "@heroicons/react/24/outline";
 import { LinkedGameAccount } from "@chess-opening-master/common";
 import { formatDateTime } from "../utils";
 
@@ -32,48 +33,85 @@ type SyncTabProps = {
   actions: SyncTabActions;
 };
 
-const SyncTab: React.FC<SyncTabProps> = ({ state, actions }) => (
-  <>
-    <section className="bg-slate-900 rounded-lg border border-slate-700 p-3 sm:p-4 space-y-3">
-      <h2 className="text-lg font-semibold text-slate-100">Linked Accounts</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
-        <select value={state.provider} onChange={(event) => actions.setProvider(event.target.value as "lichess" | "chesscom")} className="bg-slate-800 p-2 rounded text-slate-100">
-          {state.providerOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-        </select>
-        <input value={state.username} onChange={(event) => actions.setUsername(event.target.value)} className="bg-slate-800 p-2 rounded text-slate-100" placeholder="Username" />
-        <input value={state.token} onChange={(event) => actions.setToken(event.target.value)} className="bg-slate-800 p-2 rounded text-slate-100" placeholder="Optional token" />
-        <button className="bg-emerald-600 rounded p-2 hover:bg-emerald-500" onClick={() => { void actions.connectAccount(); }}>Connect</button>
-      </div>
-      <div className="space-y-2">
-        {state.accounts.map((account) => (
-          <div key={account.id} className="flex flex-wrap gap-2 items-center bg-slate-800/90 rounded p-2">
-            <span className="font-medium text-slate-100">{account.provider} | {account.username}</span>
-            <span className="text-xs text-slate-400">Connected: {formatDateTime(account.connectedAt)}</span>
-            <span className="text-xs text-slate-400">Status: {account.status}</span>
-            <span className="text-xs text-slate-400">Last sync: {formatDateTime(account.lastSyncAt)}</span>
-            {account.lastSyncFeedback ? (
-              <span className="text-xs text-slate-400">Last result +{account.lastSyncFeedback.importedCount} | dup {account.lastSyncFeedback.duplicateCount} | fail {account.lastSyncFeedback.failedCount}</span>
-            ) : null}
-            <button className="bg-blue-600 rounded px-2 py-1 text-sm hover:bg-blue-500" onClick={() => { void actions.syncProvider(account.provider); }}>Sync</button>
-            <button className="bg-rose-700 rounded px-2 py-1 text-sm hover:bg-rose-600" onClick={() => { void actions.disconnectAccount(account.provider); }}>Disconnect</button>
-          </div>
-        ))}
-      </div>
-    </section>
+const inputCls = "w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors";
 
-    <section className="bg-slate-900 rounded-lg border border-slate-700 p-3 sm:p-4 space-y-3">
-      <h2 className="text-lg font-semibold text-slate-100">Manual PGN Import</h2>
-      <div className="grid sm:grid-cols-2 gap-2">
-        <input value={state.tournamentGroup} onChange={(event) => actions.setTournamentGroup(event.target.value)} className="bg-slate-800 p-2 rounded text-slate-100" placeholder="Tournament group (optional)" />
-        <input value={state.tags} onChange={(event) => actions.setTags(event.target.value)} className="bg-slate-800 p-2 rounded text-slate-100" placeholder="Tags (comma-separated)" />
+const SyncTab: React.FC<SyncTabProps> = ({ state, actions }) => (
+  <div className="space-y-4">
+    <div className="bg-slate-900 rounded-xl border border-slate-800 p-4 space-y-4">
+      <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Link an Account</p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <select
+          value={state.provider}
+          onChange={(e) => actions.setProvider(e.target.value as "lichess" | "chesscom")}
+          className={inputCls}
+        >
+          {state.providerOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </select>
+        <input value={state.username} onChange={(e) => actions.setUsername(e.target.value)} className={inputCls} placeholder="Username" />
+        <input value={state.token} onChange={(e) => actions.setToken(e.target.value)} className={inputCls} placeholder="API token (optional)" />
       </div>
-      <textarea value={state.manualPgn} onChange={(event) => actions.setManualPgn(event.target.value)} className="w-full min-h-[180px] bg-slate-800 p-2 rounded text-slate-100" placeholder="Paste PGN" />
-      <div className="flex gap-2">
-        <input type="file" accept=".pgn" onChange={(event) => { void actions.uploadPgnFile(event); }} className="text-sm text-slate-300" />
-        <button className="bg-indigo-600 rounded px-3 py-2 hover:bg-indigo-500" onClick={() => { void actions.runManualImport(); }}>Import PGN</button>
+      <button
+        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium transition-colors"
+        onClick={() => { void actions.connectAccount(); }}
+      >
+        <CloudArrowDownIcon className="w-4 h-4" />
+        Connect account
+      </button>
+
+      {state.accounts.length > 0 ? (
+        <div className="space-y-2 pt-2 border-t border-slate-800">
+          <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Connected</p>
+          {state.accounts.map((account) => (
+            <div key={account.id} className="rounded-lg border border-slate-800 p-3 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <p className="text-sm font-medium text-slate-100 capitalize">{account.provider} · {account.username}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Connected {formatDateTime(account.connectedAt)} · Status: {account.status}
+                  </p>
+                  {account.lastSyncAt ? (
+                    <p className="text-xs text-slate-500">Last sync {formatDateTime(account.lastSyncAt)}</p>
+                  ) : null}
+                  {account.lastSyncFeedback ? (
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      <span className="text-emerald-400">+{account.lastSyncFeedback.importedCount} imported</span>
+                      {" · "}{account.lastSyncFeedback.duplicateCount} dup
+                      {" · "}{account.lastSyncFeedback.failedCount} failed
+                    </p>
+                  ) : null}
+                </div>
+                <div className="flex gap-2 shrink-0">
+                  <button className="text-xs px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-colors" onClick={() => { void actions.syncProvider(account.provider); }}>Sync now</button>
+                  <button className="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-rose-900/60 text-rose-400 border border-slate-700 hover:border-rose-800 transition-colors" onClick={() => { void actions.disconnectAccount(account.provider); }}>Disconnect</button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </div>
+
+    <div className="bg-slate-900 rounded-xl border border-slate-800 p-4 space-y-3">
+      <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Manual PGN Import</p>
+      <div className="grid sm:grid-cols-2 gap-3">
+        <input value={state.tournamentGroup} onChange={(e) => actions.setTournamentGroup(e.target.value)} className={inputCls} placeholder="Tournament group (optional)" />
+        <input value={state.tags} onChange={(e) => actions.setTags(e.target.value)} className={inputCls} placeholder="Tags (comma-separated)" />
       </div>
-    </section>
-  </>
+      <textarea
+        value={state.manualPgn}
+        onChange={(e) => actions.setManualPgn(e.target.value)}
+        className={`${inputCls} min-h-[160px] resize-y font-mono text-xs`}
+        placeholder="Paste PGN here…"
+      />
+      <div className="flex flex-wrap items-center gap-3">
+        <label className="text-xs text-slate-400 cursor-pointer">
+          <span className="inline-block px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-colors">Upload .pgn file</span>
+          <input type="file" accept=".pgn" onChange={(e) => { void actions.uploadPgnFile(e); }} className="sr-only" />
+        </label>
+        <button className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition-colors" onClick={() => { void actions.runManualImport(); }}>Import PGN</button>
+      </div>
+    </div>
+  </div>
 );
 
 export default SyncTab;

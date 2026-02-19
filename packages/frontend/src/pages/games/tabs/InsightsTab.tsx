@@ -1,6 +1,9 @@
 import React from "react";
 import { GamesStatsSummary } from "@chess-opening-master/common";
-import { formatPercent, outcomePercentages } from "../utils";
+import { formatPercent } from "../utils";
+import { Card, SectionTitle } from "../components/InsightCard";
+import { WDLBar, WDLMiniBar } from "../components/WDLBar";
+import MonthChart from "../components/MonthChart";
 
 type InsightsTabProps = {
   stats: GamesStatsSummary | null;
@@ -34,6 +37,7 @@ type InsightsTabProps = {
   openTrainRepertoire: (repertoireId: string, variantName?: string) => void;
 };
 
+
 const InsightsTab: React.FC<InsightsTabProps> = ({
   stats,
   mappedRatio,
@@ -50,109 +54,128 @@ const InsightsTab: React.FC<InsightsTabProps> = ({
   openTrainRepertoire,
 }) => (
   <>
-    <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3">
-      <div className="bg-slate-900/80 rounded-lg border border-slate-700 p-3"><p className="text-xs text-slate-400">Imported Games</p><p className="text-xl font-semibold text-slate-100">{stats?.totalGames || 0}</p></div>
-      <div className="bg-slate-900/80 rounded-lg border border-slate-700 p-3"><p className="text-xs text-slate-400">Win Rate</p><p className="text-xl font-semibold text-slate-100">{formatPercent(stats?.winRate || 0)}</p><p className="text-xs text-slate-400">W {stats?.wins || 0} D {stats?.draws || 0} L {stats?.losses || 0}</p></div>
-      <div className="bg-slate-900/80 rounded-lg border border-slate-700 p-3"><p className="text-xs text-slate-400">Mapped To Repertoire</p><p className="text-xl font-semibold text-slate-100">{formatPercent(mappedRatio)}</p></div>
-      <div className="bg-slate-900/80 rounded-lg border border-slate-700 p-3"><p className="text-xs text-slate-400">Off-Book Pressure</p><p className="text-xl font-semibold text-slate-100">{formatPercent(manualReviewRatio)}</p></div>
-      <div className="bg-slate-900/80 rounded-lg border border-slate-700 p-3"><p className="text-xs text-slate-400">Unique Lines</p><p className="text-xl font-semibold text-slate-100">{stats?.uniqueLines || 0}</p></div>
-    </section>
+    {/* ── Stat Cards ── */}
+    <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3">
+      {([
+        { label: "Games",        value: stats?.totalGames ?? 0,       sub: null },
+        { label: "Win Rate",     value: formatPercent(stats?.winRate ?? 0), sub: `${stats?.wins ?? 0}W · ${stats?.draws ?? 0}D · ${stats?.losses ?? 0}L` },
+        { label: "Mapped",       value: formatPercent(mappedRatio),    sub: "to repertoire" },
+        { label: "Off-Book",     value: formatPercent(manualReviewRatio), sub: "needs review" },
+        { label: "Unique Lines", value: stats?.uniqueLines ?? 0,       sub: null },
+      ] as const).map(({ label, value, sub }) => (
+        <Card key={label}>
+          <p className="text-[11px] text-slate-500 mb-1">{label}</p>
+          <p className="text-2xl font-semibold text-slate-100">{value}</p>
+          {sub ? <p className="text-[11px] text-slate-500 mt-1">{sub}</p> : null}
+        </Card>
+      ))}
+    </div>
 
-    <section className="bg-slate-900 rounded-lg border border-slate-700 p-4 space-y-2">
-      <h2 className="text-lg font-semibold text-slate-100">Overall Outcome Ratio</h2>
-      <div className="h-3 bg-slate-700 rounded overflow-hidden flex">
-        <div className="bg-emerald-500" style={{ width: `${(wdl.win * 100).toFixed(2)}%` }} />
-        <div className="bg-slate-400" style={{ width: `${(wdl.draw * 100).toFixed(2)}%` }} />
-        <div className="bg-rose-500" style={{ width: `${(wdl.loss * 100).toFixed(2)}%` }} />
-      </div>
-      <p className="text-xs text-slate-300">Win {formatPercent(wdl.win)} | Draw {formatPercent(wdl.draw)} | Loss {formatPercent(wdl.loss)}</p>
-    </section>
+    {/* ── Result Split ── */}
+    <Card>
+      <SectionTitle>Result Split</SectionTitle>
+      <WDLBar win={wdl.win} draw={wdl.draw} loss={wdl.loss} />
+    </Card>
 
-    <section className="bg-slate-900 rounded-lg border border-slate-700 p-3 sm:p-4 space-y-3">
-      <h2 className="text-lg font-semibold text-slate-100">Games By Date</h2>
-      <p className="text-xs text-slate-400">Monthly game volume for the current filters.</p>
-      <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-10 gap-2 items-end min-h-[120px] sm:min-h-[140px]">
-        {gamesByMonth.map((month) => (
-          <div key={month.month} className="space-y-1">
-            <div className="h-24 bg-slate-800 rounded flex items-end">
-              <div className="w-full bg-blue-500 rounded" style={{ height: `${maxMonthGames > 0 ? Math.max(6, (month.games / maxMonthGames) * 100) : 6}%` }} />
-            </div>
-            <p className="text-[11px] text-slate-300">{month.month}</p>
-            <p className="text-[11px] text-slate-400">{month.games}</p>
-          </div>
-        ))}
-      </div>
-    </section>
+    {/* ── Games by Month ── */}
+    <Card>
+      <SectionTitle>Games By Month</SectionTitle>
+      <MonthChart gamesByMonth={gamesByMonth} maxMonthGames={maxMonthGames} />
+    </Card>
 
-    <section className="bg-slate-900 rounded-lg border border-slate-700 p-3 sm:p-4 space-y-2">
-      <h2 className="text-lg font-semibold text-slate-100">Success / Draw / Loss By Opening Variant</h2>
-      {(variantPerformance.length === 0) ? <p className="text-sm text-slate-400">No variant data for current filters.</p> : null}
-      <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
-        {variantPerformance.slice(0, 8).map((variant) => {
-          const percentages = outcomePercentages(variant.wins, variant.draws, variant.losses);
-          return (
-            <div key={variant.variantKey} className="bg-slate-800/90 rounded p-2 sm:p-3">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm font-medium text-slate-100 truncate">{variant.variantName}</p>
-                <p className="text-xs sm:text-sm text-slate-200">{formatPercent(variant.successRate)}</p>
+    {/* ── Weakest & Strongest side by side ── */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <Card>
+        <SectionTitle>Weakest Variants</SectionTitle>
+        {weakestVariants.length === 0
+          ? <p className="text-sm text-slate-500">Not enough data.</p>
+          : weakestVariants.map((v) => (
+              <div key={v.variantKey} className="flex items-center justify-between py-2 border-b border-slate-800 last:border-0 gap-2">
+                <p className="text-sm text-slate-300 truncate">{v.variantName}</p>
+                <p className="text-sm font-semibold text-rose-400 shrink-0 tabular-nums">{formatPercent(v.successRate)}</p>
               </div>
-              <p className="text-[11px] sm:text-xs text-slate-400">G {variant.games} | W {variant.wins} D {variant.draws} L {variant.losses}</p>
-              <div className="mt-1.5 h-1.5 bg-slate-700 rounded overflow-hidden flex">
-                <div className="bg-emerald-500" style={{ width: `${(percentages.win * 100).toFixed(2)}%` }} />
-                <div className="bg-slate-400" style={{ width: `${(percentages.draw * 100).toFixed(2)}%` }} />
-                <div className="bg-rose-500" style={{ width: `${(percentages.loss * 100).toFixed(2)}%` }} />
+            ))
+        }
+      </Card>
+      <Card>
+        <SectionTitle>Strongest Variants</SectionTitle>
+        {strongestVariants.length === 0
+          ? <p className="text-sm text-slate-500">Not enough data.</p>
+          : strongestVariants.map((v) => (
+              <div key={v.variantKey} className="flex items-center justify-between py-2 border-b border-slate-800 last:border-0 gap-2">
+                <p className="text-sm text-slate-300 truncate">{v.variantName}</p>
+                <p className="text-sm font-semibold text-emerald-400 shrink-0 tabular-nums">{formatPercent(v.successRate)}</p>
               </div>
-              {variant.repertoireId ? (
-                <div className="mt-1.5 hidden sm:flex gap-2">
-                  <button className="text-xs px-2 py-1 rounded bg-slate-700" onClick={() => openRepertoire(variant.repertoireId as string, variant.variantName)}>See</button>
-                  <button className="text-xs px-2 py-1 rounded bg-blue-600" onClick={() => openTrainRepertoire(variant.repertoireId as string, variant.variantName)}>Train</button>
+            ))
+        }
+      </Card>
+    </div>
+
+    {/* ── Off-Book Openings & Training Ideas ── */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <Card>
+        <SectionTitle>Off-Book Openings</SectionTitle>
+        {offBookOpenings.length === 0
+          ? <p className="text-sm text-slate-500">None detected.</p>
+          : offBookOpenings.map((o) => (
+              <div key={`${o.openingName}-${o.games}`} className="py-2.5 border-b border-slate-800 last:border-0">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm text-slate-200 truncate">{o.openingName}</p>
+                  <p className="text-xs text-slate-500 shrink-0 tabular-nums">{o.games}g · {formatPercent(o.successRate)}</p>
                 </div>
-              ) : null}
-            </div>
-          );
-        })}
-      </div>
-    </section>
+                <p className="mt-0.5 text-[11px] font-mono text-slate-600 truncate">{o.sampleLine.slice(0, 6).join(" ")}</p>
+              </div>
+            ))
+        }
+      </Card>
+      <Card>
+        <SectionTitle>Training Ideas</SectionTitle>
+        {trainingIdeas.length === 0
+          ? <p className="text-sm text-slate-500">No ideas yet.</p>
+          : <ul className="space-y-2.5">
+              {trainingIdeas.map((idea) => (
+                <li key={idea} className="flex items-start gap-2 text-sm text-slate-300 leading-snug">
+                  <span className="text-blue-400 shrink-0 select-none mt-0.5">›</span>
+                  {idea}
+                </li>
+              ))}
+            </ul>
+        }
+      </Card>
+    </div>
 
-    <section className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-      <div className="bg-slate-900 rounded-lg border border-slate-700 p-3 sm:p-4 space-y-2">
-        <h2 className="text-lg font-semibold text-slate-100">Weakest Variants</h2>
-        {weakestVariants.map((variant) => (
-          <div key={`weak-${variant.variantKey}`} className="bg-slate-800/90 rounded p-3 flex items-center justify-between gap-2">
-            <p className="text-sm text-slate-100">{variant.variantName}</p>
-            <p className="text-sm text-rose-300">{formatPercent(variant.successRate)}</p>
+    {/* ── Performance By Variant (last) ── */}
+    <Card>
+      <SectionTitle>Performance By Variant</SectionTitle>
+      {variantPerformance.length === 0
+        ? <p className="text-sm text-slate-500">No variant data for current filters.</p>
+        : <div className="space-y-4">
+            {variantPerformance.slice(0, 8).map((v) => (
+              <div key={v.variantKey}>
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <p className="text-sm text-slate-200 truncate">{v.variantName}</p>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-xs text-slate-500 tabular-nums">{v.games}g</span>
+                    <span className="text-sm font-semibold tabular-nums text-slate-100">{formatPercent(v.successRate)}</span>
+                    {v.repertoireId ? (
+                      <>
+                        <button className="text-xs px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors" onClick={() => openRepertoire(v.repertoireId as string, v.variantName)}>View</button>
+                        <button className="text-xs px-2 py-0.5 rounded-md bg-blue-600 hover:bg-blue-500 text-white transition-colors" onClick={() => openTrainRepertoire(v.repertoireId as string, v.variantName)}>Train</button>
+                      </>
+                    ) : null}
+                  </div>
+                </div>
+                <WDLMiniBar wins={v.wins} draws={v.draws} losses={v.losses} />
+                <div className="mt-1 flex gap-3 text-[11px] text-slate-600 tabular-nums">
+                  <span className="text-emerald-600">{v.wins}W</span>
+                  <span>{v.draws}D</span>
+                  <span className="text-rose-600">{v.losses}L</span>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      <div className="bg-slate-900 rounded-lg border border-slate-700 p-3 sm:p-4 space-y-2">
-        <h2 className="text-lg font-semibold text-slate-100">Strongest Variants</h2>
-        {strongestVariants.map((variant) => (
-          <div key={`strong-${variant.variantKey}`} className="bg-slate-800/90 rounded p-3 flex items-center justify-between gap-2">
-            <p className="text-sm text-slate-100">{variant.variantName}</p>
-            <p className="text-sm text-emerald-300">{formatPercent(variant.successRate)}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-
-    <section className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-      <div className="bg-slate-900 rounded-lg border border-slate-700 p-3 sm:p-4 space-y-2">
-        <h2 className="text-lg font-semibold text-slate-100">Off-Book And Unknown Openings</h2>
-        {offBookOpenings.map((opening) => (
-          <div key={`${opening.openingName}-${opening.games}`} className="bg-slate-800/90 rounded p-3">
-            <p className="text-sm font-medium text-slate-100">{opening.openingName}</p>
-            <p className="text-xs text-slate-400">Manual review {opening.manualReviewGames}/{opening.games} | Mapped {opening.mappedGames}/{opening.games} | Success {formatPercent(opening.successRate)}</p>
-            <p className="text-xs text-slate-300">Line sample: {opening.sampleLine.join(" ")}</p>
-          </div>
-        ))}
-      </div>
-      <div className="bg-slate-900 rounded-lg border border-slate-700 p-3 sm:p-4 space-y-2">
-        <h2 className="text-lg font-semibold text-slate-100">Training Ideas</h2>
-        <ul className="list-disc list-inside text-sm text-slate-200 space-y-1">
-          {trainingIdeas.map((idea) => <li key={idea}>{idea}</li>)}
-        </ul>
-      </div>
-    </section>
+      }
+    </Card>
   </>
 );
 
