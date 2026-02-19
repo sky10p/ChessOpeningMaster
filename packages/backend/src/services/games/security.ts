@@ -1,4 +1,4 @@
-import { createCipheriv, createDecipheriv, createHash, randomBytes } from "crypto";
+import { createCipheriv, createDecipheriv, createHash, createSecretKey, randomBytes } from "crypto";
 
 const getEncryptionSecret = (): string => {
   const configuredSecret = process.env.GAME_PROVIDER_TOKEN_SECRET?.trim();
@@ -13,14 +13,18 @@ const getEncryptionSecret = (): string => {
 
 const ENCRYPTION_SECRET = getEncryptionSecret();
 
-const buildKey = (): Buffer => createHash("sha256").update(ENCRYPTION_SECRET).digest();
+const toHex = (bytes: Uint8Array): string => Buffer.from(bytes).toString("hex");
+
+const fromHex = (hex: string): Uint8Array => Uint8Array.from(Buffer.from(hex, "hex"));
+
+const ENCRYPTION_KEY = createSecretKey(fromHex(createHash("sha256").update(ENCRYPTION_SECRET).digest("hex")));
 
 export const encryptSecret = (value: string): string => {
-  const iv = randomBytes(12);
-  const cipher = createCipheriv("aes-256-gcm", buildKey(), iv);
-  const encrypted = Buffer.concat([cipher.update(value, "utf8"), cipher.final()]);
-  const authTag = cipher.getAuthTag();
-  return `${iv.toString("hex")}:${authTag.toString("hex")}:${encrypted.toString("hex")}`;
+  const iv = fromHex(randomBytes(12).toString("hex"));
+  const cipher = createCipheriv("aes-256-gcm", ENCRYPTION_KEY, iv);
+  const encryptedHex = `${cipher.update(value, "utf8", "hex")}${cipher.final("hex")}`;
+  const authTag = Uint8Array.from(cipher.getAuthTag());
+  return `${toHex(iv)}:${toHex(authTag)}:${encryptedHex}`;
 };
 
 export const decryptSecret = (value?: string): string | undefined => {
@@ -29,13 +33,14 @@ export const decryptSecret = (value?: string): string | undefined => {
   }
   const [ivHex, tagHex, encryptedHex] = value.split(":");
   if (!ivHex || !tagHex || !encryptedHex) {
-    return undefined;
+    throw new Error("Invalid encrypted secret format");
   }
-  const decipher = createDecipheriv("aes-256-gcm", buildKey(), Buffer.from(ivHex, "hex"));
-  decipher.setAuthTag(Buffer.from(tagHex, "hex"));
-  const decrypted = Buffer.concat([
-    decipher.update(Buffer.from(encryptedHex, "hex")),
-    decipher.final(),
-  ]);
-  return decrypted.toString("utf8");
+  try {
+    const decipher = createDecipheriv("aes-256-gcm", ENCRYPTION_KEY, fromHex(ivHex));
+    decipher.setAuthTag(fromHex(tagHex));
+    const decryptedUtf8 = `${decipher.update(encryptedHex, "hex", "utf8")}${decipher.final("utf8")}`;
+    return decryptedUtf8;
+  } catch {
+    throw new Error("Failed to decrypt secret");
+  }
 };

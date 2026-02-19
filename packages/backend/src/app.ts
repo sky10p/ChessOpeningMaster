@@ -13,6 +13,7 @@ import { authMiddleware } from "./middleware/auth";
 import { ensureDefaultUserAndMigrateData } from "./services/authService";
 import { ensureDatabaseIndexes } from "./db/indexes";
 import { startGamesAutoSyncScheduler } from "./services/games/autoSyncScheduler";
+import { logError, logInfo, logWarn } from "./utils/logger";
 
 const app = express();
 const port = process.env.BACKEND_PORT || 3001;
@@ -84,49 +85,53 @@ if (require.main === module) {
     await ensureDefaultUserAndMigrateData();
     const scheduler = startGamesAutoSyncScheduler();
     const server = app.listen(port, () => {
-      console.log(`Server listening at http://localhost:${port}`);
+      logInfo(`Server listening at http://localhost:${port}`);
     });
 
-    let shuttingDown = false;
-    const handleShutdown = (signal: NodeJS.Signals) => {
-      if (shuttingDown) {
-        return;
+    let shutdownPromise: Promise<void> | null = null;
+    const handleShutdown = (signal: NodeJS.Signals): Promise<void> => {
+      if (shutdownPromise) {
+        return shutdownPromise;
       }
-      shuttingDown = true;
-      void (async () => {
+      logInfo(`Received ${signal}, shutting down gracefully`);
+      shutdownPromise = (async () => {
         let exitCode = 0;
         try {
           const completed = await scheduler.stop();
           if (!completed) {
-            console.warn("Games auto-sync shutdown timed out");
+            logWarn("Games auto-sync shutdown timed out");
           }
         } catch (error) {
           exitCode = 1;
-          console.error("Failed to stop games auto-sync scheduler", error);
+          logError("Failed to stop games auto-sync scheduler", error);
         }
         try {
           await closeHttpServer(server);
         } catch (error) {
           exitCode = 1;
-          console.error("Failed to close HTTP server", error);
+          logError("Failed to close HTTP server", error);
         }
         try {
           await disconnectDB();
         } catch (error) {
           exitCode = 1;
-          console.error("Failed to disconnect database", error);
+          logError("Failed to disconnect database", error);
         }
         process.exit(exitCode);
       })();
-      console.log(`Received ${signal}, shutting down gracefully`);
+      return shutdownPromise;
     };
 
-    process.on("SIGINT", () => handleShutdown("SIGINT"));
-    process.on("SIGTERM", () => handleShutdown("SIGTERM"));
+    process.on("SIGINT", () => {
+      void handleShutdown("SIGINT");
+    });
+    process.on("SIGTERM", () => {
+      void handleShutdown("SIGTERM");
+    });
   };
 
   run().catch((error) => {
-    console.error("Backend startup failed", error);
+    logError("Backend startup failed", error);
     process.exit(1);
   });
 }

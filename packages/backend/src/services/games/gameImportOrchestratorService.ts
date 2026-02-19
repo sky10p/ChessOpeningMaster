@@ -9,6 +9,8 @@ import { buildFallbackDedupeKey, detectOpening, inferOrientation, toNormalizedRe
 import { ImportBatchCache, RepertoireMetadata, RepertoireMetadataCacheKey } from "./gameImportTypes";
 import { buildOpeningMapping as buildOpeningMappingService } from "./openingMappingService";
 import { toTimeControlBucket } from "./gameTimeControlService";
+import { MongoBulkWriteError } from "mongodb";
+import { logError } from "../../utils/logger";
 
 export interface ProviderImportInput {
   source: "lichess" | "chesscom" | "manual";
@@ -47,6 +49,10 @@ export async function importGamesForUserInternal(userId: string, input: Provider
   const db = getDB();
   const accountsCollection = db.collection<LinkedGameAccountDocument>("linkedGameAccounts");
   const gamesCollection = db.collection<ImportedGameDocument>("importedGames");
+  const gamesCollectionWithOptionalBatch = gamesCollection as typeof gamesCollection & {
+    find?: typeof gamesCollection.find;
+    insertMany?: typeof gamesCollection.insertMany;
+  };
 
   let importedCount = 0;
   let duplicateCount = 0;
@@ -114,20 +120,57 @@ export async function importGamesForUserInternal(userId: string, input: Provider
           ? await lichessProvider.importGames({ username: username || "", token, since: syncSince, max: 250 })
           : await chessComProvider.importGames({ username: username || "", since: syncSince, max: 250 });
 
-    for (const game of providerGames) {
+    processedCount = providerGames.length;
+
+    const gamesWithDedupeKey = providerGames.map((game) => {
+      const white = game.headers.White || "Unknown";
+      const black = game.headers.Black || "Unknown";
+      const playedAt = parseDateHeader(game.headers.UTCDate || game.headers.Date);
+      const dedupeKey = game.providerGameId
+        ? `${input.source}:${game.providerGameId}`
+        : buildFallbackDedupeKey(input.source, playedAt?.toISOString(), white, black, game.headers.Result, game.movesSan);
+      return {
+        game,
+        white,
+        black,
+        playedAt,
+        dedupeKey,
+      };
+    });
+
+    const uniqueDedupeKeys = [...new Set(gamesWithDedupeKey.map((entry) => entry.dedupeKey))];
+    const existingKeys = new Set<string>();
+    if (typeof gamesCollectionWithOptionalBatch.find === "function") {
+      const existingDocs = await gamesCollectionWithOptionalBatch
+        .find(
+          { userId, dedupeKey: { $in: uniqueDedupeKeys } },
+          { projection: { dedupeKey: 1, _id: 0 } }
+        )
+        .toArray();
+      existingDocs
+        .map((entry) => entry.dedupeKey)
+        .filter((value): value is string => typeof value === "string")
+        .forEach((dedupeKey) => existingKeys.add(dedupeKey));
+    } else {
+      for (const dedupeKey of uniqueDedupeKeys) {
+        const existingDoc = await gamesCollection.findOne({ userId, dedupeKey }, { projection: { _id: 1 } });
+        if (existingDoc) {
+          existingKeys.add(dedupeKey);
+        }
+      }
+    }
+    const seenKeys = new Set(existingKeys);
+    const docsToInsert: ImportedGameDocument[] = [];
+
+    for (const entry of gamesWithDedupeKey) {
       try {
-        processedCount += 1;
-        const white = game.headers.White || "Unknown";
-        const black = game.headers.Black || "Unknown";
-        const playedAt = parseDateHeader(game.headers.UTCDate || game.headers.Date);
-        const dedupeKey = game.providerGameId
-          ? `${input.source}:${game.providerGameId}`
-          : buildFallbackDedupeKey(input.source, playedAt?.toISOString(), white, black, game.headers.Result, game.movesSan);
-        const alreadyExists = await gamesCollection.findOne({ userId, dedupeKey }, { projection: { _id: 1 } });
-        if (alreadyExists) {
+        if (seenKeys.has(entry.dedupeKey)) {
           duplicateCount += 1;
           continue;
         }
+        seenKeys.add(entry.dedupeKey);
+
+        const { game, white, black, playedAt, dedupeKey } = entry;
 
         const openingDetection = detectOpening(game.headers, game.movesSan);
         const orientation = inferOrientation(username, white, black);
@@ -168,21 +211,67 @@ export async function importGamesForUserInternal(userId: string, input: Provider
           openingMapping,
           createdAt: startedAt,
         };
-        await gamesCollection.insertOne(doc);
-        importedCount += 1;
+        docsToInsert.push(doc);
       } catch (error) {
         failedCount += 1;
-        console.error("Game import failed", {
-          userId,
+        logError("Game import failed", error, {
           source: input.source,
-          providerGameId: game.providerGameId,
-          white: game.headers.White || "Unknown",
-          black: game.headers.Black || "Unknown",
-          gameDate: game.headers.UTCDate || game.headers.Date,
-          result: game.headers.Result,
-          error: error instanceof Error ? error.message : String(error),
-          stack: error instanceof Error ? error.stack : undefined,
+          providerGameId: entry.game.providerGameId,
+          gameDate: entry.game.headers.UTCDate || entry.game.headers.Date,
         });
+      }
+    }
+
+    if (docsToInsert.length > 0) {
+      if (typeof gamesCollectionWithOptionalBatch.insertMany === "function") {
+        try {
+          const insertResult = await gamesCollectionWithOptionalBatch.insertMany(docsToInsert, { ordered: false });
+          importedCount += insertResult.insertedCount;
+        } catch (error) {
+          if (error instanceof MongoBulkWriteError) {
+            const writeErrors = Array.isArray(error.writeErrors) ? error.writeErrors : [error.writeErrors];
+            const duplicateWriteErrors = writeErrors.filter((writeError) => writeError.code === 11000).length;
+            const otherWriteErrors = writeErrors.length - duplicateWriteErrors;
+            duplicateCount += duplicateWriteErrors;
+            failedCount += otherWriteErrors;
+            importedCount += error.result.insertedCount;
+            if (otherWriteErrors > 0) {
+              logError("Bulk game insert partially failed", error, {
+                source: input.source,
+                attempted: docsToInsert.length,
+                duplicateWriteErrors,
+                otherWriteErrors,
+              });
+            }
+          } else {
+            failedCount += docsToInsert.length;
+            logError("Bulk game insert failed", error, {
+              source: input.source,
+              attempted: docsToInsert.length,
+            });
+          }
+        }
+      } else {
+        for (const doc of docsToInsert) {
+          try {
+            await gamesCollection.insertOne(doc);
+            importedCount += 1;
+          } catch (error) {
+            const errorCode =
+              typeof error === "object" && error !== null && "code" in error && typeof error.code === "number"
+                ? error.code
+                : undefined;
+            if (errorCode === 11000) {
+              duplicateCount += 1;
+              continue;
+            }
+            failedCount += 1;
+            logError("Game insert failed", error, {
+              source: input.source,
+              dedupeKey: doc.dedupeKey,
+            });
+          }
+        }
       }
     }
 

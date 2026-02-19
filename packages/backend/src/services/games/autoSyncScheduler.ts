@@ -1,4 +1,5 @@
 import { runAutoSyncForDueAccounts } from "./gameImportService";
+import { logError } from "../../utils/logger";
 
 const getAutoSyncIntervalMs = (): number => {
   const value = Number(process.env.GAMES_AUTO_SYNC_INTERVAL_MS || 60 * 60 * 1000);
@@ -72,7 +73,7 @@ export function startGamesAutoSyncScheduler(): GamesAutoSyncSchedulerHandle {
       try {
         await runAutoSyncForDueAccounts(getAutoSyncBatchSize());
       } catch (error) {
-        console.error("Games auto-sync cycle failed", error);
+        logError("Games auto-sync cycle failed", error);
       } finally {
         if (schedulerState) {
           schedulerState.running = false;

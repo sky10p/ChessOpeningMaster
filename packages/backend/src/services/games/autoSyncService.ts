@@ -1,6 +1,7 @@
 import { getDB } from "../../db/mongo";
 import { LinkedGameAccountDocument } from "../../models/GameImport";
 import { ProviderImportInput } from "./gameImportOrchestratorService";
+import { logError } from "../../utils/logger";
 
 const getAutoSyncDueHours = (): number => {
   const value = Number(process.env.GAMES_AUTO_SYNC_DUE_HOURS || 24);
@@ -32,10 +33,9 @@ export async function runAutoSyncForDueAccountsInternal(
     try {
       await importGamesForUser(account.userId, { source: account.provider });
     } catch (error) {
-      console.error("Auto-sync failed", {
+      logError("Auto-sync failed", error, {
         userId: account.userId,
         provider: account.provider,
-        error: error instanceof Error ? error.message : String(error),
       });
     }
   }
