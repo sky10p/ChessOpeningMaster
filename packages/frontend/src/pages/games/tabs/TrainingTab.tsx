@@ -4,7 +4,12 @@ import { buildLineTitle, formatDateTime, formatPercent } from "../utils";
 
 type TrainingTabProps = {
   trainingPlanId?: string;
-  actionableTrainingItems: TrainingPlanItem[];
+  actionableTrainingItems: Array<TrainingPlanItem & {
+    mappingConfidence?: number;
+    manualReviewRate?: number;
+    pathHint?: "errors" | "due" | "new" | "study";
+    whyNow?: string[];
+  }>;
   signalLines: LineStudyCandidate[];
   trainingItemsWithErrors: number;
   highPriorityTrainingItems: number;
@@ -18,6 +23,26 @@ type TrainingTabProps = {
 const SectionTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 mb-3">{children}</p>
 );
+
+const confidenceTone = (confidence: number): string => {
+  if (confidence >= 0.8) return "text-emerald-400 border-emerald-900/60 bg-emerald-950/20";
+  if (confidence >= 0.6) return "text-amber-300 border-amber-900/60 bg-amber-950/20";
+  return "text-rose-300 border-rose-900/60 bg-rose-950/20";
+};
+
+const pathHintTone: Record<"errors" | "due" | "new" | "study", string> = {
+  errors: "text-rose-300 border-rose-900/60 bg-rose-950/20",
+  due: "text-amber-300 border-amber-900/60 bg-amber-950/20",
+  new: "text-blue-300 border-blue-900/60 bg-blue-950/20",
+  study: "text-slate-300 border-slate-700 bg-slate-800/40",
+};
+
+const pathHintLabel: Record<"errors" | "due" | "new" | "study", string> = {
+  errors: "Errors-first",
+  due: "Due-now",
+  new: "High-activity",
+  study: "Build-line",
+};
 
 const ActionButtons: React.FC<{
   target: { repertoireId: string; variantName: string } | null;
@@ -68,6 +93,10 @@ const TrainingTab: React.FC<TrainingTabProps> = ({
           : <div className="space-y-3">
               {actionableTrainingItems.map((item, index) => {
                 const target = openingTargetFromLine(item.lineKey);
+                const mappingConfidence = item.mappingConfidence ?? 0;
+                const manualReviewRate = item.manualReviewRate ?? 0;
+                const pathHint = item.pathHint ?? "study";
+                const whyNow = item.whyNow ?? [];
                 return (
                   <div key={item.lineKey} className="rounded-lg border border-slate-800 p-3 space-y-2">
                     <div className="flex items-start justify-between gap-2">
@@ -85,6 +114,21 @@ const TrainingTab: React.FC<TrainingTabProps> = ({
                       {item.trainingErrors ? <span className="text-rose-400">{item.trainingErrors} errors</span> : null}
                       {item.trainingDueAt ? <span>Due {formatDateTime(item.trainingDueAt)}</span> : null}
                     </div>
+                    <div className="flex flex-wrap items-center gap-2 text-[11px]">
+                      <span className={`px-2 py-0.5 rounded border ${confidenceTone(mappingConfidence)}`}>
+                        Mapping {formatPercent(mappingConfidence)}
+                      </span>
+                      <span className="px-2 py-0.5 rounded border border-slate-700 bg-slate-800/40 text-slate-300">
+                        Manual review {formatPercent(manualReviewRate)}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded border ${pathHintTone[pathHint]}`}>
+                        {pathHintLabel[pathHint]}
+                      </span>
+                    </div>
+                    {whyNow.length > 0
+                      ? <p className="text-xs text-blue-200">Why now: {whyNow.slice(0, 2).join(" · ")}</p>
+                      : null
+                    }
                     {item.reasons.length > 0
                       ? <p className="text-xs text-amber-300">{item.reasons.slice(0, 2).join(" · ")}</p>
                       : null

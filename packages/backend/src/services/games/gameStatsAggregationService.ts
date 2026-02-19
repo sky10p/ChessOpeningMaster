@@ -44,6 +44,7 @@ type AggregatedStatsFacets = {
     losses: number;
     mappedGames: number;
     manualReviewGames: number;
+    averageMappingConfidence: number;
     successRate: number;
   }>;
   topOpenings: Array<{ openingName: string; count: number }>;
@@ -390,6 +391,7 @@ const buildStatsFacetPipeline = (userId: string, filters: GameStatsFilters): Rec
                 },
               },
               manualReviewGames: { $sum: { $cond: [{ $eq: ["$openingMapping.requiresManualReview", true] }, 1, 0] } },
+              mappingConfidenceSum: { $sum: { $ifNull: ["$openingMapping.confidence", 0] } },
             },
           },
           {
@@ -411,6 +413,13 @@ const buildStatsFacetPipeline = (userId: string, filters: GameStatsFilters): Rec
               losses: 1,
               mappedGames: 1,
               manualReviewGames: 1,
+              averageMappingConfidence: {
+                $cond: [
+                  { $gt: ["$games", 0] },
+                  { $divide: ["$mappingConfidenceSum", "$games"] },
+                  0,
+                ],
+              },
               successRate: {
                 $cond: [
                   { $gt: [{ $add: ["$wins", "$draws", "$losses"] }, 0] },

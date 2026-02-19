@@ -2,6 +2,14 @@ import React from "react";
 import { GamesStatsSummary, ImportedGame, TrainingPlan } from "@chess-opening-master/common";
 import { buildLineTitle, formatPercent, getOpeningLabel, isUnknownLabel, outcomePercentages } from "../utils";
 
+type EnrichedTrainingPlanItem = {
+  averageMappingConfidence?: number;
+  frequencyScore?: number;
+  underperformanceScore?: number;
+};
+
+type PathHint = "errors" | "due" | "new" | "study";
+
 export const useGamesInsights = (stats: GamesStatsSummary | null, games: ImportedGame[], trainingPlan: TrainingPlan | null) => {
   const mappedRatio = stats && stats.totalGames > 0 ? stats.mappedToRepertoireCount / stats.totalGames : 0;
   const manualReviewRatio = stats && stats.totalGames > 0 ? stats.needsManualReviewCount / stats.totalGames : 0;
@@ -19,12 +27,42 @@ export const useGamesInsights = (stats: GamesStatsSummary | null, games: Importe
 
   const focusLines = React.useMemo(() => stats?.linesToStudy || [], [stats]);
   const focusLineKeySet = React.useMemo(() => new Set(focusLines.map((line) => line.lineKey)), [focusLines]);
+  const focusLineByKey = React.useMemo(() => new Map(focusLines.map((line) => [line.lineKey, line])), [focusLines]);
 
   const actionableTrainingItems = React.useMemo(() => (trainingPlan?.items || [])
     .filter((item) => focusLineKeySet.size === 0 || focusLineKeySet.has(item.lineKey))
     .filter((item) => item.mappedGames > 0 && Boolean(item.variantName || item.repertoireName))
+    .map((item) => {
+      const enrichedItem = item as typeof item & EnrichedTrainingPlanItem;
+      const line = focusLineByKey.get(item.lineKey);
+      const games = item.games || 1;
+      const manualReviewRate = item.manualReviewGames / games;
+      const mappingConfidence = enrichedItem.averageMappingConfidence ?? line?.averageMappingConfidence ?? 0;
+      const dueSoon = item.trainingDueAt ? (new Date(item.trainingDueAt).getTime() <= Date.now()) : false;
+      const pathHint: PathHint = (item.trainingErrors || 0) > 0
+        ? "errors"
+        : dueSoon
+          ? "due"
+          : (item.priority >= 0.7 || (enrichedItem.frequencyScore || 0) >= 0.45)
+            ? "new"
+            : "study";
+      const whyNow = [
+        (item.trainingErrors || 0) > 0 ? `${item.trainingErrors} training error${(item.trainingErrors || 0) > 1 ? "s" : ""}` : "",
+        dueSoon ? "Training review is due now" : "",
+        enrichedItem.underperformanceScore && enrichedItem.underperformanceScore > 0.4 ? `Low results in ${item.games} recent games` : "",
+        manualReviewRate > 0.35 ? `${Math.round(manualReviewRate * 100)}% manual-review games` : "",
+        item.deviationRate > 0.3 ? `${Math.round(item.deviationRate * 100)}% early deviation rate` : "",
+      ].filter(Boolean);
+      return {
+        ...item,
+        mappingConfidence,
+        manualReviewRate,
+        pathHint,
+        whyNow,
+      };
+    })
     .sort((a, b) => ((b.trainingErrors || 0) - (a.trainingErrors || 0)) || (b.priority - a.priority)),
-  [trainingPlan, focusLineKeySet]);
+  [trainingPlan, focusLineKeySet, focusLineByKey]);
 
   const signalLines = React.useMemo(() => [...focusLines]
     .sort((a, b) => ((b.trainingErrors || 0) - (a.trainingErrors || 0)) || (b.deviationRate - a.deviationRate)),

@@ -150,6 +150,7 @@ export interface GamesStatsSummary {
     losses: number;
     mappedGames: number;
     manualReviewGames: number;
+    averageMappingConfidence?: number;
     successRate: number;
   }>;
   gamesByMonth: Array<{
@@ -201,6 +202,11 @@ export interface TrainingPlanItem {
   mappedGames: number;
   manualReviewGames: number;
   deviationRate: number;
+  averageMappingConfidence?: number;
+  repertoireGapScore?: number;
+  underperformanceScore?: number;
+  recencyScore?: number;
+  frequencyScore?: number;
   trainingErrors?: number;
   trainingDueAt?: string;
   trainingLastReviewedAt?: string;

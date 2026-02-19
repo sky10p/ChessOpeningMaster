@@ -6,6 +6,14 @@ import type { ImportedGamesFilters } from "./gameImportFilters";
 import { buildPriority, hasActiveImportedFilters, toTrainingStatsFilters } from "./trainingPlanScoringService";
 import { getGamesStatsSummaryForUser } from "./gameStatsAggregationService";
 
+type EnrichedTrainingPlanItem = {
+  averageMappingConfidence?: number;
+  repertoireGapScore?: number;
+  underperformanceScore?: number;
+  recencyScore?: number;
+  frequencyScore?: number;
+};
+
 export async function generateTrainingPlanForUser(
   userId: string,
   weights?: Partial<TrainingPlanWeights>,
@@ -55,6 +63,11 @@ export async function generateTrainingPlanForUser(
       mappedGames: line.mappedGames,
       manualReviewGames: line.manualReviewGames,
       deviationRate: line.deviationRate,
+      averageMappingConfidence: line.averageMappingConfidence,
+      repertoireGapScore: line.repertoireGapScore,
+      underperformanceScore: line.underperformanceScore,
+      recencyScore: line.recencyScore,
+      frequencyScore: line.frequencyScore,
       trainingErrors: line.trainingErrors,
       trainingDueAt: line.trainingDueAt,
       trainingLastReviewedAt: line.trainingLastReviewedAt,
@@ -87,6 +100,7 @@ export async function getLatestTrainingPlanForUser(userId: string, filters?: Imp
   const stats = await getGamesStatsSummaryForUser(userId, toTrainingStatsFilters(filters));
   const lineByKey = new Map(stats.linesToStudy.map((line) => [line.lineKey, line]));
   const hydratedItems = plan.items.map((item) => {
+    const enrichedItem = item as typeof item & EnrichedTrainingPlanItem;
     const line = lineByKey.get(item.lineKey);
     const priority = typeof item.priority === "number" ? item.priority : 0;
     return {
@@ -104,6 +118,11 @@ export async function getLatestTrainingPlanForUser(userId: string, filters?: Imp
       mappedGames: typeof item.mappedGames === "number" ? item.mappedGames : (line?.mappedGames || 0),
       manualReviewGames: typeof item.manualReviewGames === "number" ? item.manualReviewGames : (line?.manualReviewGames || 0),
       deviationRate: typeof item.deviationRate === "number" ? item.deviationRate : (line?.deviationRate || 0),
+      averageMappingConfidence: typeof enrichedItem.averageMappingConfidence === "number" ? enrichedItem.averageMappingConfidence : (line?.averageMappingConfidence || 0),
+      repertoireGapScore: typeof enrichedItem.repertoireGapScore === "number" ? enrichedItem.repertoireGapScore : (line?.repertoireGapScore || 0),
+      underperformanceScore: typeof enrichedItem.underperformanceScore === "number" ? enrichedItem.underperformanceScore : (line?.underperformanceScore || 0),
+      recencyScore: typeof enrichedItem.recencyScore === "number" ? enrichedItem.recencyScore : (line?.recencyScore || 0),
+      frequencyScore: typeof enrichedItem.frequencyScore === "number" ? enrichedItem.frequencyScore : (line?.frequencyScore || 0),
       trainingErrors: typeof item.trainingErrors === "number" ? item.trainingErrors : (line?.trainingErrors || 0),
       trainingDueAt: item.trainingDueAt || line?.trainingDueAt,
       trainingLastReviewedAt: item.trainingLastReviewedAt || line?.trainingLastReviewedAt,

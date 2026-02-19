@@ -20,10 +20,11 @@ type InsightsTabProps = {
     wins: number;
     draws: number;
     losses: number;
+    averageMappingConfidence?: number;
     successRate: number;
   }>;
-  weakestVariants: Array<{ variantKey: string; variantName: string; successRate: number }>;
-  strongestVariants: Array<{ variantKey: string; variantName: string; successRate: number }>;
+  weakestVariants: Array<{ variantKey: string; variantName: string; repertoireId?: string; successRate: number }>;
+  strongestVariants: Array<{ variantKey: string; variantName: string; repertoireId?: string; successRate: number }>;
   offBookOpenings: Array<{
     openingName: string;
     games: number;
@@ -92,7 +93,12 @@ const InsightsTab: React.FC<InsightsTabProps> = ({
           : weakestVariants.map((v) => (
               <div key={v.variantKey} className="flex items-center justify-between py-2 border-b border-slate-800 last:border-0 gap-2">
                 <p className="text-sm text-slate-300 truncate">{v.variantName}</p>
-                <p className="text-sm font-semibold text-rose-400 shrink-0 tabular-nums">{formatPercent(v.successRate)}</p>
+                <div className="flex items-center gap-2 shrink-0">
+                  <p className="text-sm font-semibold text-rose-400 tabular-nums">{formatPercent(v.successRate)}</p>
+                  {v.repertoireId ? (
+                    <button className="text-xs px-2 py-0.5 rounded-md bg-blue-600 hover:bg-blue-500 text-white transition-colors" onClick={() => openTrainRepertoire(v.repertoireId as string, v.variantName)}>Train</button>
+                  ) : null}
+                </div>
               </div>
             ))
         }
@@ -104,7 +110,12 @@ const InsightsTab: React.FC<InsightsTabProps> = ({
           : strongestVariants.map((v) => (
               <div key={v.variantKey} className="flex items-center justify-between py-2 border-b border-slate-800 last:border-0 gap-2">
                 <p className="text-sm text-slate-300 truncate">{v.variantName}</p>
-                <p className="text-sm font-semibold text-emerald-400 shrink-0 tabular-nums">{formatPercent(v.successRate)}</p>
+                <div className="flex items-center gap-2 shrink-0">
+                  <p className="text-sm font-semibold text-emerald-400 tabular-nums">{formatPercent(v.successRate)}</p>
+                  {v.repertoireId ? (
+                    <button className="text-xs px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors" onClick={() => openRepertoire(v.repertoireId as string, v.variantName)}>View</button>
+                  ) : null}
+                </div>
               </div>
             ))
         }
@@ -170,6 +181,7 @@ const InsightsTab: React.FC<InsightsTabProps> = ({
                   <span className="text-emerald-600">{v.wins}W</span>
                   <span>{v.draws}D</span>
                   <span className="text-rose-600">{v.losses}L</span>
+                  {typeof v.averageMappingConfidence === "number" ? <span>Map {formatPercent(v.averageMappingConfidence)}</span> : null}
                 </div>
               </div>
             ))}
