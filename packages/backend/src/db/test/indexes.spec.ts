@@ -91,4 +91,16 @@ describe("ensureDatabaseIndexes", () => {
 
     await expect(ensureDatabaseIndexes(mockDb as never)).rejects.toThrow("fatal");
   });
+
+  it("creates imported games indexes for stats filtering dimensions", async () => {
+    await ensureDatabaseIndexes(mockDb as never);
+
+    expect(importedGamesCollection.createIndex).toHaveBeenCalledWith({ userId: 1, source: 1, playedAt: -1 }, undefined);
+    expect(importedGamesCollection.createIndex).toHaveBeenCalledWith({ userId: 1, orientation: 1, playedAt: -1 }, undefined);
+    expect(importedGamesCollection.createIndex).toHaveBeenCalledWith({ userId: 1, rated: 1, playedAt: -1 }, undefined);
+    expect(importedGamesCollection.createIndex).toHaveBeenCalledWith({ userId: 1, tournamentGroup: 1, playedAt: -1 }, undefined);
+    expect(importedGamesCollection.createIndex).toHaveBeenCalledWith({ userId: 1, timeControlBucket: 1, playedAt: -1 }, undefined);
+    expect(importedGamesCollection.createIndex).toHaveBeenCalledWith({ userId: 1, "openingMapping.repertoireId": 1, playedAt: -1 }, undefined);
+    expect(importedGamesCollection.createIndex).toHaveBeenCalledWith({ userId: 1, "openingMapping.requiresManualReview": 1, playedAt: -1 }, undefined);
+  });
 });

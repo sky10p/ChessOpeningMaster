@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { PlusIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, ArrowDownTrayIcon, TrophyIcon } from "@heroicons/react/24/outline";
 
 import {
   deleteRepertoire,
@@ -104,7 +104,7 @@ const NavbarContainer: React.FC<NavbarContainerProps> = ({ authEnabled, onLogged
       ? [{id: "download_repertoires", name: "Download Repertoires", url: "#", onClick: handleDownloadRepertoires, icon: <ArrowDownTrayIcon className="h-6 w-6 mr-2" />}]
       : []),
     { id: "create_repertoire", name: "Create Repertoire", url: "/create-repertoire", icon: <PlusIcon className="h-6 w-6 mr-2" /> },
-    { id: "my_games", name: "My Games", url: "/games", icon: <ArrowDownTrayIcon className="h-6 w-6 mr-2" /> },
+    { id: "my_games", name: "My Games", url: "/games", icon: <TrophyIcon className="h-6 w-6 mr-2" /> },
   ]}
   showLogout={authEnabled}
   onLogout={handleLogout}

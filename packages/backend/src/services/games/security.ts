@@ -1,6 +1,17 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from "crypto";
 
-const ENCRYPTION_SECRET = process.env.GAME_PROVIDER_TOKEN_SECRET || "development-game-provider-secret";
+const getEncryptionSecret = (): string => {
+  const configuredSecret = process.env.GAME_PROVIDER_TOKEN_SECRET?.trim();
+  if (configuredSecret) {
+    return configuredSecret;
+  }
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("GAME_PROVIDER_TOKEN_SECRET is required in production");
+  }
+  return "development-game-provider-secret";
+};
+
+const ENCRYPTION_SECRET = getEncryptionSecret();
 
 const buildKey = (): Buffer => createHash("sha256").update(ENCRYPTION_SECRET).digest();
 
