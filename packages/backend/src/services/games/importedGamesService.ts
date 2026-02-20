@@ -180,7 +180,7 @@ const buildDerivedTimeControlBucketExpression = () => {
               then: "bullet",
             },
           ],
-          default: undefined,
+          default: null,
         },
       },
     ],

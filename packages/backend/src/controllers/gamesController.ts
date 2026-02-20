@@ -42,6 +42,14 @@ const parseImportedGamesFiltersFromValue = (value: Record<string, unknown>): Imp
 
 const parseImportedGamesFilters = (req: Request): ImportedGamesFilters => parseImportedGamesFiltersFromValue(req.query as Record<string, unknown>);
 
+const normalizeImportedGamesLimit = (value: unknown): number => {
+  const parsedLimit = Number(value);
+  if (!Number.isFinite(parsedLimit)) {
+    return 100;
+  }
+  return Math.min(500, Math.max(1, Math.trunc(parsedLimit)));
+};
+
 export async function getLinkedAccounts(req: Request, res: Response, next: NextFunction) {
   try {
     const accounts = await listLinkedAccounts(getRequestUserId(req));
@@ -101,10 +109,9 @@ export async function postImportGames(req: Request, res: Response, next: NextFun
 
 export async function getImportedGames(req: Request, res: Response, next: NextFunction) {
   try {
-    const limit = Number(req.query.limit);
     const games = await listImportedGames(
       getRequestUserId(req),
-      Number.isFinite(limit) ? limit : 100,
+      normalizeImportedGamesLimit(req.query.limit),
       parseImportedGamesFilters(req)
     );
     res.json(games);
@@ -188,7 +195,10 @@ export async function patchTrainingPlanItem(req: Request, res: Response, next: N
   try {
     const planId = req.params.planId;
     const lineKey = req.params.lineKey;
-    const done = Boolean(req.body?.done);
+    const done = req.body?.done;
+    if (typeof done !== "boolean") {
+      return res.status(400).json({ message: "done must be a boolean" });
+    }
     await markTrainingPlanItemDone(getRequestUserId(req), planId, lineKey, done);
     res.status(204).send();
   } catch (error) {

@@ -3,6 +3,15 @@ import { LinkedGameAccount } from "@chess-opening-master/common";
 import { getDB } from "../../db/mongo";
 import { LinkedGameAccountDocument } from "../../models/GameImport";
 import { encryptSecret } from "./security";
+import { getAutoSyncDueHours } from "./autoSyncConfig";
+
+const getNextSyncAt = (doc: LinkedGameAccountDocument): string => {
+  if (!doc.lastSyncAt) {
+    return new Date().toISOString();
+  }
+  const dueInMs = getAutoSyncDueHours() * 60 * 60 * 1000;
+  return new Date(doc.lastSyncAt.getTime() + dueInMs).toISOString();
+};
 
 const mapAccount = (doc: LinkedGameAccountDocument & { _id: ObjectId }): LinkedGameAccount => ({
   id: doc._id.toString(),
@@ -10,6 +19,7 @@ const mapAccount = (doc: LinkedGameAccountDocument & { _id: ObjectId }): LinkedG
   username: doc.username,
   connectedAt: doc.connectedAt.toISOString(),
   lastSyncAt: doc.lastSyncAt?.toISOString(),
+  nextSyncAt: getNextSyncAt(doc),
   status: doc.status,
   lastError: doc.lastError,
   lastSyncStartedAt: doc.lastSyncStartedAt?.toISOString(),

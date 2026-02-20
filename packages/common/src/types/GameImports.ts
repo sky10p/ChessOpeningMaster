@@ -24,6 +24,7 @@ export interface LinkedGameAccount {
   username: string;
   connectedAt: string;
   lastSyncAt?: string;
+  nextSyncAt?: string;
   status: SyncStatus;
   lastError?: string;
   lastSyncStartedAt?: string;

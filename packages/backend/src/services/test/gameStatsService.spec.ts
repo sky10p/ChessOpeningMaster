@@ -1,4 +1,4 @@
-import { buildImportedGamesFilter, buildLinesToStudy, computeResults } from "../games/gameStatsService";
+import { buildImportedGamesFilter, buildLinesToStudy, buildStatsFilter, computeResults } from "../games/gameStatsService";
 import { ImportedGameDocument } from "../../models/GameImport";
 
 const createGame = (overrides: Partial<ImportedGameDocument>): ImportedGameDocument => ({
@@ -35,6 +35,35 @@ describe("gameStatsService", () => {
       userId: "user-1",
       "openingMapping.repertoireId": { $exists: true, $ne: null },
     });
+  });
+
+  it("builds playedAt date range with valid date filters", () => {
+    const filter = buildStatsFilter("user-1", { dateFrom: "2026-02-01", dateTo: "2026-02-20" });
+    expect(filter).toEqual({
+      userId: "user-1",
+      playedAt: {
+        $gte: new Date("2026-02-01"),
+        $lte: new Date("2026-02-20"),
+      },
+    });
+  });
+
+  it("throws 400 when dateFrom is invalid", () => {
+    expect(() => buildImportedGamesFilter("user-1", { dateFrom: "not-a-date" })).toThrow("Invalid dateFrom date");
+    try {
+      buildImportedGamesFilter("user-1", { dateFrom: "not-a-date" });
+    } catch (error) {
+      expect((error as Error & { status?: number }).status).toBe(400);
+    }
+  });
+
+  it("throws 400 when dateTo is invalid", () => {
+    expect(() => buildStatsFilter("user-1", { dateTo: "bad-date" })).toThrow("Invalid dateTo date");
+    try {
+      buildStatsFilter("user-1", { dateTo: "bad-date" });
+    } catch (error) {
+      expect((error as Error & { status?: number }).status).toBe(400);
+    }
   });
 
   it("computes perspective results", () => {

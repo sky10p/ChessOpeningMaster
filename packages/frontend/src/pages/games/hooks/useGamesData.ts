@@ -16,6 +16,7 @@ import {
 } from "../../../repository/games/games";
 
 export const useGamesData = (query: ImportedGamesQuery) => {
+  const ONE_DAY_MS = 24 * 60 * 60 * 1000;
   const [accounts, setAccounts] = React.useState<LinkedGameAccount[]>([]);
   const [stats, setStats] = React.useState<GamesStatsSummary | null>(null);
   const [games, setGames] = React.useState<ImportedGame[]>([]);
@@ -28,10 +29,23 @@ export const useGamesData = (query: ImportedGamesQuery) => {
   const [manualPgn, setManualPgn] = React.useState("");
   const [tags, setTags] = React.useState("");
   const [tournamentGroup, setTournamentGroup] = React.useState("");
+  const [accountsLoaded, setAccountsLoaded] = React.useState(false);
   const accountsRequestIdRef = React.useRef(0);
   const gamesRequestIdRef = React.useRef(0);
   const statsRequestIdRef = React.useRef(0);
   const trainingPlanRequestIdRef = React.useRef(0);
+  const startupSyncTriggeredRef = React.useRef(false);
+
+  const isAccountDueForStartupSync = React.useCallback((account: LinkedGameAccount): boolean => {
+    if (!account.lastSyncAt) {
+      return true;
+    }
+    const lastSyncTime = new Date(account.lastSyncAt).getTime();
+    if (Number.isNaN(lastSyncTime)) {
+      return true;
+    }
+    return Date.now() - lastSyncTime > ONE_DAY_MS;
+  }, [ONE_DAY_MS]);
 
   const loadAccounts = React.useCallback(async () => {
     const requestId = ++accountsRequestIdRef.current;
@@ -40,6 +54,7 @@ export const useGamesData = (query: ImportedGamesQuery) => {
       return;
     }
     setAccounts(nextAccounts);
+    setAccountsLoaded(true);
   }, []);
 
   const loadGames = React.useCallback(async () => {
@@ -115,6 +130,38 @@ export const useGamesData = (query: ImportedGamesQuery) => {
   React.useEffect(() => {
     void refreshData();
   }, [refreshData]);
+
+  React.useEffect(() => {
+    if (!accountsLoaded || startupSyncTriggeredRef.current) {
+      return;
+    }
+    startupSyncTriggeredRef.current = true;
+    const dueProviders = accounts
+      .filter((account) => account.status !== "running")
+      .filter(isAccountDueForStartupSync)
+      .map((account) => account.provider);
+    if (dueProviders.length === 0) {
+      return;
+    }
+
+    const runStartupSync = async () => {
+      setLoading(true);
+      setMessage("Running automatic sync for due accounts...");
+      try {
+        for (const source of dueProviders) {
+          await importGames({ source });
+        }
+        await refreshData({ accounts: true, games: true, stats: true, trainingPlan: true });
+        setMessage(`Automatic sync complete for ${dueProviders.join(", ")}.`);
+      } catch (error) {
+        setMessage(error instanceof Error ? error.message : "Automatic sync failed");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void runStartupSync();
+  }, [accounts, accountsLoaded, isAccountDueForStartupSync, refreshData]);
 
   const connectAccount = React.useCallback(async () => {
     setMessage("");

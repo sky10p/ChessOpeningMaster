@@ -2,14 +2,7 @@ import { getDB } from "../../db/mongo";
 import { LinkedGameAccountDocument } from "../../models/GameImport";
 import { ProviderImportInput } from "./gameImportOrchestratorService";
 import { logError } from "../../utils/logger";
-
-const getAutoSyncDueHours = (): number => {
-  const value = Number(process.env.GAMES_AUTO_SYNC_DUE_HOURS || 24);
-  if (!Number.isFinite(value) || value <= 0) {
-    return 24;
-  }
-  return value;
-};
+import { getAutoSyncDueHours } from "./autoSyncConfig";
 
 export async function runAutoSyncForDueAccountsInternal(
   importGamesForUser: (userId: string, input: ProviderImportInput) => Promise<unknown>,

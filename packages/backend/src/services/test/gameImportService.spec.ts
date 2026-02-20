@@ -238,4 +238,16 @@ describe("gameImportService import cache", () => {
       }
     );
   });
+
+  it("returns a 400 error when provider import has no linked account and no username", async () => {
+    mockLinkedAccountsFindOne.mockResolvedValueOnce(null);
+
+    await expect(importGamesForUser("user-1", { source: "lichess" })).rejects.toMatchObject({
+      status: 400,
+      message: "Lichess import requires a linked account or a username in the request",
+    });
+
+    expect(lichessProvider.importGames).not.toHaveBeenCalled();
+    expect(mockLinkedAccountsUpdateOne).not.toHaveBeenCalled();
+  });
 });

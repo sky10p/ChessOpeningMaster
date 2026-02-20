@@ -21,6 +21,45 @@ export interface ProviderImportInput {
   tags?: string[];
 }
 
+type ErrorWithStatus = Error & { status?: number };
+
+const createBadRequestError = (message: string): ErrorWithStatus => {
+  const error: ErrorWithStatus = new Error(message);
+  error.status = 400;
+  return error;
+};
+
+const getProviderLabel = (provider: "lichess" | "chesscom"): string => (provider === "lichess" ? "Lichess" : "Chess.com");
+
+const getValidatedProviderUsername = (
+  source: "lichess" | "chesscom",
+  username: string | undefined
+): string => {
+  if (!username) {
+    throw createBadRequestError(`${getProviderLabel(source)} import requires a linked account or a username in the request`);
+  }
+  return username;
+};
+
+async function importProviderGames(
+  input: ProviderImportInput,
+  username: string | undefined,
+  token: string | undefined,
+  syncSince: Date | undefined
+) {
+  if (input.source === "manual") {
+    return (await manualPgnProvider.importGames(input.pgn ?? "")).map((game) => ({ ...game, providerGameId: undefined }));
+  }
+
+  const providerUsername = getValidatedProviderUsername(input.source, username);
+
+  if (input.source === "lichess") {
+    return lichessProvider.importGames({ username: providerUsername, token, since: syncSince, max: 250 });
+  }
+
+  return chessComProvider.importGames({ username: providerUsername, since: syncSince, max: 250 });
+}
+
 const parseDateHeader = (value?: string): Date | undefined => {
   if (!value) {
     return undefined;
@@ -100,6 +139,9 @@ export async function importGamesForUserInternal(userId: string, input: Provider
   const linked = input.source === "manual" ? null : await accountsCollection.findOne({ userId, provider: input.source });
   const username = input.username || linked?.username;
   const token = input.token || decryptSecret(linked?.tokenEncrypted);
+  if (input.source !== "manual") {
+    getValidatedProviderUsername(input.source, username);
+  }
   const hasExistingGamesForSource = input.source === "manual"
     ? true
     : (await gamesCollection.findOne({ userId, source: input.source }, { projection: { _id: 1 } })) !== null;
@@ -113,12 +155,7 @@ export async function importGamesForUserInternal(userId: string, input: Provider
       await setAccountStatus(input.source, "running");
     }
 
-    const providerGames =
-      input.source === "manual"
-        ? (await manualPgnProvider.importGames(input.pgn || "")).map((game) => ({ ...game, providerGameId: undefined }))
-        : input.source === "lichess"
-          ? await lichessProvider.importGames({ username: username || "", token, since: syncSince, max: 250 })
-          : await chessComProvider.importGames({ username: username || "", since: syncSince, max: 250 });
+    const providerGames = await importProviderGames(input, username, token, syncSince);
 
     processedCount = providerGames.length;
 

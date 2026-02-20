@@ -3,6 +3,7 @@ import { ImportedGameDocument } from "../../models/GameImport";
 import { ImportedGamesFilters } from "./gameImportFilters";
 import { resolveOpeningName } from "./openingDetectionService";
 import { VariantTrainingSignal } from "./gameImportTypes";
+import { parseDateStringOrThrow } from "../../utils/dateUtils";
 
 const escapeRegex = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -17,8 +18,8 @@ export const buildStatsFilter = (userId: string, filters: GameStatsFilters): Rec
   }
   if (filters.dateFrom || filters.dateTo) {
     filter.playedAt = {
-      ...(filters.dateFrom ? { $gte: new Date(filters.dateFrom) } : {}),
-      ...(filters.dateTo ? { $lte: new Date(filters.dateTo) } : {}),
+      ...(filters.dateFrom ? { $gte: parseDateStringOrThrow(filters.dateFrom, "dateFrom") } : {}),
+      ...(filters.dateTo ? { $lte: parseDateStringOrThrow(filters.dateTo, "dateTo") } : {}),
     };
   }
   if (filters.ratedOnly) {
@@ -69,8 +70,8 @@ export const buildImportedGamesFilter = (userId: string, filters: ImportedGamesF
   }
   if (filters.dateFrom || filters.dateTo) {
     filter.playedAt = {
-      ...(filters.dateFrom ? { $gte: new Date(filters.dateFrom) } : {}),
-      ...(filters.dateTo ? { $lte: new Date(filters.dateTo) } : {}),
+      ...(filters.dateFrom ? { $gte: parseDateStringOrThrow(filters.dateFrom, "dateFrom") } : {}),
+      ...(filters.dateTo ? { $lte: parseDateStringOrThrow(filters.dateTo, "dateTo") } : {}),
     };
   }
   if (filters.mapped === "mapped") {

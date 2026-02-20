@@ -72,6 +72,9 @@ const SyncTab: React.FC<SyncTabProps> = ({ state, actions }) => (
                   {account.lastSyncAt ? (
                     <p className="text-xs text-slate-500">Last sync {formatDateTime(account.lastSyncAt)}</p>
                   ) : null}
+                  {account.nextSyncAt ? (
+                    <p className="text-xs text-slate-500">Next sync {formatDateTime(account.nextSyncAt)}</p>
+                  ) : null}
                   {account.lastSyncFeedback ? (
                     <p className="text-xs text-slate-400 mt-0.5">
                       <span className="text-emerald-400">+{account.lastSyncFeedback.importedCount} imported</span>
