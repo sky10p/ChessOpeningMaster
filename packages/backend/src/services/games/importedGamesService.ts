@@ -3,11 +3,13 @@ import { ImportedGame } from "@chess-opening-master/common";
 import { getDB } from "../../db/mongo";
 import { ImportedGameDocument, LinkedGameAccountDocument } from "../../models/GameImport";
 import type { ImportedGamesFilters } from "./gameImportFilters";
-import { RepertoireMetadata } from "./gameImportTypes";
+import { ImportBatchCache, RepertoireMetadata } from "./gameImportTypes";
 import { buildRepertoireMetadataById } from "./repertoireMetadataService";
 import { normalizeImportedOpeningData } from "./openingDetectionService";
 import { buildImportedGamesFilter } from "./gameStatsService";
 import { toTimeControlBucket } from "./gameTimeControlService";
+import { detectOpening } from "./pgnProcessing";
+import { buildOpeningMapping } from "./openingMappingService";
 
 const appendAndConstraint = (baseFilter: Record<string, unknown>, constraint: Record<string, unknown>): Record<string, unknown> => ({
   ...baseFilter,
@@ -358,4 +360,72 @@ export async function clearImportedGamesForUser(userId: string, filters: Importe
     await resetLinkedAccountsIfNeeded();
   }
   return result.deletedCount || 0;
+}
+
+export async function rematchImportedGamesForUser(
+  userId: string,
+  filters: ImportedGamesFilters = {}
+): Promise<{ scannedCount: number; updatedCount: number }> {
+  const db = getDB();
+  const gamesCollection = db.collection<ImportedGameDocument>("importedGames");
+  const query = buildImportedGamesFilter(userId, filters);
+  const docs = await gamesCollection.find(query).toArray();
+  if (docs.length === 0) {
+    return { scannedCount: 0, updatedCount: 0 };
+  }
+
+  const importBatchCache: ImportBatchCache = {
+    repertoireMetadataByScope: new Map(),
+  };
+
+  const operations: Array<{ updateOne: { filter: Record<string, unknown>; update: Record<string, unknown> } }> = [];
+
+  for (const doc of docs) {
+    const openingDetection = detectOpening({}, doc.movesSan || []);
+    const openingMapping = await buildOpeningMapping(
+      userId,
+      doc.orientation,
+      openingDetection.openingName || doc.openingDetection?.openingName,
+      openingDetection.eco || doc.openingDetection?.eco,
+      openingDetection.lineMovesSan,
+      doc.tags,
+      importBatchCache
+    );
+    const resolvedOpeningName = openingDetection.openingName || openingMapping.variantName || openingMapping.repertoireName;
+    const nextOpeningDetection = {
+      ...openingDetection,
+      ...(resolvedOpeningName ? { openingName: resolvedOpeningName } : {}),
+    };
+    const nextTimeControlBucket = doc.timeControlBucket || toTimeControlBucket(doc.timeControl);
+
+    const openingDetectionChanged = JSON.stringify(doc.openingDetection || {}) !== JSON.stringify(nextOpeningDetection);
+    const openingMappingChanged = JSON.stringify(doc.openingMapping || {}) !== JSON.stringify(openingMapping);
+    const timeControlChanged = (doc.timeControlBucket || null) !== (nextTimeControlBucket || null);
+
+    if (!openingDetectionChanged && !openingMappingChanged && !timeControlChanged) {
+      continue;
+    }
+
+    operations.push({
+      updateOne: {
+        filter: { _id: doc._id, userId },
+        update: {
+          $set: {
+            openingDetection: nextOpeningDetection,
+            openingMapping,
+            ...(nextTimeControlBucket ? { timeControlBucket: nextTimeControlBucket } : {}),
+          },
+        },
+      },
+    });
+  }
+
+  if (operations.length > 0) {
+    await gamesCollection.bulkWrite(operations, { ordered: false });
+  }
+
+  return {
+    scannedCount: docs.length,
+    updatedCount: operations.length,
+  };
 }

@@ -7,7 +7,7 @@ type TrainingTabProps = {
   actionableTrainingItems: Array<TrainingPlanItem & {
     mappingConfidence?: number;
     manualReviewRate?: number;
-    pathHint?: "errors" | "due" | "new" | "study";
+    pathHint?: "errors" | "due" | "map" | "new" | "study";
     whyNow?: string[];
   }>;
   signalLines: LineStudyCandidate[];
@@ -30,16 +30,18 @@ const confidenceTone = (confidence: number): string => {
   return "text-rose-300 border-rose-900/60 bg-rose-950/20";
 };
 
-const pathHintTone: Record<"errors" | "due" | "new" | "study", string> = {
+const pathHintTone: Record<"errors" | "due" | "map" | "new" | "study", string> = {
   errors: "text-rose-300 border-rose-900/60 bg-rose-950/20",
   due: "text-amber-300 border-amber-900/60 bg-amber-950/20",
+  map: "text-violet-300 border-violet-900/60 bg-violet-950/20",
   new: "text-blue-300 border-blue-900/60 bg-blue-950/20",
   study: "text-slate-300 border-slate-700 bg-slate-800/40",
 };
 
-const pathHintLabel: Record<"errors" | "due" | "new" | "study", string> = {
+const pathHintLabel: Record<"errors" | "due" | "map" | "new" | "study", string> = {
   errors: "Errors-first",
   due: "Due-now",
+  map: "Needs-mapping",
   new: "High-activity",
   study: "Build-line",
 };
@@ -88,6 +90,7 @@ const TrainingTab: React.FC<TrainingTabProps> = ({
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
       <div className="bg-slate-900 rounded-xl border border-slate-800 p-4 xl:max-h-[68vh] xl:overflow-y-auto">
         <SectionTitle>Training Queue</SectionTitle>
+        <p className="text-xs text-slate-500 mb-3">Includes mapped variants and high-signal lines that still need mapping.</p>
         {actionableTrainingItems.length === 0
           ? <p className="text-sm text-slate-500">No matched items for current filters.</p>
           : <div className="space-y-3">

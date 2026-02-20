@@ -11,6 +11,7 @@ const mockedGetGamesStats = gamesRepo.getGamesStats as jest.MockedFunction<typeo
 const mockedGetTrainingPlan = gamesRepo.getTrainingPlan as jest.MockedFunction<typeof gamesRepo.getTrainingPlan>;
 const mockedSaveLinkedAccount = gamesRepo.saveLinkedAccount as jest.MockedFunction<typeof gamesRepo.saveLinkedAccount>;
 const mockedSetTrainingPlanItemDone = gamesRepo.setTrainingPlanItemDone as jest.MockedFunction<typeof gamesRepo.setTrainingPlanItemDone>;
+const mockedForceSynchronizeGames = gamesRepo.forceSynchronizeGames as jest.MockedFunction<typeof gamesRepo.forceSynchronizeGames>;
 
 const flushAsyncState = async () => {
   await act(async () => {
@@ -51,6 +52,11 @@ describe("useGamesData", () => {
       status: "idle",
     });
     mockedSetTrainingPlanItemDone.mockResolvedValue();
+    mockedForceSynchronizeGames.mockResolvedValue({
+      providerSync: { attempted: [], results: [] },
+      rematch: { scannedCount: 0, updatedCount: 0 },
+      trainingPlan: { generated: true, itemCount: 0 },
+    });
   });
 
   it("loads data with the applied query including training plan filter", async () => {
@@ -93,7 +99,7 @@ describe("useGamesData", () => {
     await waitFor(() => expect(result.current.message).toBe("Account linked"));
   });
 
-  it("marks training item done and only refreshes training plan", async () => {
+  it("marks training item done and refreshes stats plus training plan", async () => {
     const query = { source: "lichess" as const };
     const { result } = renderHook(() => useGamesData(query));
     await flushAsyncState();
@@ -109,6 +115,37 @@ describe("useGamesData", () => {
     expect(mockedGetTrainingPlan).toHaveBeenCalledTimes(2);
     expect(mockedGetLinkedAccounts).toHaveBeenCalledTimes(1);
     expect(mockedGetImportedGames).toHaveBeenCalledTimes(1);
-    expect(mockedGetGamesStats).toHaveBeenCalledTimes(1);
+    expect(mockedGetGamesStats).toHaveBeenCalledTimes(2);
+  });
+
+  it("forces synchronization and refreshes all datasets", async () => {
+    const query = { source: "lichess" as const, mapped: "mapped" as const };
+    const { result } = renderHook(() => useGamesData(query));
+    await flushAsyncState();
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    mockedForceSynchronizeGames.mockResolvedValueOnce({
+      providerSync: { attempted: ["lichess"], results: [] },
+      rematch: { scannedCount: 10, updatedCount: 4 },
+      trainingPlan: { generated: true, itemCount: 6, planId: "plan-2" },
+    });
+
+    await act(async () => {
+      await result.current.forceSyncAll();
+    });
+    await flushAsyncState();
+
+    expect(mockedForceSynchronizeGames).toHaveBeenCalledWith({
+      forceProviderSync: true,
+      rematchGames: true,
+      regeneratePlan: true,
+      filters: query,
+    });
+    expect(mockedGetLinkedAccounts).toHaveBeenCalledTimes(2);
+    expect(mockedGetImportedGames).toHaveBeenCalledTimes(2);
+    expect(mockedGetGamesStats).toHaveBeenCalledTimes(2);
+    expect(mockedGetTrainingPlan).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(result.current.message).toMatch(/Force sync complete/i));
   });
 });

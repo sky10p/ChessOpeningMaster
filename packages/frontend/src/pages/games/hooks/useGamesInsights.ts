@@ -8,7 +8,7 @@ type EnrichedTrainingPlanItem = {
   underperformanceScore?: number;
 };
 
-type PathHint = "errors" | "due" | "new" | "study";
+type PathHint = "errors" | "due" | "map" | "new" | "study";
 
 export const useGamesInsights = (stats: GamesStatsSummary | null, games: ImportedGame[], trainingPlan: TrainingPlan | null) => {
   const mappedRatio = stats && stats.totalGames > 0 ? stats.mappedToRepertoireCount / stats.totalGames : 0;
@@ -31,7 +31,6 @@ export const useGamesInsights = (stats: GamesStatsSummary | null, games: Importe
 
   const actionableTrainingItems = React.useMemo(() => (trainingPlan?.items || [])
     .filter((item) => focusLineKeySet.size === 0 || focusLineKeySet.has(item.lineKey))
-    .filter((item) => item.mappedGames > 0 && Boolean(item.variantName || item.repertoireName))
     .map((item) => {
       const enrichedItem = item as typeof item & EnrichedTrainingPlanItem;
       const line = focusLineByKey.get(item.lineKey);
@@ -39,16 +38,24 @@ export const useGamesInsights = (stats: GamesStatsSummary | null, games: Importe
       const manualReviewRate = item.manualReviewGames / games;
       const mappingConfidence = enrichedItem.averageMappingConfidence ?? line?.averageMappingConfidence ?? 0;
       const dueSoon = item.trainingDueAt ? (new Date(item.trainingDueAt).getTime() <= Date.now()) : false;
+      const requiresMapping =
+        item.mappedGames === 0
+        || (!item.variantName && !item.repertoireName)
+        || manualReviewRate >= 0.5
+        || mappingConfidence < 0.55;
       const pathHint: PathHint = (item.trainingErrors || 0) > 0
         ? "errors"
         : dueSoon
           ? "due"
+          : requiresMapping
+            ? "map"
           : (item.priority >= 0.7 || (enrichedItem.frequencyScore || 0) >= 0.45)
             ? "new"
             : "study";
       const whyNow = [
         (item.trainingErrors || 0) > 0 ? `${item.trainingErrors} training error${(item.trainingErrors || 0) > 1 ? "s" : ""}` : "",
         dueSoon ? "Training review is due now" : "",
+        requiresMapping ? "Line needs mapping before full training" : "",
         enrichedItem.underperformanceScore && enrichedItem.underperformanceScore > 0.4 ? `Low results in ${item.games} recent games` : "",
         manualReviewRate > 0.35 ? `${Math.round(manualReviewRate * 100)}% manual-review games` : "",
         item.deviationRate > 0.3 ? `${Math.round(item.deviationRate * 100)}% early deviation rate` : "",
@@ -60,6 +67,16 @@ export const useGamesInsights = (stats: GamesStatsSummary | null, games: Importe
         pathHint,
         whyNow,
       };
+    })
+    .filter((item) => {
+      const needsMappingWork = item.pathHint === "map";
+      return (
+        item.mappedGames > 0
+        || (item.trainingErrors || 0) > 0
+        || needsMappingWork
+        || item.deviationRate >= 0.3
+        || item.priority >= 0.35
+      );
     })
     .sort((a, b) => ((b.trainingErrors || 0) - (a.trainingErrors || 0)) || (b.priority - a.priority)),
   [trainingPlan, focusLineKeySet, focusLineByKey]);

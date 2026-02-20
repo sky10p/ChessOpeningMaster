@@ -8,6 +8,7 @@ import {
   getLinkedAccounts,
   getTrainingPlan,
   patchTrainingPlanItem,
+  postForceSynchronize,
   postGenerateTrainingPlan,
   postImportGames,
   postLinkedAccount,
@@ -26,5 +27,6 @@ router.get("/stats", getGamesStatsSummary);
 router.post("/training-plan", postGenerateTrainingPlan);
 router.get("/training-plan", getTrainingPlan);
 router.patch("/training-plan/:planId/items/:lineKey", patchTrainingPlanItem);
+router.post("/force-sync", postForceSynchronize);
 
 export default router;

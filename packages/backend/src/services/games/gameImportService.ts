@@ -3,11 +3,34 @@ import type { ImportedGamesFilters } from "./gameImportFilters";
 import { runAutoSyncForDueAccountsInternal } from "./autoSyncService";
 import { importGamesForUserInternal, ProviderImportInput } from "./gameImportOrchestratorService";
 import { getGamesStatsSummaryForUser } from "./gameStatsAggregationService";
-import { clearImportedGamesForUser, deleteImportedGameForUser, listImportedGamesForUser } from "./importedGamesService";
+import { clearImportedGamesForUser, deleteImportedGameForUser, listImportedGamesForUser, rematchImportedGamesForUser } from "./importedGamesService";
 import { disconnectLinkedAccountForUser, listLinkedAccountsForUser, upsertLinkedAccountForUser } from "./linkedAccountsService";
 import { generateTrainingPlanForUser, getLatestTrainingPlanForUser, markTrainingPlanItemDoneForUser } from "./trainingPlanService";
 
 export type { ImportedGamesFilters } from "./gameImportFilters";
+
+export type ForceSyncOptions = {
+  forceProviderSync?: boolean;
+  rematchGames?: boolean;
+  regeneratePlan?: boolean;
+  filters?: ImportedGamesFilters;
+};
+
+export type ForceSyncSummary = {
+  providerSync: {
+    attempted: Array<"lichess" | "chesscom">;
+    results: Array<ImportSummary>;
+  };
+  rematch: {
+    scannedCount: number;
+    updatedCount: number;
+  };
+  trainingPlan: {
+    generated: boolean;
+    itemCount: number;
+    planId?: string;
+  };
+};
 
 export async function listLinkedAccounts(userId: string): Promise<LinkedGameAccount[]> {
   return listLinkedAccountsForUser(userId);
@@ -58,5 +81,55 @@ export async function markTrainingPlanItemDone(userId: string, planId: string, l
 }
 
 export async function runAutoSyncForDueAccounts(maxAccounts = 25): Promise<void> {
-  return runAutoSyncForDueAccountsInternal(importGamesForUser, maxAccounts);
+  return runAutoSyncForDueAccountsInternal(async (userId, input) => {
+    await importGamesForUser(userId, input);
+    await forceSynchronizeForUser(userId, {
+      forceProviderSync: false,
+      rematchGames: true,
+      regeneratePlan: true,
+    });
+  }, maxAccounts);
+}
+
+export async function forceSynchronizeForUser(
+  userId: string,
+  options: ForceSyncOptions = {}
+): Promise<ForceSyncSummary> {
+  const forceProviderSync = options.forceProviderSync ?? true;
+  const rematchGames = options.rematchGames ?? true;
+  const regeneratePlan = options.regeneratePlan ?? true;
+  const filters = options.filters;
+
+  const providerSyncResults: ImportSummary[] = [];
+  const attemptedProviders: Array<"lichess" | "chesscom"> = [];
+
+  if (forceProviderSync) {
+    const accounts = await listLinkedAccountsForUser(userId);
+    for (const account of accounts) {
+      attemptedProviders.push(account.provider);
+      const summary = await importGamesForUserInternal(userId, { source: account.provider });
+      providerSyncResults.push(summary);
+    }
+  }
+
+  const rematch = rematchGames
+    ? await rematchImportedGamesForUser(userId, filters || {})
+    : { scannedCount: 0, updatedCount: 0 };
+
+  const trainingPlan = regeneratePlan
+    ? await generateTrainingPlanForUser(userId, undefined, filters)
+    : null;
+
+  return {
+    providerSync: {
+      attempted: attemptedProviders,
+      results: providerSyncResults,
+    },
+    rematch,
+    trainingPlan: {
+      generated: Boolean(trainingPlan),
+      itemCount: trainingPlan?.items.length || 0,
+      ...(trainingPlan?.id ? { planId: trainingPlan.id } : {}),
+    },
+  };
 }

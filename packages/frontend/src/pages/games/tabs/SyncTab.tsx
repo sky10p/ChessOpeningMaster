@@ -23,6 +23,7 @@ type SyncTabActions = {
   setTournamentGroup: React.Dispatch<React.SetStateAction<string>>;
   connectAccount: () => Promise<void>;
   syncProvider: (source: "lichess" | "chesscom") => Promise<void>;
+  forceSyncAll: () => Promise<void>;
   disconnectAccount: (source: "lichess" | "chesscom") => Promise<void>;
   uploadPgnFile: (event: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
   runManualImport: () => Promise<void>;
@@ -56,6 +57,13 @@ const SyncTab: React.FC<SyncTabProps> = ({ state, actions }) => (
       >
         <CloudArrowDownIcon className="w-4 h-4" />
         Connect account
+      </button>
+      <button
+        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition-colors"
+        onClick={() => { void actions.forceSyncAll(); }}
+      >
+        <CloudArrowDownIcon className="w-4 h-4" />
+        Force sync all
       </button>
 
       {state.accounts.length > 0 ? (

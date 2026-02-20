@@ -2,9 +2,9 @@ import { runAutoSyncForDueAccounts } from "./gameImportService";
 import { logError } from "../../utils/logger";
 
 const getAutoSyncIntervalMs = (): number => {
-  const value = Number(process.env.GAMES_AUTO_SYNC_INTERVAL_MS || 60 * 60 * 1000);
+  const value = Number(process.env.GAMES_AUTO_SYNC_INTERVAL_MS || 24 * 60 * 60 * 1000);
   if (!Number.isFinite(value) || value < 60 * 1000) {
-    return 60 * 60 * 1000;
+    return 24 * 60 * 60 * 1000;
   }
   return value;
 };

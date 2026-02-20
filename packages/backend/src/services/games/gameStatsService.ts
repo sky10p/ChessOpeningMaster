@@ -261,7 +261,9 @@ export const buildLinesToStudy = (
   }).filter((line) => (
     line.games >= 2 ||
     line.underperformanceScore > 0.55 ||
-    line.deviationRate > 0.5
+    line.deviationRate > 0.5 ||
+    (line.trainingErrors || 0) > 0 ||
+    Boolean(line.trainingDueAt)
   ))
     .sort((a, b) => (
       ((b.trainingErrors || 0) * 0.15 + b.underperformanceScore + b.frequencyScore + b.recencyScore + b.deviationRate + b.repertoireGapScore) -

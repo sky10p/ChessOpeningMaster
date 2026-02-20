@@ -3,7 +3,7 @@ import { GamesStatsSummary, ImportedGame, LinkedGameAccount, TrainingPlan } from
 import {
   clearImportedGames,
   deleteImportedGame,
-  generateTrainingPlan,
+  forceSynchronizeGames,
   getGamesStats,
   getImportedGames,
   getLinkedAccounts,
@@ -151,6 +151,12 @@ export const useGamesData = (query: ImportedGamesQuery) => {
         for (const source of dueProviders) {
           await importGames({ source });
         }
+        await forceSynchronizeGames({
+          forceProviderSync: false,
+          rematchGames: true,
+          regeneratePlan: true,
+          filters: query,
+        });
         await refreshData({ accounts: true, games: true, stats: true, trainingPlan: true });
         setMessage(`Automatic sync complete for ${dueProviders.join(", ")}.`);
       } catch (error) {
@@ -161,7 +167,7 @@ export const useGamesData = (query: ImportedGamesQuery) => {
     };
 
     void runStartupSync();
-  }, [accounts, accountsLoaded, isAccountDueForStartupSync, refreshData]);
+  }, [accounts, accountsLoaded, isAccountDueForStartupSync, query, refreshData]);
 
   const connectAccount = React.useCallback(async () => {
     setMessage("");
@@ -180,12 +186,18 @@ export const useGamesData = (query: ImportedGamesQuery) => {
     setMessage("");
     try {
       const summary = await importGames({ source });
+      const recalc = await forceSynchronizeGames({
+        forceProviderSync: false,
+        rematchGames: true,
+        regeneratePlan: true,
+        filters: query,
+      });
       await refreshData({ accounts: false, games: true, stats: true, trainingPlan: true });
-      setMessage(`Sync complete (${source}). Imported ${summary.importedCount}, duplicates ${summary.duplicateCount}, failed ${summary.failedCount}, processed ${summary.processedCount}.`);
+      setMessage(`Sync complete (${source}). Imported ${summary.importedCount}, duplicates ${summary.duplicateCount}, failed ${summary.failedCount}, processed ${summary.processedCount}. Rematched ${recalc.rematch.updatedCount}/${recalc.rematch.scannedCount}; plan ${recalc.trainingPlan.itemCount} items.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Sync failed");
     }
-  }, [refreshData]);
+  }, [query, refreshData]);
 
   const runManualImport = React.useCallback(async () => {
     setMessage("");
@@ -196,12 +208,18 @@ export const useGamesData = (query: ImportedGamesQuery) => {
         tags: tags.split(",").map((tag) => tag.trim()).filter(Boolean),
         tournamentGroup: tournamentGroup || undefined,
       });
+      const recalc = await forceSynchronizeGames({
+        forceProviderSync: false,
+        rematchGames: true,
+        regeneratePlan: true,
+        filters: query,
+      });
       await refreshData({ accounts: false, games: true, stats: true, trainingPlan: true });
-      setMessage(`Manual import complete. Imported ${summary.importedCount}, duplicates ${summary.duplicateCount}, failed ${summary.failedCount}, processed ${summary.processedCount}.`);
+      setMessage(`Manual import complete. Imported ${summary.importedCount}, duplicates ${summary.duplicateCount}, failed ${summary.failedCount}, processed ${summary.processedCount}. Rematched ${recalc.rematch.updatedCount}/${recalc.rematch.scannedCount}; plan ${recalc.trainingPlan.itemCount} items.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Manual import failed");
     }
-  }, [manualPgn, tags, tournamentGroup, refreshData]);
+  }, [manualPgn, tags, tournamentGroup, query, refreshData]);
 
   const uploadPgnFile = React.useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -213,17 +231,40 @@ export const useGamesData = (query: ImportedGamesQuery) => {
 
   const regeneratePlan = React.useCallback(async () => {
     try {
-      setTrainingPlan(await generateTrainingPlan(undefined, query));
-      setMessage("Training plan generated");
+      const summary = await forceSynchronizeGames({
+        forceProviderSync: false,
+        rematchGames: true,
+        regeneratePlan: true,
+        filters: query,
+      });
+      await refreshData({ accounts: false, games: true, stats: true, trainingPlan: true });
+      setMessage(`Training plan generated (${summary.trainingPlan.itemCount} items, ${summary.rematch.updatedCount}/${summary.rematch.scannedCount} games rematched).`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Failed to generate training plan");
     }
-  }, [query]);
+  }, [query, refreshData]);
 
   const markDone = React.useCallback(async (planId: string, lineKey: string, done: boolean) => {
     await setTrainingPlanItemDone(planId, lineKey, done);
-    await refreshData({ accounts: false, games: false, stats: false, trainingPlan: true });
+    await refreshData({ accounts: false, games: false, stats: true, trainingPlan: true });
   }, [refreshData]);
+
+  const forceSyncAll = React.useCallback(async () => {
+    setMessage("");
+    try {
+      const summary = await forceSynchronizeGames({
+        forceProviderSync: true,
+        rematchGames: true,
+        regeneratePlan: true,
+        filters: query,
+      });
+      await refreshData({ accounts: true, games: true, stats: true, trainingPlan: true });
+      const syncedProviders = summary.providerSync.attempted.length > 0 ? summary.providerSync.attempted.join(", ") : "none";
+      setMessage(`Force sync complete. Providers: ${syncedProviders}. Rematched ${summary.rematch.updatedCount}/${summary.rematch.scannedCount}. Plan items: ${summary.trainingPlan.itemCount}.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Force sync failed");
+    }
+  }, [query, refreshData]);
 
   const clearFiltered = React.useCallback(async () => {
     const confirmed = window.confirm("Delete all games in current filter?");
@@ -281,6 +322,7 @@ export const useGamesData = (query: ImportedGamesQuery) => {
     runManualImport,
     uploadPgnFile,
     regeneratePlan,
+    forceSyncAll,
     markDone,
     clearFiltered,
     clearAll,

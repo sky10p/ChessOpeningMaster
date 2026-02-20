@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowPathIcon,
   ChartBarIcon,
@@ -28,9 +28,12 @@ const TAB_ICONS: Record<GamesTab, React.ReactNode> = {
   data: <CircleStackIcon className="w-4 h-4" />,
 };
 
+const isGamesTab = (value: string | null): value is GamesTab => tabs.some((tab) => tab.id === value);
+
 const GamesPage: React.FC = () => {
   const navigate = useNavigate();
-  const [selectedTab, setSelectedTab] = React.useState<GamesTab>("insights");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedTab = isGamesTab(searchParams.get("tab")) ? (searchParams.get("tab") as GamesTab) : "insights";
   const {
     filtersDraft,
     showMobileFilters,
@@ -67,6 +70,7 @@ const GamesPage: React.FC = () => {
     runManualImport,
     uploadPgnFile,
     regeneratePlan,
+    forceSyncAll,
     markDone,
     clearFiltered,
     clearAll,
@@ -147,7 +151,11 @@ const GamesPage: React.FC = () => {
           return (
             <button
               key={tab.id}
-              onClick={() => setSelectedTab(tab.id)}
+              onClick={() => {
+                const next = new URLSearchParams(searchParams);
+                next.set("tab", tab.id);
+                setSearchParams(next);
+              }}
               className={`
                 flex items-center gap-1.5 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors border-b-2
                 ${active
@@ -261,6 +269,7 @@ const GamesPage: React.FC = () => {
               setTournamentGroup,
               connectAccount,
               syncProvider,
+              forceSyncAll,
               disconnectAccount,
               uploadPgnFile,
               runManualImport,

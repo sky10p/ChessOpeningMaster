@@ -23,10 +23,24 @@ export async function generateTrainingPlanForUser(
   const stats = await getGamesStatsSummaryForUser(userId, toTrainingStatsFilters(filters));
   const db = getDB();
   const matchedLines = stats.linesToStudy.filter((line) => line.mappedGames > 0 && Boolean(line.variantName || line.repertoireName));
+  const highSignalUnmappedLines = stats.linesToStudy.filter((line) =>
+    (!line.mappedGames || !Boolean(line.variantName || line.repertoireName))
+    && (
+      (line.trainingErrors || 0) > 0
+      || line.deviationRate >= 0.35
+      || line.underperformanceScore >= 0.5
+      || line.frequencyScore >= 0.4
+      || line.manualReviewGames > 0
+    )
+  );
   const trainingErrorMatchedLines = matchedLines.filter((line) => (line.trainingErrors || 0) > 0);
   const prioritizedSource = trainingErrorMatchedLines.length > 0
-    ? [...trainingErrorMatchedLines, ...matchedLines.filter((line) => (line.trainingErrors || 0) === 0)]
-    : (matchedLines.length > 0 ? matchedLines : stats.linesToStudy);
+    ? [...trainingErrorMatchedLines, ...matchedLines.filter((line) => (line.trainingErrors || 0) === 0), ...highSignalUnmappedLines]
+    : (
+      matchedLines.length > 0
+        ? [...matchedLines, ...highSignalUnmappedLines]
+        : stats.linesToStudy
+    );
   const seen = new Set<string>();
   const candidateLines = prioritizedSource.filter((line) => {
     if (seen.has(line.lineKey)) {

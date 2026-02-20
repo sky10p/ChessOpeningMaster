@@ -4,6 +4,7 @@ import {
   clearImportedGames,
   deleteImportedGame,
   disconnectLinkedAccount,
+  forceSynchronizeForUser,
   generateTrainingPlan,
   getGamesStats,
   getLatestTrainingPlan,
@@ -201,6 +202,21 @@ export async function patchTrainingPlanItem(req: Request, res: Response, next: N
     }
     await markTrainingPlanItemDone(getRequestUserId(req), planId, lineKey, done);
     res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function postForceSynchronize(req: Request, res: Response, next: NextFunction) {
+  try {
+    const filters = parseImportedGamesFiltersFromValue((req.body?.filters || {}) as Record<string, unknown>);
+    const summary = await forceSynchronizeForUser(getRequestUserId(req), {
+      forceProviderSync: typeof req.body?.forceProviderSync === "boolean" ? req.body.forceProviderSync : true,
+      rematchGames: typeof req.body?.rematchGames === "boolean" ? req.body.rematchGames : true,
+      regeneratePlan: typeof req.body?.regeneratePlan === "boolean" ? req.body.regeneratePlan : true,
+      filters,
+    });
+    res.status(200).json(summary);
   } catch (error) {
     next(error);
   }

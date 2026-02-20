@@ -169,3 +169,34 @@ export const setTrainingPlanItemDone = async (planId: string, lineKey: string, d
   });
   await ensureOk(response, "Failed to update plan item");
 };
+
+export interface ForceSyncSummary {
+  providerSync: {
+    attempted: Array<"lichess" | "chesscom">;
+    results: ImportSummary[];
+  };
+  rematch: {
+    scannedCount: number;
+    updatedCount: number;
+  };
+  trainingPlan: {
+    generated: boolean;
+    itemCount: number;
+    planId?: string;
+  };
+}
+
+export const forceSynchronizeGames = async (payload?: {
+  forceProviderSync?: boolean;
+  rematchGames?: boolean;
+  regeneratePlan?: boolean;
+  filters?: Omit<ImportedGamesQuery, "limit">;
+}): Promise<ForceSyncSummary> => {
+  const response = await apiFetch(`${API_URL}/games/force-sync`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload || {}),
+  });
+  await ensureOk(response, "Failed to force synchronize games and training");
+  return parseJson<ForceSyncSummary>(response);
+};
