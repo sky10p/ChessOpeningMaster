@@ -49,7 +49,7 @@ const SyncTab: React.FC<SyncTabProps> = ({ state, actions }) => (
           {state.providerOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
         <input value={state.username} onChange={(e) => actions.setUsername(e.target.value)} className={inputCls} placeholder="Username" />
-        <input value={state.token} onChange={(e) => actions.setToken(e.target.value)} className={inputCls} placeholder="API token (optional)" />
+        <input type="password" autoComplete="off" value={state.token} onChange={(e) => actions.setToken(e.target.value)} className={inputCls} placeholder="API token (optional)" />
       </div>
       <button
         className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium transition-colors"

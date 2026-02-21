@@ -10,9 +10,9 @@ export const normalizeLabel = (value?: string): string => (value || "").trim().t
 export const isUnknownLabel = (value: string): boolean => normalizeLabel(value) === "unknown";
 
 export const getOpeningLabel = (game: ImportedGame): string => (
-  game.openingDetection.openingName
-  || game.openingMapping.variantName
+  game.openingMapping.variantName
   || game.openingMapping.repertoireName
+  || game.openingDetection.openingName
   || (game.openingDetection.eco ? `ECO ${game.openingDetection.eco}` : "Unknown")
 );
 

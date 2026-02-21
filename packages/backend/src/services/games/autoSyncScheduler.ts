@@ -52,7 +52,7 @@ const waitForPromise = async (target: Promise<void>, timeoutMs: number): Promise
 let schedulerState: SchedulerState | null = null;
 
 export function startGamesAutoSyncScheduler(): GamesAutoSyncSchedulerHandle {
-  if (process.env.ENABLE_GAMES_AUTO_SYNC === "false") {
+  if (process.env.ENABLE_GAMES_AUTO_SYNC !== "true") {
     return {
       stop: async () => true,
     };

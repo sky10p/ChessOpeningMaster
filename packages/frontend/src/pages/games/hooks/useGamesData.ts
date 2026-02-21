@@ -244,8 +244,12 @@ export const useGamesData = (query: ImportedGamesQuery) => {
   }, [query, refreshData]);
 
   const markDone = React.useCallback(async (planId: string, lineKey: string, done: boolean) => {
-    await setTrainingPlanItemDone(planId, lineKey, done);
-    await refreshData({ accounts: false, games: false, stats: true, trainingPlan: true });
+    try {
+      await setTrainingPlanItemDone(planId, lineKey, done);
+      await refreshData({ accounts: false, games: false, stats: true, trainingPlan: true });
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Failed to update training item");
+    }
   }, [refreshData]);
 
   const forceSyncAll = React.useCallback(async () => {
@@ -270,9 +274,17 @@ export const useGamesData = (query: ImportedGamesQuery) => {
     if (!confirmed) {
       return;
     }
-    const deletedCount = await clearImportedGames(query);
-    await refreshData({ accounts: false, games: true, stats: true, trainingPlan: true });
-    setMessage(`Deleted ${deletedCount} filtered games.`);
+    setMessage("");
+    setLoading(true);
+    try {
+      const deletedCount = await clearImportedGames(query);
+      await refreshData({ accounts: false, games: true, stats: true, trainingPlan: true });
+      setMessage(`Deleted ${deletedCount} filtered games.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Failed to delete filtered games");
+    } finally {
+      setLoading(false);
+    }
   }, [query, refreshData]);
 
   const clearAll = React.useCallback(async () => {
@@ -280,19 +292,37 @@ export const useGamesData = (query: ImportedGamesQuery) => {
     if (!confirmed) {
       return;
     }
-    const deletedCount = await clearImportedGames();
-    await refreshData({ accounts: false, games: true, stats: true, trainingPlan: true });
-    setMessage(`Deleted ${deletedCount} games.`);
+    setMessage("");
+    setLoading(true);
+    try {
+      const deletedCount = await clearImportedGames();
+      await refreshData({ accounts: false, games: true, stats: true, trainingPlan: true });
+      setMessage(`Deleted ${deletedCount} games.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Failed to delete games");
+    } finally {
+      setLoading(false);
+    }
   }, [refreshData]);
 
   const disconnectAccount = React.useCallback(async (source: "lichess" | "chesscom") => {
-    await removeLinkedAccount(source);
-    await refreshData({ accounts: true, games: false, stats: false, trainingPlan: false });
+    setMessage("");
+    try {
+      await removeLinkedAccount(source);
+      await refreshData({ accounts: true, games: false, stats: false, trainingPlan: false });
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Failed to disconnect account");
+    }
   }, [refreshData]);
 
   const removeGame = React.useCallback(async (gameId: string) => {
-    await deleteImportedGame(gameId);
-    await refreshData({ accounts: false, games: true, stats: true, trainingPlan: true });
+    setMessage("");
+    try {
+      await deleteImportedGame(gameId);
+      await refreshData({ accounts: false, games: true, stats: true, trainingPlan: true });
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Failed to delete game");
+    }
   }, [refreshData]);
 
   return {

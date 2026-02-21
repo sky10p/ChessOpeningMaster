@@ -5,9 +5,9 @@ import { RepertoireMetadata } from "./gameImportTypes";
 import { getBestVariantMatch } from "./repertoireMetadataService";
 
 export const resolveOpeningName = (game: Pick<ImportedGameDocument, "openingDetection" | "openingMapping">): string => {
-  return game.openingDetection.openingName
-    || game.openingMapping.variantName
+  return game.openingMapping.variantName
     || game.openingMapping.repertoireName
+    || game.openingDetection.openingName
     || (game.openingDetection.eco ? `ECO ${game.openingDetection.eco}` : "Unknown");
 };
 
