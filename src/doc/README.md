@@ -1,8 +1,15 @@
 # Documentation Index
 
-This directory contains comprehensive documentation for the Chess Opening Master project, specifically designed to help AI agents understand the architecture and troubleshoot issues.
+This directory contains comprehensive documentation for the ChessKeep project, specifically designed to help AI agents understand the architecture and troubleshoot issues.
 
 ## Documentation Files
+
+### 📄 [Project Summary](summary.md)
+**Shareable high-level overview for product, pages, and flow**
+- Product purpose and core capabilities
+- Frontend page map and route overview
+- Main user flows (repertoire, path, games)
+- Architecture and backend domain organization
 
 ### 🏗️ [RepertoireContext Architecture Guide](RepertoireContext-Architecture.md)
 **Essential for understanding the core system**
@@ -156,6 +163,6 @@ Extensive troubleshooting documentation covers common issues and their solutions
 
 ---
 
-*This documentation is maintained to help AI agents quickly understand and work with the Chess Opening Master codebase. Update these files when making architectural changes.*
+*This documentation is maintained to help AI agents quickly understand and work with the ChessKeep codebase. Update these files when making architectural changes.*
 
 

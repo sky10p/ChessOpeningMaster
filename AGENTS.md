@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Chess Opening Master is a monorepo application for managing chess opening repertoires. It uses Lerna with Yarn workspaces and contains three packages: frontend, backend, and common.
+ChessKeep is a monorepo application for managing chess opening repertoires. It uses Lerna with Yarn workspaces and contains three packages: frontend, backend, and common.
 
 ## Tech Stack
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Chess Opening Master project uses a comprehensive testing strategy with Jest and React Testing Library. This document outlines testing patterns, mock requirements, and specific considerations for the chess domain.
+The ChessKeep project uses a comprehensive testing strategy with Jest and React Testing Library. This document outlines testing patterns, mock requirements, and specific considerations for the chess domain.
 
 ## Test Structure
 
