@@ -104,6 +104,7 @@ describe("trainingPlanService", () => {
       lineKey: "line-unmapped",
       openingName: "Unknown",
       mappedGames: 0,
+      frequencyScore: 0.2,
       variantName: undefined,
       repertoireName: undefined,
     });

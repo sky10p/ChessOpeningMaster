@@ -16,7 +16,6 @@ import {
 } from "../../../repository/games/games";
 
 export const useGamesData = (query: ImportedGamesQuery) => {
-  const ONE_DAY_MS = 24 * 60 * 60 * 1000;
   const [accounts, setAccounts] = React.useState<LinkedGameAccount[]>([]);
   const [stats, setStats] = React.useState<GamesStatsSummary | null>(null);
   const [games, setGames] = React.useState<ImportedGame[]>([]);
@@ -37,15 +36,15 @@ export const useGamesData = (query: ImportedGamesQuery) => {
   const startupSyncTriggeredRef = React.useRef(false);
 
   const isAccountDueForStartupSync = React.useCallback((account: LinkedGameAccount): boolean => {
-    if (!account.lastSyncAt) {
+    if (!account.nextSyncAt) {
+      return !account.lastSyncAt;
+    }
+    const nextSyncTime = new Date(account.nextSyncAt).getTime();
+    if (Number.isNaN(nextSyncTime)) {
       return true;
     }
-    const lastSyncTime = new Date(account.lastSyncAt).getTime();
-    if (Number.isNaN(lastSyncTime)) {
-      return true;
-    }
-    return Date.now() - lastSyncTime > ONE_DAY_MS;
-  }, [ONE_DAY_MS]);
+    return nextSyncTime <= Date.now();
+  }, []);
 
   const loadAccounts = React.useCallback(async () => {
     const requestId = ++accountsRequestIdRef.current;

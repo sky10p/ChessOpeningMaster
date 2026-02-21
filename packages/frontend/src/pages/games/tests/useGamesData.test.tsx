@@ -9,6 +9,7 @@ const mockedGetLinkedAccounts = gamesRepo.getLinkedAccounts as jest.MockedFuncti
 const mockedGetImportedGames = gamesRepo.getImportedGames as jest.MockedFunction<typeof gamesRepo.getImportedGames>;
 const mockedGetGamesStats = gamesRepo.getGamesStats as jest.MockedFunction<typeof gamesRepo.getGamesStats>;
 const mockedGetTrainingPlan = gamesRepo.getTrainingPlan as jest.MockedFunction<typeof gamesRepo.getTrainingPlan>;
+const mockedImportGames = gamesRepo.importGames as jest.MockedFunction<typeof gamesRepo.importGames>;
 const mockedSaveLinkedAccount = gamesRepo.saveLinkedAccount as jest.MockedFunction<typeof gamesRepo.saveLinkedAccount>;
 const mockedSetTrainingPlanItemDone = gamesRepo.setTrainingPlanItemDone as jest.MockedFunction<typeof gamesRepo.setTrainingPlanItemDone>;
 const mockedForceSynchronizeGames = gamesRepo.forceSynchronizeGames as jest.MockedFunction<typeof gamesRepo.forceSynchronizeGames>;
@@ -44,6 +45,14 @@ describe("useGamesData", () => {
       linesToStudy: [],
     });
     mockedGetTrainingPlan.mockResolvedValue(null);
+    mockedImportGames.mockResolvedValue({
+      source: "lichess",
+      importedCount: 0,
+      duplicateCount: 0,
+      failedCount: 0,
+      processedCount: 0,
+      statsRefreshedAt: new Date().toISOString(),
+    });
     mockedSaveLinkedAccount.mockResolvedValue({
       id: "a1",
       provider: "lichess",
@@ -147,5 +156,54 @@ describe("useGamesData", () => {
     expect(mockedGetGamesStats).toHaveBeenCalledTimes(2);
     expect(mockedGetTrainingPlan).toHaveBeenCalledTimes(2);
     await waitFor(() => expect(result.current.message).toMatch(/Force sync complete/i));
+  });
+
+  it("runs startup auto-sync when account nextSyncAt is due", async () => {
+    const query = {};
+    mockedGetLinkedAccounts
+      .mockResolvedValueOnce([
+        {
+          id: "a1",
+          provider: "lichess",
+          username: "tester",
+          connectedAt: new Date().toISOString(),
+          lastSyncAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+          nextSyncAt: new Date(Date.now() - 60 * 1000).toISOString(),
+          status: "idle",
+        },
+      ])
+      .mockResolvedValue([]);
+
+    renderHook(() => useGamesData(query));
+    await flushAsyncState();
+
+    await waitFor(() => expect(mockedImportGames).toHaveBeenCalledWith({ source: "lichess" }));
+    expect(mockedForceSynchronizeGames).toHaveBeenCalledWith({
+      forceProviderSync: false,
+      rematchGames: true,
+      regeneratePlan: true,
+      filters: query,
+    });
+  });
+
+  it("does not run startup auto-sync when nextSyncAt is in the future", async () => {
+    const query = {};
+    mockedGetLinkedAccounts.mockResolvedValue([
+      {
+        id: "a1",
+        provider: "lichess",
+        username: "tester",
+        connectedAt: new Date().toISOString(),
+        lastSyncAt: new Date().toISOString(),
+        nextSyncAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+        status: "idle",
+      },
+    ]);
+
+    const { result } = renderHook(() => useGamesData(query));
+    await flushAsyncState();
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(mockedImportGames).not.toHaveBeenCalled();
   });
 });
