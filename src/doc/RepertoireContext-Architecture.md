@@ -2,7 +2,7 @@
 
 ## Overview
 
-The RepertoireContext is the core state management system for chess opening repertoires in the Chess Opening Master application. It has been refactored from a single large file into a modular directory structure for better maintainability.
+The RepertoireContext is the core state management system for chess opening repertoires in the ChessKeep application. It has been refactored from a single large file into a modular directory structure for better maintainability.
 
 ## Directory Structure
 

@@ -11,7 +11,7 @@
   ],
   "scripts": {
     "build": "lerna run build --stream",
-    "build:common": "lerna run build:common --scope @chess-opening-master/common --stream",
+    "build:common": "lerna run build --scope @chess-opening-master/common --stream",
     "start:front:dev": "lerna run start:dev --scope @chess-opening-master/frontend --stream",
     "start:backend:dev": "lerna run start:dev --scope @chess-opening-master/backend --stream",
     "start:backend:prod": "lerna run start:prod --scope @chess-opening-master/backend --stream",

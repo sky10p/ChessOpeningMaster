@@ -30,6 +30,9 @@ describe("ensureDatabaseIndexes", () => {
   let studiesCollection: MockCollection;
   let variantsInfoCollection: MockCollection;
   let variantReviewHistoryCollection: MockCollection;
+  let linkedGameAccountsCollection: MockCollection;
+  let importedGamesCollection: MockCollection;
+  let trainingPlansCollection: MockCollection;
   let mockDb: MockDb;
 
   beforeEach(() => {
@@ -40,6 +43,9 @@ describe("ensureDatabaseIndexes", () => {
     studiesCollection = createCollection();
     variantsInfoCollection = createCollection();
     variantReviewHistoryCollection = createCollection();
+    linkedGameAccountsCollection = createCollection();
+    importedGamesCollection = createCollection();
+    trainingPlansCollection = createCollection();
 
     mockDb = {
       collection: jest.fn((name: string) => {
@@ -50,6 +56,9 @@ describe("ensureDatabaseIndexes", () => {
         if (name === "studies") return studiesCollection;
         if (name === "variantsInfo") return variantsInfoCollection;
         if (name === "variantReviewHistory") return variantReviewHistoryCollection;
+        if (name === "linkedGameAccounts") return linkedGameAccountsCollection;
+        if (name === "importedGames") return importedGamesCollection;
+        if (name === "trainingPlans") return trainingPlansCollection;
         throw new Error(`Unexpected collection ${name}`);
       }),
     };
@@ -81,5 +90,17 @@ describe("ensureDatabaseIndexes", () => {
     usersCollection.createIndex.mockRejectedValue(new Error("fatal"));
 
     await expect(ensureDatabaseIndexes(mockDb as never)).rejects.toThrow("fatal");
+  });
+
+  it("creates imported games indexes for stats filtering dimensions", async () => {
+    await ensureDatabaseIndexes(mockDb as never);
+
+    expect(importedGamesCollection.createIndex).toHaveBeenCalledWith({ userId: 1, source: 1, playedAt: -1 }, undefined);
+    expect(importedGamesCollection.createIndex).toHaveBeenCalledWith({ userId: 1, orientation: 1, playedAt: -1 }, undefined);
+    expect(importedGamesCollection.createIndex).toHaveBeenCalledWith({ userId: 1, rated: 1, playedAt: -1 }, undefined);
+    expect(importedGamesCollection.createIndex).toHaveBeenCalledWith({ userId: 1, tournamentGroup: 1, playedAt: -1 }, undefined);
+    expect(importedGamesCollection.createIndex).toHaveBeenCalledWith({ userId: 1, timeControlBucket: 1, playedAt: -1 }, undefined);
+    expect(importedGamesCollection.createIndex).toHaveBeenCalledWith({ userId: 1, "openingMapping.repertoireId": 1, playedAt: -1 }, undefined);
+    expect(importedGamesCollection.createIndex).toHaveBeenCalledWith({ userId: 1, "openingMapping.requiresManualReview": 1, playedAt: -1 }, undefined);
   });
 });

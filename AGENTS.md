@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Chess Opening Master is a monorepo application for managing chess opening repertoires. It uses Lerna with Yarn workspaces and contains three packages: frontend, backend, and common.
+ChessKeep is a monorepo application for managing chess opening repertoires. It uses Lerna with Yarn workspaces and contains three packages: frontend, backend, and common.
 
 ## Tech Stack
 
@@ -183,6 +183,11 @@ mongodb://localhost:27017/chess_opening_master
 - `tsconfig.base.json` - Base TypeScript configuration
 - `docker-compose.yml` - MongoDB container setup
 - `packages/*/jest.config.js` - Jest configurations per package
+- `packages/frontend/src/pages/games/*` - My Games (Games Intelligence) page, tabs, hooks, and UI filters
+- `packages/frontend/src/repository/games/games.ts` - Frontend Games API client and query contract
+- `packages/backend/src/routes/games.ts` - Games API route surface
+- `packages/backend/src/controllers/gamesController.ts` - Games API input parsing and user scoping
+- `packages/backend/src/services/games/*` - Import orchestration, stats aggregation, training plan, auto-sync, security
 
 ## Documentation
 
@@ -195,6 +200,9 @@ mongodb://localhost:27017/chess_opening_master
 - [PathPage and Next Lesson Logic](src/doc/PathPage-Next-Lesson-Logic.md) - End-to-end `/path` behavior and backend next-lesson selection rules
 - [Spaced Repetition Upgrade Plan](src/doc/Spaced-Repetition-Upgrade-Plan.md) - Rating-based scheduler migration plan with no same-day repeats and Path analytics
 - [Dashboard Spaced Repetition Insights](src/doc/Dashboard-Spaced-Repetition-Insights.md) - Dashboard charts and data flow based on path plan/analytics insights
+- [Game Import Service Architecture](src/doc/Game-Import-Service-Architecture.md) - Backend module boundaries and orchestration flow for My Games
+- [Game Imports and Training Plan Guide](src/doc/Game-Imports-Guide.md) - My Games tabs, sync/import flows, and training usage
+- [Training Queue Guide](src/doc/Training-Queue-Guide.md) - Training queue behavior and interpretation rules in My Games
 
 ### Additional Documentation
 - `src/doc/repertoire-variant-sync.md` - Existing variant synchronization documentation
@@ -212,6 +220,25 @@ Core rules to preserve:
 - Same-day repeats are blocked by `lastReviewedDayKey` checks for path selection.
 - Removing a variant from path deletes its `variantsInfo` record and reloads path in the active filter.
 - All path selection is user-scoped; do not bypass `getRequestUserId(req)` filtering.
+
+## My Games (Games Intelligence) Rules (Critical for Agents)
+
+Before changing `GamesPage`, games hooks/repository, `/games` routes, or services in `backend/src/services/games`, read:
+- `src/doc/Game-Imports-Guide.md`
+- `src/doc/Game-Import-Service-Architecture.md`
+- `src/doc/Training-Queue-Guide.md`
+
+Core rules to preserve:
+- `/games` is a 4-tab page: `Insights`, `Training`, `Sync`, `Data`.
+- Shared filters currently exposed in UI: `source`, `color`, `mapped`, `timeControlBucket`, `dateFrom`, `dateTo`, `openingQuery`.
+- Backend stats supports additional query params (`ratedOnly`, `opponentRatingBand`, `tournamentGroup`) even when not exposed in current GamesPage filters.
+- Games startup flow loads accounts/imports/stats/latest-plan and can run automatic due-account sync once per page load when account is overdue.
+- Due-account startup sync threshold defaults to 24h (`GAMES_AUTO_SYNC_DUE_HOURS`) and skips accounts already in `running` state.
+- Provider sync/manual import actions must be followed by rematch + plan regeneration flow to keep Insights/Training coherent.
+- `Force sync all` triggers provider sync for linked accounts plus rematch and plan regeneration.
+- Data deletion behavior is split between delete single game (`DELETE /games/imports/:gameId`) and delete filtered/all (`DELETE /games/imports`).
+- Games controllers must always use `getRequestUserId(req)` and user-scoped queries/documents/indexes.
+- Linked provider secrets are encrypted at rest (`GAME_PROVIDER_TOKEN_SECRET` required in production).
 
 ## User Authentication and User Scope (Critical for Agents)
 
@@ -321,3 +348,5 @@ Use Node.js v20.11.1 (specified in volta config).
 Backend uses dotenv. Required variables:
 - `MONGO_URI` - MongoDB connection string
 - `NODE_ENV` - development/production
+- `GAME_PROVIDER_TOKEN_SECRET` - Required in production to encrypt linked provider tokens
+- `GAMES_AUTO_SYNC_DUE_HOURS` - Optional startup/scheduler due threshold for automatic sync checks (defaults to 24)

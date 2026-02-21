@@ -3,11 +3,12 @@ import React, { useState } from "react";
 import { Navbar } from "./Navbar";
 import { BrowserRouter as Router } from "react-router-dom";
 import { NavbarLink } from "./model";
-import { ArrowDownTrayIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { ArrowDownTrayIcon, PlusIcon, TrophyIcon } from "@heroicons/react/24/outline";
 
 const mainActions: NavbarLink[] = [
     { id: '1', name: "Download Repertoires", url: "/", onActionClick: () => alert("Home action clicked"), icon: <ArrowDownTrayIcon className="w-6 h-6 mr-2" /> },
     { id: '2', name: "Create repertoire", url: "/create", onActionClick: () => alert("About action clicked"), icon: <PlusIcon className="w-6 h-6 mr-2" /> },
+    { id: '3', name: "My Games", url: "/games", onActionClick: () => alert("My Games action clicked"), icon: <TrophyIcon className="w-6 h-6 mr-2" /> },
 ];
 
 const links: NavbarLink[] = [

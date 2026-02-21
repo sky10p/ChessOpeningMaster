@@ -1,6 +1,6 @@
 # Form Handling System
 
-This directory contains a comprehensive form handling system for the Chess Opening Master application. It provides hooks and components for easy form state management, validation, and rendering.
+This directory contains a comprehensive form handling system for the ChessKeep application. It provides hooks and components for easy form state management, validation, and rendering.
 
 ## Components
 

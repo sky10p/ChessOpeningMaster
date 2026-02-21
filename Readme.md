@@ -12,6 +12,7 @@ ChessKeep is an application that allows you to manage your chess opening reperto
 
 * Manage repertoires (create, edit, and delete).
 * Order repertoires.
+* My Games page for games intelligence, sync, imports, and training workflow.
 * User authentication with cookie-based sessions.
 * Optional default local user access for development or local-only usage.
 * User-scoped data isolation across repertoires, studies, positions, and variants info.
@@ -68,6 +69,30 @@ Dashboard now includes a dedicated `Path Insights` tab with:
 Documentation:
 
 - [src/doc/Dashboard-Spaced-Repetition-Insights.md](src/doc/Dashboard-Spaced-Repetition-Insights.md)
+
+## My Games (Games Intelligence)
+
+The `/games` page is a unified games intelligence workspace with four tabs:
+
+- `Insights`: outcome summary, mapped/manual-review ratios, strongest/weakest variants, off-book signals, monthly activity, and training ideas.
+- `Training`: actionable queue and focus lines from imported games + repertoire mapping + training signals.
+- `Sync`: linked account management (Lichess/Chess.com), per-provider sync, force-sync-all, and manual PGN import (paste/upload).
+- `Data`: imported games browser and deletion operations (single game, filtered batch, full reset).
+
+Current shared filters used across data-driven tabs:
+- `source`, `color`, `mapped`, `timeControlBucket`, `dateFrom`, `dateTo`, `openingQuery`.
+
+Behavior highlights:
+- On page load, data is fetched for accounts/imports/stats/latest training plan.
+- If linked accounts are due, one startup automatic sync pass can run and then rematch + plan regeneration are applied.
+- Provider/manual imports and force-sync flows refresh games, stats, and training plan together.
+- Marking training items done updates plan status and refreshes training/stat signals.
+
+Games documentation:
+- User flow and tab behavior: [src/doc/Game-Imports-Guide.md](src/doc/Game-Imports-Guide.md)
+- Backend architecture and orchestration: [src/doc/Game-Import-Service-Architecture.md](src/doc/Game-Import-Service-Architecture.md)
+- Queue interpretation and workflow: [src/doc/Training-Queue-Guide.md](src/doc/Training-Queue-Guide.md)
+- API/contract spec: [docs/specs/game-imports-openings-training-plan.md](docs/specs/game-imports-openings-training-plan.md)
 
 ## Installation Requirements
 

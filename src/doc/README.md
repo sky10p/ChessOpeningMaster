@@ -1,8 +1,15 @@
 # Documentation Index
 
-This directory contains comprehensive documentation for the Chess Opening Master project, specifically designed to help AI agents understand the architecture and troubleshoot issues.
+This directory contains comprehensive documentation for the ChessKeep project, specifically designed to help AI agents understand the architecture and troubleshoot issues.
 
 ## Documentation Files
+
+### 📄 [Project Summary](summary.md)
+**Shareable high-level overview for product, pages, and flow**
+- Product purpose and core capabilities
+- Frontend page map and route overview
+- Main user flows (repertoire, path, games)
+- Architecture and backend domain organization
 
 ### 🏗️ [RepertoireContext Architecture Guide](RepertoireContext-Architecture.md)
 **Essential for understanding the core system**
@@ -60,6 +67,27 @@ This directory contains comprehensive documentation for the Chess Opening Master
 - Path planning/analytics API and UI design
 - Phased rollout and acceptance criteria
 
+### ♟️ [Game Imports and Training Plan Guide](Game-Imports-Guide.md)
+**Required for `/games` page behavior (My Games / Games Intelligence)**
+- 4-tab UI model (`Insights`, `Training`, `Sync`, `Data`)
+- Shared filters and startup auto-sync behavior
+- Provider sync, manual PGN import, force-sync-all, and deletion flows
+- How user-visible messages map to backend operations
+
+### 🧱 [Game Import Service Architecture](Game-Import-Service-Architecture.md)
+**Required for backend changes under `services/games` or `/games` routes/controllers**
+- Service/module boundaries and dependency direction
+- Import/rematch/plan orchestration flow
+- Auto-sync cadence and security/token encryption constraints
+- User scoping and indexing expectations for game data
+
+### 🧭 [Training Queue Guide](Training-Queue-Guide.md)
+**Required for Training tab logic and queue interpretation**
+- End-to-end data flow from imports/stats/plan to UI
+- Actionable queue vs signal lines semantics
+- Mapping-needed handling and `pathHint` behavior
+- Practical workflow after sync/import/rematch/plan updates
+
 ### 🔧 [Troubleshooting Guide](Troubleshooting-Guide.md)
 **First stop when encountering issues**
 - Common TypeScript compilation errors
@@ -83,6 +111,9 @@ This directory contains comprehensive documentation for the Chess Opening Master
 4. Read [User Auth Backend](User-Auth-Backend.md) and [User Auth Frontend](User-Auth-Frontend.md) before changing user-related logic
 5. Read [PathPage and Next Lesson Logic](PathPage-Next-Lesson-Logic.md) before changing `/path` or next-lesson selection
 6. Read [Spaced Repetition Upgrade Plan](Spaced-Repetition-Upgrade-Plan.md) before changing training scheduling model
+7. Read [Game Imports and Training Plan Guide](Game-Imports-Guide.md) before changing `/games` page UX or filters
+8. Read [Game Import Service Architecture](Game-Import-Service-Architecture.md) before changing `/games` backend services
+9. Read [Training Queue Guide](Training-Queue-Guide.md) before changing Games training prioritization
 
 ### Debugging Issues
 1. Check [Troubleshooting Guide](Troubleshooting-Guide.md) for common problems
@@ -98,6 +129,8 @@ This directory contains comprehensive documentation for the Chess Opening Master
 6. Validate selection behavior with [PathPage and Next Lesson Logic](PathPage-Next-Lesson-Logic.md) before changing path rules
 7. Follow [Spaced Repetition Upgrade Plan](Spaced-Repetition-Upgrade-Plan.md) for scheduler/rating migrations
 8. Read [Dashboard Spaced Repetition Insights](Dashboard-Spaced-Repetition-Insights.md) before changing Dashboard SRS/path charts
+9. Validate Games tab behavior against [Game Imports and Training Plan Guide](Game-Imports-Guide.md)
+10. Validate backend orchestration assumptions against [Game Import Service Architecture](Game-Import-Service-Architecture.md)
 
 ## Key Technical Concepts
 
@@ -130,6 +163,6 @@ Extensive troubleshooting documentation covers common issues and their solutions
 
 ---
 
-*This documentation is maintained to help AI agents quickly understand and work with the Chess Opening Master codebase. Update these files when making architectural changes.*
+*This documentation is maintained to help AI agents quickly understand and work with the ChessKeep codebase. Update these files when making architectural changes.*
 
 

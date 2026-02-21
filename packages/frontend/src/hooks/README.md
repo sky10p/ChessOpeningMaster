@@ -1,6 +1,6 @@
 # Custom Hooks
 
-This directory contains reusable custom hooks for the Chess Opening Master application.
+This directory contains reusable custom hooks for the ChessKeep application.
 
 ## `useEffect` Guidance for Hook Authors
 

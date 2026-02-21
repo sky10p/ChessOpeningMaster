@@ -1,15 +1,19 @@
 import express from "express";
 import cors from "cors";
-import { connectDB, getDB } from "./db/mongo";
+import { connectDB, disconnectDB, getDB } from "./db/mongo";
+import { Server } from "http";
 import repertoiresRouter from "./routes/repertoires";
 import studiesRouter from "./routes/studies";
 import paths from "./routes/paths";
 import positionsRouter from "./routes/positionComments";
 import authRouter from "./routes/auth";
+import gamesRouter from "./routes/games";
 import errorHandler from "./middleware/errorHandler";
 import { authMiddleware } from "./middleware/auth";
 import { ensureDefaultUserAndMigrateData } from "./services/authService";
 import { ensureDatabaseIndexes } from "./db/indexes";
+import { startGamesAutoSyncScheduler } from "./services/games/autoSyncScheduler";
+import { logError, logInfo, logWarn } from "./utils/logger";
 
 const app = express();
 const port = process.env.BACKEND_PORT || 3001;
@@ -56,17 +60,78 @@ app.use("/repertoires", repertoiresRouter);
 app.use("/studies", studiesRouter);
 app.use("/paths", paths);
 app.use("/positions", positionsRouter);
+app.use("/games", gamesRouter);
 
 app.use(errorHandler);
 
 export default app;
 
+const closeHttpServer = async (server: Server): Promise<void> => {
+  await new Promise<void>((resolve, reject) => {
+    server.close((error) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      resolve();
+    });
+  });
+};
+
 if (require.main === module) {
-  connectDB().then(async () => {
+  const run = async () => {
+    await connectDB();
     await ensureDatabaseIndexes(getDB());
     await ensureDefaultUserAndMigrateData();
-    app.listen(port, () => {
-      console.log(`Server listening at http://localhost:${port}`);
+    const scheduler = startGamesAutoSyncScheduler();
+    const server = app.listen(port, () => {
+      logInfo(`Server listening at http://localhost:${port}`);
     });
+
+    let shutdownPromise: Promise<void> | null = null;
+    const handleShutdown = (signal: NodeJS.Signals): Promise<void> => {
+      if (shutdownPromise) {
+        return shutdownPromise;
+      }
+      logInfo(`Received ${signal}, shutting down gracefully`);
+      shutdownPromise = (async () => {
+        let exitCode = 0;
+        try {
+          const completed = await scheduler.stop();
+          if (!completed) {
+            logWarn("Games auto-sync shutdown timed out");
+          }
+        } catch (error) {
+          exitCode = 1;
+          logError("Failed to stop games auto-sync scheduler", error);
+        }
+        try {
+          await closeHttpServer(server);
+        } catch (error) {
+          exitCode = 1;
+          logError("Failed to close HTTP server", error);
+        }
+        try {
+          await disconnectDB();
+        } catch (error) {
+          exitCode = 1;
+          logError("Failed to disconnect database", error);
+        }
+        process.exit(exitCode);
+      })();
+      return shutdownPromise;
+    };
+
+    process.on("SIGINT", () => {
+      void handleShutdown("SIGINT");
+    });
+    process.on("SIGTERM", () => {
+      void handleShutdown("SIGTERM");
+    });
+  };
+
+  run().catch((error) => {
+    logError("Backend startup failed", error);
+    process.exit(1);
   });
 }
