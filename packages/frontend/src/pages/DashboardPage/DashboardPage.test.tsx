@@ -174,8 +174,8 @@ describe("Openings section behaviors", () => {
     );
     fireEvent.click(screen.getByRole("tab", { name: /openings/i }));
     expect(screen.getByText("Ruy Lopez")).toBeInTheDocument();
-    expect(screen.getByText("Rep1")).toBeInTheDocument();
-    expect(screen.queryByText(/Show/)).not.toBeInTheDocument();
+    expect(screen.getByText(/Rep1/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Expand/i })).not.toBeInTheDocument();
   });
 
   it("shows expand/collapse for multiple repertoires for an opening", () => {
@@ -195,12 +195,12 @@ describe("Openings section behaviors", () => {
     );
     fireEvent.click(screen.getByRole("tab", { name: /openings/i }));
     expect(screen.getByText("Ruy Lopez")).toBeInTheDocument();
-    const showBtn = screen.getByRole("button", { name: /Show 2 repertoires/i });
+    const showBtn = screen.getByRole("button", { name: /Expand/i });
     expect(showBtn).toBeInTheDocument();
     fireEvent.click(showBtn);
     expect(screen.getByText("Rep1")).toBeInTheDocument();
     expect(screen.getByText("Rep2")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /Hide repertoires/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Collapse/i }));
     expect(screen.queryByText("Rep1")).not.toBeInTheDocument();
   });
 
@@ -256,7 +256,7 @@ describe("Openings section behaviors", () => {
       </BrowserRouter>
     );
     fireEvent.click(screen.getByRole("tab", { name: /openings/i }));
-    const viewBtn = screen.getByRole("button", { name: /^view$/i });
+    const viewBtn = screen.getByRole("button", { name: /View repertoire/i });
     expect(viewBtn).toBeInTheDocument();
     fireEvent.click(viewBtn);
   });
