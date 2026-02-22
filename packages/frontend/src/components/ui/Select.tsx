@@ -40,7 +40,7 @@ export interface SelectProps
 }
 
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ className, size, error, label, hint, errorMessage, id, ...props }, ref) => {
+  ({ className, size, error, label, hint, errorMessage, id, style, ...props }, ref) => {
     const inputId = id ?? label?.toLowerCase().replace(/\s+/g, "-");
     const derivedState = error ? "error" : "default";
 
@@ -55,6 +55,12 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           ref={ref}
           id={inputId}
           className={cn(selectVariants({ size, state: derivedState }), className)}
+          style={{
+            backgroundColor: "var(--color-bg-surface)",
+            color: "var(--color-text-base)",
+            borderColor: "var(--color-border-default)",
+            ...style,
+          }}
           aria-invalid={error}
           {...props}
         />
