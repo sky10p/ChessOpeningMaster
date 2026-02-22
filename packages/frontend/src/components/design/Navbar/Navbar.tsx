@@ -49,8 +49,8 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
               alt="Chess Navbar Background"
               className="w-full h-32 object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-page to-transparent"></div>
-            <div className="absolute bottom-3 left-3 text-2xl font-bold text-white">ChessKeep</div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+            <div className="absolute bottom-3 left-3 text-2xl font-bold text-white drop-shadow-md">ChessKeep</div>
           </div>
           
           <nav className="mt-6 px-3 space-y-1.5">
