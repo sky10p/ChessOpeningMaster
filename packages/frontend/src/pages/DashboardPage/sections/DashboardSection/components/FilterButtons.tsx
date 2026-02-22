@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { FilterType } from "../types";
 
 interface FilterButtonsProps {
@@ -27,7 +27,7 @@ export const FilterButtons: React.FC<FilterButtonsProps> = ({
           className={`px-3 py-1 rounded ${
             filter === value
               ? "bg-blue-600 text-white"
-              : "bg-gray-800 text-gray-200 hover:bg-gray-700"
+              : "bg-surface-raised text-text-muted hover:bg-interactive"
           }`}
         >
           {label}

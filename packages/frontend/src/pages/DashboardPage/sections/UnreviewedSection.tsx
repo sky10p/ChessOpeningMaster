@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+﻿import React, { useMemo, useState } from "react";
 import { IRepertoireDashboard } from "@chess-opening-master/common";
 import { generateUnreviewedVariantsByOpening, getRelevantVariants } from "./DashboardSection/utils";
 import { OpeningWithUnreviewedVariants } from "./DashboardSection/types";
@@ -92,15 +92,15 @@ export const UnreviewedSection: React.FC<UnreviewedSectionProps> = ({ repertoire
   return (
     <section className="flex-1 flex flex-col min-h-0 p-4 overflow-y-auto">
       <header className="mb-4">
-        <h2 className="font-bold text-gray-100 text-2xl leading-tight mb-1 truncate">
+        <h2 className="font-bold text-text-base text-2xl leading-tight mb-1 truncate">
           Unreviewed Variants
         </h2>
-        <p className="text-gray-300 text-base leading-snug mb-2">
+        <p className="text-text-muted text-base leading-snug mb-2">
           Focus on variants you haven't reviewed yet. Filter by color, repertoire, or search to plan your study.
         </p>
       </header>
 
-      <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 mb-4">
+      <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle mb-4">
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap gap-2">
             {(["all", "white", "black"] as OrientationFilter[]).map((option) => (
@@ -110,7 +110,7 @@ export const UnreviewedSection: React.FC<UnreviewedSectionProps> = ({ repertoire
                 className={`px-3 py-1 rounded text-sm ${
                   orientationFilter === option
                     ? "bg-blue-600 text-white"
-                    : "bg-gray-800 text-gray-200 hover:bg-gray-700"
+                    : "bg-surface-raised text-text-muted hover:bg-interactive"
                 }`}
               >
                 {option === "all" ? "All" : option === "white" ? "White" : "Black"}
@@ -120,7 +120,7 @@ export const UnreviewedSection: React.FC<UnreviewedSectionProps> = ({ repertoire
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             <div>
-              <label className="block text-xs text-gray-400 mb-1">Repertoires</label>
+              <label className="block text-xs text-text-subtle mb-1">Repertoires</label>
               <RepertoireFilterDropdown
                 filteredRepertoires={filteredRepertoires}
                 orientationFilter={orientationFilter}
@@ -129,30 +129,30 @@ export const UnreviewedSection: React.FC<UnreviewedSectionProps> = ({ repertoire
               />
             </div>
             <div>
-              <label className="block text-xs text-gray-400 mb-1">Search opening</label>
+              <label className="block text-xs text-text-subtle mb-1">Search opening</label>
               <input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="e.g. French"
-                className="w-full bg-gray-800 text-gray-100 px-3 py-2 border border-gray-700 rounded-lg text-sm"
+                className="w-full bg-surface-raised text-text-base px-3 py-2 border border-border-default rounded-lg text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs text-gray-400 mb-1">Min unreviewed</label>
+              <label className="block text-xs text-text-subtle mb-1">Min unreviewed</label>
               <input
                 type="number"
                 min={0}
                 value={minUnreviewed}
                 onChange={(e) => setMinUnreviewed(Math.max(0, Number(e.target.value) || 0))}
-                className="w-full bg-gray-800 text-gray-100 px-3 py-2 border border-gray-700 rounded-lg text-sm"
+                className="w-full bg-surface-raised text-text-base px-3 py-2 border border-border-default rounded-lg text-sm"
               />
             </div>
             <div>
-              <label className="block text-xs text-gray-400 mb-1">Sort by</label>
+              <label className="block text-xs text-text-subtle mb-1">Sort by</label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="w-full bg-gray-800 text-gray-100 px-3 py-2 border border-gray-700 rounded-lg text-sm"
+                className="w-full bg-surface-raised text-text-base px-3 py-2 border border-border-default rounded-lg text-sm"
               >
                 <option value="unreviewed">Unreviewed count</option>
                 <option value="name">Opening name</option>
@@ -163,17 +163,17 @@ export const UnreviewedSection: React.FC<UnreviewedSectionProps> = ({ repertoire
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-        <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center">
+        <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center">
           <span className="text-3xl font-bold text-amber-400">
             {summary.totalUnreviewed}
           </span>
-          <span className="text-gray-300 mt-1">Unreviewed Variants</span>
+          <span className="text-text-muted mt-1">Unreviewed Variants</span>
         </div>
-        <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center">
+        <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center">
           <span className="text-3xl font-bold text-purple-400">
             {summary.totalOpenings}
           </span>
-          <span className="text-gray-300 mt-1">Openings With Unreviewed</span>
+          <span className="text-text-muted mt-1">Openings With Unreviewed</span>
         </div>
       </div>
 

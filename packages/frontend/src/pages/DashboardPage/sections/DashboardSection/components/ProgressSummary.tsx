@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { ProgressStats } from "../types";
 
 interface ProgressSummaryProps {
@@ -7,8 +7,8 @@ interface ProgressSummaryProps {
 
 export const ProgressSummary: React.FC<ProgressSummaryProps> = ({ stats }) => {
   return (
-    <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center">
-      <h3 className="text-lg font-semibold text-gray-200 mb-3">
+    <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center">
+      <h3 className="text-lg font-semibold text-text-muted mb-3">
         Progress Summary
       </h3>
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 w-full">
@@ -16,7 +16,7 @@ export const ProgressSummary: React.FC<ProgressSummaryProps> = ({ stats }) => {
           <span className="text-2xl font-bold text-amber-400">
             {stats.neverReviewed}
           </span>
-          <span className="text-gray-300 mt-1 text-sm text-center">
+          <span className="text-text-muted mt-1 text-sm text-center">
             Overall Unreviewed
           </span>
         </div>
@@ -24,25 +24,25 @@ export const ProgressSummary: React.FC<ProgressSummaryProps> = ({ stats }) => {
           <span className="text-2xl font-bold text-red-400">
             {stats.reviewedWithErrors}
           </span>
-          <span className="text-gray-300 mt-1 text-sm">Overall Errors</span>
+          <span className="text-text-muted mt-1 text-sm">Overall Errors</span>
         </div>
         <div className="flex flex-col items-center">
           <span className="text-2xl font-bold text-blue-400">
             {stats.reviewedToday}
           </span>
-          <span className="text-gray-300 mt-1 text-sm">Reviewed Today</span>
+          <span className="text-text-muted mt-1 text-sm">Reviewed Today</span>
         </div>
         <div className="flex flex-col items-center">
           <span className="text-2xl font-bold text-red-400">
             {stats.reviewedTodayErrors}
           </span>
-          <span className="text-gray-300 mt-1 text-sm">Errors Today</span>
+          <span className="text-text-muted mt-1 text-sm">Errors Today</span>
         </div>
         <div className="flex flex-col items-center">
           <span className="text-2xl font-bold text-green-400">
             {stats.reviewedTodayOk}
           </span>
-          <span className="text-gray-300 mt-1 text-sm">OK Today</span>
+          <span className="text-text-muted mt-1 text-sm">OK Today</span>
         </div>
       </div>
     </div>

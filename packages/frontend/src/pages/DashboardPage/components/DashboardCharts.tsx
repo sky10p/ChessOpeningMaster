@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -60,10 +60,10 @@ export const RatioBarChart: React.FC<RatioBarChartProps> = ({
   };
 
   return (
-    <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center overflow-x-auto md:overflow-x-visible">
-      <h3 className="text-lg font-semibold text-gray-200 mb-2">{chartTitle}</h3>
+    <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center overflow-x-auto md:overflow-x-visible">
+      <h3 className="text-lg font-semibold text-text-muted mb-2">{chartTitle}</h3>
       {data.length === 0 ? (
-        <div className="text-gray-400 text-center py-8">{emptyMessage}</div>
+        <div className="text-text-subtle text-center py-8">{emptyMessage}</div>
       ) : (
         <ResponsiveContainer width="100%" height={260}>
           <BarChart
@@ -158,10 +158,10 @@ export const VerticalBarChart: React.FC<VerticalBarChartProps> = ({
   onOpeningClick,
 }) => {
   return (
-    <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center overflow-x-auto md:overflow-x-visible">
-      <h3 className="text-lg font-semibold text-gray-200 mb-2">{title}</h3>
+    <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center overflow-x-auto md:overflow-x-visible">
+      <h3 className="text-lg font-semibold text-text-muted mb-2">{title}</h3>
       {data.length === 0 ? (
-        <div className="text-gray-400 text-center py-8">{emptyMessage}</div>
+        <div className="text-text-subtle text-center py-8">{emptyMessage}</div>
       ) : (
         <ResponsiveContainer width="100%" height={260}>
           <BarChart

@@ -1,10 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { XMarkIcon, EllipsisVerticalIcon, ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon, EllipsisVerticalIcon, ArrowRightOnRectangleIcon, SunIcon, MoonIcon } from "@heroicons/react/24/outline";
 import chessNavbarBackground from "../../../assets/chess-navbar-background.jpg";
 import { NavbarLink } from "./model";
 import { ChartPieIcon, StarIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
 import { AcademicCapIcon, FlagIcon } from "@heroicons/react/24/outline";
+import { useTheme } from "../../../hooks/useTheme";
 
 interface NavbarProps {
   open: boolean;
@@ -17,6 +18,7 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, secondaryActions, showLogout = false, onLogout }) => {
   const [favouritesOpen, setFavouritesOpen] = React.useState(true);
+  const { theme, toggleTheme } = useTheme();
   
   return (
     <div className={`fixed inset-0 z-40 flex ${open ? 'block' : 'hidden'}`}>
@@ -27,11 +29,11 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
       />
       
       {/* Sidebar panel */}
-      <div className="relative flex-1 flex flex-col max-w-xs w-full bg-gradient-to-b from-slate-800 to-slate-900 shadow-xl border-r border-slate-700 transition-transform duration-300">
+      <div className="relative flex-1 flex flex-col max-w-xs w-full bg-surface-raised shadow-xl border-r border-border-default transition-transform duration-300">
         {/* Close button */}
         <div className="absolute top-3 right-3 z-10">
           <button
-            className="flex items-center justify-center h-8 w-8 rounded-full bg-slate-700/70 text-slate-300 hover:bg-slate-600 hover:text-white transition-colors duration-200"
+            className="flex items-center justify-center h-8 w-8 rounded-full bg-interactive/70 text-text-muted hover:bg-interactive hover:text-text-base transition-colors duration-200"
             onClick={() => setOpen(false)}
           >
             <span className="sr-only">Close sidebar</span>
@@ -47,7 +49,7 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
               alt="Chess Navbar Background"
               className="w-full h-32 object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-page to-transparent"></div>
             <div className="absolute bottom-3 left-3 text-2xl font-bold text-white">ChessKeep</div>
           </div>
           
@@ -79,7 +81,7 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
               )
             ))}
             
-            <div className="border-t border-slate-700/70 my-4"></div>
+            <div className="border-t border-border-subtle my-4"></div>
             
             <Link
               key="dashboard"
@@ -111,7 +113,7 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
                   <span>Repertoires</span>
                 </div>
                 <ChevronDownIcon
-                  className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${favouritesOpen ? 'transform rotate-180' : ''}`}
+                  className={`h-4 w-4 text-text-subtle transition-transform duration-200 ${favouritesOpen ? 'transform rotate-180' : ''}`}
                 />
               </button>
               
@@ -121,7 +123,7 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
                   {secondaryActions.map((link) => (
                     <div 
                       key={link.id} 
-                      className="flex items-center justify-between py-2 px-3 text-sm font-medium text-slate-300 rounded-md hover:bg-slate-700/50 hover:text-white transition-colors duration-200"
+                      className="flex items-center justify-between py-2 px-3 text-sm font-medium text-text-muted rounded-md hover:bg-interactive hover:text-text-base transition-colors duration-200"
                     >
                       <Link
                         to={link.url}
@@ -131,7 +133,7 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
                         {link.name}
                       </Link>
                       <button
-                        className="ml-2 p-1 rounded-md text-slate-400 hover:text-amber-400 hover:bg-slate-700"
+                        className="ml-2 p-1 rounded-md text-text-subtle hover:text-accent hover:bg-interactive"
                         onClick={link.onActionClick}
                       >
                         <EllipsisVerticalIcon className="h-4 w-4" aria-hidden="true" />
@@ -164,8 +166,28 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
           </nav>
           
           {/* Footer section */}
-          <div className="mt-auto px-3 py-4">
-            <div className="px-3 py-3 bg-slate-800/50 rounded-lg border border-slate-700/50 text-xs text-slate-400">
+          <div className="mt-auto px-3 py-4 space-y-3">
+            <button
+              onClick={toggleTheme}
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg bg-surface border border-border-subtle text-text-muted hover:text-text-base hover:bg-interactive transition-colors duration-200"
+            >
+              <div className="flex items-center gap-2.5">
+                {theme === "dark" ? (
+                  <MoonIcon className="h-4 w-4 text-brand" />
+                ) : (
+                  <SunIcon className="h-4 w-4 text-amber-400" />
+                )}
+                <span className="text-sm font-medium">{theme === "dark" ? "Dark mode" : "Light mode"}</span>
+              </div>
+              <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 ${
+                theme === "light" ? "bg-brand" : "bg-border-default"
+              }`}>
+                <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform duration-200 ${
+                  theme === "light" ? "translate-x-4" : "translate-x-1"
+                }`} />
+              </div>
+            </button>
+            <div className="px-3 py-3 bg-surface rounded-lg border border-border-subtle text-xs text-text-subtle">
               <p>ChessKeep v1.0</p>
               <p className="mt-1">Manage your chess repertoire with ease</p>
             </div>

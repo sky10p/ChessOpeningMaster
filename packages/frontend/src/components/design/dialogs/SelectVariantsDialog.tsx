@@ -199,18 +199,18 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
       onClose={() => handleClose(true)}
       className="fixed z-50 inset-0 overflow-y-auto"
     >
-      <DialogBackdrop className="fixed inset-0 bg-black opacity-30" />
+      <DialogBackdrop className="fixed inset-0 bg-black/50" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="bg-background rounded max-w-2xl mx-auto p-6 z-50 max-h-screen overflow-auto">
-          <DialogTitle className="text-xl font-bold text-textLight">
+        <DialogPanel className="bg-surface-raised rounded-lg max-w-2xl mx-auto p-6 z-50 max-h-screen overflow-auto w-full shadow-elevated border border-border-default">
+          <DialogTitle className="text-xl font-bold text-text-base">
             {title}
           </DialogTitle>
-          <Description className="mt-4 text-textLight mb-4">
+          <Description className="mt-4 text-text-muted mb-4">
             {contentText}
           </Description>
           <input
             type="text"
-            className="mb-4 w-full px-3 py-2 border border-secondary rounded focus:outline-none focus:ring-2 focus:ring-accent text-black bg-white"
+            className="mb-4 w-full px-3 py-2 border border-border-default rounded focus:outline-none focus:ring-2 focus:ring-accent text-black bg-white"
             placeholder="Filter Variants"
             value={filterText}
             onChange={handleFilterChange}
@@ -221,7 +221,7 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
                 label={`Filter by current position (${positionFilterCount} variants available)`}
                 checked={filterByCurrentPosition}
                 onChange={setFilterByCurrentPosition}
-                className="ml-2 text-textLight"
+                className="ml-2 text-text-base"
               />
             </div>
           )}
@@ -232,7 +232,7 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
                 checked={isAllSelected}
                 indeterminate={isSomeSelected}
                 onChange={handleSelectAll}
-                className="ml-2 text-textLight"
+                className="ml-2 text-text-base"
               />
             </div>
           )}
@@ -245,10 +245,10 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
                       checked={isGroupSelected(groupName)}
                       indeterminate={isSomeOfGroupSelected(groupName)}
                       onChange={() => handleSelectAllGroup(groupName)}
-                      className="ml-2 text-textLight"
+                      className="ml-2 text-text-base"
                     />
                   )}
-                  <h3 className="ml-2 text-lg font-semibold text-textLight">
+                  <h3 className="ml-2 text-lg font-semibold text-text-base">
                     {groupName}
                   </h3>
                 </div>
@@ -261,7 +261,7 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
                       onChange={() =>
                         handleToggleVariant(variant.originalIndex)
                       }
-                      className="ml-2 text-textLight"
+                      className="ml-2 text-text-base"
                       style={{ color: getTextColorFromVariant(variant) }}
                     />
                   ))}
@@ -272,13 +272,13 @@ const SelectVariantsDialog: React.FC<SelectVariantsDialogProps> = ({
           <div className="mt-4 flex justify-end space-x-2">
             <button
               onClick={() => onClose(true)}
-              className="px-4 py-2 bg-secondary text-textLight rounded hover:bg-scrollbarThumbHover"
+              className="px-4 py-2 bg-surface border border-border-default text-text-base rounded hover:bg-interactive"
             >
               Cancel
             </button>
             <button
               onClick={handleConfirm}
-              className="px-4 py-2 bg-accent text-black rounded hover:bg-accent"
+              className="px-4 py-2 bg-accent text-black rounded hover:opacity-90"
             >
               Confirm
             </button>

@@ -12,14 +12,14 @@ const UiSwitch: React.FC<UiSwitchProps> = ({ label, enabled, setEnabled }) => {
             <span className="mr-2">{typeof label === 'function' ? label(enabled) : label}</span>
             <button
                 className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors focus:outline-none ${
-                    enabled ? 'bg-accent' : 'bg-gray-300'
+                    enabled ? 'bg-accent' : 'bg-border-default'
                 }`}
                 onClick={() => setEnabled(!enabled)}
             >
                 <span
                     className={`transform transition-transform ${
-                        enabled ? 'translate-x-6 bg-white' : 'translate-x-1 bg-black'
-                    } inline-block w-4 h-4 rounded-full`}
+                        enabled ? 'translate-x-6' : 'translate-x-1'
+                    } inline-block w-4 h-4 rounded-full bg-white shadow`}
                 />
             </button>
         </div>

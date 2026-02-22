@@ -28,8 +28,8 @@ describe("RepertoireWorkspaceLayout", () => {
       "gap-4",
       "h-full",
       "w-full",
-      "bg-background",
-      "text-textLight"
+      "bg-page",
+      "text-text-base"
     );
   });
 

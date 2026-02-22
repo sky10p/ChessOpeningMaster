@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+﻿import React, { useState, useEffect, useMemo } from "react";
 import {
   PieChart,
   Pie,
@@ -273,7 +273,7 @@ export const StudiesSection: React.FC = () => {
     return (
       <section className="flex-1 flex flex-col min-h-0 p-4">
         <div className="flex items-center justify-center h-full">
-          <p className="text-gray-300 text-xl">Loading study data...</p>
+          <p className="text-text-muted text-xl">Loading study data...</p>
         </div>
       </section>
     );
@@ -289,34 +289,34 @@ export const StudiesSection: React.FC = () => {
   return (
     <section className="flex-1 flex flex-col min-h-0 p-4">
       <header className="mb-4">
-        <h2 className="font-bold text-gray-100 text-2xl leading-tight mb-1 truncate">
+        <h2 className="font-bold text-text-base text-2xl leading-tight mb-1 truncate">
           Studies Overview
         </h2>
-        <p className="text-gray-300 text-base leading-snug mb-2 truncate">
+        <p className="text-text-muted text-base leading-snug mb-2 truncate">
           Key statistics and metrics for your chess studies.
         </p>
       </header>
       
       <div style={{ maxHeight: "calc(100vh - 180px)", overflowY: "auto" }} className="flex-1">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <div className="bg-gray-800 rounded-lg p-4 shadow border border-gray-700 flex flex-col items-center">
+          <div className="bg-surface-raised rounded-lg p-4 shadow border border-border-default flex flex-col items-center">
             <span className="text-3xl font-bold text-blue-400">{totalStudies}</span>
-            <span className="text-gray-300 mt-1">Total Studies</span>
+            <span className="text-text-muted mt-1">Total Studies</span>
           </div>
-          <div className="bg-gray-800 rounded-lg p-4 shadow border border-gray-700 flex flex-col items-center">
+          <div className="bg-surface-raised rounded-lg p-4 shadow border border-border-default flex flex-col items-center">
             <span className="text-3xl font-bold text-amber-400">{totalSessions}</span>
-            <span className="text-gray-300 mt-1">Total Sessions</span>
+            <span className="text-text-muted mt-1">Total Sessions</span>
           </div>
-          <div className="bg-gray-800 rounded-lg p-4 shadow border border-gray-700 flex flex-col items-center">
+          <div className="bg-surface-raised rounded-lg p-4 shadow border border-border-default flex flex-col items-center">
             <span className="text-3xl font-bold text-purple-400">
               {Math.floor(totalTimeSpentSeconds / 3600)}h {Math.floor((totalTimeSpentSeconds % 3600) / 60)}m
             </span>
-            <span className="text-gray-300 mt-1">Total Time Spent</span>
+            <span className="text-text-muted mt-1">Total Time Spent</span>
           </div>
         </div>
 
         <div className="flex justify-end mb-4">
-          <div className="bg-gray-800 rounded-lg overflow-hidden">
+          <div className="bg-surface-raised rounded-lg overflow-hidden">
             <button
               className={`px-4 py-2 ${timeframeOption === "week" ? "bg-blue-700" : ""}`}
               onClick={() => setTimeframeOption("week")}
@@ -333,12 +333,12 @@ export const StudiesSection: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-6">
-          <div className="bg-gray-800 rounded-lg p-4 shadow border border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-200 mb-2 text-center">
+          <div className="bg-surface-raised rounded-lg p-4 shadow border border-border-default">
+            <h3 className="text-lg font-semibold text-text-muted mb-2 text-center">
               Time Spent by {timeframeOption === "week" ? "Week" : "Month"}
             </h3>
             {!hasAreaChartData ? (
-              <div className="text-gray-400 text-center py-16">No data available</div>
+              <div className="text-text-subtle text-center py-16">No data available</div>
             ) : (
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={areaChartData} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
@@ -359,12 +359,12 @@ export const StudiesSection: React.FC = () => {
             )}
           </div>
 
-          <div className="bg-gray-800 rounded-lg p-4 shadow border border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-200 mb-2 text-center">
+          <div className="bg-surface-raised rounded-lg p-4 shadow border border-border-default">
+            <h3 className="text-lg font-semibold text-text-muted mb-2 text-center">
               Time Distribution by Group
             </h3>
             {!hasPieChartData ? (
-              <div className="text-gray-400 text-center py-16">No data available</div>
+              <div className="text-text-subtle text-center py-16">No data available</div>
             ) : (
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
@@ -393,12 +393,12 @@ export const StudiesSection: React.FC = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-          <div className="bg-gray-800 rounded-lg p-4 shadow border border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-200 mb-2 text-center">
+          <div className="bg-surface-raised rounded-lg p-4 shadow border border-border-default">
+            <h3 className="text-lg font-semibold text-text-muted mb-2 text-center">
               Time by Group per {timeframeOption === "week" ? "Week" : "Month"}
             </h3>
             {!hasStackedBarData ? (
-              <div className="text-gray-400 text-center py-16">No data available</div>
+              <div className="text-text-subtle text-center py-16">No data available</div>
             ) : (
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={stackedBarChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
@@ -415,16 +415,16 @@ export const StudiesSection: React.FC = () => {
             )}
           </div>
 
-          <div className="bg-gray-800 rounded-lg p-4 shadow border border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-200 mb-2 text-center">
+          <div className="bg-surface-raised rounded-lg p-4 shadow border border-border-default">
+            <h3 className="text-lg font-semibold text-text-muted mb-2 text-center">
               Studies Without Recent Practice
             </h3>
             {!hasStudiesWithoutPractice ? (
-              <div className="text-gray-400 text-center py-16">No data available</div>
+              <div className="text-text-subtle text-center py-16">No data available</div>
             ) : (
               <div className="overflow-auto h-[300px]">
-                <table className="min-w-full text-gray-200">
-                  <thead className="bg-gray-700">
+                <table className="min-w-full text-text-muted">
+                  <thead className="bg-interactive">
                     <tr>
                       <th className="py-2 px-4 text-left">Study</th>
                       <th className="py-2 px-4 text-left">Group</th>
@@ -434,7 +434,7 @@ export const StudiesSection: React.FC = () => {
                   </thead>
                   <tbody>
                     {studiesWithoutPractice.slice(0, 10).map((study, index) => (
-                      <tr key={`${study.groupName}-${study.name}-${index}`} className="border-t border-gray-700">
+                      <tr key={`${study.groupName}-${study.name}-${index}`} className="border-t border-border-default">
                         <td className="py-2 px-4">{study.name}</td>
                         <td className="py-2 px-4">{study.groupName}</td>
                         <td className="py-2 px-4 text-right">

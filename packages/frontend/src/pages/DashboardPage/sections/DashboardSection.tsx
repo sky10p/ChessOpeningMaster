@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+﻿import React, { useState, useMemo } from "react";
 import { IRepertoireDashboard } from "@chess-opening-master/common";
 import {
   PieChart,
@@ -209,10 +209,10 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
   return (
     <section className="flex-1 flex flex-col min-h-0 p-4">
       <header className="mb-4">
-        <h2 className="font-bold text-gray-100 text-2xl leading-tight mb-1 truncate">
+        <h2 className="font-bold text-text-base text-2xl leading-tight mb-1 truncate">
           Dashboard Overview
         </h2>
-        <p className="text-gray-300 text-base leading-snug mb-2 truncate">
+        <p className="text-text-muted text-base leading-snug mb-2 truncate">
           Key statistics and metrics for your chess repertoires.
         </p>
         <div className="flex flex-wrap gap-2 mt-2 mb-2">
@@ -221,7 +221,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
             className={`px-3 py-1 rounded ${
               filter === "all"
                 ? "bg-blue-600 text-white"
-                : "bg-gray-800 text-gray-200 hover:bg-gray-700"
+                : "bg-surface-raised text-text-muted hover:bg-interactive"
             }`}
           >
             All
@@ -231,7 +231,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
             className={`px-3 py-1 rounded ${
               filter === "white"
                 ? "bg-blue-600 text-white"
-                : "bg-gray-800 text-gray-200 hover:bg-gray-700"
+                : "bg-surface-raised text-text-muted hover:bg-interactive"
             }`}
           >
             Only White
@@ -241,7 +241,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
             className={`px-3 py-1 rounded ${
               filter === "black"
                 ? "bg-blue-600 text-white"
-                : "bg-gray-800 text-gray-200 hover:bg-gray-700"
+                : "bg-surface-raised text-text-muted hover:bg-interactive"
             }`}
           >
             Only Black
@@ -251,7 +251,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
             className={`px-3 py-1 rounded ${
               filter === "errors"
                 ? "bg-blue-600 text-white"
-                : "bg-gray-800 text-gray-200 hover:bg-gray-700"
+                : "bg-surface-raised text-text-muted hover:bg-interactive"
             }`}
           >
             Only Errors
@@ -261,7 +261,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
             className={`px-3 py-1 rounded ${
               filter === "unreviewed"
                 ? "bg-blue-600 text-white"
-                : "bg-gray-800 text-gray-200 hover:bg-gray-700"
+                : "bg-surface-raised text-text-muted hover:bg-interactive"
             }`}
           >
             Only Unreviewed
@@ -285,32 +285,32 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
       </header>
       <div style={{ maxHeight: "600px", overflowY: "auto" }} className="flex-1">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center">
+          <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center">
             <span className="text-3xl font-bold text-blue-400">
               {totalRepertoires}
             </span>
-            <span className="text-gray-300 mt-1">Total Repertoires</span>
+            <span className="text-text-muted mt-1">Total Repertoires</span>
           </div>
-          <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center">
+          <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center">
             <span className="text-3xl font-bold text-amber-400">
               {totalVariants}
             </span>
-            <span className="text-gray-300 mt-1">Total Variants</span>
+            <span className="text-text-muted mt-1">Total Variants</span>
           </div>
-          <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center">
+          <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center">
             <span className="text-3xl font-bold text-purple-400">
               {mostRecent ? mostRecent.name : "-"}
             </span>
-            <span className="text-gray-300 mt-1">Most Recently Updated</span>
+            <span className="text-text-muted mt-1">Most Recently Updated</span>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full overflow-x-auto">
-          <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center">
-            <h3 className="text-lg font-semibold text-gray-200 mb-2">
+          <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center">
+            <h3 className="text-lg font-semibold text-text-muted mb-2">
               Variants Review Status
             </h3>
             {reviewData.every((d) => d.value === 0) ? (
-              <div className="text-gray-400 text-center py-8">No data</div>
+              <div className="text-text-subtle text-center py-8">No data</div>
             ) : (
               <ResponsiveContainer width="100%" height={220}>
                 <PieChart>
@@ -378,12 +378,12 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
             onVariantsClick={handleVariantsClick}
           />
           
-          <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center">
-            <h3 className="text-lg font-semibold text-gray-200 mb-2">
+          <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center">
+            <h3 className="text-lg font-semibold text-text-muted mb-2">
               Review Activity Over Time (10 days)
             </h3>
             {!hasReviewActivity ? (
-              <div className="text-gray-400 text-center py-8">
+              <div className="text-text-subtle text-center py-8">
                 No review activity in the last 10 days
               </div>
             ) : (
@@ -403,8 +403,8 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
             )}
           </div>
 
-          <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center">
-            <h3 className="text-lg font-semibold text-gray-200 mb-3">
+          <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center">
+            <h3 className="text-lg font-semibold text-text-muted mb-3">
               Progress Summary
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 w-full">
@@ -412,7 +412,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
                 <span className="text-2xl font-bold text-amber-400">
                   {neverReviewed}
                 </span>
-                <span className="text-gray-300 mt-1 text-sm text-center">
+                <span className="text-text-muted mt-1 text-sm text-center">
                   Overall Unreviewed
                 </span>
               </div>
@@ -420,25 +420,25 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
                 <span className="text-2xl font-bold text-red-400">
                   {reviewedWithErrors}
                 </span>
-                <span className="text-gray-300 mt-1 text-sm">Overall Errors</span>
+                <span className="text-text-muted mt-1 text-sm">Overall Errors</span>
               </div>
               <div className="flex flex-col items-center">
                 <span className="text-2xl font-bold text-blue-400">
                   {reviewedToday}
                 </span>
-                <span className="text-gray-300 mt-1 text-sm">Reviewed Today</span>
+                <span className="text-text-muted mt-1 text-sm">Reviewed Today</span>
               </div>
               <div className="flex flex-col items-center">
                 <span className="text-2xl font-bold text-red-400">
                   {reviewedTodayErrors}
                 </span>
-                <span className="text-gray-300 mt-1 text-sm">Errors Today</span>
+                <span className="text-text-muted mt-1 text-sm">Errors Today</span>
               </div>
               <div className="flex flex-col items-center">
                 <span className="text-2xl font-bold text-green-400">
                   {reviewedTodayOk}
                 </span>
-                <span className="text-gray-300 mt-1 text-sm">OK Today</span>
+                <span className="text-text-muted mt-1 text-sm">OK Today</span>
               </div>
             </div>
           </div>

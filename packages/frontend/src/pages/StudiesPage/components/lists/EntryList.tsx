@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { StudyEntry } from "../../models";
 
 interface EntryListProps {
@@ -15,11 +15,11 @@ const EntryList: React.FC<EntryListProps> = ({
   return (
     <ol className="space-y-3">
       {(entries || []).map((entry, idx) => (
-        <li key={entry.id} className="bg-slate-900 rounded p-2 sm:p-3 flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-          <span className="font-bold text-slate-400">{idx + 1}.</span>
+        <li key={entry.id} className="bg-surface rounded p-2 sm:p-3 flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+          <span className="font-bold text-text-subtle">{idx + 1}.</span>
           <div className="flex-1">
             <div className="font-semibold text-white break-words">{entry.title}</div>
-            <div className="text-slate-300 text-sm mb-1 break-words">{entry.description}</div>
+            <div className="text-text-muted text-sm mb-1 break-words">{entry.description}</div>
             <a
               href={entry.externalUrl}
               target="_blank"
@@ -46,7 +46,7 @@ const EntryList: React.FC<EntryListProps> = ({
         </li>
       ))}
       {(entries || []).length === 0 && (
-        <li className="text-slate-400 text-sm">No studies yet.</li>
+        <li className="text-text-subtle text-sm">No studies yet.</li>
       )}
     </ol>
   );

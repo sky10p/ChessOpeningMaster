@@ -48,8 +48,8 @@ const SelectNextMoveDialog: React.FC<SelectNextMoveDialogProps> = ({
       className="fixed z-50 inset-0 overflow-y-auto"
     >
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="bg-background rounded max-w-md mx-auto p-6 z-50">
-          <DialogTitle className="text-lg font-bold text-textLight mb-4">
+        <DialogPanel className="bg-surface-raised rounded-lg max-w-md mx-auto p-6 z-50 w-full shadow-elevated border border-border-default">
+          <DialogTitle className="text-lg font-bold text-text-base mb-4">
             {title}
           </DialogTitle>
 
@@ -72,7 +72,7 @@ const SelectNextMoveDialog: React.FC<SelectNextMoveDialogProps> = ({
                 >
                   <Radio
                     value={nextMove}
-                    className="group flex size-4 items-center justify-center rounded-full border-2 border-gray-400 data-[checked]:border-blue-400 data-[checked]:bg-blue-400"
+                    className="group flex size-4 items-center justify-center rounded-full border-2 border-border-default data-[checked]:border-brand data-[checked]:bg-brand"
                     aria-label={`Choose ${nextMove} as next move`}
                   >
                     <span className="invisible size-2 rounded-full bg-white group-data-[checked]:visible" />
@@ -82,7 +82,7 @@ const SelectNextMoveDialog: React.FC<SelectNextMoveDialogProps> = ({
                       className={`cursor-pointer ${
                         selectedVariantMove === nextMove
                           ? "text-blue-400 font-bold"
-                          : "text-white"
+                          : "text-text-base"
                       }`}
                     >
                       {nextMove}
@@ -108,13 +108,13 @@ const SelectNextMoveDialog: React.FC<SelectNextMoveDialogProps> = ({
           <div className="flex justify-end space-x-2">
             <button
               onClick={() => onClose(true)}
-              className="px-4 py-2 text-textLight rounded hover:bg-gray-700"
+              className="px-4 py-2 text-text-base rounded hover:bg-interactive"
             >
               Cancel
             </button>
             <button
               onClick={handleNextMoveConfirm}
-              className="px-4 py-2 bg-accent text-black rounded hover:bg-yellow-500"
+              className="px-4 py-2 bg-accent text-black rounded hover:opacity-90"
             >
               Choose
             </button>

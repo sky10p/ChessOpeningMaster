@@ -12,19 +12,19 @@ export const StockfishSubpanel: React.FC<StockfishSubpanelProps> = ({
     lines,  
 }) => {
  return (
-    <div className="rounded-md shadow-md w-full overflow-hidden border border-slate-700">
+    <div className="rounded-md shadow-surface w-full overflow-hidden border border-border-default">
       <div className="overflow-y-auto max-h-72">
         {lines.length > 0 ? (
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-800">
+            <thead className="bg-surface-raised">
               <tr>
-                <th className="py-2 px-4 text-xs font-medium text-slate-400">Eval</th>
-                <th className="py-2 px-4 text-xs font-medium text-slate-400">Sequence</th>
+                <th className="py-2 px-4 text-xs font-medium text-text-muted">Eval</th>
+                <th className="py-2 px-4 text-xs font-medium text-text-muted">Sequence</th>
               </tr>
             </thead>
             <tbody>
               {lines.map((line, index) => (
-                <tr key={index} className="border-b border-slate-700 hover:bg-slate-800 transition-colors">
+                <tr key={index} className="border-b border-border-subtle hover:bg-interactive transition-colors">
                   <td className={`py-2 px-4 font-mono ${getEvaluationColorClass(line.evaluation)}`}>
                     {formatEvaluation(line.evaluation)}
                   </td>
@@ -33,7 +33,7 @@ export const StockfishSubpanel: React.FC<StockfishSubpanelProps> = ({
                       {uciToSan(line.moves, fen).map((move, moveIndex) => (
                         <span 
                           key={moveIndex} 
-                          className={`px-1 py-0.5 rounded ${moveIndex === 0 ? 'bg-blue-900 bg-opacity-40' : ''}`}
+                          className={`px-1 py-0.5 rounded ${moveIndex === 0 ? 'bg-brand/20' : ''}`}
                         >
                           {move}
                         </span>
@@ -45,7 +45,7 @@ export const StockfishSubpanel: React.FC<StockfishSubpanelProps> = ({
             </tbody>
           </table>
         ) : (
-          <div className="flex items-center justify-center h-32 text-slate-500">
+          <div className="flex items-center justify-center h-32 text-text-subtle">
             <p>Engine analysis loading...</p>
           </div>
         )}
@@ -59,7 +59,7 @@ function getEvaluationColorClass(evaluation: number): string {
   if (evaluation > 3) return 'text-green-400';
   if (evaluation > 1.5) return 'text-green-300';
   if (evaluation > 0.5) return 'text-blue-300';
-  if (evaluation > -0.5) return 'text-slate-300';
+  if (evaluation > -0.5) return 'text-text-muted';
   if (evaluation > -1.5) return 'text-orange-300';
   return 'text-red-400';
 }

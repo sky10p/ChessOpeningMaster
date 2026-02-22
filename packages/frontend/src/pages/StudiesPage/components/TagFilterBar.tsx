@@ -1,4 +1,5 @@
 import React, { memo } from "react";
+import { Badge, Button, Input } from "../../../components/ui";
 
 interface TagFilterBarProps {
   allTags: string[];
@@ -17,22 +18,23 @@ const TagFilterBar: React.FC<TagFilterBarProps> = ({
   onTagSelect,
   onTagRemove,
 }) => (
-  <div className="flex flex-wrap items-center gap-2 p-4 border-b border-slate-800 bg-slate-900">
-    <span className="font-semibold">Filter by tag:</span>
+  <div className="flex flex-wrap items-center gap-2 p-4 border-b border-border-default bg-surface">
+    <span className="font-semibold text-text-base">Filter by tag:</span>
     {selectedTags.map((tag) => (
-      <span key={tag} className="bg-blue-700 text-white px-2 py-0.5 rounded text-xs flex items-center gap-1">
+      <Badge key={tag} variant="brand" size="sm" className="flex items-center gap-1">
         {tag}
         <button
-          className="ml-1 text-white hover:text-red-300"
+          className="ml-1 hover:text-danger"
           onClick={() => onTagRemove(tag)}
           aria-label={`Remove tag ${tag}`}
         >
           ×
         </button>
-      </span>
+      </Badge>
     ))}
-    <input
-      className="px-2 py-1 rounded border border-slate-700 bg-slate-800 text-slate-100 w-40"
+    <Input
+      size="sm"
+      className="w-40"
       placeholder="Type to filter or add tag"
       value={tagFilter}
       onChange={onTagInput}
@@ -46,12 +48,9 @@ const TagFilterBar: React.FC<TagFilterBarProps> = ({
         ))}
     </datalist>
     {tagFilter && allTags.includes(tagFilter) && !selectedTags.includes(tagFilter) && (
-      <button
-        className="px-2 py-1 bg-blue-600 text-white rounded"
-        onClick={() => onTagSelect(tagFilter)}
-      >
+      <Button intent="primary" size="sm" onClick={() => onTagSelect(tagFilter)}>
         Add Tag
-      </button>
+      </Button>
     )}
   </div>
 );

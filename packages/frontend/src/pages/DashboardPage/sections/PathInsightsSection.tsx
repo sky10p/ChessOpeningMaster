@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { SpacedRepetitionInsightsPanel } from "./DashboardSection/components";
 import {
   DEFAULT_DAILY_NEW_LIMIT,
@@ -26,10 +26,10 @@ export const PathInsightsSection: React.FC = () => {
   return (
     <section className="flex-1 flex flex-col min-h-0 p-4 overflow-y-auto">
       <header className="mb-4">
-        <h2 className="font-bold text-gray-100 text-2xl leading-tight mb-1">
+        <h2 className="font-bold text-text-base text-2xl leading-tight mb-1">
           Path Insights
         </h2>
-        <p className="text-gray-300 text-base leading-snug mb-2">
+        <p className="text-text-muted text-base leading-snug mb-2">
           Forecast your review queue, quality trends, and upcoming openings.
         </p>
         <div className="flex flex-wrap gap-2 mt-2">
@@ -40,7 +40,7 @@ export const PathInsightsSection: React.FC = () => {
               className={`px-3 py-1 rounded ${
                 filter === value
                   ? "bg-blue-600 text-white"
-                  : "bg-gray-800 text-gray-200 hover:bg-gray-700"
+                  : "bg-surface-raised text-text-muted hover:bg-interactive"
               }`}
             >
               {label}

@@ -1,33 +1,64 @@
 import plugin from "tailwindcss/plugin";
 
+export const darkMode = "class";
 export const content = ["./src/**/*.{js,jsx,ts,tsx}"];
 export const theme = {
   extend: {
     colors: {
-      primary: "#1e293b", /* Fondo principal oscuro */
-      secondary: "#475569", /* Gris medio */
-      accent: "#fbbf24", /* Amarillo de acento */
-      background: "#0f172a", /* Fondo aún más oscuro */
-      textLight: "#e2e8f0", /* Texto claro */
-      textDark: "#94a3b8", /* Texto gris oscuro */
-      danger: "#f87171", /* Rojo para eliminar repertorios */
-      scrollbarThumb: "#475569", /* Color del pulgar de la barra de desplazamiento */
-      scrollbarTrack: "#1e293b", /* Color de la pista de la barra de desplazamiento */
-      scrollbarThumbHover: "#64748b", /* Color del pulgar de la barra de desplazamiento al pasar el ratón */
-      success: "#10B981", /* Verde para entrenar */
+      page: "var(--color-bg-page)",
+      surface: "var(--color-bg-surface)",
+      "surface-raised": "var(--color-bg-surface-raised)",
+      interactive: "var(--color-bg-interactive)",
+      brand: "var(--color-brand)",
+      "brand-hover": "var(--color-brand-hover)",
+      "brand-subtle": "var(--color-brand-subtle)",
+      accent: "var(--color-accent)",
+      "accent-hover": "var(--color-accent-hover)",
+      danger: "var(--color-danger)",
+      "danger-hover": "var(--color-danger-hover)",
+      "danger-subtle": "var(--color-danger-subtle)",
+      success: "var(--color-success)",
+      warning: "var(--color-warning)",
+      "text-base": "var(--color-text-base)",
+      "text-muted": "var(--color-text-muted)",
+      "text-subtle": "var(--color-text-subtle)",
+      "text-on-brand": "var(--color-text-on-brand)",
+      "border-default": "var(--color-border-default)",
+      "border-subtle": "var(--color-border-subtle)",
+    },
+    borderRadius: {
+      sm: "6px",
+      md: "8px",
+      lg: "12px",
+      xl: "16px",
+      "2xl": "20px",
     },
     spacing: {
-      'safe-bottom': 'env(safe-area-inset-bottom)',
-      'screen-dynamic': 'calc(var(--vh, 1vh) * 100)',
+      "safe-bottom": "env(safe-area-inset-bottom)",
+      "screen-dynamic": "calc(var(--vh, 1vh) * 100)",
+    },
+    transitionDuration: {
+      fast: "var(--transition-fast)",
+      normal: "var(--transition-normal)",
+      slow: "var(--transition-slow)",
     },
     boxShadow: {
-      'lg': '0 10px 15px rgba(0, 0, 0, 0.1)',
+      sm:       "var(--shadow-sm)",
+      surface:  "var(--shadow-surface)",
+      elevated: "var(--shadow-elevated)",
+    },
+    fontFamily: {
+      sans: ["Inter", "system-ui", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
     },
   },
 };
 export const plugins = [
   plugin(function ({ addUtilities }) {
     addUtilities({
+      ".scrollbar-none": {
+        "scrollbar-width": "none",
+        "&::-webkit-scrollbar": { display: "none" },
+      },
       ".scrollbar-custom": {
         "scrollbar-width": "thin",
         "scrollbar-color": "var(--tw-scrollbar-thumb) var(--tw-scrollbar-track)",

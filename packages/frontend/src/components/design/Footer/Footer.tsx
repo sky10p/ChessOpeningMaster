@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Tab, TabGroup, TabList } from '@headlessui/react';
 import { FooterIcon } from './models';
 
@@ -22,10 +22,10 @@ const Footer: React.FC<FooterProps> = ({
     <footer className='md:hidden sticky bottom-0 z-50'>
       {isVisible && icons.length > 0 && (
         <TabGroup selectedIndex={selectedIndex} onChange={handleChange}>
-          <TabList className="flex justify-around bg-gray-800 p-2 border-t border-secondary">
+          <TabList className="flex justify-around bg-surface-raised p-2 border-t border-border-default">
             {icons.map((icon) => (
               <Tab key={icon.key} className={({ selected }) =>
-                selected ? 'text-accent' : 'text-white'
+                selected ? 'text-accent' : 'text-text-muted'
               }>
                 <div className="flex flex-col items-center">
                   {icon.icon}

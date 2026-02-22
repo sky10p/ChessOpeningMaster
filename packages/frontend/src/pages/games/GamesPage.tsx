@@ -20,6 +20,7 @@ import InsightsTab from "./tabs/InsightsTab";
 import SyncTab from "./tabs/SyncTab";
 import TrainingTab from "./tabs/TrainingTab";
 import { GamesTab } from "./types";
+import { Button, Badge, Tabs, TabButton } from "../../components/ui";
 
 const TAB_ICONS: Record<GamesTab, React.ReactNode> = {
   insights: <ChartBarIcon className="w-4 h-4" />,
@@ -110,83 +111,80 @@ const GamesPage: React.FC = () => {
   const showFilters = selectedTab !== "sync";
 
   return (
-    <div className="w-full h-full min-h-0 self-stretch bg-slate-950 rounded-none sm:rounded-xl shadow-2xl flex flex-col overflow-hidden border border-slate-800/60">
+    <div className="w-full h-full min-h-0 self-stretch bg-page rounded-none sm:rounded-xl shadow-elevated flex flex-col overflow-hidden border border-border-subtle">
 
-      {/* ── Header ── */}
-      <header className="shrink-0 px-4 py-3 bg-slate-900 border-b border-slate-800">
+      <header className="shrink-0 px-4 py-3 bg-surface border-b border-border-default">
         <div className="flex items-center justify-between gap-3">
-          <h1 className="text-base font-semibold text-slate-100">Games Intelligence</h1>
+          <h1 className="text-base font-semibold text-text-base">Games Intelligence</h1>
 
           <div className="flex items-center gap-2">
-            <button
+            <Button
+              intent="secondary"
+              size="sm"
               title="Refresh data"
               onClick={() => { void loadData(); }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors border border-slate-700"
             >
               <ArrowPathIcon className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
               <span className="hidden sm:inline">Refresh</span>
-            </button>
+            </Button>
 
-            <button
+            <Button
+              intent="primary"
+              size="sm"
               title="Regenerate training plan"
               onClick={regeneratePlan}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium transition-colors"
             >
               <SparklesIcon className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Regenerate Plan</span>
               <span className="sm:hidden">Plan</span>
-            </button>
+            </Button>
           </div>
         </div>
 
         {message ? (
-          <div className="mt-2 rounded-lg bg-slate-800/80 border border-slate-700 px-3 py-2 text-xs text-slate-200">{message}</div>
+          <div className="mt-2 rounded-lg bg-interactive border border-border-default px-3 py-2 text-xs text-text-base">{message}</div>
         ) : null}
       </header>
 
-      {/* ── Tab bar ── */}
-      <div className="shrink-0 flex items-stretch bg-slate-900 border-b border-slate-800 overflow-x-auto scrollbar-none">
+      <Tabs variant="pill" className="shrink-0 gap-1 p-2 sm:p-3 bg-surface border-b border-border-subtle">
         {tabs.map((tab) => {
           const active = selectedTab === tab.id;
           return (
-            <button
+            <TabButton
               key={tab.id}
+              variant="pill"
+              active={active}
               onClick={() => {
                 const next = new URLSearchParams(searchParams);
                 next.set("tab", tab.id);
                 setSearchParams(next);
               }}
-              className={`
-                flex items-center gap-1.5 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors border-b-2
-                ${active
-                  ? "border-blue-500 text-blue-400 bg-slate-800/60"
-                  : "border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
-                }
-              `}
             >
               {TAB_ICONS[tab.id]}
               {tab.label}
-            </button>
+            </TabButton>
           );
         })}
 
         {showFilters ? (
           <div className="sm:hidden ml-auto flex items-center pr-3">
-            <button
+            <Button
+              intent="secondary"
+              size="sm"
               onClick={() => setShowMobileFilters(true)}
-              className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition-colors"
+              className="relative"
             >
               <FunnelIcon className="w-3.5 h-3.5" />
               Filters
               {activeFiltersCount > 0 ? (
-                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-blue-500 text-white text-[10px] flex items-center justify-center font-bold">
+                <Badge variant="brand" size="sm" className="absolute -top-1.5 -right-1.5 rounded-full">
                   {activeFiltersCount}
-                </span>
+                </Badge>
               ) : null}
-            </button>
+            </Button>
           </div>
         ) : null}
-      </div>
+      </Tabs>
 
       {/* ── Desktop filter bar ── */}
       {showFilters ? (

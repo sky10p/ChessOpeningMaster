@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { Study } from "../models";
 import StudyCard from "./display/StudyCard";
 
@@ -18,7 +18,7 @@ const StudyList = ({ studies, onSelectStudy }: StudyListProps): React.ReactEleme
         />
       ))}
       {studies.length === 0 && (
-        <div className="text-slate-400 text-sm col-span-full">No studies found.</div>
+        <div className="text-text-subtle text-sm col-span-full">No studies found.</div>
       )}
     </div>
   );

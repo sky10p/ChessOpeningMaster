@@ -1,3 +1,4 @@
+﻿import { useChartColors } from "../../../../../hooks/useChartColors";
 import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -76,11 +77,11 @@ const MetricInfoTooltip: React.FC<MetricInfoTooltipProps> = ({ text }) => {
         type="button"
         aria-label="Metric info"
         title="Metric info"
-        className="text-gray-500 hover:text-gray-300 focus:outline-none"
+        className="text-text-subtle hover:text-text-muted focus:outline-none"
       >
         <QuestionMarkCircleIcon className="h-4 w-4" />
       </button>
-      <span className="pointer-events-none absolute left-0 top-full z-20 mt-2 hidden w-60 rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-xs text-gray-200 shadow-xl group-hover:block group-focus-within:block">
+      <span className="pointer-events-none absolute left-0 top-full z-20 mt-2 hidden w-60 rounded-lg border border-border-default bg-surface px-3 py-2 text-xs text-text-muted shadow-xl group-hover:block group-focus-within:block">
         {text}
       </span>
     </span>
@@ -101,8 +102,8 @@ const MetricCard: React.FC<MetricCardProps> = ({
   helpText,
 }) => {
   return (
-    <div className="bg-gray-800 rounded-lg p-3">
-      <div className="text-xs text-gray-400 flex items-center gap-1">
+    <div className="bg-surface-raised rounded-lg p-3">
+      <div className="text-xs text-text-subtle flex items-center gap-1">
         <span>{label}</span>
         <MetricInfoTooltip text={helpText} />
       </div>
@@ -119,6 +120,7 @@ export const SpacedRepetitionInsightsPanel: React.FC<SpacedRepetitionInsightsPan
   dailyNewLimit = 5,
 }) => {
   const navigate = useNavigate();
+  const { tickFill } = useChartColors();
 
   const dueLoadData = useMemo<DueLoadItem[]>(
     () =>
@@ -152,14 +154,14 @@ export const SpacedRepetitionInsightsPanel: React.FC<SpacedRepetitionInsightsPan
   );
 
   return (
-    <section className="bg-gray-900 rounded-xl p-4 shadow border border-gray-800 mb-6">
+    <section className="bg-surface rounded-xl p-4 shadow border border-border-subtle mb-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <div>
-          <h3 className="text-lg font-semibold text-gray-100">Spaced Repetition Insights</h3>
-          <p className="text-sm text-gray-400">
+          <h3 className="text-lg font-semibold text-text-base">Spaced Repetition Insights</h3>
+          <p className="text-sm text-text-subtle">
             Due-load, rating quality, and opening forecast from your learning path.
           </p>
-          <div className="mt-2 inline-flex items-center gap-1 rounded-full border border-gray-700 bg-gray-800 px-2 py-1 text-xs text-gray-300">
+          <div className="mt-2 inline-flex items-center gap-1 rounded-full border border-border-default bg-surface-raised px-2 py-1 text-xs text-text-muted">
             <span>New/Day: {dailyNewLimit}</span>
             <MetricInfoTooltip text="Maximum number of new variants the planner can introduce per day within this view." />
           </div>
@@ -206,73 +208,73 @@ export const SpacedRepetitionInsightsPanel: React.FC<SpacedRepetitionInsightsPan
             />
           </div>
 
-          <div className="bg-gray-800 rounded-lg p-3">
-            <h4 className="text-sm font-semibold text-gray-200 mb-2">Today vs Plan</h4>
+          <div className="bg-surface-raised rounded-lg p-3">
+            <h4 className="text-sm font-semibold text-text-muted mb-2">Today vs Plan</h4>
             <div className="grid grid-cols-2 gap-2 text-center">
-              <div className="rounded bg-gray-700/70 px-2 py-2">
-                <div className="text-[11px] text-gray-400">Reviews (due)</div>
+              <div className="rounded bg-interactive/70 px-2 py-2">
+                <div className="text-[11px] text-text-subtle">Reviews (due)</div>
                 <div className="text-lg font-semibold text-cyan-300">
                   {todayProgress.completedReviewsToday} / {todayProgress.reviewTargetToday}
                 </div>
               </div>
-              <div className="rounded bg-gray-700/70 px-2 py-2">
-                <div className="text-[11px] text-gray-400">New learned (first-time)</div>
+              <div className="rounded bg-interactive/70 px-2 py-2">
+                <div className="text-[11px] text-text-subtle">New learned (first-time)</div>
                 <div className="text-lg font-semibold text-blue-300">
                   {todayProgress.completedNewToday} / {todayProgress.newTargetToday}
                 </div>
               </div>
             </div>
             <div className="mt-2 grid grid-cols-3 gap-2 text-center">
-              <div className="rounded bg-gray-700/70 px-2 py-2">
-                <div className="text-[11px] text-gray-400">Target</div>
+              <div className="rounded bg-interactive/70 px-2 py-2">
+                <div className="text-[11px] text-text-subtle">Target</div>
                 <div className="text-lg font-semibold text-cyan-300">{todayProgress.plannedTodayTarget}</div>
               </div>
-              <div className="rounded bg-gray-700/70 px-2 py-2">
-                <div className="text-[11px] text-gray-400">Completed</div>
+              <div className="rounded bg-interactive/70 px-2 py-2">
+                <div className="text-[11px] text-text-subtle">Completed</div>
                 <div className="text-lg font-semibold text-emerald-300">{todayProgress.completedToday}</div>
               </div>
-              <div className="rounded bg-gray-700/70 px-2 py-2">
-                <div className="text-[11px] text-gray-400">Remaining</div>
+              <div className="rounded bg-interactive/70 px-2 py-2">
+                <div className="text-[11px] text-text-subtle">Remaining</div>
                 <div className="text-lg font-semibold text-blue-300">{todayProgress.remainingToTarget}</div>
               </div>
             </div>
-            <div className="mt-2 text-xs text-gray-400">
+            <div className="mt-2 text-xs text-text-subtle">
               Reviews remaining: {todayProgress.remainingReviewsTarget} · New remaining: {todayProgress.remainingNewTarget}
             </div>
-            <div className={`mt-1 text-sm ${todayProgress.exceededTarget ? "text-emerald-300" : "text-gray-300"}`}>
+            <div className={`mt-1 text-sm ${todayProgress.exceededTarget ? "text-emerald-300" : "text-text-muted"}`}>
               {todayProgress.todayPlanMessage}
             </div>
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-            <div className="xl:col-span-2 bg-gray-800 rounded-lg p-3">
-              <h4 className="text-sm font-semibold text-gray-200 mb-2">Upcoming Due Load (14 days)</h4>
+            <div className="xl:col-span-2 bg-surface-raised rounded-lg p-3">
+              <h4 className="text-sm font-semibold text-text-muted mb-2">Upcoming Due Load (14 days)</h4>
               {dueLoadData.some((entry) => entry.dueCount > 0) ? (
                 <ResponsiveContainer width="100%" height={220}>
                   <BarChart data={dueLoadData} margin={{ top: 8, right: 12, left: -20, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" tick={{ fill: "#cbd5e1", fontSize: 11 }} />
-                    <YAxis allowDecimals={false} tick={{ fill: "#cbd5e1", fontSize: 11 }} />
+                    <XAxis dataKey="date" tick={{ fill: tickFill, fontSize: 11 }} />
+                    <YAxis allowDecimals={false} tick={{ fill: tickFill, fontSize: 11 }} />
                     <Tooltip />
                     <Bar dataKey="dueCount" fill="#06b6d4" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="text-gray-400 text-sm py-6">No due variants in the next 14 days for this filter.</div>
+                <div className="text-text-subtle text-sm py-6">No due variants in the next 14 days for this filter.</div>
               )}
             </div>
 
-            <div className="bg-gray-800 rounded-lg p-3">
-              <h4 className="text-sm font-semibold text-gray-200 mb-2">Likely Next Variants</h4>
+            <div className="bg-surface-raised rounded-lg p-3">
+              <h4 className="text-sm font-semibold text-text-muted mb-2">Likely Next Variants</h4>
               {nextVariants.length === 0 && (
-                <div className="text-gray-400 text-sm">No variants due right now.</div>
+                <div className="text-text-subtle text-sm">No variants due right now.</div>
               )}
               <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
                 {nextVariants.map((variant) => (
-                  <div key={`${variant.repertoireId}-${variant.variantName}-${variant.dueDate}`} className="rounded border border-gray-700 px-2 py-2">
-                    <div className="text-xs text-gray-400">{variant.dueDate}</div>
-                    <div className="text-sm text-gray-100 truncate">{variant.variantName}</div>
-                    <div className="text-xs text-gray-400 truncate">{variant.repertoireName}</div>
+                  <div key={`${variant.repertoireId}-${variant.variantName}-${variant.dueDate}`} className="rounded border border-border-default px-2 py-2">
+                    <div className="text-xs text-text-subtle">{variant.dueDate}</div>
+                    <div className="text-sm text-text-base truncate">{variant.variantName}</div>
+                    <div className="text-xs text-text-subtle truncate">{variant.repertoireName}</div>
                   </div>
                 ))}
               </div>
@@ -280,13 +282,13 @@ export const SpacedRepetitionInsightsPanel: React.FC<SpacedRepetitionInsightsPan
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-            <div className="bg-gray-800 rounded-lg p-3">
-              <h4 className="text-sm font-semibold text-gray-200 mb-2">Rating Distribution (30 days)</h4>
+            <div className="bg-surface-raised rounded-lg p-3">
+              <h4 className="text-sm font-semibold text-text-muted mb-2">Rating Distribution (30 days)</h4>
               <ResponsiveContainer width="100%" height={180}>
                 <BarChart data={ratingData} margin={{ top: 8, right: 12, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="rating" tick={{ fill: "#cbd5e1", fontSize: 11 }} />
-                  <YAxis allowDecimals={false} tick={{ fill: "#cbd5e1", fontSize: 11 }} />
+                  <XAxis dataKey="rating" tick={{ fill: tickFill, fontSize: 11 }} />
+                  <YAxis allowDecimals={false} tick={{ fill: tickFill, fontSize: 11 }} />
                   <Tooltip />
                   <Bar dataKey="count" radius={[4, 4, 0, 0]}>
                     {ratingData.map((entry) => (
@@ -297,21 +299,21 @@ export const SpacedRepetitionInsightsPanel: React.FC<SpacedRepetitionInsightsPan
               </ResponsiveContainer>
             </div>
 
-            <div className="bg-gray-800 rounded-lg p-3">
-              <h4 className="text-sm font-semibold text-gray-200 mb-2">Openings Entering the Queue</h4>
+            <div className="bg-surface-raised rounded-lg p-3">
+              <h4 className="text-sm font-semibold text-text-muted mb-2">Openings Entering the Queue</h4>
               {openingsLoadData.length === 0 ? (
-                <div className="text-gray-400 text-sm py-6">No opening forecast available yet.</div>
+                <div className="text-text-subtle text-sm py-6">No opening forecast available yet.</div>
               ) : (
                 <div className="space-y-3 max-h-56 overflow-y-auto pr-1">
                   {openingsLoadData.map((entry) => {
                     const widthPercent = (entry.count / maxOpeningCount) * 100;
                     return (
-                      <div key={entry.opening} className="rounded border border-gray-700 px-2 py-2">
+                      <div key={entry.opening} className="rounded border border-border-default px-2 py-2">
                         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
-                          <div className="text-sm text-gray-100 leading-snug break-words">{entry.opening}</div>
+                          <div className="text-sm text-text-base leading-snug break-words">{entry.opening}</div>
                           <div className="text-xs font-semibold text-emerald-300">{entry.count}</div>
                         </div>
-                        <div className="mt-2 h-2 overflow-hidden rounded bg-gray-700">
+                        <div className="mt-2 h-2 overflow-hidden rounded bg-interactive">
                           <div
                             className="h-full rounded bg-emerald-500"
                             style={{ width: `${widthPercent}%` }}

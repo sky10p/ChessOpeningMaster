@@ -17,6 +17,28 @@ import { ErrorsSection } from "./sections/ErrorsSection";
 import { UnreviewedSection } from "./sections/UnreviewedSection";
 import { PathInsightsSection } from "./sections/PathInsightsSection";
 import { ArrowsRightLeftIcon } from "@heroicons/react/24/solid";
+import {
+  Squares2X2Icon,
+  ChartPieIcon,
+  MapIcon,
+  BookOpenIcon,
+  FolderOpenIcon,
+  AcademicCapIcon,
+  ExclamationTriangleIcon,
+  EyeIcon,
+} from "@heroicons/react/24/outline";
+import { Tabs, TabButton } from "../../components/ui";
+
+const SECTION_ICONS: Record<string, React.ReactNode> = {
+  dashboard:    <Squares2X2Icon className="w-4 h-4" />,
+  overview:     <ChartPieIcon className="w-4 h-4" />,
+  pathInsights: <MapIcon className="w-4 h-4" />,
+  repertoires:  <BookOpenIcon className="w-4 h-4" />,
+  openings:     <FolderOpenIcon className="w-4 h-4" />,
+  studies:      <AcademicCapIcon className="w-4 h-4" />,
+  errors:       <ExclamationTriangleIcon className="w-4 h-4" />,
+  unreviewed:   <EyeIcon className="w-4 h-4" />,
+};
 
 export const DashboardPage = () => {
   const navigate = useNavigate();
@@ -114,59 +136,33 @@ export const DashboardPage = () => {
   const openings = getDifferentOpenings(filteredRepertoires);
 
   return (
-    <div className="container p-0 sm:p-4 w-full h-full bg-gradient-to-b from-gray-900 via-primary to-gray-900 rounded-lg shadow-2xl flex flex-col">
-      <nav className="flex gap-2 sm:gap-4 p-2 sm:p-4 bg-primary z-20 sticky top-0 border-b border-gray-800 overflow-x-auto">
-        <button
-          className={`flex-shrink-0 whitespace-nowrap px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-l sm:rounded-t-none text-sm sm:text-base font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'dashboard' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
-          onClick={() => handleSectionChange('dashboard')}
-        >
-          Dashboard
-        </button>
-        <button
-          className={`flex-shrink-0 whitespace-nowrap px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-l sm:rounded-t-none text-sm sm:text-base font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'overview' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
-          onClick={() => handleSectionChange('overview')}
-        >
-          Overview
-        </button>
-        <button
-          className={`flex-shrink-0 whitespace-nowrap px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-l sm:rounded-t-none text-sm sm:text-base font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'pathInsights' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
-          onClick={() => handleSectionChange('pathInsights')}
-        >
-          Path Insights
-        </button>
-        <button
-          className={`flex-shrink-0 whitespace-nowrap px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-l sm:rounded-t-none text-sm sm:text-base font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'repertoires' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
-          onClick={() => handleSectionChange('repertoires')}
-        >
-          Repertoires
-        </button>
-        <button
-          className={`flex-shrink-0 whitespace-nowrap px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-l sm:rounded-t-none text-sm sm:text-base font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'openings' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
-          onClick={() => handleSectionChange('openings')}
-        >
-          Openings
-        </button>
-        <button
-          className={`flex-shrink-0 whitespace-nowrap px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-l sm:rounded-t-none text-sm sm:text-base font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'studies' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
-          onClick={() => handleSectionChange('studies')}
-        >
-          Studies
-        </button>
-        <button
-          className={`flex-shrink-0 whitespace-nowrap px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-l sm:rounded-t-none text-sm sm:text-base font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'errors' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
-          onClick={() => handleSectionChange('errors')}
-        >
-          Errors
-        </button>
-        <button
-          className={`flex-shrink-0 whitespace-nowrap px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-l sm:rounded-t-none text-sm sm:text-base font-semibold focus:outline-none transition-colors duration-150 ring-0 focus:ring-2 focus:ring-blue-400 ${selectedSection === 'unreviewed' ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-800 text-gray-200 hover:bg-gray-700'}`}
-          onClick={() => handleSectionChange('unreviewed')}
-        >
-          Unreviewed
-        </button>
-      </nav>
-      <div className="sm:hidden flex items-center justify-center gap-1 px-3 py-1.5 bg-primary/90 border-b border-gray-800 text-[11px] uppercase tracking-wide text-gray-400">
-        <ArrowsRightLeftIcon className="h-3.5 w-3.5 text-gray-500 animate-pulse" />
+    <div className="w-full h-full min-h-0 self-stretch bg-page rounded-none sm:rounded-xl shadow-elevated flex flex-col overflow-hidden border border-border-subtle">
+      <Tabs variant="pill" className="sticky top-0 z-20 gap-1 p-2 sm:p-4 bg-surface border-b border-border-subtle">
+        {(
+          [
+            ["dashboard",    "Dashboard"],
+            ["overview",     "Overview"],
+            ["pathInsights", "Path Insights"],
+            ["repertoires",  "Repertoires"],
+            ["openings",     "Openings"],
+            ["studies",      "Studies"],
+            ["errors",       "Errors"],
+            ["unreviewed",   "Unreviewed"],
+          ] as const
+        ).map(([id, label]) => (
+          <TabButton
+            key={id}
+            variant="pill"
+            active={selectedSection === id}
+            onClick={() => handleSectionChange(id)}
+          >
+            {SECTION_ICONS[id]}
+            {label}
+          </TabButton>
+        ))}
+      </Tabs>
+      <div className="sm:hidden flex items-center justify-center gap-1 px-3 py-1.5 bg-surface/90 border-b border-border-subtle text-[11px] uppercase tracking-wide text-text-subtle">
+        <ArrowsRightLeftIcon className="h-3.5 w-3.5 text-text-subtle animate-pulse" />
         <span>Swipe left/right for tabs</span>
       </div>
       <div className="flex-1 flex flex-col relative min-h-0">

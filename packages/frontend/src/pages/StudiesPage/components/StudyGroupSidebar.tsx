@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from "react";
 import { StudyGroup } from "../models";
+import { Button, Input } from "../../../components/ui";
 
 interface StudyGroupSidebarProps {
   groups: StudyGroup[];
@@ -58,15 +59,15 @@ const StudyGroupSidebar: React.FC<StudyGroupSidebarProps> = ({
   }, [onDeleteGroup]);
 
   return (
-    <aside className="w-64 min-w-[220px] bg-slate-900 border-r border-slate-800 flex flex-col p-4 rounded-lg mt-2 mb-2">
-      <h2 className="text-lg font-bold mb-4">Study Groups</h2>
+    <aside className="w-64 min-w-[220px] bg-surface border-r border-border-default flex flex-col p-4 rounded-lg mt-2 mb-2">
+      <h2 className="text-lg font-bold mb-4 text-text-base">Study Groups</h2>
       <ul className="flex-1 space-y-1 overflow-y-auto">
         {groups.map((group) => (
           <li key={group.id} className="flex items-center">
             {editingGroup?.id === group.id ? (
               <div className="flex-1 flex flex-col gap-1">
-                <input
-                  className="px-2 py-1 rounded border border-slate-700 bg-slate-800 text-slate-100 w-full"
+                <Input
+                  size="sm"
                   value={editingGroup.name}
                   onChange={handleNameChange}
                   autoFocus
@@ -74,18 +75,20 @@ const StudyGroupSidebar: React.FC<StudyGroupSidebarProps> = ({
                   role="textbox"
                 />
                 <div className="flex gap-1">
-                  <button
-                    className="px-2 py-1 text-xs bg-blue-600 text-white rounded"
+                  <Button
+                    intent="primary"
+                    size="xs"
                     onClick={() => handleEditSave(group.id, editingGroup.name)}
                   >
                     Save
-                  </button>
-                  <button
-                    className="px-2 py-1 text-xs bg-slate-700 text-white rounded"
+                  </Button>
+                  <Button
+                    intent="secondary"
+                    size="xs"
                     onClick={handleEditCancel}
                   >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               </div>
             ) : (
@@ -93,22 +96,22 @@ const StudyGroupSidebar: React.FC<StudyGroupSidebarProps> = ({
                 <button
                   className={`flex-1 text-left px-3 py-2 rounded transition-colors font-medium ${
                     activeGroupId === group.id
-                      ? "bg-blue-700 text-white"
-                      : "hover:bg-slate-800 text-slate-200"
+                      ? "bg-brand text-text-on-brand"
+                      : "hover:bg-interactive text-text-muted"
                   }`}
                   onClick={() => onSelectGroup(group.id)}
                 >
                   {group.name}
                 </button>
                 <button
-                  className="ml-1 px-2 py-1 text-xs text-yellow-400 hover:text-yellow-200"
+                  className="ml-1 px-2 py-1 text-xs text-warning hover:text-yellow-200"
                   title="Edit group"
                   onClick={() => handleEditClick(group.id, group.name)}
                 >
                   ✎
                 </button>
                 <button
-                  className="ml-1 px-2 py-1 text-xs text-red-400 hover:text-red-200"
+                  className="ml-1 px-2 py-1 text-xs text-danger hover:text-red-200"
                   title="Delete group"
                   onClick={() => handleDeleteGroup(group.id)}
                 >
@@ -122,36 +125,27 @@ const StudyGroupSidebar: React.FC<StudyGroupSidebarProps> = ({
       <div className="mt-4">
         {showNewGroup ? (
           <div className="flex flex-col gap-2">
-            <input
-              className="px-2 py-1 rounded border border-slate-700 bg-slate-800 text-slate-100"
+            <Input
+              size="sm"
               placeholder="New group name"
               value={newGroupName}
               onChange={(e) => onNewGroupNameChange(e.target.value)}
               autoFocus
             />
-            {groupError && <span className="text-red-400 text-xs">{groupError}</span>}
+            {groupError && <span className="text-danger text-xs">{groupError}</span>}
             <div className="flex gap-2">
-              <button
-                className="px-2 py-1 bg-blue-600 text-white rounded"
-                onClick={onAddGroup}
-              >
+              <Button intent="primary" size="xs" onClick={onAddGroup}>
                 Add
-              </button>
-              <button
-                className="px-2 py-1 bg-slate-700 text-white rounded"
-                onClick={onCancelNewGroup}
-              >
+              </Button>
+              <Button intent="secondary" size="xs" onClick={onCancelNewGroup}>
                 Cancel
-              </button>
+              </Button>
             </div>
           </div>
         ) : (
-          <button
-            className="w-full px-2 py-1 bg-blue-700 text-white rounded mt-2"
-            onClick={onShowNewGroup}
-          >
+          <Button intent="primary" size="sm" className="w-full justify-center" onClick={onShowNewGroup}>
             + New Group
-          </button>
+          </Button>
         )}
       </div>
     </aside>

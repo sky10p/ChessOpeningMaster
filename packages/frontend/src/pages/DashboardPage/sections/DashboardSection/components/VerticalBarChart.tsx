@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -9,6 +9,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
+import { useChartColors } from "../../../../../hooks/useChartColors";
 import { ChartMargins, OpeningStats } from "../types";
 
 interface VerticalBarChartProps {
@@ -38,11 +39,12 @@ export const VerticalBarChart: React.FC<VerticalBarChartProps> = ({
   barChartMargin,
   onOpeningClick,
 }) => {
+  const { tickFill } = useChartColors();
   return (
-    <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center overflow-x-auto md:overflow-x-visible">
-      <h3 className="text-lg font-semibold text-gray-200 mb-2">{title}</h3>
+    <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center overflow-x-auto md:overflow-x-visible">
+      <h3 className="text-lg font-semibold text-text-muted mb-2">{title}</h3>
       {data.length === 0 ? (
-        <div className="text-gray-400 text-center py-8">{emptyMessage}</div>
+        <div className="text-text-subtle text-center py-8">{emptyMessage}</div>
       ) : (
         <ResponsiveContainer width="100%" height={260}>
           <BarChart
@@ -55,11 +57,12 @@ export const VerticalBarChart: React.FC<VerticalBarChartProps> = ({
             <XAxis
               type="number"
               allowDecimals={false}
+              tick={{ fill: tickFill }}
               label={{
                 value: label,
                 position: "insideBottomRight",
                 offset: -5,
-                fill: "#cbd5e1",
+                fill: tickFill,
               }}
             />
             <YAxis
@@ -77,9 +80,8 @@ export const VerticalBarChart: React.FC<VerticalBarChartProps> = ({
                       y={0}
                       dy={4}
                       textAnchor="end"
-                      fill="#cbd5e1"
+                      style={{ fill: "var(--color-text-muted)", cursor: onOpeningClick ? "pointer" : "default" }}
                       fontSize={isMobile ? 10 : 13}
-                      style={{ cursor: onOpeningClick ? "pointer" : "default" }}
                       onClick={() => onOpeningClick?.(name)}
                     >
                       {display}

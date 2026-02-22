@@ -234,18 +234,18 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
       onClose={() => handleClose(true)} // changed
       className="fixed z-50 inset-0 overflow-y-auto"
     >
-      <DialogBackdrop className="fixed inset-0 bg-black opacity-30" />
+      <DialogBackdrop className="fixed inset-0 bg-black/50" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="bg-background rounded w-screen md:w-auto xl:max-w-5xl mx-auto p-6 z-50 max-h-screen overflow-auto">
-          <DialogTitle className="text-xl font-bold text-textLight">
+        <DialogPanel className="bg-surface-raised rounded-lg w-screen md:w-auto xl:max-w-5xl mx-auto p-6 z-50 max-h-screen overflow-auto shadow-elevated border border-border-default">
+          <DialogTitle className="text-xl font-bold text-text-base">
             {title}
           </DialogTitle>
-          <Description className="mt-4 text-textLight mb-4">
+          <Description className="mt-4 text-text-muted mb-4">
             {contentText}
           </Description>
           <input
             type="text"
-            className="mb-4 w-full px-3 py-2 border border-secondary rounded focus:outline-none focus:ring-2 focus:ring-accent text-black bg-white"
+            className="mb-4 w-full px-3 py-2 border border-border-default rounded focus:outline-none focus:ring-2 focus:ring-accent text-black bg-white"
             placeholder="Filter Train Variants"
             value={filterText}
             onChange={handleFilterChange}
@@ -256,21 +256,21 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
               checked={isAllSelected}
               indeterminate={isSomeSelected}
               onChange={handleSelectAll}
-              className="ml-2 text-textLight"
+              className="ml-2 text-text-base"
             />
             <UiCheckbox
               label="Select New"
               checked={allNewSelected}
               indeterminate={!allNewSelected && someNewSelected}
               onChange={handleSelectNewVariants}
-              className="ml-2 text-textLight"
+              className="ml-2 text-text-base"
             />
             <UiCheckbox
               label="Not Studied Today"
               checked={allNotStudiedSelected}
               indeterminate={!allNotStudiedSelected && someNotStudiedSelected}
               onChange={handleSelectNotStudiedToday}
-              className="ml-2 text-textLight"
+              className="ml-2 text-text-base"
             />
           </div>
           <div className="h-96 overflow-y-auto p-4">
@@ -296,13 +296,13 @@ const SelectTrainVariantsDialog: React.FC<SelectTrainVariantsDialogProps> = ({
           <div className="mt-4 flex justify-end space-x-2">
             <button
               onClick={() => handleClose(true)} // changed
-              className="px-4 py-2 bg-secondary text-textLight rounded hover:bg-scrollbarThumbHover"
+              className="px-4 py-2 bg-surface border border-border-default text-text-base rounded hover:bg-interactive"
             >
               Cancel
             </button>
             <button
               onClick={handleConfirm}
-              className="px-4 py-2 bg-accent text-black rounded hover:bg-accent"
+              className="px-4 py-2 bg-accent text-black rounded hover:opacity-90"
             >
               Confirm
             </button>

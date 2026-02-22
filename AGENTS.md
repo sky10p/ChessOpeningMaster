@@ -148,6 +148,41 @@ packages/
 4. **Quote directory names** in cd commands: `cd "directory name"`
 5. **TypeScript strict mode** is enabled
 
+## Design System
+
+The frontend has a token-based design system. **Read `src/doc/Design-System.md` before touching any UI.**
+
+### Critical rules
+
+1. **No hard-coded Tailwind colours.** Use semantic token classes everywhere:
+   - Backgrounds: `bg-page`, `bg-surface`, `bg-surface-raised`, `bg-interactive`
+   - Borders: `border-border-default`, `border-border-subtle`
+   - Text: `text-text-base`, `text-text-muted`, `text-text-subtle`, `text-text-on-brand`
+   - Brand actions: `bg-brand`, `bg-accent`, `bg-danger`, `bg-success`, `bg-warning`
+
+2. **No raw `<button>` elements.** Use `<Button intent="…" size="…">` or `<IconButton label="…">` from `components/ui`.
+
+3. **No raw `<input>`, `<textarea>`, `<select>`.** Use `<Input>`, `<Textarea>`, or `<Select>` from `components/ui`.
+
+4. **Use `<Tabs>` + `<TabButton variant="…">` for all tab bars.** Never build custom tab bars with raw buttons and ternary class strings.
+
+5. **Use `<Badge variant="…">` for all status chips / filter tags.** Never build inline `<span>` badges with raw colour classes.
+
+6. **Class merging via `cn()`.** Import from `utils/cn.ts`. Never concatenate Tailwind classes manually in template strings.
+
+7. **Theming.** Dark mode is active by default (`class="dark"` on `<html>`). Light mode is toggled by replacing that with `class="light"`. Never write theme-specific styles outside `index.css` token blocks.
+
+### Component imports
+
+```ts
+import { Button, IconButton, Badge, Card, Tabs, TabButton, Input, Textarea, Select } from "../../components/ui";
+import { cn } from "../../utils/cn";
+```
+
+### Documentation
+
+- Full token reference, all component API options, layout patterns, icon rules, a11y checklist, definition of done → `src/doc/Design-System.md`
+
 ## React `useEffect` Quality Guidelines
 
 Default policy: use local documentation as the source of truth during implementation and review.
@@ -192,6 +227,7 @@ mongodb://localhost:27017/chess_opening_master
 ## Documentation
 
 ### Architecture Documentation
+- [Design System](src/doc/Design-System.md) - Token reference, component catalogue, theming, layout patterns, a11y checklist, and Definition of Done for new UI
 - [RepertoireContext Architecture Guide](src/doc/RepertoireContext-Architecture.md) - Detailed documentation of the main context system
 - [Variant Selection Logic](src/doc/Variant-Selection-Logic.md) - Complete guide to how chess opening variants are selected and managed
 - [Testing Strategy](src/doc/Testing-Strategy.md) - Comprehensive testing patterns, mock requirements, and test scenarios
@@ -203,6 +239,7 @@ mongodb://localhost:27017/chess_opening_master
 - [Game Import Service Architecture](src/doc/Game-Import-Service-Architecture.md) - Backend module boundaries and orchestration flow for My Games
 - [Game Imports and Training Plan Guide](src/doc/Game-Imports-Guide.md) - My Games tabs, sync/import flows, and training usage
 - [Training Queue Guide](src/doc/Training-Queue-Guide.md) - Training queue behavior and interpretation rules in My Games
+- [Mobile vs Desktop Component Architecture](src/doc/Mobile-Desktop-Component-Architecture.md) - How EditRepertoirePage splits into mobile tab panels and desktop sub-panels, shared vs device-specific components
 
 ### Additional Documentation
 - `src/doc/repertoire-variant-sync.md` - Existing variant synchronization documentation
