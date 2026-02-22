@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useRef, useState } from "react";
+﻿import React, { useMemo, useState } from "react";
 import { EyeIcon, PlayIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/solid";
 import { VariantsProgressBar } from "../../../components/design/SelectTrainVariants/VariantsProgressBar";
 import { IRepertoireDashboard, TrainVariantInfo } from "@chess-opening-master/common";
@@ -19,8 +19,8 @@ interface OpeningCardProps {
   isOpen: boolean;
   repCount: number;
   onToggle: () => void;
-  goToRepertoire: (repertoire: IRepertoireDashboard, variantName: string) => void;
-  goToTrainRepertoire: (repertoire: IRepertoireDashboard, variantName: string) => void;
+  goToRepertoire: (repertoire: IRepertoireDashboard, variantName?: string) => void;
+  goToTrainRepertoire: (repertoire: IRepertoireDashboard, variantName?: string) => void;
   getTrainVariantInfo: (trainInfo: TrainVariantInfo[]) => Record<string, TrainVariantInfo>;
 }
 
@@ -40,22 +40,6 @@ export const OpeningCard: React.FC<OpeningCardProps> = ({
   const orientation = primaryRepertoire?.orientation ?? "white";
   const isSingle = repertoiresWithOpening.length === 1;
   const [isPeeking, setIsPeeking] = useState(false);
-  const peekTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const touchMoved = useRef(false);
-
-  const cancelPeek = () => {
-    if (peekTimer.current) clearTimeout(peekTimer.current);
-    peekTimer.current = null;
-    setIsPeeking(false);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (peekTimer.current) {
-        clearTimeout(peekTimer.current);
-      }
-    };
-  }, []);
 
   const fen = useMemo(
     () =>
@@ -88,23 +72,11 @@ export const OpeningCard: React.FC<OpeningCardProps> = ({
 
         {/* Peek zone: top 55% — press-and-hold to reveal board; scroll gestures pass through */}
         <div
-          className="absolute inset-x-0 top-0 bottom-[45%] z-10 cursor-zoom-in"
+          className="absolute inset-0 z-10 cursor-zoom-in"
           onPointerDown={() => setIsPeeking(true)}
           onPointerUp={() => setIsPeeking(false)}
           onPointerLeave={() => setIsPeeking(false)}
           onPointerCancel={() => setIsPeeking(false)}
-          onTouchStart={() => {
-            touchMoved.current = false;
-            peekTimer.current = setTimeout(() => {
-              if (!touchMoved.current) setIsPeeking(true);
-            }, 200);
-          }}
-          onTouchMove={() => {
-            touchMoved.current = true;
-            cancelPeek();
-          }}
-          onTouchEnd={cancelPeek}
-          onTouchCancel={cancelPeek}
         />
 
         {/* Gradient: always dark regardless of page theme — fades on peek */}
@@ -118,7 +90,7 @@ export const OpeningCard: React.FC<OpeningCardProps> = ({
         {/* ── TOP: badges ── */}
         <div
           className={cn(
-            "absolute top-2 left-2 right-2 z-30 flex items-start justify-between gap-1 transition-opacity duration-200",
+            "absolute top-2 left-2 right-2 z-30 flex items-start justify-between gap-1 transition-opacity duration-200 pointer-events-none",
             isPeeking && "opacity-0 pointer-events-none"
           )}
         >
@@ -158,7 +130,7 @@ export const OpeningCard: React.FC<OpeningCardProps> = ({
         {/* ── BOTTOM: title, meta, progress, actions ── */}
         <div
           className={cn(
-            "absolute bottom-0 left-0 right-0 z-30 px-2.5 pt-8 pb-2.5 flex flex-col gap-1.5 transition-opacity duration-200",
+            "absolute bottom-0 left-0 right-0 z-30 px-2.5 pt-8 pb-2.5 flex flex-col gap-1.5 transition-opacity duration-200 pointer-events-none",
             isPeeking && "opacity-0 pointer-events-none"
           )}
         >
@@ -178,7 +150,7 @@ export const OpeningCard: React.FC<OpeningCardProps> = ({
             variantInfo={summaryVariantInfo}
           />
 
-          <div className="flex gap-1.5 mt-0.5">
+          <div className="flex gap-1.5 mt-0.5 pointer-events-auto">
             <Button
               intent="primary"
               size="sm"

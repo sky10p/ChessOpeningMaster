@@ -115,6 +115,11 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
     [openings, openingNameFilter, filterByStatus, filterByOrientation, filterByRepertoire]
   );
 
+  const filteredOpeningsSignature = useMemo(
+    () => filteredOpenings.join("||"),
+    [filteredOpenings]
+  );
+
   const allVariantsInfo = useMemo(
     () => filteredRepertoires.flatMap((repertoire) => repertoire.variantsInfo || []),
     [filteredRepertoires]
@@ -129,7 +134,7 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
 
   useEffect(() => {
     setRenderedCount(INITIAL_BATCH);
-  }, [filteredOpenings]);
+  }, [filteredOpeningsSignature]);
 
   useEffect(() => {
     if (isLoading || renderedCount >= filteredOpenings.length) return;
