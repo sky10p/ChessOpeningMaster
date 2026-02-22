@@ -129,9 +129,9 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
 
   return (
     <>
-      <div className="w-full h-full max-h-full overflow-hidden bg-slate-800 text-white flex flex-col rounded-lg shadow-lg border border-slate-700">
+      <div className="w-full h-full max-h-full overflow-hidden bg-surface text-text-base flex flex-col rounded-lg shadow-surface border border-border-default">
         {/* Header con controles y acciones */}
-        <div className="px-4 py-3 flex items-center justify-between w-full bg-gradient-to-r from-slate-800 to-slate-700 z-10 border-b border-slate-600 rounded-t-lg">
+        <div className="px-4 py-3 flex items-center justify-between w-full bg-surface-raised z-10 border-b border-border-default rounded-t-lg">
           <div className="flex items-center gap-3">
             <UiSwitch
               label={(enabled) => (
@@ -149,7 +149,7 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
             <UiSwitch
               label={
                 <div className="flex items-center">
-                  <PresentationChartLineIcon className="h-5 w-5 text-blue-400" />
+                  <PresentationChartLineIcon className="h-5 w-5 text-brand" />
                   <span className="ml-1 text-sm font-medium hidden sm:inline">
                     Stats
                   </span>
@@ -161,7 +161,7 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
             <UiSwitch
               label={
                 <div className="flex items-center">
-                  <ChatBubbleBottomCenterTextIcon className="h-5 w-5 text-green-400" />
+                  <ChatBubbleBottomCenterTextIcon className="h-5 w-5 text-success" />
                   <span className="ml-1 text-sm font-medium hidden sm:inline">
                     Notes
                   </span>
@@ -183,7 +183,7 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
           {/* Panel de variante siempre visible */}
           <div className="flex flex-col flex-1 overflow-hidden">
             <button
-              className="m-3 py-2 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-md transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+              className="m-3 py-2 px-4 bg-brand hover:opacity-90 text-text-on-brand font-medium rounded-md transition-all duration-200 shadow-surface hover:shadow-elevated flex items-center justify-center gap-2"
               onClick={() => setShowSelectVariantDialog(true)}
             >
               <span>
@@ -218,8 +218,8 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
 
           {/* Paneles condicionales */}
           {stockfishEnabled && (
-            <div className="p-3 border-t border-slate-700 bg-slate-800">
-              <h3 className="text-sm font-medium text-slate-300 mb-2">
+            <div className="p-3 border-t border-border-default bg-surface">
+              <h3 className="text-sm font-medium text-text-muted mb-2">
                 Engine Analysis
               </h3>
               <StockfishSubpanel lines={lines} fen={fen} />
@@ -227,8 +227,8 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
           )}
 
           {statisticsEnabled && (
-            <div className="p-3 border-t border-slate-700 bg-slate-800">
-              <h3 className="text-sm font-medium text-slate-300 mb-2">
+            <div className="p-3 border-t border-border-default bg-surface">
+              <h3 className="text-sm font-medium text-text-muted mb-2">
                 Statistical Analysis
               </h3>
               <StatisticsSubpanel fen={fen} />
@@ -236,8 +236,8 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
           )}
 
           {commentEnabled && (
-            <div className="p-3 border-t border-slate-700 bg-slate-800">
-              <h3 className="text-sm font-medium text-slate-300 mb-2">
+            <div className="p-3 border-t border-border-default bg-surface">
+              <h3 className="text-sm font-medium text-text-muted mb-2">
                 Position Notes
               </h3>
               <BoardComment comment={comment} updateComment={updateComment} />

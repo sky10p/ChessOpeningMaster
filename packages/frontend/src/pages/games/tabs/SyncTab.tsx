@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { CloudArrowDownIcon } from "@heroicons/react/24/outline";
 import { LinkedGameAccount } from "@chess-opening-master/common";
 import { formatDateTime } from "../utils";
@@ -34,12 +34,12 @@ type SyncTabProps = {
   actions: SyncTabActions;
 };
 
-const inputCls = "w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors";
+const inputCls = "w-full bg-surface-raised border border-border-default rounded-lg px-3 py-2 text-sm text-text-base placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors";
 
 const SyncTab: React.FC<SyncTabProps> = ({ state, actions }) => (
   <div className="space-y-4">
-    <div className="bg-slate-900 rounded-xl border border-slate-800 p-4 space-y-4">
-      <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Link an Account</p>
+    <div className="bg-surface rounded-xl border border-border-subtle p-4 space-y-4">
+      <p className="text-xs font-semibold uppercase tracking-widest text-text-subtle">Link an Account</p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <select
           value={state.provider}
@@ -67,24 +67,24 @@ const SyncTab: React.FC<SyncTabProps> = ({ state, actions }) => (
       </button>
 
       {state.accounts.length > 0 ? (
-        <div className="space-y-2 pt-2 border-t border-slate-800">
-          <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Connected</p>
+        <div className="space-y-2 pt-2 border-t border-border-subtle">
+          <p className="text-xs font-semibold uppercase tracking-widest text-text-subtle">Connected</p>
           {state.accounts.map((account) => (
-            <div key={account.id} className="rounded-lg border border-slate-800 p-3 space-y-2">
+            <div key={account.id} className="rounded-lg border border-border-subtle p-3 space-y-2">
               <div className="flex items-center justify-between gap-2">
                 <div>
-                  <p className="text-sm font-medium text-slate-100 capitalize">{account.provider} · {account.username}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-sm font-medium text-text-base capitalize">{account.provider} · {account.username}</p>
+                  <p className="text-xs text-text-subtle mt-0.5">
                     Connected {formatDateTime(account.connectedAt)} · Status: {account.status}
                   </p>
                   {account.lastSyncAt ? (
-                    <p className="text-xs text-slate-500">Last sync {formatDateTime(account.lastSyncAt)}</p>
+                    <p className="text-xs text-text-subtle">Last sync {formatDateTime(account.lastSyncAt)}</p>
                   ) : null}
                   {account.nextSyncAt ? (
-                    <p className="text-xs text-slate-500">Next sync {formatDateTime(account.nextSyncAt)}</p>
+                    <p className="text-xs text-text-subtle">Next sync {formatDateTime(account.nextSyncAt)}</p>
                   ) : null}
                   {account.lastSyncFeedback ? (
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-xs text-text-subtle mt-0.5">
                       <span className="text-emerald-400">+{account.lastSyncFeedback.importedCount} imported</span>
                       {" · "}{account.lastSyncFeedback.duplicateCount} dup
                       {" · "}{account.lastSyncFeedback.failedCount} failed
@@ -93,7 +93,7 @@ const SyncTab: React.FC<SyncTabProps> = ({ state, actions }) => (
                 </div>
                 <div className="flex gap-2 shrink-0">
                   <button className="text-xs px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-colors" onClick={() => { void actions.syncProvider(account.provider); }}>Sync now</button>
-                  <button className="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-rose-900/60 text-rose-400 border border-slate-700 hover:border-rose-800 transition-colors" onClick={() => { void actions.disconnectAccount(account.provider); }}>Disconnect</button>
+                  <button className="text-xs px-3 py-1.5 rounded-lg bg-surface-raised hover:bg-rose-900/60 text-rose-400 border border-border-default hover:border-rose-800 transition-colors" onClick={() => { void actions.disconnectAccount(account.provider); }}>Disconnect</button>
                 </div>
               </div>
             </div>
@@ -102,8 +102,8 @@ const SyncTab: React.FC<SyncTabProps> = ({ state, actions }) => (
       ) : null}
     </div>
 
-    <div className="bg-slate-900 rounded-xl border border-slate-800 p-4 space-y-3">
-      <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Manual PGN Import</p>
+    <div className="bg-surface rounded-xl border border-border-subtle p-4 space-y-3">
+      <p className="text-xs font-semibold uppercase tracking-widest text-text-subtle">Manual PGN Import</p>
       <div className="grid sm:grid-cols-2 gap-3">
         <input value={state.tournamentGroup} onChange={(e) => actions.setTournamentGroup(e.target.value)} className={inputCls} placeholder="Tournament group (optional)" />
         <input value={state.tags} onChange={(e) => actions.setTags(e.target.value)} className={inputCls} placeholder="Tags (comma-separated)" />
@@ -115,8 +115,8 @@ const SyncTab: React.FC<SyncTabProps> = ({ state, actions }) => (
         placeholder="Paste PGN here…"
       />
       <div className="flex flex-wrap items-center gap-3">
-        <label className="text-xs text-slate-400 cursor-pointer">
-          <span className="inline-block px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-colors">Upload .pgn file</span>
+        <label className="text-xs text-text-subtle cursor-pointer">
+          <span className="inline-block px-3 py-1.5 rounded-lg bg-surface-raised hover:bg-slate-700 border border-border-default transition-colors">Upload .pgn file</span>
           <input type="file" accept=".pgn" onChange={(e) => { void actions.uploadPgnFile(e); }} className="sr-only" />
         </label>
         <button className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition-colors" onClick={() => { void actions.runManualImport(); }}>Import PGN</button>

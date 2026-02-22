@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from "react";
+﻿import React, { memo, useCallback } from "react";
 import { Study, StudyEntry, StudySession } from "../models";
 import TagDisplay from "./display/TagDisplay";
 import TimerControls from "./controls/TimerControls";
@@ -55,26 +55,26 @@ const StudyDetail: React.FC<StudyDetailProps> = ({
   const totalTime = sessions.reduce((a, s) => a + s.duration, 0);
   
   return (
-    <div className="max-w-2xl mx-auto bg-slate-800 rounded-lg shadow-lg p-2 sm:p-6 animate-fade-in mb-10">
+    <div className="max-w-2xl mx-auto bg-surface-raised rounded-lg shadow-lg p-2 sm:p-6 animate-fade-in mb-10">
       <div className="flex items-center justify-between mb-4">
-        <button className="text-blue-400 hover:underline" onClick={onBack}>
+        <button className="text-brand hover:underline" onClick={onBack}>
           ← Back to studies
         </button>
-        <button className="text-red-400 hover:underline" onClick={handleDeleteStudy}>
+        <button className="text-danger hover:underline" onClick={handleDeleteStudy}>
           Delete Study
         </button>
       </div>
       
       <div className="flex flex-wrap items-center gap-2 mb-2">
-        <h2 className="text-xl font-bold text-white mr-2">{study.name}</h2>
+        <h2 className="text-xl font-bold text-text-base mr-2">{study.name}</h2>
         <TagDisplay tags={study.tags} />
       </div>
       <div className="flex items-center gap-2 mb-4">
-        <button className="px-2 py-1 bg-blue-600 text-white rounded" onClick={onShowNewEntry}>
+        <button className="px-2 py-1 bg-brand text-text-on-brand rounded" onClick={onShowNewEntry}>
           + Add Study
         </button>
-        {entrySuccess && <span className="text-green-400 text-xs">{entrySuccess}</span>}
-        {entryError && <span className="text-red-400 text-xs">{entryError}</span>}
+        {entrySuccess && <span className="text-success text-xs">{entrySuccess}</span>}
+        {entryError && <span className="text-danger text-xs">{entryError}</span>}
       </div>
       
       <TimerControls 

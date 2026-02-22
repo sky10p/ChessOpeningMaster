@@ -35,13 +35,13 @@ const MoveItem: React.FC<{
   <span
     className={`inline-block p-1.5 cursor-pointer rounded-md transition-all duration-150 ${
       move === currentMoveNode
-        ? "bg-blue-600 text-white shadow-md"
-        : "hover:bg-slate-700 hover:shadow"
+        ? "bg-brand text-text-on-brand shadow-md"
+        : "hover:bg-interactive hover:shadow"
     }`}
     onContextMenu={(event) => onContextMenu(event, move)}
     onClick={onClick}
   >
-    <span className={`mr-1 ${move.getMove().color === 'w' ? 'text-white' : 'text-gray-400'}`}>
+    <span className={`mr-1 ${move.getMove().color === 'w' ? 'text-text-base' : 'text-text-muted'}`}>
       {pieceIcons[move.getMove().piece] || ""}
     </span>
     <span className="font-medium">{move.getMove().san}</span>
@@ -129,12 +129,12 @@ export const VariantMovementsSubpanel: React.FC<VariantMovementsSubpanelProps> =
   );
 
   return (
-    <div className="overflow-y-auto h-full w-full rounded-md bg-slate-900 text-white shadow-inner">
+    <div className="overflow-y-auto h-full w-full rounded-md bg-surface text-text-base shadow-inner">
       {turns.length > 0 ? (
         <div className="p-3 space-y-2">
           {turns.map((turn) => (
-            <div key={turn.whiteMove.id} className="grid grid-cols-12 py-1.5 border-b border-slate-800 last:border-0">
-              <div className="col-span-1 text-sm font-semibold text-slate-500 flex items-center">{`${turn.turnNumber}.`}</div>
+            <div key={turn.whiteMove.id} className="grid grid-cols-12 py-1.5 border-b border-border-subtle last:border-0">
+              <div className="col-span-1 text-sm font-semibold text-text-subtle flex items-center">{`${turn.turnNumber}.`}</div>
               <div className="col-span-5 cursor-pointer flex items-center" onClick={() => goToMove(turn.whiteMove)}>
                 <MoveItem
                   move={turn.whiteMove}
@@ -143,7 +143,7 @@ export const VariantMovementsSubpanel: React.FC<VariantMovementsSubpanelProps> =
                   onClick={() => goToMove(turn.whiteMove)}
                 />
                 {turn.whiteMove.variantName && (
-                  <span className="ml-2 text-xs text-slate-400 hidden sm:inline-block truncate max-w-[100px]" title={turn.whiteMove.variantName}>
+                  <span className="ml-2 text-xs text-text-subtle hidden sm:inline-block truncate max-w-[100px]" title={turn.whiteMove.variantName}>
                     {turn.whiteMove.variantName}
                   </span>
                 )}
@@ -158,7 +158,7 @@ export const VariantMovementsSubpanel: React.FC<VariantMovementsSubpanelProps> =
                       onClick={() => turn.blackMove && goToMove(turn.blackMove)}
                     />
                     {turn.blackMove.variantName && (
-                      <span className="ml-2 text-xs text-slate-400 hidden sm:inline-block truncate max-w-[100px]" title={turn.blackMove.variantName}>
+                      <span className="ml-2 text-xs text-text-subtle hidden sm:inline-block truncate max-w-[100px]" title={turn.blackMove.variantName}>
                         {turn.blackMove.variantName}
                       </span>
                     )}
@@ -169,14 +169,14 @@ export const VariantMovementsSubpanel: React.FC<VariantMovementsSubpanelProps> =
           ))}
         </div>
       ) : (
-        <div className="flex items-center justify-center h-full p-4 text-slate-500">
+        <div className="flex items-center justify-center h-full p-4 text-text-subtle">
           <p className="text-center">No movements available for this variant.</p>
         </div>
       )}
 
       {contextMenu.node && (
         <div
-          className="fixed z-10 rounded-md shadow-lg context-menu bg-slate-800 border border-slate-700 overflow-hidden"
+          className="fixed z-10 rounded-md shadow-elevated context-menu bg-surface-raised border border-border-default overflow-hidden"
           style={{ top: contextMenu.y, left: contextMenu.x }}
           onMouseLeave={handleCloseContextMenu}
         >

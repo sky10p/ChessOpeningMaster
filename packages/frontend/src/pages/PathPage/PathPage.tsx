@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+﻿import React, { useEffect, useMemo, useState } from "react";
 import { usePaths } from "../../hooks/usePaths";
 import { useDialogContext } from "../../contexts/DialogContext";
 import { useNavigationUtils } from "../../utils/navigationUtils";
@@ -14,6 +14,7 @@ import {
   ListBulletIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import { Button, Badge, Input, Select } from "../../components/ui";
 import {
   BoardOrientation,
   PathCategory,
@@ -97,11 +98,11 @@ const MetricInfoTooltip: React.FC<MetricInfoTooltipProps> = ({ text }) => (
       type="button"
       aria-label="Metric info"
       title="Metric info"
-      className="text-gray-500 hover:text-gray-300 focus:outline-none"
+      className="text-text-subtle hover:text-text-muted focus:outline-none"
     >
       <QuestionMarkCircleIcon className="h-4 w-4" />
     </button>
-    <span className="pointer-events-none absolute left-0 top-full z-20 mt-2 hidden w-64 rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-xs text-gray-200 shadow-xl group-hover:block group-focus-within:block">
+    <span className="pointer-events-none absolute left-0 top-full z-20 mt-2 hidden w-64 rounded-lg border border-border-default bg-surface px-3 py-2 text-xs text-text-base shadow-xl group-hover:block group-focus-within:block">
       {text}
     </span>
   </span>
@@ -113,7 +114,7 @@ interface MetricTitleProps {
 }
 
 const MetricTitle: React.FC<MetricTitleProps> = ({ label, helpText }) => (
-  <div className="text-xs text-gray-400 flex items-center gap-1">
+  <div className="text-xs text-text-muted flex items-center gap-1">
     <span>{label}</span>
     <MetricInfoTooltip text={helpText} />
   </div>
@@ -245,13 +246,13 @@ const PathPage: React.FC = () => {
 
   const renderTopNamedCounts = (entries: PathNamedCount[], emptyMessage: string) => {
     if (entries.length === 0) {
-      return <div className="text-gray-500 text-sm">{emptyMessage}</div>;
+      return <div className="text-text-subtle text-sm">{emptyMessage}</div>;
     }
     return (
       <div className="space-y-2">
         {entries.map((entry) => (
           <div key={entry.name} className="flex justify-between text-sm">
-            <span className="text-gray-300 truncate pr-3">{entry.name}</span>
+            <span className="text-text-muted truncate pr-3">{entry.name}</span>
             <span className="text-blue-300 font-semibold">{entry.count}</span>
           </div>
         ))}
@@ -267,7 +268,7 @@ const PathPage: React.FC = () => {
       return <div className="text-red-500 text-center">{error}</div>;
     }
     if (!path) {
-      return <div className="text-gray-400">No lesson available.</div>;
+      return <div className="text-text-muted">No lesson available.</div>;
     }
 
     if (isStudiedVariantPath(path)) {
@@ -277,41 +278,47 @@ const PathPage: React.FC = () => {
           <div className="font-semibold text-lg text-blue-300 mb-1 text-center">
             Repertoire to review: {path.repertoireName}
           </div>
-          <div className="text-gray-100 mb-1">
+          <div className="text-text-base mb-1">
             <span className="font-medium">Name:</span> {path.name}
           </div>
-          <div className="text-gray-300 mb-1">
+          <div className="text-text-muted mb-1">
             <span className="font-medium">Errors:</span> {path.errors}
           </div>
-          <div className="text-gray-300 mb-1">
+          <div className="text-text-muted mb-1">
             <span className="font-medium">Last Reviewed:</span> {formatDate(path.lastDate)}
           </div>
           {path.dueAt && (
-            <div className="text-gray-300 mb-1">
+            <div className="text-text-muted mb-1">
               <span className="font-medium">Due At:</span> {formatDate(path.dueAt)}
             </div>
           )}
           <div className="flex flex-col sm:flex-row gap-3 mt-4 w-full">
-            <button
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-semibold w-full"
+            <Button
+              intent="primary"
+              size="md"
+              className="w-full justify-center"
               onClick={goToReviewVariant}
             >
               Start Review
-            </button>
-            <button
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-semibold w-full"
+            </Button>
+            <Button
+              intent="secondary"
+              size="md"
+              className="w-full justify-center"
               onClick={goToTrainVariant}
             >
               Start Training
-            </button>
+            </Button>
           </div>
-          <button
-            className="mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-semibold flex items-center justify-center gap-2 w-full"
+          <Button
+            intent="danger"
+            size="md"
+            className="mt-4 w-full justify-center"
             onClick={handleRemoveVariant}
           >
             <XMarkIcon className="h-5 w-5" />
             Remove this variant from path
-          </button>
+          </Button>
         </>
       );
     }
@@ -323,25 +330,29 @@ const PathPage: React.FC = () => {
           <div className="font-semibold text-lg text-blue-300 mb-1 text-center">
             New Repertoire to learn: {path.repertoireName}
           </div>
-          <div className="text-gray-100 mb-1">
+          <div className="text-text-base mb-1">
             <span className="font-medium">Name:</span> {path.name}
           </div>
-          <div className="text-gray-300 mb-1">
+          <div className="text-text-muted mb-1">
             <span className="font-medium">Status:</span> Not yet started
           </div>
           <div className="flex flex-col sm:flex-row gap-3 mt-4 w-full">
-            <button
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-semibold w-full"
+            <Button
+              intent="primary"
+              size="md"
+              className="w-full justify-center"
               onClick={goToReviewVariant}
             >
               Start Review
-            </button>
-            <button
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-semibold w-full"
+            </Button>
+            <Button
+              intent="secondary"
+              size="md"
+              className="w-full justify-center"
               onClick={goToTrainVariant}
             >
               Start Training
-            </button>
+            </Button>
           </div>
         </>
       );
@@ -352,18 +363,20 @@ const PathPage: React.FC = () => {
         <>
           <AcademicCapIcon className="h-8 w-8 text-emerald-400 mb-2" />
           <div className="font-semibold text-lg text-emerald-300 mb-1">Study to Review</div>
-          <div className="text-gray-100 mb-1">
+          <div className="text-text-base mb-1">
             <span className="font-medium">Name:</span> {path.name}
           </div>
-          <div className="text-gray-300 mb-1">
+          <div className="text-text-muted mb-1">
             <span className="font-medium">Last Session:</span> {path.lastSession}
           </div>
-          <button
-            className="mt-4 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded font-semibold w-full sm:w-auto"
+          <Button
+            intent="accent"
+            size="md"
+            className="mt-4 w-full sm:w-auto justify-center"
             onClick={goToStudy}
           >
             Go to Study
-          </button>
+          </Button>
         </>
       );
     }
@@ -371,9 +384,9 @@ const PathPage: React.FC = () => {
     if (isEmptyPath(path)) {
       return (
         <>
-          <div className="font-semibold text-lg text-gray-200 mb-2">All Caught Up!</div>
-          <div className="text-gray-300 mb-2 text-center">You have no variants or studies to review right now.</div>
-          <div className="text-gray-400 text-center">Adjust filters or return tomorrow for new due lessons.</div>
+          <div className="font-semibold text-lg text-text-muted mb-2">All Caught Up!</div>
+          <div className="text-text-muted mb-2 text-center">You have no variants or studies to review right now.</div>
+          <div className="text-text-subtle text-center">Adjust filters or return tomorrow for new due lessons.</div>
         </>
       );
     }
@@ -384,25 +397,25 @@ const PathPage: React.FC = () => {
   const renderForecastDay = (day: PathForecastDay) => {
     const barWidth = day.dueCount === 0 ? 0 : (day.dueCount / maxForecastDayLoad) * 100;
     return (
-      <div key={day.date} className="rounded-xl border border-gray-800 bg-gray-950/70 p-3">
+      <div key={day.date} className="rounded-xl border border-border-subtle bg-surface/70 p-3">
         <div className="flex items-center justify-between gap-2 mb-2">
-          <div className="text-sm font-semibold text-gray-100">{day.date === plan?.todayKey ? "Today" : formatShortDate(day.date)}</div>
-          <div className="text-xs text-gray-300">{day.dueCount} due</div>
+          <div className="text-sm font-semibold text-text-base">{day.date === plan?.todayKey ? "Today" : formatShortDate(day.date)}</div>
+          <div className="text-xs text-text-muted">{day.dueCount} due</div>
         </div>
-        <div className="h-2 rounded bg-gray-800 overflow-hidden mb-2">
+        <div className="h-2 rounded bg-surface-raised overflow-hidden mb-2">
           <div className="h-full bg-gradient-to-r from-cyan-500 to-blue-500" style={{ width: `${barWidth}%` }} />
         </div>
         <div className="flex flex-wrap gap-1 mb-2">
-          {day.topOpenings.length === 0 && <span className="text-xs text-gray-500">No due openings</span>}
+          {day.topOpenings.length === 0 && <span className="text-xs text-text-subtle">No due openings</span>}
           {day.topOpenings.map((opening) => (
-            <span key={`${day.date}-${opening.name}`} className="text-xs px-2 py-1 rounded bg-gray-800 text-gray-200 border border-gray-700">
+            <span key={`${day.date}-${opening.name}`} className="text-xs px-2 py-1 rounded bg-surface-raised text-text-muted border border-border-default">
               {opening.name} ({opening.count})
             </span>
           ))}
         </div>
         <div className="space-y-1">
           {day.variants.map((variant) => (
-            <div key={`${day.date}-${variant.repertoireId}-${variant.variantName}`} className="text-xs text-gray-300 truncate">
+            <div key={`${day.date}-${variant.repertoireId}-${variant.variantName}`} className="text-xs text-text-muted truncate">
               {variant.repertoireName}: {variant.variantName}
             </div>
           ))}
@@ -412,47 +425,47 @@ const PathPage: React.FC = () => {
   };
 
   return (
-    <div className="container p-0 sm:p-4 w-full h-full bg-gradient-to-b from-gray-900 via-primary to-gray-900 rounded-lg shadow-2xl flex flex-col overflow-hidden">
+    <div className="w-full h-full min-h-0 self-stretch bg-page rounded-none sm:rounded-xl shadow-elevated flex flex-col overflow-hidden border border-border-subtle">
       <div className="flex-1 min-h-0 flex flex-col relative p-2 sm:p-6 overflow-y-auto">
         <div className="w-full max-w-6xl mx-auto mt-1 sm:mt-2 flex flex-col gap-4 pb-4">
-          <div className="rounded-2xl border border-gray-800 bg-gradient-to-r from-slate-900 via-slate-900 to-slate-800 px-4 py-4 sm:px-6">
+          <div className="rounded-2xl border border-border-default bg-surface px-4 py-4 sm:px-6">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-blue-500/20 p-2">
-                  <ArrowPathIcon className="h-6 w-6 sm:h-7 sm:w-7 text-blue-300" />
+                <div className="rounded-xl bg-brand/20 p-2">
+                  <ArrowPathIcon className="h-6 w-6 sm:h-7 sm:w-7 text-brand" />
                 </div>
                 <div>
-                  <h1 className="text-xl sm:text-2xl font-bold text-gray-100">Path</h1>
-                  <p className="text-xs sm:text-sm text-gray-400">Next lesson first. Forecast when you want the bigger plan.</p>
+                  <h1 className="text-xl sm:text-2xl font-bold text-text-base">Path</h1>
+                  <p className="text-xs sm:text-sm text-text-muted">Next lesson first. Forecast when you want the bigger plan.</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="sticky top-0 z-10 rounded-xl border border-gray-800 bg-gray-900/95 backdrop-blur p-2 sm:p-3 space-y-3">
+          <div className="sticky top-0 z-10 rounded-xl border border-border-default bg-surface/95 backdrop-blur p-2 sm:p-3 space-y-3">
             <div className="grid grid-cols-2 gap-2">
-            <button
-              className={`rounded px-3 py-2 text-sm font-semibold transition ${
-                selectedView === "lesson" ? "bg-blue-600 text-white" : "bg-gray-800 text-gray-200 hover:bg-gray-700"
-              }`}
-              onClick={() => setSelectedView("lesson")}
-            >
-              Next lesson
-            </button>
-            <button
-              className={`rounded px-3 py-2 text-sm font-semibold transition ${
-                selectedView === "forecast" ? "bg-emerald-600 text-white" : "bg-gray-800 text-gray-200 hover:bg-gray-700"
-              }`}
-              onClick={() => setSelectedView("forecast")}
-            >
-              Path forecast
-            </button>
+              <Button
+                intent={selectedView === "lesson" ? "primary" : "secondary"}
+                size="sm"
+                className="w-full justify-center"
+                onClick={() => setSelectedView("lesson")}
+              >
+                Next lesson
+              </Button>
+              <Button
+                intent={selectedView === "forecast" ? "accent" : "secondary"}
+                size="sm"
+                className="w-full justify-center"
+                onClick={() => setSelectedView("forecast")}
+              >
+                Path forecast
+              </Button>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
-                <select
+                <Select
                   id="category-select"
-                  className="bg-gray-800 text-white border border-gray-700 rounded px-3 py-2 text-sm"
+                  size="sm"
                   value={selectedCategory}
                   onChange={(event) => setSelectedCategory(event.target.value as PathCategory | "all")}
                 >
@@ -461,108 +474,90 @@ const PathPage: React.FC = () => {
                   <option value="newVariants">New Variants</option>
                   <option value="oldVariants">Old Variants</option>
                   <option value="studyToReview">Studies to Review</option>
-                </select>
-                <button
+                </Select>
+                <Button
                   type="button"
-                  className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded border border-gray-700 bg-gray-800 text-gray-100 text-sm hover:bg-gray-700"
+                  intent="secondary"
+                  size="sm"
                   onClick={() => setShowAdvancedFilters((previousValue) => !previousValue)}
                 >
                   <FunnelIcon className="h-4 w-4" />
                   {showAdvancedFilters ? "Hide filters" : "Show filters"}
-                </button>
+                </Button>
               </div>
-              <button
+              <Button
                 type="button"
-                className="px-3 py-2 rounded border border-gray-700 bg-gray-800 text-gray-200 text-sm hover:bg-gray-700"
+                intent="secondary"
+                size="sm"
                 onClick={clearFilters}
               >
                 Reset scope
-              </button>
+              </Button>
             </div>
 
             {activeFilterTags.length > 0 && (
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {activeFilterTags.map((tag) => (
-                  <span key={tag} className="text-xs whitespace-nowrap px-2 py-1 rounded bg-gray-800 text-gray-300 border border-gray-700">
+                  <Badge key={tag} variant="default" size="sm" className="whitespace-nowrap">
                     {tag}
-                  </span>
+                  </Badge>
                 ))}
               </div>
             )}
 
             {showAdvancedFilters && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2 border-t border-gray-800">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2 border-t border-border-default">
+                <Select
+                  id="orientation-filter"
+                  label="Color"
+                  size="sm"
+                  value={filters.orientation}
+                  onChange={(event) => setFilterField("orientation", event.target.value as FilterOrientation)}
+                >
+                  <option value="all">All</option>
+                  <option value="white">White</option>
+                  <option value="black">Black</option>
+                </Select>
+                <Input
+                  id="opening-filter"
+                  label="Opening"
+                  size="sm"
+                  value={filters.openingName}
+                  onChange={(event) => setFilterField("openingName", event.target.value)}
+                  placeholder="e.g. Sicilian"
+                />
+                <Input
+                  id="fen-filter"
+                  label="FEN contains"
+                  size="sm"
+                  value={filters.fen}
+                  onChange={(event) => setFilterField("fen", event.target.value)}
+                  placeholder="piece placement..."
+                />
+                <Input
+                  id="date-from"
+                  label="Analytics from"
+                  type="date"
+                  size="sm"
+                  value={filters.dateFrom}
+                  onChange={(event) => setFilterField("dateFrom", event.target.value)}
+                />
+                <Input
+                  id="date-to"
+                  label="Analytics to"
+                  type="date"
+                  size="sm"
+                  value={filters.dateTo}
+                  onChange={(event) => setFilterField("dateTo", event.target.value)}
+                />
                 <div className="flex flex-col">
-                  <label htmlFor="orientation-filter" className="text-gray-300 mb-1 text-sm">
-                    Color
-                  </label>
-                  <select
-                    id="orientation-filter"
-                    className="bg-gray-800 text-white border border-gray-700 rounded px-3 py-2"
-                    value={filters.orientation}
-                    onChange={(event) => setFilterField("orientation", event.target.value as FilterOrientation)}
-                  >
-                    <option value="all">All</option>
-                    <option value="white">White</option>
-                    <option value="black">Black</option>
-                  </select>
-                </div>
-                <div className="flex flex-col">
-                  <label htmlFor="opening-filter" className="text-gray-300 mb-1 text-sm">
-                    Opening
-                  </label>
-                  <input
-                    id="opening-filter"
-                    className="bg-gray-800 text-white border border-gray-700 rounded px-3 py-2"
-                    value={filters.openingName}
-                    onChange={(event) => setFilterField("openingName", event.target.value)}
-                    placeholder="e.g. Sicilian"
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <label htmlFor="fen-filter" className="text-gray-300 mb-1 text-sm">
-                    FEN contains
-                  </label>
-                  <input
-                    id="fen-filter"
-                    className="bg-gray-800 text-white border border-gray-700 rounded px-3 py-2"
-                    value={filters.fen}
-                    onChange={(event) => setFilterField("fen", event.target.value)}
-                    placeholder="piece placement..."
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <label htmlFor="date-from" className="text-gray-300 mb-1 text-sm">
-                    Analytics from
-                  </label>
-                  <input
-                    id="date-from"
-                    type="date"
-                    className="bg-gray-800 text-white border border-gray-700 rounded px-3 py-2"
-                    value={filters.dateFrom}
-                    onChange={(event) => setFilterField("dateFrom", event.target.value)}
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <label htmlFor="date-to" className="text-gray-300 mb-1 text-sm">
-                    Analytics to
-                  </label>
-                  <input
-                    id="date-to"
-                    type="date"
-                    className="bg-gray-800 text-white border border-gray-700 rounded px-3 py-2"
-                    value={filters.dateTo}
-                    onChange={(event) => setFilterField("dateTo", event.target.value)}
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <label htmlFor="daily-new-limit" className="text-gray-300 mb-1 text-sm flex items-center gap-1">
+                  <label htmlFor="daily-new-limit" className="text-text-muted mb-1 text-sm flex items-center gap-1">
                     <span>Daily new limit</span>
                     <MetricInfoTooltip text="Maximum number of brand-new variants to introduce per day. It does not affect due reviews." />
                   </label>
-                  <input
+                  <Input
                     id="daily-new-limit"
-                    className="bg-gray-800 text-white border border-gray-700 rounded px-3 py-2"
+                    size="sm"
                     value={filters.dailyNewLimit}
                     onChange={(event) => setFilterField("dailyNewLimit", event.target.value)}
                     placeholder="5"
@@ -575,30 +570,30 @@ const PathPage: React.FC = () => {
           {selectedView === "lesson" && (
             <>
               <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
-                <div className="xl:col-span-8 bg-gray-900 border border-gray-800 rounded-2xl shadow p-4 sm:p-6 w-full flex flex-col items-center justify-center min-h-[280px]">
+                <div className="xl:col-span-8 bg-surface border border-border-default rounded-2xl shadow p-4 sm:p-6 w-full flex flex-col items-center justify-center min-h-[280px]">
                   {renderLessonCard()}
                 </div>
                 <div className="xl:col-span-4 space-y-3">
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-gray-900 border border-gray-800 rounded-xl p-3">
+                    <div className="bg-surface border border-border-default rounded-xl p-3">
                       <MetricTitle
                         label="Overdue now"
                         helpText="Variants whose due date is already in the past and are still pending review."
                       />
                       <div className="text-xl font-semibold text-red-300">{plan?.overdueCount ?? 0}</div>
                     </div>
-                    <div className="bg-gray-900 border border-gray-800 rounded-xl p-3">
-                      <div className="text-xs text-gray-400">Due today</div>
+                    <div className="bg-surface border border-border-default rounded-xl p-3">
+                      <div className="text-xs text-text-muted">Due today</div>
                       <div className="text-xl font-semibold text-yellow-300">{plan?.dueTodayCount ?? 0}</div>
                     </div>
-                    <div className="bg-gray-900 border border-gray-800 rounded-xl p-3">
+                    <div className="bg-surface border border-border-default rounded-xl p-3">
                       <MetricTitle
                         label="Next 7 days"
                         helpText="Total due reviews scheduled in the first 7 days of the forecast window, including today."
                       />
                       <div className="text-xl font-semibold text-cyan-300">{nextSevenDueCount}</div>
                     </div>
-                    <div className="bg-gray-900 border border-gray-800 rounded-xl p-3">
+                    <div className="bg-surface border border-border-default rounded-xl p-3">
                       <MetricTitle
                         label="Suggested new"
                         helpText="Recommended new variants to add today after considering current due workload and New/Day cap."
@@ -607,53 +602,55 @@ const PathPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex flex-col gap-3">
+                  <div className="bg-surface border border-border-default rounded-xl p-4 flex flex-col gap-3">
                     <div>
-                      <div className="text-sm text-gray-200 font-semibold">Need a bigger-picture plan?</div>
-                      <div className="text-sm text-gray-400">Open Path forecast to see likely openings and variants by day.</div>
+                      <div className="text-sm text-text-base font-semibold">Need a bigger-picture plan?</div>
+                      <div className="text-sm text-text-muted">Open Path forecast to see likely openings and variants by day.</div>
                     </div>
-                    <button
+                    <Button
                       type="button"
-                      className="w-full px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700"
+                      intent="accent"
+                      size="sm"
+                      className="w-full justify-center"
                       onClick={() => setSelectedView("forecast")}
                     >
                       Open forecast
-                    </button>
+                    </Button>
                   </div>
 
-                  <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex flex-col gap-2">
-                    <div className="text-sm text-gray-200 font-semibold">Today vs plan</div>
+                  <div className="bg-surface border border-border-default rounded-xl p-4 flex flex-col gap-2">
+                    <div className="text-sm text-text-base font-semibold">Today vs plan</div>
                     <div className="grid grid-cols-2 gap-2 text-center">
-                      <div className="rounded bg-gray-800 px-2 py-2">
-                        <div className="text-[11px] text-gray-400">Reviews (due)</div>
+                      <div className="rounded bg-interactive px-2 py-2">
+                        <div className="text-[11px] text-text-muted">Reviews (due)</div>
                         <div className="text-lg font-semibold text-cyan-300">{completedReviewsToday} / {reviewTargetToday}</div>
                       </div>
-                      <div className="rounded bg-gray-800 px-2 py-2">
-                        <div className="text-[11px] text-gray-400">New learned (first-time)</div>
+                      <div className="rounded bg-interactive px-2 py-2">
+                        <div className="text-[11px] text-text-muted">New learned (first-time)</div>
                         <div className="text-lg font-semibold text-blue-300">{completedNewToday} / {newTargetToday}</div>
                       </div>
                     </div>
                     <div className="grid grid-cols-3 gap-2 text-center">
-                      <div className="rounded bg-gray-800 px-2 py-2">
-                        <div className="text-[11px] text-gray-400">Target</div>
+                      <div className="rounded bg-interactive px-2 py-2">
+                        <div className="text-[11px] text-text-muted">Target</div>
                         <div className="text-lg font-semibold text-cyan-300">{plannedTodayTarget}</div>
                       </div>
-                      <div className="rounded bg-gray-800 px-2 py-2">
-                        <div className="text-[11px] text-gray-400">Completed</div>
+                      <div className="rounded bg-interactive px-2 py-2">
+                        <div className="text-[11px] text-text-muted">Completed</div>
                         <div className="text-lg font-semibold text-emerald-300">{completedToday}</div>
                       </div>
-                      <div className="rounded bg-gray-800 px-2 py-2">
-                        <div className="text-[11px] text-gray-400">Remaining</div>
+                      <div className="rounded bg-interactive px-2 py-2">
+                        <div className="text-[11px] text-text-muted">Remaining</div>
                         <div className="text-lg font-semibold text-blue-300">{remainingToTarget}</div>
                       </div>
                     </div>
-                    <div className="text-xs text-gray-400">
+                    <div className="text-xs text-text-muted">
                       Reviews remaining: {remainingReviewsTarget} · New remaining: {remainingNewTarget}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-text-subtle">
                       New learned increases only when a variant is reviewed for the first time in this filter scope.
                     </div>
-                    <div className={`text-sm ${exceededTarget ? "text-emerald-300" : "text-gray-300"}`}>
+                    <div className={`text-sm ${exceededTarget ? "text-emerald-300" : "text-text-muted"}`}>
                       {todayPlanMessage}
                     </div>
                   </div>
@@ -665,23 +662,23 @@ const PathPage: React.FC = () => {
           {selectedView === "forecast" && (
             <div className="space-y-4">
               {(insightsLoading || loading) && (
-                <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 text-blue-400 animate-pulse">
+                <div className="bg-surface border border-border-subtle rounded-xl p-4 text-blue-400 animate-pulse">
                   Loading path forecast...
                 </div>
               )}
 
               {insightsError && (
-                <div className="bg-gray-900 border border-red-900 rounded-xl p-4 text-red-400">{insightsError}</div>
+                <div className="bg-surface border border-red-900 rounded-xl p-4 text-red-400">{insightsError}</div>
               )}
 
               {!insightsLoading && analytics && (
-                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4">
-                  <div className="text-sm text-gray-300 mb-2">Recent review quality ({analytics.rangeStart} to {analytics.rangeEnd})</div>
+                <div className="bg-surface border border-border-subtle rounded-2xl p-4">
+                  <div className="text-sm text-text-muted mb-2">Recent review quality ({analytics.rangeStart} to {analytics.rangeEnd})</div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {ratingOrder.map((rating) => (
-                      <div key={rating} className="rounded bg-gray-800 px-3 py-2 text-center">
+                      <div key={rating} className="rounded bg-surface-raised px-3 py-2 text-center">
                         <div className={`text-sm capitalize ${ratingColorClass[rating]}`}>{rating}</div>
-                        <div className="text-lg text-gray-100 font-semibold">{analytics.ratingBreakdown[rating]}</div>
+                        <div className="text-lg text-text-base font-semibold">{analytics.ratingBreakdown[rating]}</div>
                       </div>
                     ))}
                   </div>
@@ -691,25 +688,25 @@ const PathPage: React.FC = () => {
               {!insightsLoading && plan && (
                 <>
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                    <div className="bg-gray-900 border border-gray-800 rounded-xl p-3">
+                    <div className="bg-surface border border-border-subtle rounded-xl p-3">
                       <MetricTitle
                         label="Due now"
                         helpText="All variants currently due for review, including overdue and due-today items."
                       />
                       <div className="text-xl font-semibold text-red-300">{plan.reviewDueCount}</div>
                     </div>
-                    <div className="bg-gray-900 border border-gray-800 rounded-xl p-3">
+                    <div className="bg-surface border border-border-subtle rounded-xl p-3">
                       <MetricTitle
                         label="Next 7 days"
                         helpText="Total due reviews scheduled in the first 7 days of the forecast window, including today."
                       />
                       <div className="text-xl font-semibold text-cyan-300">{nextSevenDueCount}</div>
                     </div>
-                    <div className="bg-gray-900 border border-gray-800 rounded-xl p-3">
-                      <div className="text-xs text-gray-400">Variants in queue</div>
-                      <div className="text-xl font-semibold text-gray-100">{nextVariants.length}</div>
+                    <div className="bg-surface border border-border-subtle rounded-xl p-3">
+                      <div className="text-xs text-text-subtle">Variants in queue</div>
+                      <div className="text-xl font-semibold text-text-base">{nextVariants.length}</div>
                     </div>
-                    <div className="bg-gray-900 border border-gray-800 rounded-xl p-3">
+                    <div className="bg-surface border border-border-subtle rounded-xl p-3">
                       <MetricTitle
                         label="Suggested new/day"
                         helpText="How many new variants are recommended today within the active New/Day cap."
@@ -719,54 +716,54 @@ const PathPage: React.FC = () => {
                   </div>
 
                   <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-                    <div className="xl:col-span-2 bg-gray-900 border border-gray-800 rounded-2xl p-4">
+                    <div className="xl:col-span-2 bg-surface border border-border-subtle rounded-2xl p-4">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
                         <div className="flex items-center gap-2">
                         <CalendarDaysIcon className="h-5 w-5 text-cyan-300" />
-                        <h2 className="text-base font-semibold text-gray-100">Likely Study Path (14 days)</h2>
+                        <h2 className="text-base font-semibold text-text-base">Likely Study Path (14 days)</h2>
                         </div>
-                        <div className="text-xs text-gray-400">Daily due load + representative variants</div>
+                        <div className="text-xs text-text-subtle">Daily due load + representative variants</div>
                       </div>
                       {hasForecastLoad ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-3">
                           {forecastDays.map(renderForecastDay)}
                         </div>
                       ) : (
-                        <div className="rounded-xl border border-gray-800 bg-gray-950/60 p-4 text-sm text-gray-400">
+                        <div className="rounded-xl border border-border-subtle bg-surface/60 p-4 text-sm text-text-subtle">
                           No due forecast inside the current filter scope.
                         </div>
                       )}
                     </div>
 
                     <div className="space-y-4">
-                      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4">
+                      <div className="bg-surface border border-border-subtle rounded-2xl p-4">
                         <div className="flex items-center gap-2 mb-3">
                           <ListBulletIcon className="h-5 w-5 text-blue-300" />
-                          <h2 className="text-base font-semibold text-gray-100">Likely Next Variants</h2>
+                          <h2 className="text-base font-semibold text-text-base">Likely Next Variants</h2>
                         </div>
                         <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
                           {nextVariants.length === 0 && (
-                            <div className="text-sm text-gray-500">No due variants in this filter scope.</div>
+                            <div className="text-sm text-text-subtle">No due variants in this filter scope.</div>
                           )}
                           {nextVariants.map((variant) => (
-                            <div key={`${variant.repertoireId}-${variant.variantName}-${variant.dueDate}`} className="rounded border border-gray-800 bg-gray-900/60 p-2">
+                            <div key={`${variant.repertoireId}-${variant.variantName}-${variant.dueDate}`} className="rounded border border-border-subtle bg-surface/60 p-2">
                               <div className="flex items-center justify-between gap-2">
-                                <div className="text-xs text-gray-400">{variant.dueDate}</div>
+                                <div className="text-xs text-text-subtle">{variant.dueDate}</div>
                                 {variant.orientation && (
-                                  <div className="text-[10px] uppercase tracking-wide text-gray-400">{variant.orientation}</div>
+                                  <div className="text-[10px] uppercase tracking-wide text-text-subtle">{variant.orientation}</div>
                                 )}
                               </div>
-                              <div className="text-sm text-gray-100 truncate">{variant.variantName}</div>
-                              <div className="text-xs text-gray-400 truncate">{variant.repertoireName}</div>
+                              <div className="text-sm text-text-base truncate">{variant.variantName}</div>
+                              <div className="text-xs text-text-subtle truncate">{variant.repertoireName}</div>
                             </div>
                           ))}
                         </div>
                       </div>
 
-                      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4">
+                      <div className="bg-surface border border-border-subtle rounded-2xl p-4">
                         <div className="flex items-center gap-2 mb-3">
                           <ChartBarIcon className="h-5 w-5 text-emerald-300" />
-                          <h2 className="text-base font-semibold text-gray-100">Openings Entering Soon</h2>
+                          <h2 className="text-base font-semibold text-text-base">Openings Entering Soon</h2>
                         </div>
                         {renderTopNamedCounts(upcomingOpenings, "No opening forecast in this scope.")}
                       </div>

@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { useForm, useFormField } from "../../../../hooks";
 import { FormField } from "../../../../components/forms";
 
@@ -55,8 +55,8 @@ const NewEntryModalEnhanced: React.FC<NewEntryModalProps> = ({ open, onClose, on
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 animate-fade-in">
-      <div className="bg-slate-800 rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md mx-2">
-        <h3 className="text-lg font-bold mb-4 text-white">Add Study</h3>
+      <div className="bg-surface-raised rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md mx-2">
+        <h3 className="text-lg font-bold mb-4 text-text-base">Add Study</h3>
         <form onSubmit={handleSubmit(handleSave)}>
           <FormField
             {...getFieldProps('title')}
@@ -78,18 +78,18 @@ const NewEntryModalEnhanced: React.FC<NewEntryModalProps> = ({ open, onClose, on
             rows={3}
           />
           
-          {error && <div className="text-red-400 mb-2">{error}</div>}
+          {error && <div className="text-danger mb-2">{error}</div>}
           <div className="flex gap-2 justify-end">
             <button 
               type="submit" 
-              className="px-3 py-1 bg-blue-700 text-white rounded"
+              className="px-3 py-1 bg-brand text-text-on-brand rounded disabled:opacity-50"
               disabled={!isValid()}
             >
               Save
             </button>
             <button
               type="button" 
-              className="px-3 py-1 bg-slate-700 text-white rounded" 
+              className="px-3 py-1 bg-surface-raised text-text-base border border-border-default rounded" 
               onClick={handleClose}
             >
               Cancel

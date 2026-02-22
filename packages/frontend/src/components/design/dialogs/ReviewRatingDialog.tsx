@@ -36,16 +36,16 @@ export const ReviewRatingDialog: React.FC<ReviewRatingDialogProps> = ({
     <Dialog open={open} onClose={onClose} className="fixed z-50 inset-0 overflow-y-auto">
       <DialogBackdrop className="fixed inset-0 bg-black/70" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="w-full max-w-xl rounded-lg border border-slate-700 bg-slate-900 p-5 shadow-2xl">
-          <DialogTitle className="text-lg font-semibold text-slate-100">Rate This Review</DialogTitle>
-          <Description className="mt-1 text-sm text-slate-300">{pendingVariantReview.variantName}</Description>
-          <div className="mt-3 grid grid-cols-2 gap-2 text-sm text-slate-300">
+        <DialogPanel className="w-full max-w-xl rounded-lg border border-border-default bg-surface-raised p-5 shadow-elevated">
+          <DialogTitle className="text-lg font-semibold text-text-base">Rate This Review</DialogTitle>
+          <Description className="mt-1 text-sm text-text-muted">{pendingVariantReview.variantName}</Description>
+          <div className="mt-3 grid grid-cols-2 gap-2 text-sm text-text-muted">
             <div>Wrong moves: {pendingVariantReview.wrongMoves}</div>
             <div>Ignored errors: {pendingVariantReview.ignoredWrongMoves}</div>
             <div>Hints used: {pendingVariantReview.hintsUsed}</div>
             <div>Time: {pendingVariantReview.timeSpentSec}s</div>
           </div>
-          <p className="mt-3 text-sm text-slate-200">
+          <p className="mt-3 text-sm text-text-base">
             Suggested: <span className="font-semibold">{pendingVariantReview.suggestedRating}</span>
           </p>
           <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -57,8 +57,8 @@ export const ReviewRatingDialog: React.FC<ReviewRatingDialogProps> = ({
                 onClick={() => onSelectRating(rating)}
                 className={`rounded px-3 py-2 text-sm font-semibold transition ${
                   selectedRating === rating
-                    ? "bg-blue-600 text-white"
-                    : "bg-slate-800 text-slate-200 hover:bg-slate-700"
+                    ? "bg-brand text-text-on-brand"
+                    : "bg-surface text-text-muted hover:bg-interactive"
                 } ${isSavingRating ? "cursor-not-allowed opacity-60" : ""}`}
               >
                 {rating}

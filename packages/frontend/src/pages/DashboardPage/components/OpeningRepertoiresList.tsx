@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { VariantsProgressBar } from "../../../components/design/SelectTrainVariants/VariantsProgressBar";
 import { IRepertoireDashboard, TrainVariantInfo } from "@chess-opening-master/common";
 import { MoveVariantNode } from "../../../models/VariantNode";
@@ -28,9 +28,9 @@ export const OpeningRepertoiresList: React.FC<OpeningRepertoiresListProps> = ({
         : [];
       const variantInfo = getTrainVariantInfo(r.variantsInfo);
       return (
-        <div key={r._id} className="flex items-center gap-2 bg-gray-800 rounded-lg px-2 py-1">
+        <div key={r._id} className="flex items-center gap-2 bg-surface-raised rounded-lg px-2 py-1">
           <span
-            className="cursor-pointer font-medium text-gray-100 hover:underline"
+            className="cursor-pointer font-medium text-text-base hover:underline"
             onClick={() => goToRepertoire(r)}
           >
             {r.name}
@@ -59,7 +59,7 @@ export const OpeningRepertoiresList: React.FC<OpeningRepertoiresListProps> = ({
       );
     })}
     {repertoiresWithOpening.length === 0 && (
-      <div className="text-gray-500 text-xs text-center">No repertoires</div>
+      <div className="text-text-subtle text-xs text-center">No repertoires</div>
     )}
   </div>
 );

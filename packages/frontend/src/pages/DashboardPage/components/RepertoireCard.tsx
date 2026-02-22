@@ -5,6 +5,8 @@ import { IRepertoireDashboard, TrainVariantInfo } from "@chess-opening-master/co
 import { TrainVariant } from "../../../models/chess.models";
 import { useDialogContext } from "../../../contexts/DialogContext";
 import { disableRepertoire, enableRepertoire } from "../../../repository/repertoires/repertoires";
+import { Button, IconButton } from "../../../components/ui";
+import { cn } from "../../../utils/cn";
 
 interface RepertoireCardProps {
   repertoire: IRepertoireDashboard;
@@ -49,42 +51,33 @@ export const RepertoireCard: React.FC<RepertoireCardProps> = ({
 
   return (
     <li
-      className={`p-3 sm:p-4 bg-gray-900 rounded-xl shadow-lg border ${
-        repertoire.disabled ? 'border-red-800 opacity-75' : 'border-gray-800'
-      } hover:shadow-2xl transition-shadow duration-300 flex flex-col justify-between ring-0 focus-within:ring-2 focus-within:ring-blue-400`}
+      className={cn(
+        "p-3 sm:p-4 bg-surface rounded-xl shadow-surface border transition-shadow duration-300 flex flex-col justify-between focus-within:ring-2 focus-within:ring-brand",
+        repertoire.disabled ? "border-danger/40 opacity-75" : "border-border-default hover:shadow-elevated"
+      )}
     >
       <div className="flex items-center justify-between mb-2">
-        <h3 className={`text-base sm:text-lg font-semibold text-gray-100 truncate ${repertoire.disabled ? 'text-gray-400' : ''}`}>
+        <h3 className={cn("text-base sm:text-lg font-semibold text-text-base truncate", repertoire.disabled && "text-text-muted")}>
           {repertoire.name}
-          {repertoire.disabled && <span className="ml-2 text-xs text-red-400">(Disabled)</span>}
+          {repertoire.disabled && <span className="ml-2 text-xs text-danger">(Disabled)</span>}
         </h3>
-        <button
+        <IconButton
+          label={repertoire.disabled ? "Enable repertoire" : "Disable repertoire"}
           onClick={handleToggleDisable}
-          className={`p-1 rounded-full focus:outline-none focus:ring-2 ${
-            repertoire.disabled 
-              ? 'text-red-500 hover:text-red-400 focus:ring-red-400' 
-              : 'text-green-500 hover:text-green-400 focus:ring-green-400'
-          }`}
-          title={repertoire.disabled ? 'Enable repertoire' : 'Disable repertoire'}
+          className={repertoire.disabled ? "text-danger" : "text-success"}
         >
           {repertoire.disabled ? <LockClosedIcon className="h-4 w-4" /> : <LockOpenIcon className="h-4 w-4" />}
-        </button>
+        </IconButton>
       </div>
-      <div className="flex space-x-2 mb-2 justify-center">
-        <button
-          className="flex items-center px-3 py-1 bg-gray-800 text-gray-100 rounded hover:bg-gray-700 transition-colors text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-          onClick={() => goToRepertoire(repertoire)}
-        >
-          <EyeIcon className="h-5 w-5 mr-1" />
+      <div className="flex gap-2 mb-2 justify-center">
+        <Button intent="secondary" size="sm" onClick={() => goToRepertoire(repertoire)}>
+          <EyeIcon className="h-4 w-4" />
           View
-        </button>
-        <button
-          className="flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-          onClick={() => goToTrainRepertoire(repertoire)}
-        >
-          <PlayIcon className="h-5 w-5 mr-1" />
+        </Button>
+        <Button intent="primary" size="sm" onClick={() => goToTrainRepertoire(repertoire)}>
+          <PlayIcon className="h-4 w-4" />
           Train
-        </button>
+        </Button>
       </div>
       <VariantsProgressBar
         variants={getTrainVariants(repertoire)}

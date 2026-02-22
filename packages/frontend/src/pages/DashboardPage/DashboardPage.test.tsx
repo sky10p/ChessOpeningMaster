@@ -72,9 +72,9 @@ describe("DashboardPage", () => {
         <DashboardPage />
       </BrowserRouter>
     );
-    expect(screen.getByRole("button", { name: /dashboard/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /openings/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /path insights/i })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /dashboard/i })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /openings/i })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /path insights/i })).toBeInTheDocument();
   });
 
   it("shows Dashboard section by default", () => {
@@ -92,7 +92,7 @@ describe("DashboardPage", () => {
         <DashboardPage />
       </BrowserRouter>
     );
-    fireEvent.click(screen.getByRole("button", { name: /openings/i }));
+    fireEvent.click(screen.getByRole("tab", { name: /openings/i }));
     expect(screen.getByText(/browse your prepared openings/i)).toBeInTheDocument();
   });
 
@@ -102,7 +102,7 @@ describe("DashboardPage", () => {
         <DashboardPage />
       </BrowserRouter>
     );
-    fireEvent.click(screen.getByRole("button", { name: /path insights/i }));
+    fireEvent.click(screen.getByRole("tab", { name: /path insights/i }));
     expect(screen.getByText(/forecast your review queue/i)).toBeInTheDocument();
     expect(screen.getByText(/spaced repetition insights/i)).toBeInTheDocument();
   });
@@ -170,7 +170,7 @@ describe("Openings section behaviors", () => {
         <DashboardPage />
       </BrowserRouter>
     );
-    fireEvent.click(screen.getByRole("button", { name: /openings/i }));
+    fireEvent.click(screen.getByRole("tab", { name: /openings/i }));
     expect(screen.getByText("Ruy Lopez")).toBeInTheDocument();
     expect(screen.getByText("Rep1")).toBeInTheDocument();
     expect(screen.queryByText(/Show/)).not.toBeInTheDocument();
@@ -190,7 +190,7 @@ describe("Openings section behaviors", () => {
         <DashboardPage />
       </BrowserRouter>
     );
-    fireEvent.click(screen.getByRole("button", { name: /openings/i }));
+    fireEvent.click(screen.getByRole("tab", { name: /openings/i }));
     expect(screen.getByText("Ruy Lopez")).toBeInTheDocument();
     const showBtn = screen.getByRole("button", { name: /Show 2 repertoires/i });
     expect(showBtn).toBeInTheDocument();
@@ -212,7 +212,7 @@ describe("Openings section behaviors", () => {
         <DashboardPage />
       </BrowserRouter>
     );
-    fireEvent.click(screen.getByRole("button", { name: /openings/i }));
+    fireEvent.click(screen.getByRole("tab", { name: /openings/i }));
     expect(screen.queryByText("Ruy Lopez")).not.toBeInTheDocument();
     expect(screen.queryByText("Italian Game")).not.toBeInTheDocument();
   });
@@ -231,7 +231,7 @@ describe("Openings section behaviors", () => {
         <DashboardPage />
       </BrowserRouter>
     );
-    fireEvent.click(screen.getByRole("button", { name: /openings/i }));
+    fireEvent.click(screen.getByRole("tab", { name: /openings/i }));
     const filterInput = screen.getByPlaceholderText(/filter openings/i);
     fireEvent.change(filterInput, { target: { value: "italian" } });
     expect(screen.getByText("Italian Game")).toBeInTheDocument();
@@ -249,7 +249,7 @@ describe("Openings section behaviors", () => {
         <DashboardPage />
       </BrowserRouter>
     );
-    fireEvent.click(screen.getByRole("button", { name: /openings/i }));
+    fireEvent.click(screen.getByRole("tab", { name: /openings/i }));
     const viewBtn = screen.getByRole("button", { name: /^view$/i });
     expect(viewBtn).toBeInTheDocument();
     fireEvent.click(viewBtn);

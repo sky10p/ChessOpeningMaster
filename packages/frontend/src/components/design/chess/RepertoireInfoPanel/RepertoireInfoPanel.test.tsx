@@ -305,7 +305,7 @@ describe('RepertoireInfoPanel - Selected movement highlight', () => {
     const selectedMove = screen.getByText('d4').parentElement;
     const unselectedMove = screen.getByText('e4').parentElement;
 
-    expect(selectedMove).toHaveClass('bg-blue-600');
-    expect(unselectedMove).not.toHaveClass('bg-blue-600');
+    expect(selectedMove).toHaveClass('bg-brand');
+    expect(unselectedMove).not.toHaveClass('bg-brand');
   });
 });

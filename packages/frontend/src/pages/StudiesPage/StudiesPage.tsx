@@ -18,6 +18,7 @@ import NewStudyModal from "./components/modals/NewStudyModal";
 import NewEntryModal from "./components/modals/NewEntryModal";
 import EditEntryModal from "./components/modals/EditEntryModal";
 import DeleteEntryModal from "./components/modals/DeleteEntryModal";
+import { Button } from "../../components/ui";
 import DeleteSessionModal from "./components/modals/DeleteSessionModal";
 import ManualTimeModal from "./components/modals/ManualTimeModal";
 import { Study, StudyEntry } from "./models";
@@ -148,7 +149,7 @@ const StudiesPage: React.FC = () => {
   }, [selectedStudy, activeGroupId, refreshGroups]);
 
   return (
-    <div className="w-full h-full bg-background text-textLight">
+    <div className="w-full h-full min-h-0 self-stretch bg-page rounded-none sm:rounded-xl shadow-elevated flex flex-col overflow-hidden border border-border-subtle">
       <div className="w-full h-full flex flex-col md:flex-row md:items-start md:gap-4">
         {!isMobile && (
           <StudyGroupSidebar
@@ -200,7 +201,7 @@ const StudiesPage: React.FC = () => {
           />
           <div className="flex-1 overflow-hidden p-2 sm:p-4 transition-all duration-300">
             {loading ? (
-              <div className="text-center p-4 text-blue-400">
+              <div className="text-center p-4 text-brand">
                 Loading studies...
               </div>
             ) : selectedStudy ? (
@@ -238,15 +239,16 @@ const StudiesPage: React.FC = () => {
               <div className="h-full flex flex-col">
                 <div className="max-w-4xl mx-auto w-full">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
-                    <h2 className="text-xl font-bold text-white">
+                    <h2 className="text-xl font-bold text-text-base">
                       {groups.find((g) => g.id === activeGroupId)?.name} Studies
                     </h2>
-                    <button
-                      className="px-3 py-1.5 bg-blue-700 text-white rounded shadow hover:bg-blue-800 transition"
+                    <Button
+                      intent="primary"
+                      size="sm"
                       onClick={() => setShowNewStudy(true)}
                     >
                       + New Study
-                    </button>
+                    </Button>
                   </div>
                 </div>
                 <ScrollContainer className="max-w-4xl mx-auto w-full">

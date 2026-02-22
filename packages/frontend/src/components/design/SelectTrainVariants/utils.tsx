@@ -41,10 +41,10 @@ export const getColor = (
 export const getTextColor = (
   variant: TrainVariant,
   variantInfo: Record<string, TrainVariantInfo>
-) => {
+): string | undefined => {
   const color = getColor(variant, variantInfo);
   if (color === VARIANT_COLORS.unresolved) {
-    return VARIANT_TEXT_COLORS.unresolved;
+    return undefined;
   }
   return color;
 };

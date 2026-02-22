@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import {
   ResponsiveContainer,
   PieChart,
@@ -21,12 +21,12 @@ export const VariantsReviewStatusChart: React.FC<VariantsReviewStatusChartProps>
   const hasData = data.some((d) => d.value > 0);
 
   return (
-    <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center">
-      <h3 className="text-lg font-semibold text-gray-200 mb-2">
+    <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center">
+      <h3 className="text-lg font-semibold text-text-muted mb-2">
         Variants Review Status
       </h3>
       {!hasData ? (
-        <div className="text-gray-400 text-center py-8">No data</div>
+        <div className="text-text-subtle text-center py-8">No data</div>
       ) : (
         <ResponsiveContainer width="100%" height={220}>
           <PieChart>

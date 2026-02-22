@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { createRepertoire } from "../../repository/repertoires/repertoires";
 import { useNavigate } from "react-router-dom";
 import { useNavbarDispatch } from "../../contexts/NavbarContext";
+import { Button, Input } from "../../components/ui";
 
 const CreateRepertoire: React.FC = () => {
   const [repertoireName, setRepertoireName] = useState("");
@@ -23,24 +24,25 @@ const CreateRepertoire: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-background text-textLight">
-      <div className="max-w-md w-full p-8 bg-gray-800 rounded shadow-md">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-page text-text-base">
+      <div className="max-w-md w-full p-8 bg-surface rounded-xl shadow-elevated">
         <h1 className="text-2xl font-bold text-center mb-4">Crear nuevo repertorio</h1>
-        <p className="text-center mb-4">Ingresa el nombre de tu nuevo repertorio de aperturas personalizado.</p>
-        <input
+        <p className="text-center mb-4 text-text-muted">Ingresa el nombre de tu nuevo repertorio de aperturas personalizado.</p>
+        <Input
           type="text"
-          className="w-full p-2 mb-4 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-accent"
+          className="mb-4"
           placeholder="Nombre del repertorio"
           value={repertoireName}
           onChange={handleChange}
         />
         <div className="flex justify-center">
-          <button
-            className="px-4 py-2 bg-accent text-black font-medium rounded hover:bg-yellow-500"
+          <Button
+            intent="accent"
+            size="md"
             onClick={handleCreateRepertoire}
           >
             Crear repertorio
-          </button>
+          </Button>
         </div>
       </div>
     </div>

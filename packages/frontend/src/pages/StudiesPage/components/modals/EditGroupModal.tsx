@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+﻿import React, { useEffect } from "react";
 import { useFormState } from "../../../../hooks";
 
 interface EditGroupModalProps {
@@ -25,9 +25,9 @@ const EditGroupModal: React.FC<EditGroupModalProps> = ({ open, initialName, onCl
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 animate-fade-in">
-      <div className="bg-slate-800 rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md mx-2">
+      <div className="bg-surface-raised rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md mx-2">
         <h3 className="text-lg font-bold mb-4 text-white">Edit Group</h3>        <input
-          className="w-full px-3 py-2 mb-3 rounded border border-slate-700 bg-slate-900 text-slate-100"
+          className="w-full px-3 py-2 mb-3 rounded border border-border-default bg-surface text-text-base"
           placeholder="Group name *"
           value={values.name}
           onChange={(e) => handleChange('name', e.target.value)}

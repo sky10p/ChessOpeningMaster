@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { ImportedGame } from "@chess-opening-master/common";
 import { buildLineTitle, formatDateTime, formatPercent, getOpeningLabel } from "../utils";
 
@@ -15,7 +15,7 @@ type DataTabProps = {
 const resultColor = (result: string) => {
   if (result === "1-0") return "text-emerald-400";
   if (result === "0-1") return "text-rose-400";
-  return "text-slate-400";
+  return "text-text-subtle";
 };
 
 const DataTab: React.FC<DataTabProps> = ({
@@ -28,20 +28,20 @@ const DataTab: React.FC<DataTabProps> = ({
   openTrainRepertoire,
 }) => (
   <div className="space-y-4">
-    <div className="bg-slate-900 rounded-xl border border-slate-800 p-4 flex flex-wrap items-center justify-between gap-3">
-      <p className="text-sm text-slate-300">
-        <span className="font-semibold text-slate-100">{games.length}</span>
-        <span className="text-slate-500"> games in current view</span>
+    <div className="bg-surface rounded-xl border border-border-subtle p-4 flex flex-wrap items-center justify-between gap-3">
+      <p className="text-sm text-text-muted">
+        <span className="font-semibold text-text-base">{games.length}</span>
+        <span className="text-text-subtle"> games in current view</span>
       </p>
       <div className="flex gap-2">
         <button
-          className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-rose-900/60 text-rose-400 text-xs border border-slate-700 hover:border-rose-800 transition-colors"
+          className="px-3 py-1.5 rounded-lg bg-surface-raised hover:bg-rose-900/60 text-rose-400 text-xs border border-border-default hover:border-rose-800 transition-colors"
           onClick={() => { void clearFiltered(); }}
         >
           Delete filtered
         </button>
         <button
-          className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-rose-900/60 text-rose-400 text-xs border border-slate-700 hover:border-rose-800 transition-colors"
+          className="px-3 py-1.5 rounded-lg bg-surface-raised hover:bg-rose-900/60 text-rose-400 text-xs border border-border-default hover:border-rose-800 transition-colors"
           onClick={() => { void clearAll(); }}
         >
           Delete all
@@ -50,24 +50,24 @@ const DataTab: React.FC<DataTabProps> = ({
     </div>
 
     {gamesByMonthGroups.map(([month, monthGames]) => (
-      <div key={month} className="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
-        <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 px-4 pt-3 pb-2 border-b border-slate-800">{month}</p>
+      <div key={month} className="bg-surface rounded-xl border border-border-subtle overflow-hidden">
+        <p className="text-xs font-semibold uppercase tracking-widest text-text-subtle px-4 pt-3 pb-2 border-b border-border-subtle">{month}</p>
         <div className="divide-y divide-slate-800">
           {monthGames.map((game) => {
             const opening = getOpeningLabel(game);
             return (
-              <div key={game.id} className="px-4 py-3 hover:bg-slate-800/40 transition-colors">
+              <div key={game.id} className="px-4 py-3 hover:bg-surface-raised/40 transition-colors">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1 space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm font-medium text-slate-100 truncate">{opening}{game.openingDetection.eco ? ` (${game.openingDetection.eco})` : ""}</span>
+                      <span className="text-sm font-medium text-text-base truncate">{opening}{game.openingDetection.eco ? ` (${game.openingDetection.eco})` : ""}</span>
                       <span className={`text-xs font-semibold ${resultColor(game.result)}`}>{game.result}</span>
                     </div>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-text-subtle">
                       {formatDateTime(game.playedAt)} · {game.white} vs {game.black} · {game.timeControlBucket || "?"}  · {game.source}
                     </p>
                     {game.openingMapping.variantName ? (
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-text-subtle">
                         {buildLineTitle(opening, game.openingMapping.variantName, game.openingMapping.repertoireName)}
                         {" · "}{formatPercent(game.openingMapping.confidence)} conf.
                         {game.openingMapping.requiresManualReview ? <span className="text-amber-400"> · needs review</span> : null}
@@ -78,11 +78,11 @@ const DataTab: React.FC<DataTabProps> = ({
                   <div className="flex flex-col gap-1.5 shrink-0">
                     {game.openingMapping.repertoireId ? (
                       <>
-                        <button className="text-xs px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors" onClick={() => openRepertoire(game.openingMapping.repertoireId as string, game.openingMapping.variantName || opening)}>View</button>
+                        <button className="text-xs px-2.5 py-1 rounded-md bg-surface-raised hover:bg-slate-700 text-text-muted border border-border-default transition-colors" onClick={() => openRepertoire(game.openingMapping.repertoireId as string, game.openingMapping.variantName || opening)}>View</button>
                         <button className="text-xs px-2.5 py-1 rounded-md bg-blue-600 hover:bg-blue-500 text-white transition-colors" onClick={() => openTrainRepertoire(game.openingMapping.repertoireId as string, game.openingMapping.variantName || opening)}>Train</button>
                       </>
                     ) : null}
-                    <button className="text-xs px-2.5 py-1 rounded-md bg-slate-800 hover:bg-rose-900/60 text-rose-400 border border-slate-700 hover:border-rose-800 transition-colors" onClick={() => { void removeGame(game.id); }}>Delete</button>
+                    <button className="text-xs px-2.5 py-1 rounded-md bg-surface-raised hover:bg-rose-900/60 text-rose-400 border border-border-default hover:border-rose-800 transition-colors" onClick={() => { void removeGame(game.id); }}>Delete</button>
                   </div>
                 </div>
               </div>

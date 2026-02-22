@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+﻿import React, { useState, useCallback } from "react";
 import { IRepertoireDashboard, TrainVariantInfo } from "@chess-opening-master/common";
 import { MoveVariantNode } from "../../../models/VariantNode";
 import { OpeningCard } from "../components/OpeningCard";
@@ -88,16 +88,16 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
 
   return (
     <section className="flex-1 flex flex-col min-h-0">
-      <div className="sticky top-12 sm:top-16 z-10 bg-primary pb-2 pt-2 sm:pt-4 px-2 sm:px-4 border-b border-gray-800">
+      <div className="sticky top-12 sm:top-16 z-10 bg-page pb-2 pt-2 sm:pt-4 px-2 sm:px-4 border-b border-border-subtle">
         <header className="mb-2">
-          <h2 className="font-bold text-gray-100 text-lg sm:text-2xl leading-tight mb-1 truncate">Openings</h2>
-          <p className="text-gray-300 text-xs sm:text-base leading-snug mb-2 sm:mb-4 truncate">Browse your prepared openings and see which repertoires use them. Filter by color, status, or name.</p>
+          <h2 className="font-bold text-text-base text-lg sm:text-2xl leading-tight mb-1 truncate">Openings</h2>
+          <p className="text-text-muted text-xs sm:text-base leading-snug mb-2 sm:mb-4 truncate">Browse your prepared openings and see which repertoires use them. Filter by color, status, or name.</p>
         </header>
         <div className="flex flex-col md:flex-row gap-2 md:gap-4">
           <select
             value={orientationFilter}
             onChange={(e) => setOrientationFilter(e.target.value as 'all' | 'white' | 'black')}
-            className="bg-gray-800 text-gray-100 px-3 py-2 border border-gray-700 rounded-lg shadow-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition ease-in-out duration-150 text-xs sm:text-sm"
+            className="bg-surface-raised text-text-base px-3 py-2 border border-border-default rounded-lg shadow-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition ease-in-out duration-150 text-xs sm:text-sm"
           >
             <option value="all">All</option>
             <option value="white">White</option>
@@ -107,7 +107,7 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as 'all' | 'errors' | 'successful' | 'new')}
-            className="bg-gray-800 text-gray-100 px-3 py-2 border border-gray-700 rounded-lg shadow-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition ease-in-out duration-150 text-xs sm:text-sm"
+            className="bg-surface-raised text-text-base px-3 py-2 border border-border-default rounded-lg shadow-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition ease-in-out duration-150 text-xs sm:text-sm"
           >
             <option value="all">All</option>
             <option value="errors">With Errors</option>
@@ -127,7 +127,7 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
             placeholder="Filter openings"
             value={openingNameFilter}
             onChange={(e) => setOpeningNameFilter(e.target.value)}
-            className="bg-gray-800 text-gray-100 px-3 py-2 border border-gray-700 rounded-lg shadow-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition ease-in-out duration-150 flex-grow text-xs sm:text-sm"
+            className="bg-surface-raised text-text-base px-3 py-2 border border-border-default rounded-lg shadow-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition ease-in-out duration-150 flex-grow text-xs sm:text-sm"
           />
         </div>
       </div>

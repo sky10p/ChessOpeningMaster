@@ -2,51 +2,128 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  /* Enhanced color palette */
-  --color-primary: #1e40af;      /* Deep blue */
-  --color-primary-light: #3b82f6; /* Lighter blue */
-  --color-secondary: #9333ea;    /* Purple */
-  --color-accent: #f59e0b;       /* Amber/gold */
-  --color-accent-light: #fbbf24; /* Light amber */
-  
-  /* Background colors */
-  --color-bg-dark: #0f172a;      /* Dark slate blue */
-  --color-bg-card: #1e293b;      /* Slightly lighter slate */
-  
-  /* Text colors */
-  --color-text-primary: #f8fafc;  /* Almost white */
-  --color-text-secondary: #cbd5e1; /* Light gray */
-  --color-text-muted: #94a3b8;     /* Muted gray */
-  
-  /* Chess theme colors */
-  --color-chess-light: #f0d9b5;    /* Light square */
-  --color-chess-dark: #b58863;     /* Dark square */
-  
-  /* Scrollbar colors */
-  --tw-scrollbar-thumb: #475569;
-  --tw-scrollbar-track: #1e293b;
-  --tw-scrollbar-thumb-hover: #64748b;
-  
-  /* Animation speeds */
-  --transition-fast: 150ms;
+/* ─── Design Tokens — Dark Theme (default) ─────────────────────────────────── */
+:root,
+.dark {
+  /* Backgrounds — three-level elevation */
+  --color-bg-page:            #0f172a; /* slate-900   · global canvas     */
+  --color-bg-surface:         #1e293b; /* slate-800   · cards & panels    */
+  --color-bg-surface-raised:  #293548; /* slate-750   · nested cards      */
+  --color-bg-interactive:     #334155; /* slate-700   · hover / chip / input */
+
+  /* Brand — indigo for personality */
+  --color-brand:              #6366f1; /* indigo-500  */
+  --color-brand-hover:        #818cf8; /* indigo-400  */
+  --color-brand-subtle:       rgba(99, 102, 241, 0.12);
+
+  /* Accent — amber/gold from the ChessKeep logo */
+  --color-accent:             #f59e0b; /* amber-500   */
+  --color-accent-hover:       #fbbf24; /* amber-400   */
+
+  /* Semantic feedback — pastel tones readable on dark bg */
+  --color-danger:             #f87171; /* red-400     */
+  --color-danger-hover:       #fca5a5; /* red-300     */
+  --color-danger-subtle:      rgba(248, 113, 113, 0.12);
+  --color-success:            #34d399; /* emerald-400 */
+  --color-warning:            #fbbf24; /* amber-400   */
+
+  /* Text hierarchy */
+  --color-text-base:          #f1f5f9; /* slate-100   */
+  --color-text-muted:         #94a3b8; /* slate-400   */
+  --color-text-subtle:        #64748b; /* slate-500   */
+  --color-text-on-brand:      #ffffff;
+
+  /* Borders */
+  --color-border-default:     #334155; /* slate-700   */
+  --color-border-subtle:      #1e293b; /* slate-800   */
+
+  /* Chess board */
+  --color-chess-light:        #f0d9b5;
+  --color-chess-dark:         #b58863;
+
+  /* Shadows — dark bg: depth via colour contrast, minimal shadow */
+  --shadow-sm:       0 1px 2px rgba(0, 0, 0, 0.45);
+  --shadow-surface:  0 2px 8px  rgba(0, 0, 0, 0.45);
+  --shadow-elevated: 0 12px 32px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.4);
+
+  /* Scrollbar */
+  --tw-scrollbar-thumb:       #475569; /* slate-600   */
+  --tw-scrollbar-track:       #1e293b; /* slate-800   */
+  --tw-scrollbar-thumb-hover: #64748b; /* slate-500   */
+
+  /* Transitions */
+  --transition-fast:   150ms;
   --transition-normal: 250ms;
-  --transition-slow: 350ms;
-  
-  /* Context menu colors */
-  --context-menu-bg: #1e293b;
-  --context-menu-text: #f8fafc;
-  --context-menu-hover-bg: #334155;
-  --context-menu-border: #475569;
+  --transition-slow:   350ms;
+
+  /* Context menu */
+  --context-menu-bg:        #1e293b;
+  --context-menu-text:      #f8fafc;
+  --context-menu-hover-bg:  #334155;
+  --context-menu-border:    #475569;
 }
 
+/* ─── Design Tokens — Light Theme ───────────────────────────────────────────── */
+.light {
+  /* Backgrounds — cool blue-gray base so white surfaces clearly pop */
+  --color-bg-page:            #eef2f7; /* custom cool blue-gray           */
+  --color-bg-surface:         #ffffff; /* pure white · cards pop on page  */
+  --color-bg-surface-raised:  #f8fafc; /* slate-50   · inner elevation    */
+  --color-bg-interactive:     #e2e8f0; /* slate-200  · hover / chip       */
+
+  /* Brand — indigo for light backgrounds */
+  --color-brand:              #4f46e5; /* indigo-600  */
+  --color-brand-hover:        #4338ca; /* indigo-700  */
+  --color-brand-subtle:       #eef2ff; /* indigo-50   */
+
+  /* Accent */
+  --color-accent:             #d97706; /* amber-600   */
+  --color-accent-hover:       #b45309; /* amber-700   */
+
+  /* Semantic feedback — deeper tones for legibility on light bg */
+  --color-danger:             #dc2626; /* red-600     */
+  --color-danger-hover:       #b91c1c; /* red-700     */
+  --color-danger-subtle:      #fef2f2; /* red-50      */
+  --color-success:            #059669; /* emerald-600 */
+  --color-warning:            #d97706; /* amber-600   */
+
+  /* Text — WCAG AA verified contrast ratios */
+  --color-text-base:          #0f172a; /* slate-900   · 18.1:1 on white   */
+  --color-text-muted:         #475569; /* slate-600   ·  7.1:1 on white   */
+  --color-text-subtle:        #64748b; /* slate-500   ·  4.7:1 on white   */
+  --color-text-on-brand:      #ffffff;
+
+  /* Borders */
+  --color-border-default:     #cbd5e1; /* slate-300   */
+  --color-border-subtle:      #e2e8f0; /* slate-200   */
+
+  /* Shadows — light theme uses drop shadows for depth hierarchy */
+  --shadow-sm:       0 1px 3px rgba(15, 23, 42, 0.07), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-surface:  0 2px 10px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.05);
+  --shadow-elevated: 0 10px 30px rgba(15, 23, 42, 0.11), 0 4px 10px rgba(15, 23, 42, 0.07);
+
+  /* Scrollbar */
+  --tw-scrollbar-thumb:       #94a3b8; /* slate-400   */
+  --tw-scrollbar-track:       #e2e8f0; /* slate-200   */
+  --tw-scrollbar-thumb-hover: #64748b; /* slate-500   */
+
+  /* Context menu */
+  --context-menu-bg:        #ffffff;
+  --context-menu-text:      #0f172a;
+  --context-menu-hover-bg:  #f1f5f9;
+  --context-menu-border:    #e2e8f0;
+}
+
+/* ─── Base styles ────────────────────────────────────────────────────────────── */
 body {
-  background-color: var(--color-bg-dark);
-  color: var(--color-text-primary);
+  background-color: var(--color-bg-page);
+  color: var(--color-text-base);
   padding-bottom: env(safe-area-inset-bottom);
   margin: 0;
   padding: 0;
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
@@ -74,29 +151,20 @@ body {
   background-color: var(--tw-scrollbar-thumb-hover);
 }
 
-/* Custom component styles */
+/* ─── Focus ring global reset (replaced by component-level focus-visible) ───── */
+:focus {
+  outline: none;
+}
+
 @layer components {
-  .btn-primary {
-    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-all duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50;
-  }
-  
-  .btn-secondary {
-    @apply bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md transition-all duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50;
-  }
-  
-  .btn-accent {
-    @apply bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-4 rounded-md transition-all duration-200 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-opacity-50;
-  }
-  
-  .card {
-    @apply bg-slate-800 rounded-lg shadow-lg p-4 border border-slate-700;
-  }
-  
   .nav-link {
-    @apply flex items-center px-3 py-2 text-base font-medium text-slate-200 rounded-md transition-colors duration-200 hover:bg-slate-700 hover:text-white;
+    @apply flex items-center w-full px-3 py-2 text-sm rounded-md text-text-muted hover:text-text-base hover:bg-interactive transition-colors duration-200;
   }
-  
-  .nav-link-active {
-    @apply flex items-center px-3 py-2 text-base font-medium rounded-md bg-blue-700 text-white;
+
+  /* Surface card — auto-adds shadow and border in both themes */
+  .surface-card {
+    @apply bg-surface border border-border-subtle rounded-xl;
+    box-shadow: var(--shadow-surface);
   }
 }
+

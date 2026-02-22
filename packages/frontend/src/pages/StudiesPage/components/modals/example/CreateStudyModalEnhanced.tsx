@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { useForm, useFormField } from "../../../../../hooks";
 import { FormField } from "../../../../../components/forms";
 
@@ -55,7 +55,7 @@ const CreateStudyModal: React.FC<CreateStudyModalProps> = ({ open, onClose, onSa
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 animate-fade-in">
-      <div className="bg-slate-800 rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md mx-2">
+      <div className="bg-surface-raised rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md mx-2">
         <h3 className="text-lg font-bold mb-4 text-white">Create New Study</h3>
         <form onSubmit={handleSubmit(saveForm)}>
           <FormField

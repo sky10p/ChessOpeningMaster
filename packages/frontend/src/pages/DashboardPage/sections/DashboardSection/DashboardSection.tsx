@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ExpandableVariantsChart } from "../../components/ExpandableVariantsChart";
 import { useNavigationUtils } from "../../../../utils/navigationUtils";
@@ -78,10 +78,10 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
   return (
     <section className="flex-1 flex flex-col min-h-0 p-4 overflow-y-auto">
       <header className="mb-4">
-        <h2 className="font-bold text-gray-100 text-2xl leading-tight mb-1 truncate">
+        <h2 className="font-bold text-text-base text-2xl leading-tight mb-1 truncate">
           Dashboard Overview
         </h2>
-        <p className="text-gray-300 text-base leading-snug mb-2 truncate">
+        <p className="text-text-muted text-base leading-snug mb-2 truncate">
           Key statistics and metrics for your chess repertoires.
         </p>
         <FilterButtons filter={filter} onFilterChange={setFilter} />

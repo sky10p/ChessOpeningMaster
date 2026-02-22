@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { useForm } from "../../../../hooks";
 
 interface NewEntryModalProps {
@@ -56,9 +56,9 @@ const NewEntryModal: React.FC<NewEntryModalProps> = ({ open, onClose, onSave, er
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 animate-fade-in">
-      <div className="bg-slate-800 rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md mx-2">
+      <div className="bg-surface-raised rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md mx-2">
         <h3 className="text-lg font-bold mb-4 text-white">Add Study</h3>        <input
-          className={`w-full px-3 py-2 mb-3 rounded border ${touched.title && errors.title ? 'border-red-500' : 'border-slate-700'} bg-slate-900 text-slate-100`}
+          className={`w-full px-3 py-2 mb-3 rounded border ${touched.title && errors.title ? 'border-red-500' : 'border-border-default'} bg-surface text-text-base`}
           placeholder="Title *"
           value={values.title}
           onChange={(e) => handleChange('title', e.target.value)}
@@ -66,14 +66,14 @@ const NewEntryModal: React.FC<NewEntryModalProps> = ({ open, onClose, onSave, er
           autoFocus
         />
         {touched.title && errors.title && <div className="text-red-400 text-sm mt-1 mb-2">{errors.title}</div>}        <input
-          className={`w-full px-3 py-2 mb-3 rounded border ${touched.externalUrl && errors.externalUrl ? 'border-red-500' : 'border-slate-700'} bg-slate-900 text-slate-100`}
+          className={`w-full px-3 py-2 mb-3 rounded border ${touched.externalUrl && errors.externalUrl ? 'border-red-500' : 'border-border-default'} bg-surface text-text-base`}
           placeholder="External study link (optional)"
           value={values.externalUrl}
           onChange={(e) => handleChange('externalUrl', e.target.value)}
           onBlur={() => handleBlur('externalUrl')}
         />
         {touched.externalUrl && errors.externalUrl && <div className="text-red-400 text-sm mt-1 mb-2">{errors.externalUrl}</div>}        <textarea
-          className={`w-full px-3 py-2 mb-3 rounded border ${touched.description && errors.description ? 'border-red-500' : 'border-slate-700'} bg-slate-900 text-slate-100`}
+          className={`w-full px-3 py-2 mb-3 rounded border ${touched.description && errors.description ? 'border-red-500' : 'border-border-default'} bg-surface text-text-base`}
           placeholder="Description or comment"
           value={values.description}
           onChange={(e) => handleChange('description', e.target.value)}

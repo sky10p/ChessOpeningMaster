@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -21,12 +21,12 @@ export const ReviewActivityChart: React.FC<ReviewActivityChartProps> = ({
   hasActivity,
 }) => {
   return (
-    <div className="bg-gray-900 rounded-lg p-4 shadow border border-gray-800 flex flex-col items-center">
-      <h3 className="text-lg font-semibold text-gray-200 mb-2">
+    <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center">
+      <h3 className="text-lg font-semibold text-text-muted mb-2">
         Review Activity Over Time (10 days)
       </h3>
       {!hasActivity ? (
-        <div className="text-gray-400 text-center py-8">
+        <div className="text-text-subtle text-center py-8">
           No review activity in the last 10 days
         </div>
       ) : (

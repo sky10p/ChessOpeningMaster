@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { useForm } from "../../../../../hooks";
 
 interface CreateStudyModalProps {
@@ -51,12 +51,12 @@ const CreateStudyModal: React.FC<CreateStudyModalProps> = ({ open, onClose, onSa
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 animate-fade-in">
-      <div className="bg-slate-800 rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md mx-2">
+      <div className="bg-surface-raised rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md mx-2">
         <h3 className="text-lg font-bold mb-4 text-white">Create New Study</h3>
         <form onSubmit={handleSubmit(saveForm)}>
           <div className="mb-3">
             <input
-              className="w-full px-3 py-2 rounded border border-slate-700 bg-slate-900 text-slate-100"              placeholder="Title *"
+              className="w-full px-3 py-2 rounded border border-border-default bg-surface text-text-base"              placeholder="Title *"
               value={values.title}
               onChange={(e) => handleChange("title", e.target.value)}
               onBlur={() => handleBlur("title")}
@@ -69,7 +69,7 @@ const CreateStudyModal: React.FC<CreateStudyModalProps> = ({ open, onClose, onSa
           
           <div className="mb-3">
             <textarea
-              className="w-full px-3 py-2 rounded border border-slate-700 bg-slate-900 text-slate-100"
+              className="w-full px-3 py-2 rounded border border-border-default bg-surface text-text-base"
               placeholder="Description"
               value={values.description}
               onChange={(e) => handleChange("description", e.target.value)}
@@ -82,9 +82,9 @@ const CreateStudyModal: React.FC<CreateStudyModalProps> = ({ open, onClose, onSa
           </div>
           
           <div className="mb-4">
-            <label className="block text-slate-300 text-sm mb-1">Difficulty:</label>
+            <label className="block text-text-muted text-sm mb-1">Difficulty:</label>
             <select
-              className="w-full px-3 py-2 rounded border border-slate-700 bg-slate-900 text-slate-100"
+              className="w-full px-3 py-2 rounded border border-border-default bg-surface text-text-base"
               value={values.difficulty}
               onChange={(e) => handleChange("difficulty", e.target.value)}
             >

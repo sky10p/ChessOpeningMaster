@@ -27,8 +27,8 @@ export const RepertoirePageState: React.FC<RepertoirePageStateProps> = ({
   const text = getStateMessage(status, message);
 
   return (
-    <div className="w-full h-full bg-background text-textLight flex items-center justify-center">
-      <div className="w-full max-w-md mx-4 px-6 py-8 border border-secondary rounded bg-gray-800 text-center">
+    <div className="w-full h-full bg-page text-text-base flex items-center justify-center">
+      <div className="w-full max-w-md mx-4 px-6 py-8 border border-border-default rounded-xl bg-surface text-center">
         <p className="text-base sm:text-lg font-medium">{text}</p>
       </div>
     </div>
