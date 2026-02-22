@@ -61,6 +61,7 @@ describe("DashboardPage", () => {
 
     jest.spyOn(useDashboardModule, "useDashboard").mockReturnValue({
       repertoires: mockRepertoires,
+      loading: false,
       setRepertoires: jest.fn(),
       updateRepertoires: jest.fn().mockResolvedValue(undefined),
     });
@@ -162,6 +163,7 @@ describe("Openings section behaviors", () => {
   it("shows single repertoire directly for an opening", () => {
     jest.spyOn(useDashboardModule, "useDashboard").mockReturnValue({
       repertoires: [makeRep("1", "Rep1", "white", "Ruy Lopez")],
+      loading: false,
       setRepertoires: jest.fn(),
       updateRepertoires: jest.fn().mockResolvedValue(undefined),
     });
@@ -182,6 +184,7 @@ describe("Openings section behaviors", () => {
         makeRep("1", "Rep1", "white", "Ruy Lopez"),
         makeRep("2", "Rep2", "black", "Ruy Lopez"),
       ],
+      loading: false,
       setRepertoires: jest.fn(),
       updateRepertoires: jest.fn().mockResolvedValue(undefined),
     });
@@ -204,6 +207,7 @@ describe("Openings section behaviors", () => {
   it("shows 'No repertoires' if none for an opening", () => {
     jest.spyOn(useDashboardModule, "useDashboard").mockReturnValue({
       repertoires: [],
+      loading: false,
       setRepertoires: jest.fn(),
       updateRepertoires: jest.fn().mockResolvedValue(undefined),
     });
@@ -223,6 +227,7 @@ describe("Openings section behaviors", () => {
         makeRep("1", "Rep1", "white", "Ruy Lopez"),
         makeRep("2", "Rep2", "black", "Italian Game"),
       ],
+      loading: false,
       setRepertoires: jest.fn(),
       updateRepertoires: jest.fn().mockResolvedValue(undefined),
     });
@@ -241,6 +246,7 @@ describe("Openings section behaviors", () => {
   it("View button is present and clickable in Openings section", () => {
     jest.spyOn(useDashboardModule, "useDashboard").mockReturnValue({
       repertoires: [makeRep("1", "Rep1", "white", "Ruy Lopez")],
+      loading: false,
       setRepertoires: jest.fn(),
       updateRepertoires: jest.fn().mockResolvedValue(undefined),
     });

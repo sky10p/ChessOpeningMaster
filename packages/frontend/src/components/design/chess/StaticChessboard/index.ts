@@ -1,0 +1,1 @@
+export { StaticChessboard } from "./StaticChessboard";

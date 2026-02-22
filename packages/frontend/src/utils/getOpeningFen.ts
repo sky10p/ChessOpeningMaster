@@ -1,0 +1,38 @@
+import { Chess } from "chess.js";
+import { IMoveNode } from "@chess-opening-master/common";
+
+const START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+function findOpeningFen(
+  node: IMoveNode,
+  chess: Chess,
+  openingName: string
+): string | null {
+  if (node.variantName === openingName) {
+    return chess.fen();
+  }
+  for (const child of node.children) {
+    if (!child.move) continue;
+    try {
+      chess.move(child.move.san);
+      const result = findOpeningFen(child, chess, openingName);
+      if (result !== null) return result;
+      chess.undo();
+    } catch {
+      chess.undo();
+    }
+  }
+  return null;
+}
+
+export const getOpeningFen = (
+  moveNodes: IMoveNode,
+  openingName: string
+): string => {
+  try {
+    const chess = new Chess();
+    return findOpeningFen(moveNodes, chess, openingName) ?? START_FEN;
+  } catch {
+    return START_FEN;
+  }
+};

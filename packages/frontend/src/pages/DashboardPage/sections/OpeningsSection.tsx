@@ -1,7 +1,8 @@
-﻿import React, { useState, useCallback } from "react";
+﻿import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { IRepertoireDashboard, TrainVariantInfo } from "@chess-opening-master/common";
 import { MoveVariantNode } from "../../../models/VariantNode";
 import { OpeningCard } from "../components/OpeningCard";
+import { OpeningCardSkeleton } from "../components/OpeningCardSkeleton";
 import { getVariantsProgressInfo } from "../../../components/design/SelectTrainVariants/utils";
 import { RepertoireFilterDropdown } from "../components/RepertoireFilterDropdown";
 
@@ -13,6 +14,7 @@ interface OpeningsSectionProps {
   getTrainVariantInfo: (trainInfo: TrainVariantInfo[]) => Record<string, TrainVariantInfo>;
   goToRepertoire: (repertoire: IRepertoireDashboard) => void;
   goToTrainRepertoire: (repertoire: IRepertoireDashboard) => void;
+  loading?: boolean;
 }
 
 export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
@@ -23,11 +25,27 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
   getTrainVariantInfo,
   goToRepertoire,
   goToTrainRepertoire,
+  loading = false,
 }) => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [orientationFilter, setOrientationFilter] = useState<'all' | 'white' | 'black'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'errors' | 'successful' | 'new'>('all');
   const [selectedRepertoires, setSelectedRepertoires] = useState<string[]>([]);
+
+  const hasReceivedData = useRef(filteredRepertoires.length > 0);
+  const [ready, setReady] = useState(filteredRepertoires.length > 0);
+
+  useEffect(() => {
+    if (!hasReceivedData.current && (filteredRepertoires.length > 0 || !loading)) {
+      hasReceivedData.current = true;
+      setReady(true);
+    }
+  }, [filteredRepertoires, loading]);
+
+  const isLoading = loading || !ready;
+
+  const INITIAL_BATCH = 10;
+  const BATCH_SIZE = 8;
 
   const getVariantsByOrientation = useCallback((repertoires: IRepertoireDashboard[], opening: string) => {
     return repertoires
@@ -86,6 +104,30 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
     );
   }, [selectedRepertoires, filteredRepertoires]);
 
+  const filteredOpenings = useMemo(
+    () =>
+      openings
+        .filter(o => o.toLowerCase().includes(openingNameFilter.toLowerCase()))
+        .filter(filterByStatus)
+        .filter(filterByOrientation)
+        .filter(filterByRepertoire),
+    [openings, openingNameFilter, filterByStatus, filterByOrientation, filterByRepertoire]
+  );
+
+  const [renderedCount, setRenderedCount] = useState(INITIAL_BATCH);
+
+  useEffect(() => {
+    setRenderedCount(INITIAL_BATCH);
+  }, [filteredOpenings]);
+
+  useEffect(() => {
+    if (isLoading || renderedCount >= filteredOpenings.length) return;
+    const id = requestAnimationFrame(() =>
+      setRenderedCount(c => Math.min(c + BATCH_SIZE, filteredOpenings.length))
+    );
+    return () => cancelAnimationFrame(id);
+  }, [renderedCount, filteredOpenings.length, isLoading]);
+
   return (
     <section className="flex-1 flex flex-col min-h-0">
       <div className="sticky top-12 sm:top-16 z-10 bg-page pb-2 pt-2 sm:pt-4 px-2 sm:px-4 border-b border-border-subtle">
@@ -132,42 +174,49 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
         </div>
       </div>
       <div className="flex-1 overflow-y-auto pt-2 sm:pt-4 px-1 sm:px-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          {openings
-            .filter(opening => opening.toLowerCase().includes(openingNameFilter.toLowerCase()))
-            .filter(filterByStatus)
-            .filter(filterByOrientation)
-            .filter(filterByRepertoire)
-            .map((opening) => {
-              const repertoiresWithOpening = filteredRepertoires.filter((repertoire) =>
-                (orientationFilter === 'all' || repertoire.orientation === orientationFilter) &&
-                repertoire.moveNodes
-                  ? MoveVariantNode.initMoveVariantNode(repertoire.moveNodes)
-                      .getVariants()
-                      .some((v) => v.name === opening)
-                  : false
-              );
-              const summaryVariants = getVariantsByOrientation(filteredRepertoires, opening);
-              const variantsInfo = filteredRepertoires.flatMap((r) => r.variantsInfo || []);
-              const summaryVariantInfo = getTrainVariantInfo(variantsInfo);
-              const isOpen = expanded[opening] || false;
-              const repCount = repertoiresWithOpening.length;
-              return (
-                <OpeningCard
-                  key={opening}
-                  opening={opening}
-                  repertoiresWithOpening={repertoiresWithOpening}
-                  summaryVariants={summaryVariants}
-                  summaryVariantInfo={summaryVariantInfo}
-                  isOpen={isOpen}
-                  repCount={repCount}
-                  onToggle={() => setExpanded((prev) => ({ ...prev, [opening]: !isOpen }))}
-                  goToRepertoire={goToRepertoire}
-                  goToTrainRepertoire={goToTrainRepertoire}
-                  getTrainVariantInfo={getTrainVariantInfo}
-                />
-              );
-            })}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+          {isLoading
+            ? Array.from({ length: 12 }).map((_, i) => (
+                <OpeningCardSkeleton key={i} />
+              ))
+            : (
+              <>
+                {filteredOpenings.slice(0, renderedCount).map((opening) => {
+                  const repertoiresWithOpening = filteredRepertoires.filter((repertoire) =>
+                    (orientationFilter === 'all' || repertoire.orientation === orientationFilter) &&
+                    repertoire.moveNodes
+                      ? MoveVariantNode.initMoveVariantNode(repertoire.moveNodes)
+                          .getVariants()
+                          .some((v) => v.name === opening)
+                      : false
+                  );
+                  const summaryVariants = getVariantsByOrientation(filteredRepertoires, opening);
+                  const variantsInfo = filteredRepertoires.flatMap((r) => r.variantsInfo || []);
+                  const summaryVariantInfo = getTrainVariantInfo(variantsInfo);
+                  const isOpen = expanded[opening] || false;
+                  const repCount = repertoiresWithOpening.length;
+                  return (
+                    <OpeningCard
+                      key={opening}
+                      opening={opening}
+                      repertoiresWithOpening={repertoiresWithOpening}
+                      summaryVariants={summaryVariants}
+                      summaryVariantInfo={summaryVariantInfo}
+                      isOpen={isOpen}
+                      repCount={repCount}
+                      onToggle={() => setExpanded((prev) => ({ ...prev, [opening]: !isOpen }))}
+                      goToRepertoire={goToRepertoire}
+                      goToTrainRepertoire={goToTrainRepertoire}
+                      getTrainVariantInfo={getTrainVariantInfo}
+                    />
+                  );
+                })}
+                {renderedCount < filteredOpenings.length &&
+                  Array.from({ length: Math.min(BATCH_SIZE, filteredOpenings.length - renderedCount) }).map((_, i) => (
+                    <OpeningCardSkeleton key={`pending-${i}`} />
+                  ))}
+              </>
+            )}
         </div>
       </div>
     </section>

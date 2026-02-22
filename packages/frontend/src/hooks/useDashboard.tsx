@@ -4,11 +4,16 @@ import { IRepertoireDashboard } from "@chess-opening-master/common";
 
 export const useDashboard = () => {
     const [dashbardRepertoires, setDashboardRepertoires] = useState<IRepertoireDashboard[]>([]);
-     
+    const [loading, setLoading] = useState(true);
+
     useEffect(() => {
-        getFullInfoRepertoires().then((data) => {
-            setDashboardRepertoires(data);
-        });
+        setLoading(true);
+        getFullInfoRepertoires()
+            .then((data) => {
+                setDashboardRepertoires(data);
+                setLoading(false);
+            })
+            .catch(() => setLoading(false));
     }, []);
 
     const updateRepertoires = useCallback(async () => {
@@ -22,6 +27,7 @@ export const useDashboard = () => {
 
     return {
         repertoires: dashbardRepertoires,
+        loading,
         setRepertoires: setDashboardRepertoires,
         updateRepertoires
     };
