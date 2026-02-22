@@ -23,11 +23,15 @@ function findOpeningFen(
     }
 
     const result = findOpeningFen(child, chess, openingName);
-    if (result !== null) return result;
-
     if (moveApplied) {
-      chess.undo();
+      try {
+        chess.undo();
+      } catch {
+        return null;
+      }
     }
+
+    if (result !== null) return result;
   }
   return null;
 }

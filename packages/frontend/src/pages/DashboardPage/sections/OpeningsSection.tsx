@@ -115,6 +115,16 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
     [openings, openingNameFilter, filterByStatus, filterByOrientation, filterByRepertoire]
   );
 
+  const allVariantsInfo = useMemo(
+    () => filteredRepertoires.flatMap((repertoire) => repertoire.variantsInfo || []),
+    [filteredRepertoires]
+  );
+
+  const summaryVariantInfo = useMemo(
+    () => getTrainVariantInfo(allVariantsInfo),
+    [allVariantsInfo, getTrainVariantInfo]
+  );
+
   const [renderedCount, setRenderedCount] = useState(INITIAL_BATCH);
 
   useEffect(() => {
@@ -192,8 +202,6 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
                       : false
                   );
                   const summaryVariants = getVariantsByOrientation(filteredRepertoires, opening);
-                  const variantsInfo = filteredRepertoires.flatMap((r) => r.variantsInfo || []);
-                  const summaryVariantInfo = getTrainVariantInfo(variantsInfo);
                   const isOpen = expanded[opening] || false;
                   const repCount = repertoiresWithOpening.length;
                   return (

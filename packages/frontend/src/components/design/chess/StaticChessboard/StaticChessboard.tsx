@@ -13,6 +13,16 @@ interface StaticChessboardProps {
   orientation?: "white" | "black";
 }
 
+const getAccessibleBoardLabel = (fen: string): string => {
+  try {
+    const chess = new Chess(fen);
+    const turn = chess.turn() === "w" ? "White" : "Black";
+    return `Chess board position, ${turn} to move`;
+  } catch {
+    return "Chess board position";
+  }
+};
+
 export const StaticChessboard = React.memo<StaticChessboardProps>(
   ({ fen, orientation = "white" }) => {
     const board = useMemo(() => {
@@ -29,7 +39,7 @@ export const StaticChessboard = React.memo<StaticChessboardProps>(
     return (
       <div
         role="img"
-        aria-label={`Chess position: ${fen}`}
+        aria-label={getAccessibleBoardLabel(fen)}
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(8, 1fr)",

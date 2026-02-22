@@ -193,7 +193,7 @@ export const OpeningCard: React.FC<OpeningCardProps> = ({
               <Button
                 intent="ghost"
                 size="sm"
-                onClick={() => goToRepertoire(primaryRepertoire, opening)}
+                onClick={() => primaryRepertoire && goToRepertoire(primaryRepertoire, opening)}
                 aria-label="View repertoire"
                 className="text-white/80 hover:text-white hover:bg-white/15 border border-white/25 hover:border-white/50"
               >
