@@ -24,6 +24,13 @@ The main `Dashboard` tab stays focused on general repertoire KPIs, while `Path I
 - Dashboard page tab wiring:
   - `packages/frontend/src/pages/DashboardPage/DashboardPage.tsx`
 
+## Openings Board Preview
+
+- Opening cards compute a preview position with `getOpeningFen` from:
+  - `packages/frontend/src/utils/getOpeningFen.ts`
+- The utility traverses the repertoire move tree by SAN moves and returns the FEN for the matching `variantName`.
+- If no matching opening is found or board-state resolution fails, cards use the initial chess start FEN as fallback.
+
 ## Backend/API Dependencies
 
 The tab reuses path-insight APIs:

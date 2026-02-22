@@ -61,6 +61,7 @@ describe("DashboardPage", () => {
 
     jest.spyOn(useDashboardModule, "useDashboard").mockReturnValue({
       repertoires: mockRepertoires,
+      loading: false,
       setRepertoires: jest.fn(),
       updateRepertoires: jest.fn().mockResolvedValue(undefined),
     });
@@ -162,6 +163,7 @@ describe("Openings section behaviors", () => {
   it("shows single repertoire directly for an opening", () => {
     jest.spyOn(useDashboardModule, "useDashboard").mockReturnValue({
       repertoires: [makeRep("1", "Rep1", "white", "Ruy Lopez")],
+      loading: false,
       setRepertoires: jest.fn(),
       updateRepertoires: jest.fn().mockResolvedValue(undefined),
     });
@@ -172,8 +174,8 @@ describe("Openings section behaviors", () => {
     );
     fireEvent.click(screen.getByRole("tab", { name: /openings/i }));
     expect(screen.getByText("Ruy Lopez")).toBeInTheDocument();
-    expect(screen.getByText("Rep1")).toBeInTheDocument();
-    expect(screen.queryByText(/Show/)).not.toBeInTheDocument();
+    expect(screen.getByText(/Rep1/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Expand/i })).not.toBeInTheDocument();
   });
 
   it("shows expand/collapse for multiple repertoires for an opening", () => {
@@ -182,6 +184,7 @@ describe("Openings section behaviors", () => {
         makeRep("1", "Rep1", "white", "Ruy Lopez"),
         makeRep("2", "Rep2", "black", "Ruy Lopez"),
       ],
+      loading: false,
       setRepertoires: jest.fn(),
       updateRepertoires: jest.fn().mockResolvedValue(undefined),
     });
@@ -192,18 +195,19 @@ describe("Openings section behaviors", () => {
     );
     fireEvent.click(screen.getByRole("tab", { name: /openings/i }));
     expect(screen.getByText("Ruy Lopez")).toBeInTheDocument();
-    const showBtn = screen.getByRole("button", { name: /Show 2 repertoires/i });
+    const showBtn = screen.getByRole("button", { name: /Expand/i });
     expect(showBtn).toBeInTheDocument();
     fireEvent.click(showBtn);
     expect(screen.getByText("Rep1")).toBeInTheDocument();
     expect(screen.getByText("Rep2")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /Hide repertoires/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Collapse/i }));
     expect(screen.queryByText("Rep1")).not.toBeInTheDocument();
   });
 
   it("shows 'No repertoires' if none for an opening", () => {
     jest.spyOn(useDashboardModule, "useDashboard").mockReturnValue({
       repertoires: [],
+      loading: false,
       setRepertoires: jest.fn(),
       updateRepertoires: jest.fn().mockResolvedValue(undefined),
     });
@@ -223,6 +227,7 @@ describe("Openings section behaviors", () => {
         makeRep("1", "Rep1", "white", "Ruy Lopez"),
         makeRep("2", "Rep2", "black", "Italian Game"),
       ],
+      loading: false,
       setRepertoires: jest.fn(),
       updateRepertoires: jest.fn().mockResolvedValue(undefined),
     });
@@ -241,6 +246,7 @@ describe("Openings section behaviors", () => {
   it("View button is present and clickable in Openings section", () => {
     jest.spyOn(useDashboardModule, "useDashboard").mockReturnValue({
       repertoires: [makeRep("1", "Rep1", "white", "Ruy Lopez")],
+      loading: false,
       setRepertoires: jest.fn(),
       updateRepertoires: jest.fn().mockResolvedValue(undefined),
     });
@@ -250,7 +256,7 @@ describe("Openings section behaviors", () => {
       </BrowserRouter>
     );
     fireEvent.click(screen.getByRole("tab", { name: /openings/i }));
-    const viewBtn = screen.getByRole("button", { name: /^view$/i });
+    const viewBtn = screen.getByRole("button", { name: /View repertoire/i });
     expect(viewBtn).toBeInTheDocument();
     fireEvent.click(viewBtn);
   });

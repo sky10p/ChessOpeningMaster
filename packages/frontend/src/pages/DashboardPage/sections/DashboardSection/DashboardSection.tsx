@@ -18,6 +18,7 @@ import {
 
 export const DashboardSection: React.FC<DashboardSectionProps> = ({
   repertoires,
+  loading = false,
 }) => {
   const [filter, setFilter] = useState<FilterType>("all");
   const navigate = useNavigate();
@@ -74,6 +75,32 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
     params.set("section", "overview");
     navigate({ pathname: location.pathname, search: params.toString() }, { replace: true });
   };
+
+  if (loading) {
+    return (
+      <section
+        className="flex-1 flex flex-col min-h-0 p-4 overflow-y-auto"
+        aria-label="Loading dashboard"
+        role="status"
+        aria-busy="true"
+      >
+        <div className="mb-4">
+          <div className="h-7 w-56 rounded-lg bg-surface-raised animate-pulse mb-2" />
+          <div className="h-4 w-80 rounded bg-surface-raised animate-pulse" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="rounded-xl border border-border-default bg-surface-raised animate-pulse h-24" />
+          ))}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="rounded-xl border border-border-default bg-surface-raised animate-pulse h-56" />
+          ))}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="flex-1 flex flex-col min-h-0 p-4 overflow-y-auto">

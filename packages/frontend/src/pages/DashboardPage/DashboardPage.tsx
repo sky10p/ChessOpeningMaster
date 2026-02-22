@@ -43,7 +43,7 @@ const SECTION_ICONS: Record<string, React.ReactNode> = {
 export const DashboardPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { repertoires, updateRepertoires } = useDashboard();
+  const { repertoires, loading, updateRepertoires } = useDashboard();
   const [orientationFilter, setOrientationFilter] = useState<
     "all" | "white" | "black"
   >("all");
@@ -169,6 +169,7 @@ export const DashboardPage = () => {
         {selectedSection === 'dashboard' && (
           <DashboardSection
             repertoires={repertoires}
+            loading={loading}
           />
         )}
         {selectedSection === 'overview' && (
@@ -200,6 +201,7 @@ export const DashboardPage = () => {
             getTrainVariantInfo={getTrainVariantInfo}
             goToRepertoire={goToRepertoire}
             goToTrainRepertoire={goToTrainRepertoire}
+            loading={loading}
           />
         )}
         {selectedSection === 'studies' && (

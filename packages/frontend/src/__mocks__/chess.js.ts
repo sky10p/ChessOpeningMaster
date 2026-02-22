@@ -86,6 +86,39 @@ export class Chess {
     this.currentFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     this.moveHistory = [];
   }
+
+  board(): (null | { type: string; color: string })[][] {
+    const pieceMap: { [key: string]: { type: string; color: string } } = {
+      p: { type: 'p', color: 'b' },
+      r: { type: 'r', color: 'b' },
+      n: { type: 'n', color: 'b' },
+      b: { type: 'b', color: 'b' },
+      q: { type: 'q', color: 'b' },
+      k: { type: 'k', color: 'b' },
+      P: { type: 'p', color: 'w' },
+      R: { type: 'r', color: 'w' },
+      N: { type: 'n', color: 'w' },
+      B: { type: 'b', color: 'w' },
+      Q: { type: 'q', color: 'w' },
+      K: { type: 'k', color: 'w' },
+    };
+
+    const fenParts = this.currentFen.split(' ');
+    const rows = fenParts[0].split('/');
+
+    return rows.map((row) => {
+      const squares: (null | { type: string; color: string })[] = [];
+      for (const char of row) {
+        const num = parseInt(char, 10);
+        if (!isNaN(num)) {
+          for (let i = 0; i < num; i++) squares.push(null);
+        } else {
+          squares.push(pieceMap[char] || null);
+        }
+      }
+      return squares;
+    });
+  }
 }
 
 export const WHITE = 'w';

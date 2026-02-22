@@ -43,6 +43,7 @@ export interface ReviewActivityItem {
 
 export interface DashboardSectionProps {
   repertoires: IRepertoireDashboard[];
+  loading?: boolean;
 }
 
 export interface ProgressStats {
