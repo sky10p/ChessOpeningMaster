@@ -7,6 +7,8 @@ const DARK_SQUARE = "#B58863";
 
 const WHITE_RANKS = [0, 1, 2, 3, 4, 5, 6, 7] as const;
 const BLACK_RANKS = [7, 6, 5, 4, 3, 2, 1, 0] as const;
+const WHITE_FILES = [0, 1, 2, 3, 4, 5, 6, 7] as const;
+const BLACK_FILES = [7, 6, 5, 4, 3, 2, 1, 0] as const;
 
 interface StaticChessboardProps {
   fen: string;
@@ -34,7 +36,7 @@ export const StaticChessboard = React.memo<StaticChessboardProps>(
     }, [fen]);
 
     const rankIndices = orientation === "white" ? WHITE_RANKS : BLACK_RANKS;
-    const fileIndices = orientation === "white" ? WHITE_RANKS : BLACK_RANKS;
+    const fileIndices = orientation === "white" ? WHITE_FILES : BLACK_FILES;
 
     return (
       <div

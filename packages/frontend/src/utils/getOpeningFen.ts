@@ -14,22 +14,25 @@ function findOpeningFen(
   for (const child of node.children) {
     if (!child.move) continue;
     const moveSan = child.move.san;
-    let moveApplied = false;
     try {
       chess.move(moveSan);
-      moveApplied = true;
     } catch {
       continue;
     }
 
-    const result = findOpeningFen(child, chess, openingName);
-    if (moveApplied) {
+    let result: string | null = null;
+    let undoFailed = false;
+    try {
+      result = findOpeningFen(child, chess, openingName);
+    } finally {
       try {
         chess.undo();
       } catch {
-        return null;
+        undoFailed = true;
       }
     }
+
+    if (undoFailed) return null;
 
     if (result !== null) return result;
   }

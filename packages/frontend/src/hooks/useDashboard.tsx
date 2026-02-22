@@ -20,11 +20,14 @@ export const useDashboard = () => {
     }, []);
 
     const updateRepertoires = useCallback(async () => {
+        setLoading(true);
         try {
             const updatedRepertoires = await getFullInfoRepertoires();
             setDashboardRepertoires(updatedRepertoires);
         } catch (error) {
             console.error("Failed to update repertoires:", error);
+        } finally {
+            setLoading(false);
         }
     }, []);
 

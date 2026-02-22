@@ -85,4 +85,30 @@ describe("getOpeningFen", () => {
     expect(getOpeningFen(tree, "King's Pawn")).toBe(START_FEN);
     expect(moveSpy).toHaveBeenCalled();
   });
+
+  it("skips invalid SAN branches and still finds opening in valid branch", () => {
+    const tree = createNode("root", undefined, "Starting Position", [
+      createNode("invalid", "Qa9", "Invalid Branch"),
+      createNode("e4", "e4", "King's Pawn"),
+    ]);
+
+    expect(getOpeningFen(tree, "King's Pawn")).toBe(
+      "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
+    );
+  });
+
+  it("falls back to START_FEN when undo fails after a successful move", () => {
+    const undoSpy = jest
+      .spyOn(Chess.prototype, "undo")
+      .mockImplementation(() => {
+        throw new Error("undo failed");
+      });
+
+    const tree = createNode("root", undefined, "Starting Position", [
+      createNode("e4", "e4", "King's Pawn"),
+    ]);
+
+    expect(getOpeningFen(tree, "French Defense")).toBe(START_FEN);
+    expect(undoSpy).toHaveBeenCalled();
+  });
 });

@@ -32,7 +32,7 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
   const [statusFilter, setStatusFilter] = useState<'all' | 'errors' | 'successful' | 'new'>('all');
   const [selectedRepertoires, setSelectedRepertoires] = useState<string[]>([]);
 
-  const hasReceivedData = useRef(filteredRepertoires.length > 0);
+  const hasReceivedData = useRef(false);
   const [ready, setReady] = useState(filteredRepertoires.length > 0);
 
   useEffect(() => {
@@ -225,10 +225,6 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
                     />
                   );
                 })}
-                {renderedCount < filteredOpenings.length &&
-                  Array.from({ length: Math.min(BATCH_SIZE, filteredOpenings.length - renderedCount) }).map((_, i) => (
-                    <OpeningCardSkeleton key={`pending-${i}`} />
-                  ))}
               </>
             )}
         </div>
