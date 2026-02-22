@@ -78,7 +78,12 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
 
   if (loading) {
     return (
-      <section className="flex-1 flex flex-col min-h-0 p-4 overflow-y-auto">
+      <section
+        className="flex-1 flex flex-col min-h-0 p-4 overflow-y-auto"
+        aria-label="Loading dashboard"
+        role="status"
+        aria-busy="true"
+      >
         <div className="mb-4">
           <div className="h-7 w-56 rounded-lg bg-surface-raised animate-pulse mb-2" />
           <div className="h-4 w-80 rounded bg-surface-raised animate-pulse" />

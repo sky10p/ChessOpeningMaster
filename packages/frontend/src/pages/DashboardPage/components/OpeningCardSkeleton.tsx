@@ -6,7 +6,12 @@ const Shimmer: React.FC<{ className?: string }> = ({ className }) => (
 );
 
 export const OpeningCardSkeleton: React.FC = () => (
-  <div className="rounded-xl border border-border-default shadow-surface overflow-hidden">
+  <div
+    className="rounded-xl border border-border-default shadow-surface overflow-hidden"
+    aria-label="Loading opening card"
+    role="status"
+    aria-busy="true"
+  >
     <div className="relative w-full aspect-square">
       <div className="absolute inset-0 grid grid-cols-8 grid-rows-8">
         {Array.from({ length: 64 }).map((_, i) => {

@@ -1,4 +1,4 @@
-﻿import React, { useMemo, useRef, useState } from "react";
+﻿import React, { useEffect, useMemo, useRef, useState } from "react";
 import { EyeIcon, PlayIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/solid";
 import { VariantsProgressBar } from "../../../components/design/SelectTrainVariants/VariantsProgressBar";
 import { IRepertoireDashboard, TrainVariantInfo } from "@chess-opening-master/common";
@@ -48,6 +48,14 @@ export const OpeningCard: React.FC<OpeningCardProps> = ({
     peekTimer.current = null;
     setIsPeeking(false);
   };
+
+  useEffect(() => {
+    return () => {
+      if (peekTimer.current) {
+        clearTimeout(peekTimer.current);
+      }
+    };
+  }, []);
 
   const fen = useMemo(
     () =>
@@ -158,7 +166,9 @@ export const OpeningCard: React.FC<OpeningCardProps> = ({
             {opening}
           </h3>
           <p className="text-[11px] text-white/70 truncate leading-none">
-            {isSingle ? primaryRepertoire.name : `${repCount} repertoires`}
+            {isSingle
+              ? (primaryRepertoire?.name ?? "No repertoire")
+              : `${repCount} repertoires`}
             {" · "}
             {summaryVariants.length} {summaryVariants.length === 1 ? "line" : "lines"}
           </p>
@@ -172,7 +182,8 @@ export const OpeningCard: React.FC<OpeningCardProps> = ({
             <Button
               intent="primary"
               size="sm"
-              onClick={() => goToTrainRepertoire(primaryRepertoire, opening)}
+              onClick={() => primaryRepertoire && goToTrainRepertoire(primaryRepertoire, opening)}
+              disabled={!primaryRepertoire}
               className="flex-1 justify-center"
             >
               <PlayIcon className="h-3.5 w-3.5" />

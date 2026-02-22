@@ -45,7 +45,8 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
   const isLoading = loading || !ready;
 
   const INITIAL_BATCH = 10;
-  const BATCH_SIZE = 8;
+  const BATCH_SIZE = 16;
+  const BATCH_DELAY_MS = 80;
 
   const getVariantsByOrientation = useCallback((repertoires: IRepertoireDashboard[], opening: string) => {
     return repertoires
@@ -122,10 +123,10 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
 
   useEffect(() => {
     if (isLoading || renderedCount >= filteredOpenings.length) return;
-    const id = requestAnimationFrame(() =>
+    const id = window.setTimeout(() =>
       setRenderedCount(c => Math.min(c + BATCH_SIZE, filteredOpenings.length))
-    );
-    return () => cancelAnimationFrame(id);
+    , BATCH_DELAY_MS);
+    return () => window.clearTimeout(id);
   }, [renderedCount, filteredOpenings.length, isLoading]);
 
   return (

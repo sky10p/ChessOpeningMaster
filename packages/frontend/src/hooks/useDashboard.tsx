@@ -13,7 +13,10 @@ export const useDashboard = () => {
                 setDashboardRepertoires(data);
                 setLoading(false);
             })
-            .catch(() => setLoading(false));
+            .catch((error) => {
+                console.error("Failed to load dashboard repertoires:", error);
+                setLoading(false);
+            });
     }, []);
 
     const updateRepertoires = useCallback(async () => {

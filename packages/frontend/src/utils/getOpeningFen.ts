@@ -13,12 +13,19 @@ function findOpeningFen(
   }
   for (const child of node.children) {
     if (!child.move) continue;
+    const moveSan = child.move.san;
+    let moveApplied = false;
     try {
-      chess.move(child.move.san);
-      const result = findOpeningFen(child, chess, openingName);
-      if (result !== null) return result;
-      chess.undo();
+      chess.move(moveSan);
+      moveApplied = true;
     } catch {
+      continue;
+    }
+
+    const result = findOpeningFen(child, chess, openingName);
+    if (result !== null) return result;
+
+    if (moveApplied) {
       chess.undo();
     }
   }
