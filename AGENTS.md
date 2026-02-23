@@ -234,6 +234,8 @@ mongodb://localhost:27017/chess_opening_master
 - [Troubleshooting Guide](src/doc/Troubleshooting-Guide.md) - Common issues, solutions, and debugging workflows
 - [React Effect & Data Fetching Guide](src/doc/React-Effect-Data-Fetching-Guide.md) - Project rules for when to avoid `useEffect` and how to fetch safely when needed
 - [PathPage and Next Lesson Logic](src/doc/PathPage-Next-Lesson-Logic.md) - End-to-end `/path` behavior and backend next-lesson selection rules
+- [Train Error Reinforcement Mode](src/doc/Train-Error-Reinforcement-Mode.md) - Reinforcement flow, daily error snapshot rules, and mistake-SRS lifecycle
+- [Train Section Architecture](src/doc/Train-Section-Architecture.md) - `/train` routes, API/data flow, and mastery metrics for opening-level training
 - [Spaced Repetition Upgrade Plan](src/doc/Spaced-Repetition-Upgrade-Plan.md) - Rating-based scheduler migration plan with no same-day repeats and Path analytics
 - [Dashboard Spaced Repetition Insights](src/doc/Dashboard-Spaced-Repetition-Insights.md) - Dashboard charts and data flow based on path plan/analytics insights
 - [Game Import Service Architecture](src/doc/Game-Import-Service-Architecture.md) - Backend module boundaries and orchestration flow for My Games
@@ -257,6 +259,26 @@ Core rules to preserve:
 - Same-day repeats are blocked by `lastReviewedDayKey` checks for path selection.
 - Removing a variant from path deletes its `variantsInfo` record and reloads path in the active filter.
 - All path selection is user-scoped; do not bypass `getRequestUserId(req)` filtering.
+
+## Train Rules (Critical for Agents)
+
+Before changing `TrainPage`, `TrainOpeningPage`, Train reinforcement flow, or backend `/train` and mistake endpoints, read:
+- `src/doc/Train-Error-Reinforcement-Mode.md`
+- `src/doc/Train-Section-Architecture.md`
+
+Core rules to preserve:
+- Daily variant error snapshots are monotonic within the same UTC day:
+  - same-day reviews can add mistakes/increase count,
+  - same-day reviews must not reduce/remove stored snapshot errors.
+- On a later UTC day, the new day snapshot replaces the previous day snapshot.
+- Mistake SRS (`variantMistakes`) is separate from the daily variant snapshot:
+  - mistake scheduling metadata can evolve with ratings,
+  - daily error snapshot immutability rules still apply.
+- Reinforcement mode flow remains:
+  - variant completion -> results summary -> fix mistakes loop -> full-run confirm.
+- Train opening pages are repertoire-scoped:
+  - route shape is `/train/repertoire/:repertoireId/opening/:openingName`,
+  - do not merge openings across repertoires in this view.
 
 ## My Games (Games Intelligence) Rules (Critical for Agents)
 

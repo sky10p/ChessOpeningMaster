@@ -22,7 +22,11 @@ import { useFooterDispatch } from "../../../contexts/FooterContext";
 import { RepertoireWorkspaceLayout } from "../shared/RepertoireWorkspaceLayout";
 import { ReviewRating } from "@chess-opening-master/common";
 import { useAlertContext } from "../../../contexts/AlertContext";
-import { ReviewRatingDialog } from "../../../components/design/dialogs/ReviewRatingDialog";
+import { VariantResultsModal } from "./components/VariantResultsModal";
+import { MistakeReinforcementPanel } from "./components/MistakeReinforcementPanel";
+import { MistakeRatingSheet } from "./components/MistakeRatingSheet";
+import { FullRunConfirmPanel } from "./components/FullRunConfirmPanel";
+import { FocusModeMoveProgress } from "./components/FocusModeMoveProgress";
 
 const TrainRepertoireViewContainer: React.FC = () => {
   const [panelSelected, setPanelSelected] = React.useState<
@@ -47,6 +51,15 @@ const TrainRepertoireViewContainer: React.FC = () => {
     pendingVariantReview,
     submitPendingVariantReview,
     markHintUsed,
+    mode,
+    trainingPhase,
+    reinforcementSession,
+    startMistakeReinforcement,
+    submitCurrentMistakeRating,
+    isSavingMistakeRating,
+    focusModeProgress,
+    fullRunConfirmState,
+    finishFullRunConfirm,
   } = useTrainRepertoireContext();
   const [selectedRating, setSelectedRating] = React.useState<ReviewRating>("good");
   const [isSavingRating, setIsSavingRating] = React.useState(false);
@@ -55,6 +68,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
     removeIcon: removeIconFooter,
     setIsVisible,
   } = useFooterDispatch();
+  const autoFixReviewKeyRef = React.useRef<string | null>(null);
 
   useEffect(() => {
     if (!pendingVariantReview) {
@@ -259,46 +273,128 @@ const TrainRepertoireViewContainer: React.FC = () => {
     ]
   );
 
-  const handleReviewRating = async (rating: ReviewRating) => {
+  const handleFinishWithoutReinforcement = React.useCallback(
+    async (rating: ReviewRating) => {
+      if (isSavingRating || !pendingVariantReview) {
+        return;
+      }
+      try {
+        setIsSavingRating(true);
+        await submitPendingVariantReview(rating);
+      } catch (error) {
+        showAlert("Failed to save review rating", "error", 1800);
+      } finally {
+        setIsSavingRating(false);
+      }
+    },
+    [isSavingRating, pendingVariantReview, showAlert, submitPendingVariantReview]
+  );
+
+  const handleResultsModalClose = () => {
     if (isSavingRating || !pendingVariantReview) {
       return;
     }
+    void handleFinishWithoutReinforcement(selectedRating);
+  };
+
+  const handleFixMistakesNow = React.useCallback(async () => {
+    if (isSavingRating || !pendingVariantReview) {
+      return;
+    }
+    const reviewToReinforce = pendingVariantReview;
     try {
       setIsSavingRating(true);
-      await submitPendingVariantReview(rating);
+      await submitPendingVariantReview(selectedRating);
+      startMistakeReinforcement(reviewToReinforce);
     } catch (error) {
-      showAlert("Failed to save review rating", "error", 1800);
+      showAlert("Failed to start reinforcement mode", "error", 1800);
     } finally {
       setIsSavingRating(false);
     }
-  };
+  }, [
+    isSavingRating,
+    pendingVariantReview,
+    selectedRating,
+    showAlert,
+    startMistakeReinforcement,
+    submitPendingVariantReview,
+  ]);
 
-  const handleReviewDialogClose = () => {
-    if (isSavingRating || !pendingVariantReview) {
+  const handleMistakeRating = React.useCallback(
+    async (rating: ReviewRating) => {
+      try {
+        await submitCurrentMistakeRating(rating);
+      } catch {
+        showAlert("Failed to save mistake rating", "error", 1800);
+      }
+    },
+    [showAlert, submitCurrentMistakeRating]
+  );
+
+  useEffect(() => {
+    if (
+      mode !== "mistakes" ||
+      trainingPhase !== "standard" ||
+      !pendingVariantReview ||
+      pendingVariantReview.reinforcementMistakes.length === 0 ||
+      isSavingRating
+    ) {
       return;
     }
-    void handleReviewRating(selectedRating);
-  };
+    const reviewKey = `${pendingVariantReview.variantName}::${pendingVariantReview.startingFen}`;
+    if (autoFixReviewKeyRef.current === reviewKey) {
+      return;
+    }
+    autoFixReviewKeyRef.current = reviewKey;
+    void handleFixMistakesNow();
+  }, [
+    handleFixMistakesNow,
+    isSavingRating,
+    mode,
+    pendingVariantReview,
+    trainingPhase,
+  ]);
 
   return (
     <>
       <RepertoireWorkspaceLayout
         title={`Training ${repertoireName}`}
         board={<BoardContainer isTraining={true} />}
+        boardActions={
+          focusModeProgress ? (
+            <FocusModeMoveProgress progress={focusModeProgress} />
+          ) : undefined
+        }
         mobilePanel={mobilePanelContent}
         desktopPanel={desktopPanelContent}
       />
-      <ReviewRatingDialog
+      <VariantResultsModal
         open={Boolean(pendingVariantReview)}
         pendingVariantReview={pendingVariantReview}
         selectedRating={selectedRating}
-        isSavingRating={isSavingRating}
-        onClose={handleReviewDialogClose}
+        isSaving={isSavingRating}
+        onFinish={handleResultsModalClose}
+        onFixMistakes={handleFixMistakesNow}
         onSelectRating={(rating) => {
           setSelectedRating(rating);
-          void handleReviewRating(rating);
         }}
       />
+      {trainingPhase === "reinforcement" && reinforcementSession ? (
+        <>
+          <MistakeReinforcementPanel session={reinforcementSession} />
+          <MistakeRatingSheet
+            open={reinforcementSession.awaitingRating}
+            isSaving={isSavingMistakeRating}
+            onRate={handleMistakeRating}
+          />
+        </>
+      ) : null}
+      {trainingPhase === "fullRunConfirm" && fullRunConfirmState ? (
+        <FullRunConfirmPanel
+          state={fullRunConfirmState}
+          onFinish={finishFullRunConfirm}
+        />
+      ) : null}
     </>
   );
 };

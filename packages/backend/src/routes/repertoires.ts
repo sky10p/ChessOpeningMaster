@@ -10,6 +10,8 @@ import {
   getVariantsInfo,
   postVariantsInfo,
   postVariantReview,
+  getVariantMistakes,
+  postVariantMistakeReview,
   updateRepertoire,
   updateRepertoireName,
   moveRepertoireOrderUp,
@@ -31,6 +33,8 @@ router.post("/:id/duplicate", duplicateRepertoire);
 router.get("/:id/variantsInfo", getVariantsInfo);
 router.post("/:id/variantsInfo", postVariantsInfo);
 router.post("/:id/variant-reviews", postVariantReview);
+router.get("/:id/mistakes", getVariantMistakes);
+router.post("/:id/mistake-reviews", postVariantMistakeReview);
 router.delete("/:id/variantsInfo", deleteVariantInfo);
 router.put("/:id", updateRepertoire);
 router.put("/:id/name", updateRepertoireName);

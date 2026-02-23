@@ -5,8 +5,53 @@ import { getRequestUserId } from "../utils/requestUser";
 import AdmZip from "adm-zip";
 import { inferSuggestedRatingFromLegacyErrors, parseReviewRating } from "../services/spacedRepetitionService";
 import { saveVariantReview } from "../services/variantReviewService";
+import {
+  getVariantMistakesForRepertoire,
+  reviewVariantMistake,
+} from "../services/variantMistakeService";
+import { MistakeSnapshotItem } from "@chess-opening-master/common";
 
 const getUserFilter = (req: Request) => ({ userId: getRequestUserId(req) });
+
+function parseMistakeSnapshotPayload(value: unknown): MistakeSnapshotItem[] | undefined {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+  const parsed: MistakeSnapshotItem[] = [];
+  value.forEach((raw) => {
+    if (!raw || typeof raw !== "object") {
+      return;
+    }
+    const candidate = raw as Record<string, unknown>;
+    if (
+      typeof candidate.mistakeKey !== "string" ||
+      typeof candidate.positionFen !== "string" ||
+      typeof candidate.expectedMoveLan !== "string"
+    ) {
+      return;
+    }
+    parsed.push({
+      mistakeKey: candidate.mistakeKey,
+      mistakePly: Number.isFinite(candidate.mistakePly)
+        ? Number(candidate.mistakePly)
+        : 1,
+      variantStartPly: Number.isFinite(candidate.variantStartPly)
+        ? Number(candidate.variantStartPly)
+        : 0,
+      positionFen: candidate.positionFen,
+      expectedMoveLan: candidate.expectedMoveLan,
+      expectedMoveSan:
+        typeof candidate.expectedMoveSan === "string"
+          ? candidate.expectedMoveSan
+          : undefined,
+      actualMoveLan:
+        typeof candidate.actualMoveLan === "string"
+          ? candidate.actualMoveLan
+          : undefined,
+    });
+  });
+  return parsed;
+}
 
 type VariantInfoDocument = {
   _id: ObjectId;
@@ -186,6 +231,7 @@ export async function postVariantsInfo(req: Request, res: Response, next: NextFu
         req.body?.orientation === "white" || req.body?.orientation === "black"
           ? req.body.orientation
           : undefined,
+      mistakes: parseMistakeSnapshotPayload(req.body?.mistakes),
     });
     res.status(200).json(result.variantInfo);
   } catch (err) {
@@ -225,9 +271,63 @@ export async function postVariantReview(req: Request, res: Response, next: NextF
         req.body?.orientation === "white" || req.body?.orientation === "black"
           ? req.body.orientation
           : undefined,
+      mistakes: parseMistakeSnapshotPayload(req.body?.mistakes),
     });
 
     res.status(201).json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getVariantMistakes(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { id } = req.params;
+    const openingName =
+      typeof req.query?.openingName === "string" ? req.query.openingName : undefined;
+    const dueOnly =
+      typeof req.query?.dueOnly === "string" ? req.query.dueOnly === "true" : false;
+    const mistakes = await getVariantMistakesForRepertoire({
+      userId: getRequestUserId(req),
+      repertoireId: id,
+      openingName,
+      dueOnly,
+    });
+    res.status(200).json(mistakes);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function postVariantMistakeReview(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { id } = req.params;
+    const mistakeKey =
+      typeof req.body?.mistakeKey === "string" ? req.body.mistakeKey.trim() : "";
+    if (!mistakeKey) {
+      return res.status(400).json({ message: "mistakeKey is required" });
+    }
+    const rating = parseReviewRating(req.body?.rating);
+    if (!rating) {
+      return res
+        .status(400)
+        .json({ message: "rating must be one of: again, hard, good, easy" });
+    }
+    const updatedMistake = await reviewVariantMistake({
+      userId: getRequestUserId(req),
+      repertoireId: id,
+      mistakeKey,
+      rating,
+    });
+    res.status(200).json(updatedMistake);
   } catch (err) {
     next(err);
   }

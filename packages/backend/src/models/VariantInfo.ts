@@ -1,4 +1,8 @@
-import { ReviewRating, SchedulerState } from "@chess-opening-master/common";
+import {
+  MistakeSnapshotItem,
+  ReviewRating,
+  SchedulerState,
+} from "@chess-opening-master/common";
 import { BoardOrientation } from "@chess-opening-master/common";
 
 export interface VariantInfo {
@@ -22,4 +26,10 @@ export interface VariantInfo {
   openingName?: string;
   startingFen?: string;
   orientation?: BoardOrientation;
+  dailyErrorsDayKey?: string;
+  dailyErrorSnapshot?: MistakeSnapshotItem[];
+  dailyErrorCount?: number;
+  masteryScore?: number;
+  perfectRunStreak?: number;
+  masteryUpdatedAt?: Date;
 }

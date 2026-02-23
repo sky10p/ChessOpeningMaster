@@ -1,11 +1,14 @@
 import { MoveVariantNode } from "@chess-opening-master/common";
 import {
+  buildMistakeKey,
   buildPendingVariantReview,
+  computeNextMastery,
   buildVariantStartState,
   getAllowedMovesFromTrainVariants,
   getDefaultTrainVariants,
   getOpeningNameFromVariant,
   getTotalTrainingErrors,
+  mergeMistakesByKey,
   removePendingReviewByVariantName,
   removeVariantFromStartFens,
   removeVariantFromStartTimes,
@@ -19,9 +22,10 @@ const createVariant = (name: string): Variant => ({
   moves: [],
 });
 
-const createMoveNode = (id: string): MoveVariantNode => {
+const createMoveNode = (id: string, position = 1): MoveVariantNode => {
   const node = new MoveVariantNode();
   node.id = id;
+  node.position = position;
   return node;
 };
 
@@ -81,6 +85,24 @@ describe("TrainRepertoireContext.utils", () => {
 
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe("e2e4");
+  });
+
+  it("resolves allowed move by ply position when array index does not match", () => {
+    const targetMove = createMoveNode("g1f3", 5);
+    const trainVariants: TrainVariant[] = [
+      {
+        variant: {
+          ...createVariant("A"),
+          moves: [createMoveNode("e2e4", 1), targetMove, createMoveNode("f1b5", 6)],
+        },
+        state: "inProgress",
+      },
+    ];
+
+    const result = getAllowedMovesFromTrainVariants(trainVariants, 4);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe("g1f3");
   });
 
   it("removes variant keys from start maps", () => {
@@ -143,5 +165,53 @@ describe("TrainRepertoireContext.utils", () => {
     });
 
     expect(result.suggestedRating).toBe("good");
+  });
+
+  it("builds deterministic mistake key", () => {
+    expect(buildMistakeKey("Sicilian", 12, "d7d6", 2)).toBe(
+      "Sicilian::12::d7d6::2"
+    );
+  });
+
+  it("merges mistakes by key keeping latest payload", () => {
+    const merged = mergeMistakesByKey(
+      [
+        {
+          mistakeKey: "A::1::e2e4::0",
+          mistakePly: 1,
+          variantStartPly: 0,
+          positionFen: "fen-1",
+          expectedMoveLan: "e2e4",
+          expectedMoveSan: "e4",
+        },
+      ],
+      [
+        {
+          mistakeKey: "A::1::e2e4::0",
+          mistakePly: 1,
+          variantStartPly: 0,
+          positionFen: "fen-2",
+          expectedMoveLan: "e2e4",
+          expectedMoveSan: "e4",
+          actualMoveLan: "g1f3",
+        },
+      ]
+    );
+    expect(merged).toHaveLength(1);
+    expect(merged[0].positionFen).toBe("fen-2");
+    expect(merged[0].actualMoveLan).toBe("g1f3");
+  });
+
+  it("computes mastery score bounded by formula", () => {
+    const mastery = computeNextMastery({
+      previousMastery: 60,
+      rating: "good",
+      wrongMoves: 1,
+      ignoredWrongMoves: 0,
+      hintsUsed: 0,
+    });
+
+    expect(mastery).toBeGreaterThanOrEqual(0);
+    expect(mastery).toBeLessThanOrEqual(100);
   });
 });

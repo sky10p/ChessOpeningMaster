@@ -30,6 +30,7 @@ describe("ensureDatabaseIndexes", () => {
   let studiesCollection: MockCollection;
   let variantsInfoCollection: MockCollection;
   let variantReviewHistoryCollection: MockCollection;
+  let variantMistakesCollection: MockCollection;
   let linkedGameAccountsCollection: MockCollection;
   let importedGamesCollection: MockCollection;
   let trainingPlansCollection: MockCollection;
@@ -43,6 +44,7 @@ describe("ensureDatabaseIndexes", () => {
     studiesCollection = createCollection();
     variantsInfoCollection = createCollection();
     variantReviewHistoryCollection = createCollection();
+    variantMistakesCollection = createCollection();
     linkedGameAccountsCollection = createCollection();
     importedGamesCollection = createCollection();
     trainingPlansCollection = createCollection();
@@ -56,6 +58,7 @@ describe("ensureDatabaseIndexes", () => {
         if (name === "studies") return studiesCollection;
         if (name === "variantsInfo") return variantsInfoCollection;
         if (name === "variantReviewHistory") return variantReviewHistoryCollection;
+        if (name === "variantMistakes") return variantMistakesCollection;
         if (name === "linkedGameAccounts") return linkedGameAccountsCollection;
         if (name === "importedGames") return importedGamesCollection;
         if (name === "trainingPlans") return trainingPlansCollection;
@@ -102,5 +105,26 @@ describe("ensureDatabaseIndexes", () => {
     expect(importedGamesCollection.createIndex).toHaveBeenCalledWith({ userId: 1, timeControlBucket: 1, playedAt: -1 }, undefined);
     expect(importedGamesCollection.createIndex).toHaveBeenCalledWith({ userId: 1, "openingMapping.repertoireId": 1, playedAt: -1 }, undefined);
     expect(importedGamesCollection.createIndex).toHaveBeenCalledWith({ userId: 1, "openingMapping.requiresManualReview": 1, playedAt: -1 }, undefined);
+  });
+
+  it("creates variant mistake indexes", async () => {
+    await ensureDatabaseIndexes(mockDb as never);
+
+    expect(variantMistakesCollection.createIndex).toHaveBeenCalledWith(
+      { userId: 1, repertoireId: 1, variantName: 1, mistakeKey: 1 },
+      { unique: true }
+    );
+    expect(variantMistakesCollection.createIndex).toHaveBeenCalledWith(
+      { userId: 1, dueAt: 1 },
+      undefined
+    );
+    expect(variantMistakesCollection.createIndex).toHaveBeenCalledWith(
+      { userId: 1, openingName: 1, orientation: 1, dueAt: 1 },
+      undefined
+    );
+    expect(variantMistakesCollection.createIndex).toHaveBeenCalledWith(
+      { userId: 1, repertoireId: 1, openingName: 1, dueAt: 1 },
+      undefined
+    );
   });
 });
