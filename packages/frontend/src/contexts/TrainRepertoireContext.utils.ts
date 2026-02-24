@@ -66,6 +66,122 @@ export const getVariantStartPly = (variant: Variant): number => {
   return Math.max(0, startPly);
 };
 
+export const getNormalizedVariantStartPly = (variant: Variant): number =>
+  Math.max(0, getVariantStartPly(variant) - 1);
+
+export const getEffectiveReplayStartPly = (
+  variant: Variant,
+  storedVariantStartPly: number,
+  mistakePly: number
+): number => {
+  const normalizedStored = Math.max(0, Math.floor(storedVariantStartPly));
+  const namedStartPly = getVariantStartPly(variant);
+  const adjustedStored =
+    normalizedStored === namedStartPly
+      ? Math.max(0, namedStartPly - 1)
+      : normalizedStored;
+  const maxBeforeMistake = Math.max(0, Math.floor(mistakePly) - 1);
+  if (adjustedStored >= maxBeforeMistake) {
+    return 0;
+  }
+  return Math.max(
+    0,
+    Math.min(
+      Math.max(0, getNormalizedVariantStartPly(variant)),
+      Math.min(adjustedStored, maxBeforeMistake)
+    )
+  );
+};
+
+export const getStrictProgressIndex = (
+  ply: number,
+  replayStartPly: number,
+  totalSteps: number
+): number | null => {
+  const index = Math.floor(ply) - Math.floor(replayStartPly) - 1;
+  if (!Number.isFinite(index) || index < 0 || index >= totalSteps) {
+    return null;
+  }
+  return index;
+};
+
+export const getClampedProgressIndex = (
+  ply: number,
+  replayStartPly: number,
+  totalSteps: number
+): number => {
+  if (totalSteps <= 0) {
+    return 0;
+  }
+  const index = Math.floor(ply) - Math.floor(replayStartPly) - 1;
+  return Math.min(totalSteps - 1, Math.max(0, index));
+};
+
+export const getProgressMoveNodes = (
+  variant: Variant,
+  orientation: "white" | "black",
+  startPly: number
+): MoveVariantNode[] => {
+  const playerColor = orientation === "white" ? "w" : "b";
+  return variant.moves
+    .filter(
+      (moveNode) =>
+        moveNode.position > startPly && moveNode.getMove().color === playerColor
+    )
+    .sort((left, right) => left.position - right.position);
+};
+
+export const getFocusTimelineMoves = (
+  variant: Variant,
+  orientation: "white" | "black"
+): MoveVariantNode[] => getProgressMoveNodes(variant, orientation, 0);
+
+export const getProgressIndexByPly = (
+  progressMoves: MoveVariantNode[],
+  ply: number
+): number | null => {
+  const targetPly = Math.floor(ply);
+  const index = progressMoves.findIndex((moveNode) => moveNode.position === targetPly);
+  return index >= 0 ? index : null;
+};
+
+export const getFocusIndexByPly = (
+  timeline: MoveVariantNode[],
+  ply: number
+): number | null => getProgressIndexByPly(timeline, ply);
+
+export const getCompletedProgressCount = (
+  progressMoves: MoveVariantNode[],
+  currentPosition: number
+): number =>
+  progressMoves.filter((moveNode) => moveNode.position <= currentPosition).length;
+
+export const getFocusCompletedCountByPosition = (
+  timeline: MoveVariantNode[],
+  currentPosition: number
+): number => getCompletedProgressCount(timeline, currentPosition);
+
+export const getActiveProgressIndex = (
+  progressMoves: MoveVariantNode[],
+  currentPosition: number
+): number => {
+  if (progressMoves.length === 0) {
+    return 0;
+  }
+  const nextIndex = progressMoves.findIndex(
+    (moveNode) => moveNode.position > currentPosition
+  );
+  if (nextIndex >= 0) {
+    return nextIndex;
+  }
+  return progressMoves.length - 1;
+};
+
+export const getFocusActiveIndexByPosition = (
+  timeline: MoveVariantNode[],
+  currentPosition: number
+): number => getActiveProgressIndex(timeline, currentPosition);
+
 export const getVariantFenAtPly = (variant: Variant, targetPly: number): string => {
   const chess = new Chess();
   variant.moves.forEach((moveNode) => {
@@ -89,7 +205,7 @@ export const buildVariantStartStateByVariant = (
   const startPlys: Record<string, number> = {};
   selectedTrainVariants.forEach((trainVariant) => {
     const variantName = trainVariant.variant.fullName;
-    const variantStartPly = getVariantStartPly(trainVariant.variant);
+    const variantStartPly = getNormalizedVariantStartPly(trainVariant.variant);
     startTimes[variantName] = nowMs;
     startPlys[variantName] = variantStartPly;
     startFens[variantName] = getVariantFenAtPly(trainVariant.variant, variantStartPly);

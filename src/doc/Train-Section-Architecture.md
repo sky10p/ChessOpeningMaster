@@ -36,6 +36,56 @@ Backend:
      - `variantName`
      - `variantNames` (pipe-separated)
 
+Execution UI composition:
+
+- `TrainRepertoireViewContainer` orchestrates train state and modals.
+- `TrainRepertoireStandardWorkspace` renders normal-mode persistent side panels.
+- `TrainRepertoireFocusWorkspace` renders focus-mode contextual assistance as inline panel content.
+
+## Focus Mode State Machine (`mode=mistakes`)
+
+Execution on `/repertoire/train/:id?mode=mistakes` uses:
+
+1. `variant phase` (`trainingPhase=standard`)
+2. `mistakes phase` (`trainingPhase=reinforcement`)
+3. `variant confirm phase` (`trainingPhase=fullRunConfirm`)
+
+Transitions:
+
+- variant phase with mistakes -> mistakes phase
+- mistakes phase queue exhausted -> variant confirm phase
+- variant confirm phase with mistakes -> mistakes phase
+- variant confirm phase clean -> finish cycle and return to standard with final review modal
+
+Variant confirm start position:
+
+- full-run confirm always starts from beginning (`ply 0`), not from an opening/variant start offset.
+- focus training is not considered complete while any focus-phase state is active (`reinforcement`, `fullRunConfirm`, or pending focus review).
+
+Mistakes requeue semantics:
+
+- wrong move in reinforcement requeues the current mistake at queue tail,
+- if requeued item is behind current board state, replay resets to effective start before continuing.
+
+Focus progress timeline semantics:
+
+- timeline is the full variant player-move sequence (user color only), not mixed plies,
+- failed/current/success states map against that player-move timeline,
+- red marks unresolved errors,
+- orange marks solved errors only in mistakes/full-run confirm,
+- initial variant phase does not convert red to orange inside the same pass,
+- current marker advances with board replay during reinforcement auto-moves.
+
+Focus assist UX semantics:
+
+- focus mode starts with assists locked,
+- assists unlock after first mistake in current focus session,
+- unlocked assists stay available during correction and confirm phases.
+- in focus mode, comments + variant guidance are rendered in an inline `Focus Assist` card below `Your turn` inside the training info panel.
+- focus assist card content uses tabs (`Comentarios`, `Variantes candidatas`).
+- the card stays in waiting state until the first error, then switches to active guidance content.
+- persistent comment/help panels are reserved for normal mode.
+
 ## API Contract Notes
 
 ### `POST /repertoires/:id/variant-reviews`
@@ -50,6 +100,11 @@ Backend behavior:
 - applies monotonic same-day daily snapshot merge,
 - updates mastery/perfect streak fields,
 - seeds/upserts mistake SRS items.
+
+Persistence timing in focus mode:
+
+- no initial `variant-reviews` save when entering mistakes phase,
+- one final `variant-reviews` save after clean variant confirm completion.
 
 ### `GET /train/overview`
 

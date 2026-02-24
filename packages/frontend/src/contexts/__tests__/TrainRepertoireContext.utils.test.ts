@@ -4,9 +4,17 @@ import {
   buildPendingVariantReview,
   computeNextMastery,
   buildVariantStartState,
+  getClampedProgressIndex,
   getAllowedMovesFromTrainVariants,
   getDefaultTrainVariants,
+  getEffectiveReplayStartPly,
+  getFocusActiveIndexByPosition,
+  getFocusCompletedCountByPosition,
+  getFocusIndexByPly,
+  getFocusTimelineMoves,
+  getNormalizedVariantStartPly,
   getOpeningNameFromVariant,
+  getStrictProgressIndex,
   getTotalTrainingErrors,
   mergeMistakesByKey,
   removePendingReviewByVariantName,
@@ -26,6 +34,37 @@ const createMoveNode = (id: string, position = 1): MoveVariantNode => {
   const node = new MoveVariantNode();
   node.id = id;
   node.position = position;
+  return node;
+};
+
+const createPositionNode = (
+  id: string,
+  position: number,
+  variantName?: string
+): MoveVariantNode => {
+  const node = createMoveNode(id, position);
+  node.variantName = variantName;
+  return node;
+};
+
+const createColoredNode = (
+  id: string,
+  position: number,
+  color: "w" | "b",
+  variantName?: string
+): MoveVariantNode => {
+  const node = createPositionNode(id, position, variantName);
+  node.move = {
+    color,
+    piece: "p",
+    from: "a2",
+    to: "a3",
+    san: id,
+    lan: id,
+    flags: "n",
+    before: "",
+    after: "",
+  } as never;
   return node;
 };
 
@@ -213,5 +252,70 @@ describe("TrainRepertoireContext.utils", () => {
 
     expect(mastery).toBeGreaterThanOrEqual(0);
     expect(mastery).toBeLessThanOrEqual(100);
+  });
+
+  it("normalizes variant start ply to parent of named start move", () => {
+    const variant = createVariant("A");
+    variant.moves = [
+      createPositionNode("e2e4", 1),
+      createPositionNode("e7e5", 2),
+      createPositionNode("g1f3", 3, "A"),
+      createPositionNode("b8c6", 4),
+    ];
+    expect(getNormalizedVariantStartPly(variant)).toBe(2);
+  });
+
+  it("falls back to game start when stored replay start is at or after mistake parent", () => {
+    const variant = createVariant("A");
+    variant.moves = [
+      createPositionNode("e2e4", 1),
+      createPositionNode("e7e5", 2),
+      createPositionNode("g1f3", 3, "A"),
+      createPositionNode("b8c6", 4),
+      createPositionNode("f1b5", 5),
+    ];
+    expect(getEffectiveReplayStartPly(variant, 5, 3)).toBe(0);
+  });
+
+  it("uses strict progress index bounds and clamped active index", () => {
+    expect(getStrictProgressIndex(3, 2, 5)).toBe(0);
+    expect(getStrictProgressIndex(2, 2, 5)).toBeNull();
+    expect(getStrictProgressIndex(20, 2, 5)).toBeNull();
+    expect(getClampedProgressIndex(2, 2, 5)).toBe(0);
+    expect(getClampedProgressIndex(20, 2, 5)).toBe(4);
+  });
+
+  it("builds progress only with player moves and maps indices by ply", () => {
+    const variant = createVariant("A");
+    variant.moves = [
+      createColoredNode("e2e4", 1, "w"),
+      createColoredNode("e7e5", 2, "b"),
+      createColoredNode("g1f3", 3, "w"),
+      createColoredNode("b8c6", 4, "b"),
+      createColoredNode("f1b5", 5, "w"),
+    ];
+    const progressMoves = getFocusTimelineMoves(variant, "white");
+    expect(progressMoves.map((node) => node.position)).toEqual([1, 3, 5]);
+    expect(getFocusIndexByPly(progressMoves, 3)).toBe(1);
+    expect(getFocusIndexByPly(progressMoves, 4)).toBeNull();
+    expect(getFocusCompletedCountByPosition(progressMoves, 3)).toBe(2);
+    expect(getFocusActiveIndexByPosition(progressMoves, 3)).toBe(2);
+  });
+
+  it("keeps active index aligned with board progression between player moves", () => {
+    const variant = createVariant("A");
+    variant.moves = [
+      createColoredNode("e2e4", 1, "w"),
+      createColoredNode("e7e5", 2, "b"),
+      createColoredNode("g1f3", 3, "w"),
+      createColoredNode("b8c6", 4, "b"),
+      createColoredNode("f1b5", 5, "w"),
+    ];
+    const timeline = getFocusTimelineMoves(variant, "white");
+    expect(getFocusActiveIndexByPosition(timeline, 0)).toBe(0);
+    expect(getFocusActiveIndexByPosition(timeline, 1)).toBe(1);
+    expect(getFocusActiveIndexByPosition(timeline, 2)).toBe(1);
+    expect(getFocusActiveIndexByPosition(timeline, 3)).toBe(2);
+    expect(getFocusActiveIndexByPosition(timeline, 4)).toBe(2);
   });
 });

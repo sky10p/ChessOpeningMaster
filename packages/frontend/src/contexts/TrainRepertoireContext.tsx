@@ -24,10 +24,14 @@ import {
   computeNextMastery,
   getAllowedMovesFromTrainVariants,
   getDefaultTrainVariants,
-  getVariantFenAtPly,
+  getEffectiveReplayStartPly,
+  getFocusActiveIndexByPosition,
+  getFocusCompletedCountByPosition,
+  getFocusIndexByPly,
+  getFocusTimelineMoves,
+  getNormalizedVariantStartPly,
   getOpeningNameFromVariant,
   getVariantByName,
-  getVariantStartPly,
   mergeMistakesByKey,
   removePendingReviewByVariantName,
   removeVariantFromStartFens,
@@ -35,6 +39,11 @@ import {
 } from "./TrainRepertoireContext.utils";
 
 export type TrainingPhase = "standard" | "reinforcement" | "fullRunConfirm";
+export type FocusProgressStatus =
+  | "pending"
+  | "success"
+  | "failed"
+  | "recovered";
 
 export type PendingVariantReview = {
   variantName: string;
@@ -50,6 +59,7 @@ export type PendingVariantReview = {
   masteryBefore: number;
   projectedMasteryAfter: number;
   perfectRunStreakBefore: number;
+  focusCycleStage?: "initial" | "final";
 };
 
 type ReinforcementQueueItem = MistakeSnapshotItem & {
@@ -68,7 +78,7 @@ export type ReinforcementSession = {
 };
 
 export type ReinforcementMoveProgress = {
-  statuses: Array<"pending" | "success" | "failed">;
+  statuses: FocusProgressStatus[];
   activeIndex: number;
   mistakeKey: string;
 };
@@ -81,6 +91,21 @@ export type FullRunConfirmState = {
   perfect: boolean;
   masteryBefore: number;
   masteryAfter: number;
+};
+
+type FocusCycleState = {
+  variantName: string;
+  openingName: string;
+  startingFen: string;
+  startedAtMs: number;
+  masteryBefore: number;
+  perfectRunStreakBefore: number;
+  suggestedRating: ReviewRating;
+  accumulatedWrongMoves: number;
+  accumulatedIgnoredWrongMoves: number;
+  accumulatedHintsUsed: number;
+  accumulatedTimeSpentSec: number;
+  accumulatedMistakes: MistakeSnapshotItem[];
 };
 
 interface TrainRepertoireContextProps {
@@ -106,6 +131,7 @@ interface TrainRepertoireContextProps {
   mode: "standard" | "mistakes";
   reinforcementSession: ReinforcementSession | null;
   startMistakeReinforcement: (review: PendingVariantReview) => void;
+  startPendingReviewReinforcement: (review: PendingVariantReview) => void;
   markReinforcementFailure: () => void;
   markReinforcementSuccess: (playedMoveLan: string) => void;
   submitCurrentMistakeRating: (rating: ReviewRating) => Promise<VariantMistake | null>;
@@ -137,6 +163,48 @@ interface TrainRepertoireContextProviderProps {
 
 const sleep = async (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+const REINFORCEMENT_REPLAY_MOVE_DELAY_MS = 350;
+
+const getErroredIndicesFromStatuses = (statuses: FocusProgressStatus[]): number[] =>
+  statuses
+    .map((status, index) =>
+      status === "failed" || status === "recovered" ? index : null
+    )
+    .filter((index): index is number => index !== null);
+
+const getRecoveredIndicesFromStatuses = (statuses: FocusProgressStatus[]): number[] =>
+  statuses
+    .map((status, index) => (status === "recovered" ? index : null))
+    .filter((index): index is number => index !== null);
+
+const buildFocusStatuses = (
+  totalSteps: number,
+  completedCount: number,
+  failedIndices: number[],
+  recoveredIndices: number[] = []
+): FocusProgressStatus[] => {
+  const safeTotalSteps = Math.max(1, totalSteps);
+  const safeCompletedCount = Math.max(
+    0,
+    Math.min(safeTotalSteps, Math.floor(completedCount))
+  );
+  const failedIndexSet = new Set(
+    failedIndices.filter((index) => index >= 0 && index < safeTotalSteps)
+  );
+  const recoveredIndexSet = new Set(
+    recoveredIndices.filter((index) => index >= 0 && index < safeTotalSteps)
+  );
+  return Array.from({ length: safeTotalSteps }, (_, index) => {
+    if (failedIndexSet.has(index)) {
+      return recoveredIndexSet.has(index) ? "recovered" : "failed";
+    }
+    if (index < safeCompletedCount) {
+      return "success";
+    }
+    return "pending";
+  });
 };
 
 const toVariantInfoMap = (
@@ -241,10 +309,13 @@ export const TrainRepertoireContextProvider: React.FC<
   >(null);
   const [reinforcementMoveProgress, setReinforcementMoveProgress] =
     React.useState<ReinforcementMoveProgress | null>(null);
-  const [focusFailedIndices, setFocusFailedIndices] = React.useState<number[]>([]);
+  const [focusFailedPlys, setFocusFailedPlys] = React.useState<number[]>([]);
   const [fullRunConfirmState, setFullRunConfirmState] = React.useState<
     FullRunConfirmState | null
   >(null);
+  const [focusCycleState, setFocusCycleState] = React.useState<FocusCycleState | null>(
+    null
+  );
   const [fullRunMistakes, setFullRunMistakes] = React.useState<MistakeSnapshotItem[]>(
     []
   );
@@ -328,8 +399,9 @@ export const TrainRepertoireContextProvider: React.FC<
         }));
         setTrainingPhase("reinforcement");
         setFullRunConfirmState(null);
+        setFocusCycleState(null);
         setReinforcementMoveProgress(null);
-        setFocusFailedIndices([]);
+        setFocusFailedPlys([]);
         setReinforcementSession({
           variantName: queue[0].variantName,
           openingName: queue[0].openingName,
@@ -381,8 +453,9 @@ export const TrainRepertoireContextProvider: React.FC<
       setTrainingPhase("standard");
       setReinforcementSession(null);
       setReinforcementMoveProgress(null);
-      setFocusFailedIndices([]);
+      setFocusFailedPlys([]);
       setFullRunConfirmState(null);
+      setFocusCycleState(null);
       setFullRunMistakes([]);
       fullRunRetryKeyRef.current = null;
       setLastErrors(0);
@@ -503,7 +576,7 @@ export const TrainRepertoireContextProvider: React.FC<
           return;
         }
         const fullRunVariantName = fullRunVariant.fullName;
-        const variantStartPly = getVariantStartPly(fullRunVariant);
+        const variantStartPly = getNormalizedVariantStartPly(fullRunVariant);
         const mistake = buildMistake(
           fullRunVariantName,
           fullRunVariant.moves,
@@ -519,14 +592,10 @@ export const TrainRepertoireContextProvider: React.FC<
           (focusVariantParam === fullRunVariant.fullName ||
             focusVariantParam === fullRunVariant.name)
         ) {
-          const failedIndex = Math.max(
-            0,
-            mistake.mistakePly - Math.max(1, variantStartPly + 1)
-          );
-          setFocusFailedIndices((previousFailed) =>
-            previousFailed.includes(failedIndex)
+          setFocusFailedPlys((previousFailed) =>
+            previousFailed.includes(mistake.mistakePly)
               ? previousFailed
-              : [...previousFailed, failedIndex]
+              : [...previousFailed, mistake.mistakePly]
           );
         }
         return;
@@ -542,9 +611,9 @@ export const TrainRepertoireContextProvider: React.FC<
         const next = { ...previous };
         inProgressVariants.forEach((trainVariant) => {
           const currentVariantName = trainVariant.variant.fullName;
-          const variantStartPly =
-            variantStartPlys[currentVariantName] ??
-            getVariantStartPly(trainVariant.variant);
+            const variantStartPly =
+              variantStartPlys[currentVariantName] ??
+              getNormalizedVariantStartPly(trainVariant.variant);
           const mistake = buildMistake(
             currentVariantName,
             trainVariant.variant.moves,
@@ -563,14 +632,10 @@ export const TrainRepertoireContextProvider: React.FC<
             (focusVariantParam === trainVariant.variant.fullName ||
               focusVariantParam === trainVariant.variant.name)
           ) {
-            const failedIndex = Math.max(
-              0,
-              mistake.mistakePly - Math.max(1, variantStartPly + 1)
-            );
-            setFocusFailedIndices((previousFailed) =>
-              previousFailed.includes(failedIndex)
+            setFocusFailedPlys((previousFailed) =>
+              previousFailed.includes(mistake.mistakePly)
                 ? previousFailed
-                : [...previousFailed, failedIndex]
+                : [...previousFailed, mistake.mistakePly]
             );
           }
         });
@@ -580,9 +645,9 @@ export const TrainRepertoireContextProvider: React.FC<
         const next = { ...previous };
         inProgressVariants.forEach((trainVariant) => {
           const currentVariantName = trainVariant.variant.fullName;
-          const variantStartPly =
-            variantStartPlys[currentVariantName] ??
-            getVariantStartPly(trainVariant.variant);
+            const variantStartPly =
+              variantStartPlys[currentVariantName] ??
+              getNormalizedVariantStartPly(trainVariant.variant);
           const mistake = buildMistake(
             currentVariantName,
             trainVariant.variant.moves,
@@ -686,6 +751,7 @@ export const TrainRepertoireContextProvider: React.FC<
                 masteryBefore,
                 projectedMasteryAfter,
                 perfectRunStreakBefore,
+                focusCycleStage: "initial",
               },
             ];
           });
@@ -768,12 +834,6 @@ export const TrainRepertoireContextProvider: React.FC<
         setReinforcementMoveProgress(null);
         return;
       }
-      const startPly =
-        variantStartPlys[variantNameToConfirm] ?? getVariantStartPly(variant);
-      const startNode =
-        startPly > 0
-          ? variant.moves.find((moveNode) => moveNode.position === startPly)
-          : undefined;
       const startedAtMs = Date.now();
       const masteryBefore =
         typeof variantInfoMap[variantNameToConfirm]?.masteryScore === "number"
@@ -782,7 +842,7 @@ export const TrainRepertoireContextProvider: React.FC<
       setTrainingPhase("fullRunConfirm");
       setReinforcementSession(null);
       setReinforcementMoveProgress(null);
-      setFocusFailedIndices([]);
+      setFocusFailedPlys([]);
       setFullRunConfirmState({
         variantName: variantNameToConfirm,
         openingName: openingNameToConfirm,
@@ -797,13 +857,9 @@ export const TrainRepertoireContextProvider: React.FC<
       setLastErrors(0);
       setLastIgnoredErrors(0);
       setLastHintsUsed(0);
-      if (startNode) {
-        goToMove(startNode);
-      } else {
-        initBoard();
-      }
+      initBoard();
     },
-    [goToMove, initBoard, variantInfoMap, variantStartPlys, variants]
+    [initBoard, variantInfoMap, variants]
   );
 
   const startMistakeReinforcement = useCallback(
@@ -826,7 +882,7 @@ export const TrainRepertoireContextProvider: React.FC<
       setTrainingPhase("reinforcement");
       setFullRunConfirmState(null);
       setReinforcementMoveProgress(null);
-      setFocusFailedIndices([]);
+      setFocusFailedPlys([]);
       setFullRunMistakes([]);
       fullRunRetryKeyRef.current = null;
       setReinforcementSession({
@@ -840,6 +896,40 @@ export const TrainRepertoireContextProvider: React.FC<
       });
     },
     [startFullRunConfirm]
+  );
+
+  const startPendingReviewReinforcement = useCallback(
+    (review: PendingVariantReview) => {
+      const reinforcementMistakes =
+        review.reinforcementMistakes.length > 0
+          ? review.reinforcementMistakes
+          : review.mistakes;
+      if (!reinforcementMistakes.length) {
+        return;
+      }
+      setFocusCycleState({
+        variantName: review.variantName,
+        openingName: review.openingName,
+        startingFen: review.startingFen,
+        startedAtMs: Date.now(),
+        masteryBefore: review.masteryBefore,
+        perfectRunStreakBefore: review.perfectRunStreakBefore,
+        suggestedRating: review.suggestedRating,
+        accumulatedWrongMoves: review.wrongMoves,
+        accumulatedIgnoredWrongMoves: review.ignoredWrongMoves,
+        accumulatedHintsUsed: review.hintsUsed,
+        accumulatedTimeSpentSec: review.timeSpentSec,
+        accumulatedMistakes: mergeMistakesByKey(
+          review.mistakes,
+          review.reinforcementMistakes
+        ),
+      });
+      setPendingReviews((previousPendingReviews) =>
+        removePendingReviewByVariantName(previousPendingReviews, review.variantName)
+      );
+      startMistakeReinforcement(review);
+    },
+    [startMistakeReinforcement]
   );
 
   const markReinforcementFailure = useCallback(() => {
@@ -883,7 +973,11 @@ export const TrainRepertoireContextProvider: React.FC<
             return progress;
           }
           const nextStatuses = [...progress.statuses];
-          nextStatuses[progress.activeIndex] = "success";
+          nextStatuses[progress.activeIndex] =
+            nextStatuses[progress.activeIndex] === "failed" ||
+            nextStatuses[progress.activeIndex] === "recovered"
+              ? "recovered"
+              : "success";
           return {
             ...progress,
             statuses: nextStatuses,
@@ -946,10 +1040,11 @@ export const TrainRepertoireContextProvider: React.FC<
   const finishFullRunConfirm = useCallback(() => {
     setTrainingPhase("standard");
     setFullRunConfirmState(null);
+    setFocusCycleState(null);
     setFullRunMistakes([]);
     fullRunRetryKeyRef.current = null;
     setReinforcementMoveProgress(null);
-    setFocusFailedIndices([]);
+    setFocusFailedPlys([]);
     setLastErrors(0);
     setLastIgnoredErrors(0);
     setLastHintsUsed(0);
@@ -1016,59 +1111,111 @@ export const TrainRepertoireContextProvider: React.FC<
         });
         return;
       }
-      const replayStartPly = Math.max(0, currentMistake.variantStartPly);
+      const replayStartPly = getEffectiveReplayStartPly(
+        variant,
+        currentMistake.variantStartPly,
+        currentMistake.mistakePly
+      );
       const replayStartNode =
         replayStartPly > 0
           ? variant.moves.find((moveNode) => moveNode.position === replayStartPly)
           : undefined;
-      const progressMoves = variant.moves
-        .filter((moveNode) => moveNode.position > replayStartPly)
-        .sort((left, right) => left.position - right.position);
-      const toProgressIndex = (position: number) =>
-        Math.min(
-          Math.max(0, progressMoves.length - 1),
-          Math.max(0, position - replayStartPly - 1)
+      const lineProgressMoves = getFocusTimelineMoves(variant, orientation);
+      const totalProgressSteps = Math.max(1, lineProgressMoves.length);
+      const getProgressIndexForActive = (position: number) =>
+        getFocusActiveIndexByPosition(lineProgressMoves, position);
+      const getProgressIndexForFailure = (position: number) =>
+        getFocusIndexByPly(lineProgressMoves, position);
+      const getQueueFailedIndices = () =>
+        reinforcementSession.queue
+          .filter((item) => item.variantName === currentMistake.variantName)
+          .map((item) => getProgressIndexForFailure(item.mistakePly))
+          .filter((value): value is number => value !== null);
+      const getHistoricalFailedIndices = () =>
+        focusFailedPlys
+          .map((mistakePly) => getProgressIndexForFailure(mistakePly))
+          .filter((value): value is number => value !== null);
+      const getPersistentFailedIndices = (previousStatuses?: FocusProgressStatus[]) =>
+        Array.from(
+          new Set([
+            ...getQueueFailedIndices(),
+            ...getHistoricalFailedIndices(),
+            ...(previousStatuses
+              ? getErroredIndicesFromStatuses(previousStatuses)
+              : []),
+          ])
         );
-      const progressKey = `${currentMistake.variantName}::${replayStartPly}`;
+      const getPersistentRecoveredIndices = (
+        previousStatuses?: FocusProgressStatus[]
+      ) =>
+        previousStatuses ? getRecoveredIndicesFromStatuses(previousStatuses) : [];
+      const progressKey = `${currentMistake.variantName}::focus::${orientation}`;
+      const expectedParentNode =
+        expectedMoveNode.parent && expectedMoveNode.parent.position >= replayStartPly
+          ? expectedMoveNode.parent
+          : replayStartNode;
+      const targetParentPly = expectedParentNode?.position ?? replayStartPly;
+      const isCurrentNodeOnVariantPath =
+        currentMoveNode.position === 0
+          ? replayStartPly === 0
+          : Boolean(
+              variant.moves.find(
+                (moveNode) =>
+                  moveNode.position === currentMoveNode.position &&
+                  moveNode.id === currentMoveNode.id
+              )
+            );
+      const shouldReset =
+        !isCurrentNodeOnVariantPath ||
+        currentMoveNode.position < replayStartPly ||
+        currentMoveNode.position > targetParentPly;
+      const replayFromPly = shouldReset
+        ? replayStartNode
+          ? replayStartPly
+          : 0
+        : currentMoveNode.position;
       const replayMoves = variant.moves
         .filter(
           (moveNode) =>
-            moveNode.position > replayStartPly &&
-            moveNode.position < currentMistake.mistakePly
+            moveNode.position > replayFromPly && moveNode.position <= targetParentPly
         )
         .sort((left, right) => left.position - right.position);
       setReinforcementMoveProgress((previous) => {
         const hasMatchingProgress =
           previous &&
           previous.mistakeKey === progressKey &&
-          previous.statuses.length === progressMoves.length;
-        const statuses: Array<"pending" | "success" | "failed"> = hasMatchingProgress
-          ? [...(previous?.statuses || [])]
-          : Array.from(
-              { length: Math.max(1, progressMoves.length) },
-              () => "success" as const
-            );
-        reinforcementSession.queue
-          .filter((item) => item.variantName === currentMistake.variantName)
-          .forEach((item) => {
-            const failedIndex = toProgressIndex(item.mistakePly);
-            if (failedIndex >= 0 && failedIndex < statuses.length) {
-              statuses[failedIndex] = "failed";
-            }
-          });
+          previous.statuses.length === totalProgressSteps;
+        const completedCount = getFocusCompletedCountByPosition(
+          lineProgressMoves,
+          replayFromPly
+        );
+        const failedIndices = hasMatchingProgress
+          ? getPersistentFailedIndices(previous.statuses)
+          : getPersistentFailedIndices();
+        const recoveredIndices = hasMatchingProgress
+          ? getPersistentRecoveredIndices(previous.statuses)
+          : [];
         return {
-          statuses,
-          activeIndex: toProgressIndex(currentMistake.mistakePly),
+          statuses: buildFocusStatuses(
+            totalProgressSteps,
+            completedCount,
+            failedIndices,
+            recoveredIndices
+          ),
+          activeIndex: getProgressIndexForActive(replayFromPly),
           mistakeKey: progressKey,
         };
       });
-      if (replayStartNode) {
-        goToMove(replayStartNode);
-      } else {
-        initBoard();
+      if (shouldReset) {
+        if (replayStartNode) {
+          goToMove(replayStartNode);
+        } else {
+          initBoard();
+        }
+        await sleep(REINFORCEMENT_REPLAY_MOVE_DELAY_MS);
       }
-      await sleep(200);
       for (let index = 0; index < replayMoves.length; index += 1) {
+        await sleep(REINFORCEMENT_REPLAY_MOVE_DELAY_MS);
         if (cancelled) {
           return;
         }
@@ -1078,38 +1225,42 @@ export const TrainRepertoireContextProvider: React.FC<
           if (!previous || previous.mistakeKey !== progressKey) {
             return previous;
           }
-          const nextStatuses = [...previous.statuses];
-          const progressIndex = toProgressIndex(replayMoveNode.position);
-          if (progressIndex >= 0 && progressIndex < nextStatuses.length) {
-            nextStatuses[progressIndex] = "success";
-          }
+          const completedCount = getFocusCompletedCountByPosition(
+            lineProgressMoves,
+            replayMoveNode.position
+          );
+          const failedIndices = getPersistentFailedIndices(previous.statuses);
+          const recoveredIndices = getPersistentRecoveredIndices(
+            previous.statuses
+          );
           return {
             ...previous,
-            statuses: nextStatuses,
-            activeIndex: toProgressIndex(currentMistake.mistakePly),
+            statuses: buildFocusStatuses(
+              totalProgressSteps,
+              completedCount,
+              failedIndices,
+              recoveredIndices
+            ),
+            activeIndex: getProgressIndexForActive(replayMoveNode.position),
           };
         });
-        await sleep(200);
       }
       if (cancelled) {
         return;
       }
-      const parentNode =
-        expectedMoveNode.parent && expectedMoveNode.parent.position >= replayStartPly
-          ? expectedMoveNode.parent
-          : replayStartNode;
-      if (parentNode) {
-        goToMove(parentNode);
-      } else {
+      if (expectedParentNode) {
+        goToMove(expectedParentNode);
+      } else if (currentMoveNode.position !== 0) {
         initBoard();
       }
       setReinforcementMoveProgress((previous) => {
         if (!previous || previous.mistakeKey !== progressKey) {
           return previous;
         }
+        const targetPosition = expectedParentNode?.position ?? 0;
         return {
           ...previous,
-          activeIndex: toProgressIndex(currentMistake.mistakePly),
+          activeIndex: getProgressIndexForActive(targetPosition),
         };
       });
     };
@@ -1118,9 +1269,11 @@ export const TrainRepertoireContextProvider: React.FC<
       cancelled = true;
     };
   }, [
+    focusFailedPlys,
     getExpectedMistakeMoveNode,
     goToMove,
     initBoard,
+    orientation,
     reinforcementSession,
     startFullRunConfirm,
     trainingPhase,
@@ -1176,8 +1329,7 @@ export const TrainRepertoireContextProvider: React.FC<
     if (
       trainingPhase !== "fullRunConfirm" ||
       !fullRunConfirmState ||
-      !fullRunConfirmState.completed ||
-      fullRunConfirmState.perfect
+      !fullRunConfirmState.completed
     ) {
       return;
     }
@@ -1188,50 +1340,93 @@ export const TrainRepertoireContextProvider: React.FC<
     fullRunRetryKeyRef.current = retryKey;
     const fullRunVariant = getVariantByName(variants, fullRunConfirmState.variantName);
     const fullRunSnapshot = [...fullRunMistakes];
-    if (fullRunSnapshot.length > 0) {
-      const persistedMistakes = mergeMistakesByKey([], fullRunSnapshot);
-      const variantStartPly = fullRunVariant ? getVariantStartPly(fullRunVariant) : 0;
-      const startingFen = fullRunVariant
-        ? getVariantFenAtPly(fullRunVariant, variantStartPly)
-        : undefined;
-      void saveVariantReview(repertoireId, {
-        variantName: fullRunConfirmState.variantName,
-        openingName: fullRunConfirmState.openingName,
-        rating: "again",
-        suggestedRating: "again",
-        acceptedSuggested: true,
-        wrongMoves: lastErrors,
-        ignoredWrongMoves: lastIgnoredErrors,
-        hintsUsed: lastHintsUsed,
-        timeSpentSec: Math.max(
-          1,
-          Math.floor((Date.now() - fullRunConfirmState.startedAtMs) / 1000)
-        ),
-        orientation,
-        startingFen,
-        mistakes: persistedMistakes,
-      })
-        .then((response) => {
-          const variantInfo = response?.variantInfo as TrainVariantInfo | undefined;
-          if (!variantInfo?.variantName) {
-            return;
-          }
-          setVariantInfoMap((previous) => ({
-            ...previous,
-            [variantInfo.variantName]: {
-              ...variantInfo,
-              lastDate: new Date(variantInfo.lastDate),
-              dueAt: variantInfo.dueAt ? new Date(variantInfo.dueAt) : undefined,
-              lastReviewedAt: variantInfo.lastReviewedAt
-                ? new Date(variantInfo.lastReviewedAt)
-                : undefined,
-              masteryUpdatedAt: variantInfo.masteryUpdatedAt
-                ? new Date(variantInfo.masteryUpdatedAt)
-                : undefined,
+    const fullRunTimeSpentSec = Math.max(
+      1,
+      Math.floor((Date.now() - fullRunConfirmState.startedAtMs) / 1000)
+    );
+    if (fullRunConfirmState.perfect) {
+      if (
+        mode === "mistakes" &&
+        focusCycleState &&
+        focusCycleState.variantName === fullRunConfirmState.variantName
+      ) {
+        const persistedMistakes = mergeMistakesByKey(
+          focusCycleState.accumulatedMistakes,
+          fullRunSnapshot
+        );
+        const combinedTimeSpentSec =
+          focusCycleState.accumulatedTimeSpentSec + fullRunTimeSpentSec;
+        const finalReview = buildPendingVariantReview({
+          variantName: focusCycleState.variantName,
+          openingName: focusCycleState.openingName,
+          startingFen: focusCycleState.startingFen,
+          wrongMoves: focusCycleState.accumulatedWrongMoves,
+          ignoredWrongMoves: focusCycleState.accumulatedIgnoredWrongMoves,
+          hintsUsed: focusCycleState.accumulatedHintsUsed,
+          timeSpentSec: combinedTimeSpentSec,
+          suggestedRating: focusCycleState.suggestedRating,
+        });
+        const projectedMasteryAfter = computeNextMastery({
+          previousMastery: focusCycleState.masteryBefore,
+          rating: finalReview.suggestedRating,
+          wrongMoves: finalReview.wrongMoves,
+          ignoredWrongMoves: finalReview.ignoredWrongMoves,
+          hintsUsed: finalReview.hintsUsed,
+        });
+        setPendingReviews((previousPendingReviews) => {
+          const filtered = removePendingReviewByVariantName(
+            previousPendingReviews,
+            finalReview.variantName
+          );
+          return [
+            {
+              ...finalReview,
+              mistakes: persistedMistakes,
+              reinforcementMistakes: [],
+              masteryBefore: focusCycleState.masteryBefore,
+              projectedMasteryAfter,
+              perfectRunStreakBefore: focusCycleState.perfectRunStreakBefore,
+              focusCycleStage: "final",
             },
-          }));
-        })
-        .catch(() => undefined);
+            ...filtered,
+          ];
+        });
+      }
+      setTrainingPhase("standard");
+      setReinforcementSession(null);
+      setReinforcementMoveProgress(null);
+      setFullRunConfirmState(null);
+      setFocusCycleState(null);
+      setFocusFailedPlys([]);
+      setFullRunMistakes([]);
+      setLastErrors(0);
+      setLastIgnoredErrors(0);
+      setLastHintsUsed(0);
+      return;
+    }
+    if (
+      mode === "mistakes" &&
+      focusCycleState &&
+      focusCycleState.variantName === fullRunConfirmState.variantName
+    ) {
+      setFocusCycleState((previous) => {
+        if (!previous || previous.variantName !== fullRunConfirmState.variantName) {
+          return previous;
+        }
+        return {
+          ...previous,
+          accumulatedWrongMoves: previous.accumulatedWrongMoves + lastErrors,
+          accumulatedIgnoredWrongMoves:
+            previous.accumulatedIgnoredWrongMoves + lastIgnoredErrors,
+          accumulatedHintsUsed: previous.accumulatedHintsUsed + lastHintsUsed,
+          accumulatedTimeSpentSec:
+            previous.accumulatedTimeSpentSec + fullRunTimeSpentSec,
+          accumulatedMistakes: mergeMistakesByKey(
+            previous.accumulatedMistakes,
+            fullRunSnapshot
+          ),
+        };
+      });
     }
     if (!fullRunVariant || fullRunSnapshot.length === 0) {
       startFullRunConfirm(
@@ -1264,8 +1459,8 @@ export const TrainRepertoireContextProvider: React.FC<
     lastErrors,
     lastHintsUsed,
     lastIgnoredErrors,
-    orientation,
-    repertoireId,
+    mode,
+    focusCycleState,
     startFullRunConfirm,
     trainingPhase,
     variants,
@@ -1363,33 +1558,35 @@ export const TrainRepertoireContextProvider: React.FC<
     if (!focusVariant) {
       return null;
     }
-    const variantStartPly = getVariantStartPly(focusVariant);
-    const totalSteps = Math.max(1, focusVariant.moves.length - variantStartPly);
-    const statuses: Array<"pending" | "success" | "failed"> = Array.from(
-      { length: totalSteps },
-      () => "pending"
-    );
+    const progressMoves = getFocusTimelineMoves(focusVariant, orientation);
+    const totalSteps = Math.max(1, progressMoves.length);
     const completedCount = Math.min(
       totalSteps,
-      Math.max(0, currentMoveNode.position - variantStartPly)
+      getFocusCompletedCountByPosition(progressMoves, currentMoveNode.position)
     );
-    for (let index = 0; index < completedCount; index += 1) {
-      statuses[index] = "success";
-    }
     const failedIndices =
       trainingPhase === "fullRunConfirm"
-        ? fullRunMistakes.map((mistake) =>
-            Math.max(0, mistake.mistakePly - variantStartPly - 1)
-          )
-        : focusFailedIndices;
-    failedIndices.forEach((index) => {
-      if (index >= 0 && index < statuses.length) {
-        statuses[index] = "failed";
-      }
-    });
-    const activeIndex = Math.min(
-      totalSteps - 1,
-      Math.max(0, currentMoveNode.position - variantStartPly)
+        ? fullRunMistakes
+            .map((mistake) =>
+              getFocusIndexByPly(progressMoves, mistake.mistakePly)
+            )
+            .filter((value): value is number => value !== null)
+        : focusFailedPlys
+            .map((mistakePly) => getFocusIndexByPly(progressMoves, mistakePly))
+            .filter((value): value is number => value !== null);
+    const recoveredIndices =
+      trainingPhase === "fullRunConfirm"
+        ? failedIndices.filter((index) => index < completedCount)
+        : [];
+    const statuses = buildFocusStatuses(
+      totalSteps,
+      completedCount,
+      failedIndices,
+      recoveredIndices
+    );
+    const activeIndex = getFocusActiveIndexByPosition(
+      progressMoves,
+      currentMoveNode.position
     );
     return {
       statuses,
@@ -1398,9 +1595,10 @@ export const TrainRepertoireContextProvider: React.FC<
     };
   }, [
     currentMoveNode.position,
-    focusFailedIndices,
+    focusFailedPlys,
     fullRunMistakes,
     mode,
+    orientation,
     reinforcementMoveProgress,
     trainingPhase,
     variantName,
@@ -1433,6 +1631,7 @@ export const TrainRepertoireContextProvider: React.FC<
       mode,
       reinforcementSession,
       startMistakeReinforcement,
+      startPendingReviewReinforcement,
       markReinforcementFailure,
       markReinforcementSuccess,
       submitCurrentMistakeRating,
@@ -1463,6 +1662,7 @@ export const TrainRepertoireContextProvider: React.FC<
       focusModeProgress,
       reinforcementMoveProgress,
       startMistakeReinforcement,
+      startPendingReviewReinforcement,
       submitCurrentMistakeRating,
       submitPendingVariantReview,
       trainVariants,

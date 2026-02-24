@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Chess } from "chess.js";
 import { MoveVariantNode } from "../../../../models/VariantNode";
-import { Textarea } from "@headlessui/react";
 import { useDialogContext } from "../../../../contexts/DialogContext";
 import { getPositionComment } from "../../../../repository/positions/positions";
 import { BoardOrientation, getOrientationAwareFen } from "@chess-opening-master/common";
+import { Button, Card, Textarea } from "../../../ui";
 
 interface HintInfoProps {
   currentMoveNode: MoveVariantNode;
   orientation: BoardOrientation;
   updateComment: (comment: string) => Promise<void>;
+  compact?: boolean;
 }
 
 const getFenForNode = (node: MoveVariantNode, orientation: BoardOrientation): string => {
@@ -34,6 +35,7 @@ export const HintInfo: React.FC<HintInfoProps> = ({
   currentMoveNode,
   orientation,
   updateComment,
+  compact = false,
 }) => {
   const { showTextAreaDialog } = useDialogContext();
   const [hints, setHints] = useState<string[]>([]);
@@ -96,22 +98,34 @@ export const HintInfo: React.FC<HintInfoProps> = ({
   };
 
   return (
-    <div className="p-4 bg-background rounded-lg border border-secondary flex flex-col h-full w-full">
-      <div className="flex justify-between items-center mb-2">
-        <h6 className="text-lg font-semibold text-textLight">Comments</h6>
-        <button
+    <Card
+      className="flex h-full w-full flex-col border-border-default bg-surface"
+      padding={compact ? "compact" : "default"}
+    >
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <h6
+          className={
+            compact
+              ? "text-sm font-semibold text-text-base"
+              : "text-lg font-semibold text-text-base"
+          }
+        >
+          Comentarios
+        </h6>
+        <Button
           onClick={handleUpdateComment}
-          className="px-3 py-1 bg-accent text-primary rounded hover:opacity-80 text-sm"
+          intent="accent"
+          size="sm"
         >
           Update comment
-        </button>
+        </Button>
       </div>
       <Textarea
-        className="flex-grow p-2 bg-secondary text-textLight rounded focus:outline-none focus:ring-2 focus:ring-accent overflow-auto"
-        rows={10}
+        className="flex-grow resize-none bg-surface-raised text-text-base"
+        rows={compact ? 8 : 10}
         value={hints.join("\n")}
         disabled
       ></Textarea>
-    </div>
+    </Card>
   );
 };

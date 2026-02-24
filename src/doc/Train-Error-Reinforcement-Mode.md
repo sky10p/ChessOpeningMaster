@@ -25,7 +25,7 @@ It preserves existing variant training while adding targeted correction.
 
 3. `Mistake reinforcement`  
    If mistakes exist, user can start `Fix mistakes now`:
-   - the app repositions to each mistake ply,
+   - the app replays moves toward each mistake target in sequence,
    - user must play the expected move,
    - user rates each solved mistake (`again/hard/good/easy`),
    - failed attempts requeue to the end.
@@ -33,6 +33,47 @@ It preserves existing variant training while adding targeted correction.
 4. `Full-run confirm`  
    After queue exhaustion, user replays the full variant.  
    A completion panel confirms whether the run was perfect.
+
+## Focus Mode Lifecycle
+
+`mode=mistakes` for focus training follows a strict 3-phase loop:
+
+1. `Variant phase`  
+   Play the variant and collect mistakes for the current session.
+2. `Mistakes phase`  
+   Replay only queued mistakes. Failed mistakes requeue and are retried until solved in-session.
+3. `Variant confirm phase`  
+   Replay the full variant.
+   - if new mistakes appear, return to `Mistakes phase` with those errors,
+   - if clean, finish the loop and show the final review modal.
+
+In focus mode, the main variant review is persisted only once at the end of a clean confirm phase.
+The training session is considered finished only after the full 3-phase loop completes.
+
+### Focus Progress Semantics
+
+- Progress dots represent only player-color moves for the focused variant, starting from move 1.
+- Failed states map by real mistake ply (`mistakePly`) to that player-move timeline.
+- Color semantics:
+  - green = completed with no error on that move,
+  - red = known error on a move not yet solved in the current pass,
+  - orange = move had an error and is now solved in mistakes/full-run confirm (kept as reminder),
+  - ring = current move according to board position.
+- In the initial variant phase, failed moves stay red even if the user later plays the correct move in that same run.
+- During auto-replay in mistakes phase, the current ring follows board progression step-by-step.
+- After auto-replay reaches the parent of expected move, the current ring lands on the next required player move.
+
+### Focus Assist Policy
+
+- In focus mode, helps are hidden at the start (no always-on hints).
+- After the first mistake in the active focus session, helps unlock.
+- Unlocked state is kept through mistakes/full-run confirm to support correction.
+- Locked and unlocked states must be consistent on desktop and mobile panels.
+- Focus Assist is rendered inline in the right training panel as a dedicated card below `Your turn`.
+- Focus Assist card content is tabbed (`Comentarios`, `Variantes candidatas`).
+- When no errors exist, the card shows a locked/waiting state.
+- When errors exist, tabs show contextual comments and candidate variants without opening a separate overlay.
+- In normal mode, the standard persistent side-panel help/comment layout remains unchanged.
 
 ## Daily Snapshot Rule (Monotonic Same-Day)
 
@@ -63,10 +104,12 @@ For each mistake item:
 
 1. Resolve target variant by `variantName`.
 2. Resolve expected node by `mistakePly` + `expectedMoveLan`.
-3. Reposition board to the parent node of expected move.
-4. Restrict allowed move to expected move.
-5. On failure, requeue item.
-6. On success, request rating and schedule item.
+3. Resolve effective replay start context for the current mistake.
+4. If next mistake is ahead of current board position, continue replay forward.
+5. If next mistake is behind (requeued), reset to replay start and replay forward.
+6. Stop on the parent node of expected move and restrict allowed move to expected move.
+7. On failure, requeue item.
+8. On success, request rating and schedule item.
 
 If expected node cannot be resolved (stale path), the item is skipped in-session.
 
@@ -75,7 +118,7 @@ If expected node cannot be resolved (stale path), the item is skipped in-session
 After mistakes are solved:
 
 - phase switches to `fullRunConfirm`,
-- board starts from variant start ply,
+- board resets to the beginning (`ply 0`),
 - user replays the line end-to-end.
 
 UI marks perfect/non-perfect completion and shows mastery effect summary.

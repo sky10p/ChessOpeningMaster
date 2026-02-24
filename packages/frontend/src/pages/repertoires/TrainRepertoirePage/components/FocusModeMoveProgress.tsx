@@ -26,6 +26,7 @@ export const FocusModeMoveProgress: React.FC<FocusModeMoveProgressProps> = ({
             className={cn(
               "h-3.5 w-3.5 rounded-sm border border-border-default transition-all",
               status === "success" && "bg-success border-success",
+              status === "recovered" && "bg-warning border-warning",
               status === "failed" && "bg-danger border-danger",
               status === "pending" && "bg-surface-raised",
               progress.activeIndex === index && "ring-2 ring-brand ring-offset-1 ring-offset-surface"
