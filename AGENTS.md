@@ -183,6 +183,26 @@ import { cn } from "../../utils/cn";
 
 - Full token reference, all component API options, layout patterns, icon rules, a11y checklist, definition of done → `src/doc/Design-System.md`
 
+## UI Consistency Enforcement (Critical for Agents)
+
+Before changing any UI, read:
+- `src/doc/Design-System.md`
+- `src/doc/UI-Consistency-Governance.md`
+
+Mandatory rules:
+1. When reviewing or modifying UI code, fix UX/UI inconsistencies in touched scope immediately (do not defer silently).
+2. Do not make ad-hoc styling decisions. Reuse documented patterns/components or extract reusable abstractions.
+3. If a new UI pattern is introduced, document it in `src/doc/Design-System.md` in the same change.
+
+Scope boundary:
+- Enforced cleanup scope is touched files plus directly used sibling UI components for that screen.
+- Avoid unrelated repo-wide UI rewrites during feature tasks.
+
+Review output expectation:
+- Include a short `UI consistency notes` summary in implementation responses:
+  - inconsistencies fixed,
+  - reusable pattern/component reused or extracted.
+
 ## React `useEffect` Quality Guidelines
 
 Default policy: use local documentation as the source of truth during implementation and review.
@@ -228,6 +248,7 @@ mongodb://localhost:27017/chess_opening_master
 
 ### Architecture Documentation
 - [Design System](src/doc/Design-System.md) - Token reference, component catalogue, theming, layout patterns, a11y checklist, and Definition of Done for new UI
+- [UI Consistency Governance](src/doc/UI-Consistency-Governance.md) - Mandatory frontend consistency workflow, touched-scope cleanup rules, reusable pattern decisions, and anti-patterns
 - [RepertoireContext Architecture Guide](src/doc/RepertoireContext-Architecture.md) - Detailed documentation of the main context system
 - [Variant Selection Logic](src/doc/Variant-Selection-Logic.md) - Complete guide to how chess opening variants are selected and managed
 - [Testing Strategy](src/doc/Testing-Strategy.md) - Comprehensive testing patterns, mock requirements, and test scenarios

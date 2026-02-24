@@ -7,6 +7,8 @@ import { StaticChessboard } from "../../components/design/chess/StaticChessboard
 import { TrainOpeningActions } from "./components/TrainOpeningActions";
 import { TrainOpeningMistakeSummary } from "./components/TrainOpeningMistakeSummary";
 import { TrainOpeningVariantList } from "./components/TrainOpeningVariantList";
+import { PageFrame } from "../../components/design/layouts/PageFrame";
+import { PageRoot } from "../../components/design/layouts/PageRoot";
 
 const FALLBACK_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
@@ -136,18 +138,18 @@ const TrainOpeningPage: React.FC = () => {
 
   if (status === "loading") {
     return (
-      <div className="w-full h-full overflow-y-auto bg-page text-text-base">
-        <div className="mx-auto w-full max-w-6xl px-3 py-4 sm:px-4 sm:py-6">
+      <PageRoot>
+        <PageFrame className="max-w-6xl py-4 sm:py-6">
           <Card className="h-32 animate-pulse border-border-subtle bg-surface-raised" />
-        </div>
-      </div>
+        </PageFrame>
+      </PageRoot>
     );
   }
 
   if (status === "error" || !payload) {
     return (
-      <div className="w-full h-full overflow-y-auto bg-page text-text-base">
-        <div className="mx-auto w-full max-w-6xl px-3 py-4 sm:px-4 sm:py-6">
+      <PageRoot>
+        <PageFrame className="max-w-6xl py-4 sm:py-6">
           <Card className="border-border-default bg-surface" padding="default">
             <p className="text-sm text-text-muted">Unable to load opening training details.</p>
             <div className="mt-3">
@@ -156,16 +158,16 @@ const TrainOpeningPage: React.FC = () => {
               </Button>
             </div>
           </Card>
-        </div>
-      </div>
+        </PageFrame>
+      </PageRoot>
     );
   }
 
   const mastery = getMasteryBadge(payload.stats.masteryScore);
 
   return (
-    <div className="w-full h-full overflow-y-auto bg-page text-text-base">
-      <div className="mx-auto w-full max-w-6xl px-3 py-4 sm:px-4 sm:py-6">
+    <PageRoot>
+      <PageFrame className="max-w-6xl py-4 sm:py-6">
         <div className="mb-3">
           <Button intent="ghost" size="sm" onClick={() => navigate("/train")}>
             Back
@@ -251,8 +253,8 @@ const TrainOpeningPage: React.FC = () => {
             }
           />
         </div>
-      </div>
-    </div>
+      </PageFrame>
+    </PageRoot>
   );
 };
 

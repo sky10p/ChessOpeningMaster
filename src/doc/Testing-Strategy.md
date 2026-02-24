@@ -208,6 +208,29 @@ await act(async () => {
 10. **Mastery impact clarity**
    - Mastery card must show understandable before/after context and explicit point delta (gain/loss/no change).
 
+## UI Consistency Regression Strategy
+
+When a task includes UX/UI consistency cleanup, add or update tests covering:
+
+1. **Primitives enforcement**
+   - New touched UI should not introduce raw `button`, `input`, `textarea`, or `select` where project primitives are applicable.
+   - Prefer validating component usage via behavior-focused tests and targeted structural assertions in touched scope.
+
+2. **Canonical page frame/layout consistency**
+   - Top-level pages should keep the documented frame and spacing pattern.
+   - Add route/page tests that guard against accidental edge-to-edge regressions where framing is required.
+
+3. **Mobile/desktop parity**
+   - Verify the same semantic states and actions are preserved across breakpoints.
+   - Confirm that layout differences do not change meaning or flow outcomes.
+
+4. **Reusable pattern regression checks**
+   - When extracting reusable UI patterns, add regression tests for composition and key state transitions.
+   - Ensure previous duplicate/ad-hoc behavior does not reappear in touched scope.
+
+Expectation:
+- UI consistency fixes are not considered complete without matching test updates in touched scope.
+
 ## Mock Data Patterns
 
 ### Initial Repertoire Setup

@@ -21,6 +21,10 @@ This directory contains architecture and implementation guides for ChessKeep.
 - Testing patterns and mock requirements
 - Common frontend/backend scenarios
 
+### [UI Consistency Governance](UI-Consistency-Governance.md)
+- Mandatory frontend UX/UI consistency workflow
+- Touched-scope cleanup rules and reusable pattern decision rules
+
 ### [React Effect & Data Fetching Guide](React-Effect-Data-Fetching-Guide.md)
 - When to avoid `useEffect`
 - Safe data-fetching effect patterns
@@ -70,14 +74,15 @@ This directory contains architecture and implementation guides for ChessKeep.
 1. Start with [AGENTS.md](../AGENTS.md).
 2. Read [RepertoireContext Architecture Guide](RepertoireContext-Architecture.md).
 3. Read [Variant Selection Logic](Variant-Selection-Logic.md).
-4. Read [User Auth Backend](User-Auth-Backend.md) and [User Auth Frontend](User-Auth-Frontend.md).
-5. Read [PathPage and Next Lesson Logic](PathPage-Next-Lesson-Logic.md) before changing `/path`.
-6. Read [Train Error Reinforcement Mode](Train-Error-Reinforcement-Mode.md) before changing train reinforcement behavior.
-7. Read [Train Section Architecture](Train-Section-Architecture.md) before changing `/train` routes or APIs.
-8. Read [Spaced Repetition Upgrade Plan](Spaced-Repetition-Upgrade-Plan.md) for scheduler model changes.
-9. Read [Game Imports and Training Plan Guide](Game-Imports-Guide.md) for `/games` UX changes.
-10. Read [Game Import Service Architecture](Game-Import-Service-Architecture.md) for `/games` backend changes.
-11. Read [Training Queue Guide](Training-Queue-Guide.md) for games training prioritization.
+4. Read [UI Consistency Governance](UI-Consistency-Governance.md) before any UI change.
+5. Read [User Auth Backend](User-Auth-Backend.md) and [User Auth Frontend](User-Auth-Frontend.md).
+6. Read [PathPage and Next Lesson Logic](PathPage-Next-Lesson-Logic.md) before changing `/path`.
+7. Read [Train Error Reinforcement Mode](Train-Error-Reinforcement-Mode.md) before changing train reinforcement behavior.
+8. Read [Train Section Architecture](Train-Section-Architecture.md) before changing `/train` routes or APIs.
+9. Read [Spaced Repetition Upgrade Plan](Spaced-Repetition-Upgrade-Plan.md) for scheduler model changes.
+10. Read [Game Imports and Training Plan Guide](Game-Imports-Guide.md) for `/games` UX changes.
+11. Read [Game Import Service Architecture](Game-Import-Service-Architecture.md) for `/games` backend changes.
+12. Read [Training Queue Guide](Training-Queue-Guide.md) for games training prioritization.
 
 ### Debugging Issues
 1. Check [Troubleshooting Guide](Troubleshooting-Guide.md).
@@ -92,6 +97,7 @@ This directory contains architecture and implementation guides for ChessKeep.
 6. Validate `/train` contracts with [Train Section Architecture](Train-Section-Architecture.md).
 7. Validate scheduler/rating changes with [Spaced Repetition Upgrade Plan](Spaced-Repetition-Upgrade-Plan.md).
 8. Validate games UX and backend assumptions with [Game Imports and Training Plan Guide](Game-Imports-Guide.md) and [Game Import Service Architecture](Game-Import-Service-Architecture.md).
+9. Run the touched-scope consistency sweep from [UI Consistency Governance](UI-Consistency-Governance.md) for any UI task.
 
 ## Key Technical Concepts
 

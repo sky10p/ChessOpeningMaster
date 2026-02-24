@@ -14,7 +14,7 @@ import {
   ListBulletIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { Button, Badge, Input, Select } from "../../components/ui";
+import { Button, Badge, Input, Select, IconButton } from "../../components/ui";
 import {
   BoardOrientation,
   PathCategory,
@@ -24,6 +24,9 @@ import {
 } from "@chess-opening-master/common";
 import { isEmptyPath, isNewVariantPath, isStudiedVariantPath, isStudyPath } from "./helpers";
 import { getTodayPlanProgress } from "../../utils/path/todayPlanProgress";
+import { PageFrame } from "../../components/design/layouts/PageFrame";
+import { PageRoot } from "../../components/design/layouts/PageRoot";
+import { PageSurface } from "../../components/design/layouts/PageSurface";
 
 type FilterOrientation = BoardOrientation | "all";
 type PathView = "lesson" | "forecast";
@@ -94,14 +97,14 @@ interface MetricInfoTooltipProps {
 
 const MetricInfoTooltip: React.FC<MetricInfoTooltipProps> = ({ text }) => (
   <span className="group relative inline-flex items-center">
-    <button
+    <IconButton
       type="button"
-      aria-label="Metric info"
+      label="Metric info"
       title="Metric info"
-      className="text-text-subtle hover:text-text-muted focus:outline-none"
+      className="text-text-subtle hover:text-text-muted"
     >
       <QuestionMarkCircleIcon className="h-4 w-4" />
-    </button>
+    </IconButton>
     <span className="pointer-events-none absolute left-0 top-full z-20 mt-2 hidden w-64 rounded-lg border border-border-default bg-surface px-3 py-2 text-xs text-text-base shadow-xl group-hover:block group-focus-within:block">
       {text}
     </span>
@@ -425,8 +428,10 @@ const PathPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-full min-h-0 self-stretch bg-page rounded-none sm:rounded-xl shadow-elevated flex flex-col overflow-hidden border border-border-subtle">
-      <div className="flex-1 min-h-0 flex flex-col relative p-2 sm:p-6 overflow-y-auto">
+    <PageRoot>
+      <PageFrame className="h-full py-0 sm:py-2">
+        <PageSurface>
+          <div className="flex-1 min-h-0 flex flex-col relative p-2 sm:p-6 overflow-y-auto">
         <div className="w-full max-w-6xl mx-auto mt-1 sm:mt-2 flex flex-col gap-4 pb-4">
           <div className="rounded-2xl border border-border-default bg-surface px-4 py-4 sm:px-6">
             <div className="flex items-center justify-between gap-3">
@@ -773,9 +778,11 @@ const PathPage: React.FC = () => {
               )}
             </div>
           )}
-        </div>
-      </div>
-    </div>
+          </div>
+          </div>
+        </PageSurface>
+      </PageFrame>
+    </PageRoot>
   );
 };
 

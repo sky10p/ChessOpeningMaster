@@ -5,6 +5,8 @@ import {
 import { Input, Card } from "../../components/ui";
 import { getTrainOverview } from "../../repository/train/train";
 import { TrainRepertoireGroup } from "./components/TrainRepertoireGroup";
+import { PageFrame } from "../../components/design/layouts/PageFrame";
+import { PageRoot } from "../../components/design/layouts/PageRoot";
 
 const filterOverview = (
   overview: TrainOverviewResponse,
@@ -70,8 +72,8 @@ const TrainPage: React.FC = () => {
   }, [filtered]);
 
   return (
-    <div className="w-full h-full overflow-y-auto bg-page text-text-base">
-      <div className="mx-auto w-full max-w-[88rem] px-3 py-4 sm:px-4 sm:py-6">
+    <PageRoot>
+      <PageFrame className="py-4 sm:py-6">
         <div className="mb-4 rounded-xl border border-border-default bg-surface p-4 shadow-surface">
           <h1 className="text-2xl font-semibold text-text-base">Train</h1>
           <p className="mt-1 text-sm text-text-muted">
@@ -138,8 +140,8 @@ const TrainPage: React.FC = () => {
             ))}
           </div>
         ) : null}
-      </div>
-    </div>
+      </PageFrame>
+    </PageRoot>
   );
 };
 

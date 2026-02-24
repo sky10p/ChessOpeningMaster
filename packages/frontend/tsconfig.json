@@ -2,7 +2,10 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./build/frontend",
-    "rootDir": "./src"
+    "rootDir": "./src",
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false
   },
   "include": [
     "src/**/*.ts",

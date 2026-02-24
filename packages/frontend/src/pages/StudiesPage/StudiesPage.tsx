@@ -25,6 +25,9 @@ import { Study, StudyEntry } from "./models";
 import StudyDetail from "./components/StudyDetail";
 import StudyGroupMobile from "../../components/application/StudyGroupMobile";
 import ScrollContainer from "./components/containers/ScrollContainer";
+import { PageFrame } from "../../components/design/layouts/PageFrame";
+import { PageRoot } from "../../components/design/layouts/PageRoot";
+import { PageSurface } from "../../components/design/layouts/PageSurface";
 
 const StudiesPage: React.FC = () => {
   const {
@@ -149,7 +152,9 @@ const StudiesPage: React.FC = () => {
   }, [selectedStudy, activeGroupId, refreshGroups]);
 
   return (
-    <div className="w-full h-full min-h-0 self-stretch bg-page rounded-none sm:rounded-xl shadow-elevated flex flex-col overflow-hidden border border-border-subtle">
+    <PageRoot>
+      <PageFrame className="h-full py-0 sm:py-2">
+        <PageSurface>
       <div className="w-full h-full flex flex-col md:flex-row md:items-start md:gap-4">
         {!isMobile && (
           <StudyGroupSidebar
@@ -373,16 +378,18 @@ const StudiesPage: React.FC = () => {
         }}
         error={null}
       />
-      <DeleteSessionModal
-        open={showDeleteSessionModal}
-        onClose={() => {
-          setShowDeleteSessionModal(false);
-          setDeleteSessionId(null);
-        }}
-        onDelete={confirmDeleteSession}
-        error={null}
-      />
-    </div>
+          <DeleteSessionModal
+            open={showDeleteSessionModal}
+            onClose={() => {
+              setShowDeleteSessionModal(false);
+              setDeleteSessionId(null);
+            }}
+            onDelete={confirmDeleteSession}
+            error={null}
+          />
+        </PageSurface>
+      </PageFrame>
+    </PageRoot>
   );
 };
 

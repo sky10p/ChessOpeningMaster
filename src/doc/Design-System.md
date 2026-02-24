@@ -1,6 +1,8 @@
-# Design System
+﻿# Design System
 
 ChessKeep uses a lightweight, token-based design system with CVA component variants, a three-level elevation palette, and full dark/light theme support. The system is intentionally opinionated to ensure visual consistency across all pages.
+
+For the mandatory frontend consistency workflow, see `UI-Consistency-Governance.md`.
 
 ---
 
@@ -21,8 +23,8 @@ The active theme is controlled by the class on `<html>`. It's persisted to `loca
 CSS custom properties are defined in `packages/frontend/src/index.css`:
 
 ```css
-:root, .dark { /* dark theme tokens — slate-900 base */ }
-.light       { /* light theme overrides — #eef2f7 base */ }
+:root, .dark { /* dark theme tokens â€” slate-900 base */ }
+.light       { /* light theme overrides â€” #eef2f7 base */ }
 ```
 
 Tailwind resolves every `bg-page`, `text-text-base`, `shadow-surface`, etc. through `var(--*)` helpers in `tailwind.config.js`.
@@ -31,10 +33,10 @@ Tailwind resolves every `bg-page`, `text-text-base`, `shadow-surface`, etc. thro
 
 | Aspect | Value | Rationale |
 |---|---|---|
-| **Primary / Brand** | Indigo (`#6366f1` dark · `#4f46e5` light) | Distinctive, modern, matches existing UI hints |
-| **Accent** | Amber (`#f59e0b` dark · `#d97706` light) | Matches the ChessKeep logo gold/orange |
-| **Page base** | `#0f172a` dark · `#eef2f7` light | Warm dark / cool blue-gray — never pure black or white |
-| **Surfaces** | `#1e293b` dark · `#ffffff` light | White cards pop clearly against the cool-gray page in light mode |
+| **Primary / Brand** | Indigo (`#6366f1` dark Â· `#4f46e5` light) | Distinctive, modern, matches existing UI hints |
+| **Accent** | Amber (`#f59e0b` dark Â· `#d97706` light) | Matches the ChessKeep logo gold/orange |
+| **Page base** | `#0f172a` dark Â· `#eef2f7` light | Warm dark / cool blue-gray â€” never pure black or white |
+| **Surfaces** | `#1e293b` dark Â· `#ffffff` light | White cards pop clearly against the cool-gray page in light mode |
 
 ---
 
@@ -42,7 +44,7 @@ Tailwind resolves every `bg-page`, `text-text-base`, `shadow-surface`, etc. thro
 
 Every colour class in the application **must** use one of the semantic tokens below. Hard-coded Tailwind colours (`bg-gray-900`, `bg-blue-600`, etc.) are **forbidden** in new code.
 
-### Backgrounds — three-level elevation
+### Backgrounds â€” three-level elevation
 
 | Token class | Dark value | Light value | Purpose |
 |---|---|---|---|
@@ -58,14 +60,14 @@ Every colour class in the application **must** use one of the semantic tokens be
 | `border-border-default` | `#334155` (slate-700) | `#cbd5e1` (slate-300) |
 | `border-border-subtle` | `#1e293b` (slate-800) | `#e2e8f0` (slate-200) |
 
-### Text — WCAG AA verified (light mode)
+### Text â€” WCAG AA verified (light mode)
 
 | Token class | Dark | Light | Contrast on white |
 |---|---|---|---|
 | `text-text-base` | `#f1f5f9` (slate-100) | `#0f172a` (slate-900) | **18.1 : 1** |
 | `text-text-muted` | `#94a3b8` (slate-400) | `#475569` (slate-600) | **7.1 : 1** |
 | `text-text-subtle` | `#64748b` (slate-500) | `#64748b` (slate-500) | **4.7 : 1** |
-| `text-text-on-brand` | `#ffffff` | `#ffffff` | — (on brand bg) |
+| `text-text-on-brand` | `#ffffff` | `#ffffff` | â€” (on brand bg) |
 
 ### Brand / Action
 
@@ -86,7 +88,7 @@ Every colour class in the application **must** use one of the semantic tokens be
 | `bg-success` | `#34d399` (emerald-400) | `#059669` (emerald-600) |
 | `bg-warning` | `#fbbf24` (amber-400) | `#d97706` (amber-600) |
 
-### Shadows — CSS variable backed, theme-aware
+### Shadows â€” CSS variable backed, theme-aware
 
 | Token class | Dark | Light |
 |---|---|---|
@@ -131,9 +133,9 @@ import { Button, IconButton, Badge, Card, Tabs, TabButton, Input, Textarea, Sele
 <Button intent="secondary" className="w-full justify-center">Reset</Button>
 ```
 
-**`intent` options:** `primary` · `secondary` · `danger` · `ghost` · `accent` · `outline`
+**`intent` options:** `primary` Â· `secondary` Â· `danger` Â· `ghost` Â· `accent` Â· `outline`
 
-**`size` options:** `xs` · `sm` · `md` · `lg` · `xl`
+**`size` options:** `xs` Â· `sm` Â· `md` Â· `lg` Â· `xl`
 
 ### 3.2 `IconButton`
 
@@ -152,9 +154,9 @@ Always provide a `label` prop for accessibility. Uses `ghost` intent by default.
 <Badge variant="danger" size="sm">Error</Badge>
 ```
 
-**`variant` options:** `default` · `brand` · `success` · `warning` · `danger` · `info` · `accent`
+**`variant` options:** `default` Â· `brand` Â· `success` Â· `warning` Â· `danger` Â· `info` Â· `accent`
 
-**`size` options:** `sm` · `md` · `lg`
+**`size` options:** `sm` Â· `md` Â· `lg`
 
 ### 3.4 `Card`
 
@@ -169,9 +171,9 @@ Always provide a `label` prop for accessibility. Uses `ghost` intent by default.
 </Card>
 ```
 
-**`padding` options:** `none` · `compact` · `default` · `relaxed`
+**`padding` options:** `none` Â· `compact` Â· `default` Â· `relaxed`
 
-**`elevation` options:** `flat` · `raised` · `high`
+**`elevation` options:** `flat` Â· `raised` Â· `high`
 
 ### 3.5 `Tabs` + `TabButton`
 
@@ -190,7 +192,7 @@ Always provide a `label` prop for accessibility. Uses `ghost` intent by default.
 </Tabs>
 ```
 
-**`variant` options:** `underline` · `pill` · `segment`
+**`variant` options:** `underline` Â· `pill` Â· `segment`
 
 ### 3.6 `Input` + `Textarea`
 
@@ -214,9 +216,9 @@ Always provide a `label` prop for accessibility. Uses `ghost` intent by default.
 <Textarea label="Notes" rows={4} value={value} onChange={handler} />
 ```
 
-**`size` options:** `sm` · `md` · `lg`
+**`size` options:** `sm` Â· `md` Â· `lg`
 
-**`state` options:** `default` · `error` · `success`
+**`state` options:** `default` Â· `error` Â· `success`
 
 ### 3.7 `Select`
 
@@ -242,12 +244,34 @@ import { cn } from "../../utils/cn";
 <div className={cn("base-class", isActive && "active-class", className)} />
 ```
 
-Never concatenate raw template strings when merging Tailwind classes — `cn()` handles deduplication via `tailwind-merge`.
+Never concatenate raw template strings when merging Tailwind classes â€” `cn()` handles deduplication via `tailwind-merge`.
 
 ---
 
 ## 5. Layout Patterns
 
+### Top-level page frame (canonical)
+
+Use layout primitives from `packages/frontend/src/components/design/layouts`:
+
+- `PageRoot`: route-level scroll container (`bg-page`, `text-text-base`, full-height).
+- `PageFrame`: centered max-width frame with responsive horizontal gutters.
+- `PageSurface`: elevated page shell for full-height workspace pages.
+
+```tsx
+<PageRoot>
+  <PageFrame className="h-full py-0 sm:py-2">
+    <PageSurface>{/* page content */}</PageSurface>
+  </PageFrame>
+</PageRoot>
+```
+
+Rules:
+- Default to `PageRoot + PageFrame` on top-level route pages.
+- Use `PageSurface` for workspace-style pages (`Dashboard`, `Games`, `Path`, `Studies`) that need a framed full-height surface.
+- Mobile gutters are edge-to-edge by default (`PageFrame` uses `px-0` on mobile); desktop/tablet adds horizontal gutter from `sm`.
+- Do not introduce custom edge-to-edge wrappers unless there is a documented product/layout reason.
+- If a different max width is required, set `PageFrame.maxWidthClass` and document the reason in the page architecture doc.
 ### Page shell
 
 ```tsx
@@ -260,7 +284,7 @@ Never concatenate raw template strings when merging Tailwind classes — `cn()` 
 
 ```tsx
 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-  <Card padding="default" elevation="raised">…</Card>
+  <Card padding="default" elevation="raised">â€¦</Card>
 </div>
 ```
 
@@ -274,7 +298,18 @@ Never concatenate raw template strings when merging Tailwind classes — `cn()` 
 
 ---
 
-## 6. Icon Rules
+## 6. Pattern Extension Rules
+
+When adding or changing UI patterns:
+
+1. Reuse existing patterns from `components/ui` and this document first.
+2. If the same custom pattern appears in two or more locations in touched scope, extract it to a reusable component or hook.
+3. If a new reusable pattern is introduced, update this document in the same change with usage guidance.
+4. Add or update UI consistency test coverage as defined in `Testing-Strategy.md`.
+
+---
+
+## 7. Icon Rules
 
 Use `@heroicons/react` exclusively. Always import from `24/outline` unless you need a filled variant:
 
@@ -287,24 +322,26 @@ Icon sizes should use Tailwind width/height utilities (`h-4 w-4`, `h-5 w-5`, `h-
 
 ---
 
-## 7. Accessibility Checklist
+## 8. Accessibility Checklist
 
 - Every `<IconButton>` must have a `label` prop (becomes `aria-label`).
 - Every `<Tabs>` container renders `role="tablist"`.
 - All form inputs from `Input` / `Select` / `Textarea` accept a `label` prop that renders a visible `<label>` (preferred over `placeholder`-only labels).
 - Keyboard-only users must be able to activate all interactive elements via `Tab` + `Enter`/`Space`. The Button primitive includes `focus-visible` ring using `ring-brand`.
-- Do not suppress the outline on interactive elements globally — the global `focus { outline: none }` in `index.css` is intentional only for mouse users; `focus-visible` styles remain active.
+- Do not suppress the outline on interactive elements globally â€” the global `focus { outline: none }` in `index.css` is intentional only for mouse users; `focus-visible` styles remain active.
 
 ---
 
-## 8. Definition of Done for New Screens
+## 9. Definition of Done for New Screens
 
 Before a new page or modal is considered complete, verify:
 
-1. **No hard-coded colours** — all classes use semantic token names from §2.
-2. **No raw `<button>` elements** — use `Button` or `IconButton` from the UI library, or an explicit accessible control (e.g. `<TabButton>`).
-3. **No raw `<input>` / `<textarea>` / `<select>`** — use `Input`, `Textarea`, or `Select` from the UI library.
-4. **Class merging via `cn()`** — no manual string concatenation for dynamic classes.
-5. **Both themes tested** — toggle `class="light"` on `<html>` and verify there are no invisible elements.
-6. **TypeScript clean** — `yarn front:tsc:noEmits` passes with zero errors.
-7. **Tests pass** — `yarn test:frontend` passes.
+1. **No hard-coded colours** â€” all classes use semantic token names from Â§2.
+2. **No raw `<button>` elements** â€” use `Button` or `IconButton` from the UI library, or an explicit accessible control (e.g. `<TabButton>`).
+3. **No raw `<input>` / `<textarea>` / `<select>`** â€” use `Input`, `Textarea`, or `Select` from the UI library.
+4. **Class merging via `cn()`** â€” no manual string concatenation for dynamic classes.
+5. **Both themes tested** â€” toggle `class="light"` on `<html>` and verify there are no invisible elements.
+6. **TypeScript clean** â€” `yarn front:tsc:noEmits` passes with zero errors.
+7. **Tests pass** â€” `yarn test:frontend` passes.
+8. **UI consistency regression coverage** — update/add scenarios from `Testing-Strategy.md` whenever UI consistency behavior changes.
+

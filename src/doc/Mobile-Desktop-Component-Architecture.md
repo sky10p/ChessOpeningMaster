@@ -6,6 +6,22 @@ The repertoire editing page (`EditRepertoirePage`) has two distinct rendering pa
 
 ---
 
+## Consistency Rules
+
+### Shared-first policy
+- Define shared logic and state contracts first.
+- Keep view-specific composition (mobile vs desktop) as a rendering concern.
+
+### Parity contract
+- The same feature state must keep the same semantic meaning across breakpoints.
+- Layout and density can differ, but message intent, action availability, and state labels must remain aligned.
+
+### Extraction guideline
+- If mobile and desktop repeat equivalent behavior/markup patterns, extract shared component or model logic.
+- Prefer shared abstractions over duplicated per-breakpoint ad-hoc implementations.
+
+---
+
 ## Layout Shell: `RepertoireWorkspaceLayout`
 
 **File:** `packages/frontend/src/pages/repertoires/shared/RepertoireWorkspaceLayout.tsx`
