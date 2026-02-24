@@ -42,18 +42,18 @@ export const FocusAssistCard: React.FC<FocusAssistCardProps> = ({
           <p className="text-sm font-semibold text-text-base">Focus Assist</p>
           <p className="text-xs text-text-muted">
             {hasErrors
-              ? "Error detectado. Revisa comentarios y variantes candidatas."
-              : "Se activara en cuanto cometas tu primer error."}
+              ? "Error detected. Review comments and candidate lines."
+              : "It activates after your first mistake."}
           </p>
         </div>
         <Badge variant={pendingErrorCount > 0 ? "warning" : "info"} size="sm">
-          {pendingErrorCount} pendientes
+          {pendingErrorCount} pending
         </Badge>
       </div>
 
       {!hasErrors ? (
         <div className="mt-3 rounded-lg border border-border-subtle bg-surface px-3 py-3 text-sm text-text-muted">
-          Durante focus mode no se muestran ayudas persistentes. Este bloque aparecera con contenido cuando falle una jugada.
+          In focus mode, persistent guidance stays hidden. This block appears after you miss a move.
         </div>
       ) : (
         <>
@@ -63,14 +63,14 @@ export const FocusAssistCard: React.FC<FocusAssistCardProps> = ({
               active={activeTab === "comments"}
               onClick={() => setActiveTab("comments")}
             >
-              Comentarios
+              Comments
             </TabButton>
             <TabButton
               variant="segment"
               active={activeTab === "variants"}
               onClick={() => setActiveTab("variants")}
             >
-              Variantes candidatas
+              Candidate lines
             </TabButton>
           </Tabs>
           <div className="mt-3 max-h-[40vh] overflow-y-auto pr-1">
@@ -83,7 +83,7 @@ export const FocusAssistCard: React.FC<FocusAssistCardProps> = ({
               />
             ) : (
               <TrainAvailableVariantsPanel
-                title="Variantes candidatas"
+                title="Candidate lines"
                 trainVariants={trainVariants}
                 currentMoveNode={currentMoveNode}
                 onHintReveal={onHintReveal}

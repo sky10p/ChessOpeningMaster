@@ -81,12 +81,12 @@ describe('HelpInfo', () => {
         currentMoveNode={createMoveNode('root', 0)}
         onHintReveal={onHintReveal}
         assistEnabled={false}
-        assistNotice="Focus mode: ayudas bloqueadas hasta cometer el primer error."
+        assistNotice="Focus mode: guidance remains locked until your first error."
       />
     );
 
     expect(
-      screen.getByText('Focus mode: ayudas bloqueadas hasta cometer el primer error.')
+      screen.getByText('Focus mode: guidance remains locked until your first error.')
     ).toBeInTheDocument();
     expect(
       screen.getByText('Hints unlock in focus mode after your first error.')

@@ -261,15 +261,15 @@ describe('TrainInfo', () => {
       <TrainInfo
         {...defaultProps}
         assistEnabled={false}
-        assistNotice="Focus mode: ayudas bloqueadas hasta cometer el primer error."
+        assistNotice="Focus mode: guidance remains locked until your first error."
       />
     );
 
     expect(
-      screen.getByText('Focus mode: ayudas bloqueadas hasta cometer el primer error.')
+      screen.getByText('Focus mode: guidance remains locked until your first error.')
     ).toBeInTheDocument();
     expect(
-      screen.getByText('La ayuda se desbloquea tras el primer error en focus.')
+      screen.getByText('Guidance unlocks after your first error in focus mode.')
     ).toBeInTheDocument();
     expect(screen.queryByText('French Defense')).not.toBeInTheDocument();
     expect(screen.queryByText('Caro-Kann Defense')).not.toBeInTheDocument();
@@ -280,12 +280,12 @@ describe('TrainInfo', () => {
       <TrainInfo
         {...defaultProps}
         assistEnabled={true}
-        assistNotice="Focus error detected. Revisa comentarios y usa ayudas para encontrar la jugada correcta."
+        assistNotice="Focus error detected. Review comments and use guidance to find the correct move."
       />
     );
 
     expect(
-      screen.getByText('Focus error detected. Revisa comentarios y usa ayudas para encontrar la jugada correcta.')
+      screen.getByText('Focus error detected. Review comments and use guidance to find the correct move.')
     ).toBeInTheDocument();
     expect(screen.getByText('French Defense')).toBeInTheDocument();
   });

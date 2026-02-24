@@ -27,7 +27,7 @@ describe("FocusAssistCard", () => {
 
     expect(
       screen.getByText(
-        "Se activara en cuanto cometas tu primer error."
+        "It activates after your first mistake."
       )
     ).toBeInTheDocument();
     expect(screen.queryByTestId("assist-comments")).not.toBeInTheDocument();
@@ -44,7 +44,7 @@ describe("FocusAssistCard", () => {
 
     expect(screen.getByTestId("assist-comments")).toBeInTheDocument();
     expect(screen.queryByTestId("assist-variants")).not.toBeInTheDocument();
-    expect(screen.getByText("2 pendientes")).toBeInTheDocument();
+    expect(screen.getByText("2 pending")).toBeInTheDocument();
   });
 
   it("switches to candidate variants tab", () => {
@@ -56,7 +56,7 @@ describe("FocusAssistCard", () => {
       />
     );
 
-    fireEvent.click(screen.getByRole("tab", { name: "Variantes candidatas" }));
+    fireEvent.click(screen.getByRole("tab", { name: "Candidate lines" }));
 
     expect(screen.getByTestId("assist-variants")).toBeInTheDocument();
   });

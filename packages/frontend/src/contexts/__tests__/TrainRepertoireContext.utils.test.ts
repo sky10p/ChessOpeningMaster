@@ -11,9 +11,17 @@ import {
   getFocusActiveIndexByPosition,
   getFocusCompletedCountByPosition,
   getFocusIndexByPly,
+  getQueueFailedIndicesForVariant,
   getFocusTimelineMoves,
+  getRemainingVariantMoves,
   getNormalizedVariantStartPly,
   getOpeningNameFromVariant,
+  getReplayTargetParentPly,
+  parseMistakeKey,
+  resolveVariantForMistake,
+  resolveExpectedMistakeMoveNode,
+  shouldAutoCompleteSingleVariantMistakeSession,
+  sortMistakeQueueItems,
   getStrictProgressIndex,
   getTotalTrainingErrors,
   mergeMistakesByKey,
@@ -212,6 +220,19 @@ describe("TrainRepertoireContext.utils", () => {
     );
   });
 
+  it("parses deterministic mistake key", () => {
+    expect(parseMistakeKey("Sicilian::12::d7d6::2")).toEqual({
+      variantName: "Sicilian",
+      mistakePly: 12,
+      expectedMoveLan: "d7d6",
+      variantStartPly: 2,
+    });
+  });
+
+  it("returns null for invalid mistake key", () => {
+    expect(parseMistakeKey("invalid-key")).toBeNull();
+  });
+
   it("merges mistakes by key keeping latest payload", () => {
     const merged = mergeMistakesByKey(
       [
@@ -239,6 +260,22 @@ describe("TrainRepertoireContext.utils", () => {
     expect(merged).toHaveLength(1);
     expect(merged[0].positionFen).toBe("fen-2");
     expect(merged[0].actualMoveLan).toBe("g1f3");
+  });
+
+  it("sorts mistake queue by variant, ply and key", () => {
+    const sorted = sortMistakeQueueItems([
+      { variantName: "B", mistakePly: 8, mistakeKey: "k-2" },
+      { variantName: "A", mistakePly: 6, mistakeKey: "k-4" },
+      { variantName: "A", mistakePly: 4, mistakeKey: "k-3" },
+      { variantName: "A", mistakePly: 4, mistakeKey: "k-1" },
+    ]);
+
+    expect(sorted).toEqual([
+      { variantName: "A", mistakePly: 4, mistakeKey: "k-1" },
+      { variantName: "A", mistakePly: 4, mistakeKey: "k-3" },
+      { variantName: "A", mistakePly: 6, mistakeKey: "k-4" },
+      { variantName: "B", mistakePly: 8, mistakeKey: "k-2" },
+    ]);
   });
 
   it("computes mastery score bounded by formula", () => {
@@ -275,6 +312,79 @@ describe("TrainRepertoireContext.utils", () => {
       createPositionNode("f1b5", 5),
     ];
     expect(getEffectiveReplayStartPly(variant, 5, 3)).toBe(0);
+  });
+
+  it("computes replay target parent ply from expected ply without parent pointers", () => {
+    expect(getReplayTargetParentPly(6, 0)).toBe(5);
+    expect(getReplayTargetParentPly(3, 2)).toBe(2);
+    expect(getReplayTargetParentPly(1, 0)).toBe(0);
+  });
+
+  it("resolves expected mistake node by LAN when stored mistake ply is stale", () => {
+    const variant = createVariant("A");
+    variant.moves = [
+      createColoredNode("e2e4", 1, "w"),
+      createColoredNode("e7e5", 2, "b"),
+      createColoredNode("g1f3", 3, "w"),
+      createColoredNode("b8c6", 4, "b"),
+      createColoredNode("f1b5", 5, "w"),
+    ];
+    const resolved = resolveExpectedMistakeMoveNode(variant, {
+      mistakePly: 2,
+      expectedMoveLan: "g1f3",
+      variantStartPly: 0,
+    });
+
+    expect(resolved?.position).toBe(3);
+    expect(resolved?.getMove().lan).toBe("g1f3");
+  });
+
+  it("resolves variant for mistake by opening plus expected LAN when variant name is stale", () => {
+    const lineA: Variant = {
+      name: "Line A",
+      fullName: "Spanish Opening: Line A",
+      differentMoves: "",
+      moves: [
+        createColoredNode("e2e4", 1, "w"),
+        createColoredNode("e7e5", 2, "b"),
+        createColoredNode("g1f3", 3, "w"),
+      ],
+    };
+    const lineB: Variant = {
+      name: "Line B",
+      fullName: "Spanish Opening: Line B",
+      differentMoves: "",
+      moves: [
+        createColoredNode("d2d4", 1, "w"),
+        createColoredNode("d7d5", 2, "b"),
+        createColoredNode("c2c4", 3, "w"),
+      ],
+    };
+
+    const resolved = resolveVariantForMistake([lineA, lineB], {
+      variantName: "Legacy Spanish Line",
+      openingName: "Spanish Opening",
+      expectedMoveLan: "g1f3",
+      mistakePly: 3,
+      variantStartPly: 0,
+    });
+
+    expect(resolved?.fullName).toBe("Spanish Opening: Line A");
+  });
+
+  it("keeps direct variant name match when available", () => {
+    const lineA = createVariant("Line A");
+    const lineB = createVariant("Line B");
+
+    const resolved = resolveVariantForMistake([lineA, lineB], {
+      variantName: "Opening: Line B",
+      openingName: "Opening",
+      expectedMoveLan: "g1f3",
+      mistakePly: 3,
+      variantStartPly: 0,
+    });
+
+    expect(resolved?.fullName).toBe("Opening: Line B");
   });
 
   it("uses strict progress index bounds and clamped active index", () => {
@@ -317,5 +427,75 @@ describe("TrainRepertoireContext.utils", () => {
     expect(getFocusActiveIndexByPosition(timeline, 2)).toBe(1);
     expect(getFocusActiveIndexByPosition(timeline, 3)).toBe(2);
     expect(getFocusActiveIndexByPosition(timeline, 4)).toBe(2);
+  });
+
+  it("maps failed indices from mixed-variant queue to current variant timeline", () => {
+    const variant = createVariant("A");
+    variant.moves = [
+      createColoredNode("e2e4", 1, "w"),
+      createColoredNode("e7e5", 2, "b"),
+      createColoredNode("g1f3", 3, "w"),
+      createColoredNode("b8c6", 4, "b"),
+      createColoredNode("f1b5", 5, "w"),
+    ];
+    const timeline = getFocusTimelineMoves(variant, "white");
+    const failedIndices = getQueueFailedIndicesForVariant(
+      [
+        { variantName: "A", mistakePly: 3 },
+        { variantName: "B", mistakePly: 4 },
+        { variantName: "A", mistakePly: 5 },
+      ],
+      "A",
+      timeline
+    );
+
+    expect(failedIndices).toEqual([1, 2]);
+  });
+
+  it("returns remaining variant moves sorted after current ply", () => {
+    const variant = createVariant("A");
+    variant.moves = [
+      createColoredNode("e2e4", 1, "w"),
+      createColoredNode("e7e5", 2, "b"),
+      createColoredNode("g1f3", 3, "w"),
+      createColoredNode("b8c6", 4, "b"),
+      createColoredNode("f1b5", 5, "w"),
+    ];
+
+    expect(getRemainingVariantMoves(variant, 3).map((node) => node.position)).toEqual([
+      4,
+      5,
+    ]);
+  });
+
+  it("autocompletes only focus mistake-only sessions with exactly one variant", () => {
+    expect(
+      shouldAutoCompleteSingleVariantMistakeSession({
+        mode: "mistakes",
+        source: "mistakeOnly",
+        trainVariantsCount: 1,
+      })
+    ).toBe(true);
+    expect(
+      shouldAutoCompleteSingleVariantMistakeSession({
+        mode: "mistakes",
+        source: "mistakeOnly",
+        trainVariantsCount: 2,
+      })
+    ).toBe(false);
+    expect(
+      shouldAutoCompleteSingleVariantMistakeSession({
+        mode: "mistakes",
+        source: "review",
+        trainVariantsCount: 1,
+      })
+    ).toBe(false);
+    expect(
+      shouldAutoCompleteSingleVariantMistakeSession({
+        mode: "standard",
+        source: "mistakeOnly",
+        trainVariantsCount: 1,
+      })
+    ).toBe(false);
   });
 });

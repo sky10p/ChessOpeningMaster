@@ -34,6 +34,27 @@ It preserves existing variant training while adding targeted correction.
    After queue exhaustion, user replays the full variant.  
    A completion panel confirms whether the run was perfect.
 
+## Review-Only Mistake Training (Opening Page CTAs)
+
+From `/train/repertoire/:repertoireId/opening/:openingName`:
+
+- `Train Mistakes Only` starts a reinforcement queue built from all selected mistake keys for that opening.
+- `Train This Mistake` starts the same flow but with one mistake key.
+
+Behavior contract:
+
+- replay is mistake-targeted only (no full variant confirm phase),
+- replay always starts from line beginning (`ply 0`) for each reviewed variant context,
+- selected mistakes are processed in deterministic line order (`variantName`, then `mistakePly`),
+- board replay still advances step-by-step to each mistake parent before user input,
+- when reviewing a single variant, after solving the last queued mistake, replay continues automatically to the end of that variant line,
+- solved mistakes are handled in-session only,
+- no `variant-reviews` save is triggered,
+- no mastery update is triggered,
+- no `mistake-reviews` rating write is triggered.
+
+This mode is strictly for recall review and does not mutate stored progress/scheduling state.
+
 ## Focus Mode Lifecycle
 
 `mode=mistakes` for focus training follows a strict 3-phase loop:
@@ -70,7 +91,7 @@ The training session is considered finished only after the full 3-phase loop com
 - Unlocked state is kept through mistakes/full-run confirm to support correction.
 - Locked and unlocked states must be consistent on desktop and mobile panels.
 - Focus Assist is rendered inline in the right training panel as a dedicated card below `Your turn`.
-- Focus Assist card content is tabbed (`Comentarios`, `Variantes candidatas`).
+- Focus Assist card content is tabbed (`Comments`, `Candidate lines`).
 - When no errors exist, the card shows a locked/waiting state.
 - When errors exist, tabs show contextual comments and candidate variants without opening a separate overlay.
 - In normal mode, the standard persistent side-panel help/comment layout remains unchanged.
@@ -104,12 +125,16 @@ For each mistake item:
 
 1. Resolve target variant by `variantName`.
 2. Resolve expected node by `mistakePly` + `expectedMoveLan`.
+   - if stored `mistakePly` is stale, resolve by `expectedMoveLan` on the variant line after replay start.
 3. Resolve effective replay start context for the current mistake.
 4. If next mistake is ahead of current board position, continue replay forward.
 5. If next mistake is behind (requeued), reset to replay start and replay forward.
-6. Stop on the parent node of expected move and restrict allowed move to expected move.
+6. Stop on the parent ply of expected move and restrict allowed move to expected move.
+   - parent targeting is position-based (`mistakePly - 1`) and does not depend on runtime node parent links.
 7. On failure, requeue item.
-8. On success, request rating and schedule item.
+8. On success:
+   - normal reinforcement: request rating and schedule item,
+   - review-only mistake session: mark solved in-memory only (no persistence).
 
 If expected node cannot be resolved (stale path), the item is skipped in-session.
 

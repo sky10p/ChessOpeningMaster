@@ -42,7 +42,7 @@ describe("TrainAvailableVariantsPanel", () => {
     );
 
     expect(
-      screen.getByText("La ayuda se desbloquea tras el primer error en focus.")
+      screen.getByText("Guidance unlocks after your first error in focus mode.")
     ).toBeInTheDocument();
   });
 

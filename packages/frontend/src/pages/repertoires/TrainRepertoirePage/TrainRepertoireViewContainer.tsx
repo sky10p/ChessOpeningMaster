@@ -70,6 +70,10 @@ const TrainRepertoireViewContainer: React.FC = () => {
   const autoFixReviewKeyRef = React.useRef<string | null>(null);
 
   const isFocusMode = mode === "mistakes";
+  const focusOpeningName = useMemo(() => {
+    const queryParams = new URLSearchParams(location.search);
+    return queryParams.get("openingName");
+  }, [location.search]);
   const focusStatuses = focusModeProgress?.statuses || [];
   const focusFailedCount = focusStatuses.filter((status) => status === "failed").length;
   const focusErrorMarkerCount = focusStatuses.filter(
@@ -319,6 +323,18 @@ const TrainRepertoireViewContainer: React.FC = () => {
     [focusModeProgress]
   );
 
+  const handleFocusBack = React.useCallback(() => {
+    if (focusOpeningName) {
+      navigate(
+        `/train/repertoire/${repertoireId}/opening/${encodeURIComponent(
+          focusOpeningName
+        )}`
+      );
+      return;
+    }
+    navigate(-1);
+  }, [focusOpeningName, navigate, repertoireId]);
+
   return (
     <>
       {isFocusMode ? (
@@ -338,6 +354,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
           markHintUsed={markHintUsed}
           pendingErrorCount={focusFailedCount}
           hasAssistContent={focusErrorMarkerCount > 0}
+          onBack={handleFocusBack}
         />
       ) : (
         <TrainRepertoireStandardWorkspace

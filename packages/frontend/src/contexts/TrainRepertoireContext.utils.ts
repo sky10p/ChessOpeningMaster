@@ -93,6 +93,101 @@ export const getEffectiveReplayStartPly = (
   );
 };
 
+export const getReplayTargetParentPly = (
+  expectedMovePly: number,
+  replayStartPly: number
+): number => {
+  const safeExpectedPly = Math.max(1, Math.floor(expectedMovePly));
+  const safeReplayStartPly = Math.max(0, Math.floor(replayStartPly));
+  return Math.max(safeReplayStartPly, safeExpectedPly - 1);
+};
+
+export const resolveExpectedMistakeMoveNode = (
+  variant: Variant,
+  mistake: {
+    mistakePly: number;
+    expectedMoveLan: string;
+    variantStartPly: number;
+  }
+): MoveVariantNode | undefined => {
+  const normalizedMistakePly = Math.max(1, Math.floor(mistake.mistakePly));
+  const expectedMoveLan = mistake.expectedMoveLan.trim();
+  const exactMatch = variant.moves.find((moveNode) => {
+    const move = moveNode.getMove();
+    return (
+      moveNode.position === normalizedMistakePly &&
+      move?.lan?.trim() === expectedMoveLan
+    );
+  });
+  if (exactMatch) {
+    return exactMatch;
+  }
+  const replayStartPly = getEffectiveReplayStartPly(
+    variant,
+    mistake.variantStartPly,
+    normalizedMistakePly
+  );
+  const lanMatchAfterStart = variant.moves.find((moveNode) => {
+    const move = moveNode.getMove();
+    return (
+      moveNode.position > replayStartPly && move?.lan?.trim() === expectedMoveLan
+    );
+  });
+  if (lanMatchAfterStart) {
+    return lanMatchAfterStart;
+  }
+  return variant.moves.find(
+    (moveNode) => moveNode.position === normalizedMistakePly
+  );
+};
+
+export const resolveVariantForMistake = (
+  variants: Variant[],
+  mistake: {
+    variantName: string;
+    openingName: string;
+    expectedMoveLan: string;
+    mistakePly: number;
+    variantStartPly: number;
+  }
+): Variant | undefined => {
+  const direct = getVariantByName(variants, mistake.variantName);
+  if (direct) {
+    return direct;
+  }
+  const openingCandidates = variants.filter((variant) => {
+    const openingFromVariant = getOpeningNameFromVariant(variant.fullName);
+    return (
+      openingFromVariant === mistake.openingName ||
+      variant.name === mistake.openingName ||
+      variant.fullName === mistake.openingName
+    );
+  });
+  const candidates = openingCandidates.length > 0 ? openingCandidates : variants;
+  const expectedLan = mistake.expectedMoveLan.trim();
+  const exactCandidate = candidates.find((variant) =>
+    variant.moves.some((moveNode) => {
+      const move = moveNode.getMove();
+      return (
+        moveNode.position === Math.max(1, Math.floor(mistake.mistakePly)) &&
+        move?.lan?.trim() === expectedLan
+      );
+    })
+  );
+  if (exactCandidate) {
+    return exactCandidate;
+  }
+  const lanCandidate = candidates.find((variant) => {
+    const resolvedNode = resolveExpectedMistakeMoveNode(variant, {
+      mistakePly: mistake.mistakePly,
+      expectedMoveLan: mistake.expectedMoveLan,
+      variantStartPly: mistake.variantStartPly,
+    });
+    return resolvedNode?.getMove().lan?.trim() === expectedLan;
+  });
+  return lanCandidate || candidates[0];
+};
+
 export const getStrictProgressIndex = (
   ply: number,
   replayStartPly: number,
@@ -150,6 +245,18 @@ export const getFocusIndexByPly = (
   ply: number
 ): number | null => getProgressIndexByPly(timeline, ply);
 
+export const getQueueFailedIndicesForVariant = <
+  T extends { variantName: string; mistakePly: number }
+>(
+  queue: T[],
+  variantName: string,
+  timeline: MoveVariantNode[]
+): number[] =>
+  queue
+    .filter((item) => item.variantName === variantName)
+    .map((item) => getFocusIndexByPly(timeline, item.mistakePly))
+    .filter((value): value is number => value !== null);
+
 export const getCompletedProgressCount = (
   progressMoves: MoveVariantNode[],
   currentPosition: number
@@ -181,6 +288,23 @@ export const getFocusActiveIndexByPosition = (
   timeline: MoveVariantNode[],
   currentPosition: number
 ): number => getActiveProgressIndex(timeline, currentPosition);
+
+export const getRemainingVariantMoves = (
+  variant: Variant,
+  fromPly: number
+): MoveVariantNode[] =>
+  variant.moves
+    .filter((moveNode) => moveNode.position > Math.floor(fromPly))
+    .sort((left, right) => left.position - right.position);
+
+export const shouldAutoCompleteSingleVariantMistakeSession = (params: {
+  mode: "standard" | "mistakes";
+  source: "review" | "mistakeOnly";
+  trainVariantsCount: number;
+}): boolean =>
+  params.mode === "mistakes" &&
+  params.source === "mistakeOnly" &&
+  params.trainVariantsCount === 1;
 
 export const getVariantFenAtPly = (variant: Variant, targetPly: number): string => {
   const chess = new Chess();
@@ -290,6 +414,52 @@ export const buildMistakeKey = (
     Math.floor(variantStartPly)
   )}`;
 
+export const parseMistakeKey = (
+  mistakeKey: string
+):
+  | {
+      variantName: string;
+      mistakePly: number;
+      expectedMoveLan: string;
+      variantStartPly: number;
+    }
+  | null => {
+  const lastSeparator = mistakeKey.lastIndexOf("::");
+  if (lastSeparator <= 0) {
+    return null;
+  }
+  const secondLastSeparator = mistakeKey.lastIndexOf("::", lastSeparator - 1);
+  if (secondLastSeparator <= 0) {
+    return null;
+  }
+  const thirdLastSeparator = mistakeKey.lastIndexOf("::", secondLastSeparator - 1);
+  if (thirdLastSeparator <= 0) {
+    return null;
+  }
+  const variantName = mistakeKey.slice(0, thirdLastSeparator).trim();
+  const mistakePly = Number(
+    mistakeKey.slice(thirdLastSeparator + 2, secondLastSeparator)
+  );
+  const expectedMoveLan = mistakeKey
+    .slice(secondLastSeparator + 2, lastSeparator)
+    .trim();
+  const variantStartPly = Number(mistakeKey.slice(lastSeparator + 2));
+  if (
+    !variantName ||
+    !expectedMoveLan ||
+    !Number.isFinite(mistakePly) ||
+    !Number.isFinite(variantStartPly)
+  ) {
+    return null;
+  }
+  return {
+    variantName,
+    mistakePly: Math.max(1, Math.floor(mistakePly)),
+    expectedMoveLan,
+    variantStartPly: Math.max(0, Math.floor(variantStartPly)),
+  };
+};
+
 export const mergeMistakesByKey = (
   existing: MistakeSnapshotItem[],
   incoming: MistakeSnapshotItem[]
@@ -299,6 +469,21 @@ export const mergeMistakesByKey = (
   incoming.forEach((item) => map.set(item.mistakeKey, item));
   return Array.from(map.values());
 };
+
+export const sortMistakeQueueItems = <
+  T extends { variantName: string; mistakePly: number; mistakeKey: string }
+>(
+  items: T[]
+): T[] =>
+  [...items].sort((left, right) => {
+    if (left.variantName !== right.variantName) {
+      return left.variantName.localeCompare(right.variantName);
+    }
+    if (left.mistakePly !== right.mistakePly) {
+      return left.mistakePly - right.mistakePly;
+    }
+    return left.mistakeKey.localeCompare(right.mistakeKey);
+  });
 
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(Math.max(value, min), max);

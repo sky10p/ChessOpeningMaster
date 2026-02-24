@@ -60,14 +60,6 @@ const TrainOpeningPage: React.FC = () => {
     };
   }, [decodedOpeningName, repertoireId]);
 
-  const allMistakeVariantNames = useMemo(() => {
-    const names = new Set<string>();
-    (payload?.mistakes || []).forEach((mistake) => {
-      names.add(mistake.variantName);
-    });
-    return Array.from(names.values()).sort();
-  }, [payload?.mistakes]);
-
   const navigateToTrain = (params: Record<string, string | undefined>) => {
     const query = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
@@ -95,10 +87,17 @@ const TrainOpeningPage: React.FC = () => {
     if (!payload) {
       return;
     }
+    const mistakeKeys = payload.mistakes
+      .map((mistake) => mistake.mistakeKey)
+      .filter(Boolean)
+      .join("|");
+    if (!mistakeKeys) {
+      return;
+    }
     navigateToTrain({
       mode: "mistakes",
       openingName: payload.openingName,
-      variantNames: allMistakeVariantNames.join("|"),
+      mistakeKeys,
     });
   };
 

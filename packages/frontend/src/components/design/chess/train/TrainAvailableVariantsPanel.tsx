@@ -39,11 +39,11 @@ export const TrainAvailableVariantsPanel: React.FC<
       ) : null}
       {!assistEnabled ? (
         <div className="mt-2 rounded-md border border-border-subtle bg-surface-raised px-3 py-2 text-sm text-text-muted">
-          La ayuda se desbloquea tras el primer error en focus.
+          Guidance unlocks after your first error in focus mode.
         </div>
       ) : availableVariants.length === 0 ? (
         <div className="mt-2 rounded-md border border-border-subtle bg-surface-raised px-3 py-2 text-sm text-text-muted">
-          No hay variantes candidatas en este punto.
+          No candidate lines are available at this position.
         </div>
       ) : (
         <ul className="mt-2 space-y-2 max-h-60 overflow-y-auto pr-1">

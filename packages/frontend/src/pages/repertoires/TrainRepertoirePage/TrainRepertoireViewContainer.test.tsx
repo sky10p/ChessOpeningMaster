@@ -5,9 +5,12 @@ import TrainRepertoireViewContainer from "./TrainRepertoireViewContainer";
 import { useTrainRepertoireContext } from "../../../contexts/TrainRepertoireContext";
 import { useRepertoireContext } from "../../../contexts/RepertoireContext";
 
+const mockNavigate = jest.fn();
+const mockLocation = { search: "" };
+
 jest.mock("react-router-dom", () => ({
-  useNavigate: () => jest.fn(),
-  useLocation: () => ({ search: "" }),
+  useNavigate: () => mockNavigate,
+  useLocation: () => mockLocation,
 }));
 
 jest.mock("../../../contexts/RepertoireContext", () => ({
@@ -67,14 +70,21 @@ jest.mock("./components/TrainRepertoireFocusWorkspace", () => ({
     pendingErrorCount,
     hasAssistContent,
     finishedTrain,
+    onBack,
   }: {
     pendingErrorCount: number;
     hasAssistContent: boolean;
     finishedTrain: boolean;
+    onBack?: () => void;
   }) => (
     <div data-testid="focus-workspace">
       {finishedTrain ? "finished" : "in-progress"}|errors:{pendingErrorCount}|assist:
       {hasAssistContent ? "on" : "off"}
+      {onBack ? (
+        <button onClick={onBack} type="button">
+          focus-back
+        </button>
+      ) : null}
     </div>
   ),
 }));
@@ -181,6 +191,8 @@ const buildTrainContext = (overrides: Record<string, unknown> = {}) => ({
 
 describe("TrainRepertoireViewContainer", () => {
   beforeEach(() => {
+    jest.clearAllMocks();
+    mockLocation.search = "";
     mockedUseRepertoireContext.mockReturnValue({
       repertoireId: "rep-1",
       repertoireName: "Principal",
@@ -271,5 +283,37 @@ describe("TrainRepertoireViewContainer", () => {
       "in-progress"
     );
     expect(screen.queryByTestId("focus-workspace")).not.toBeInTheDocument();
+  });
+
+  it("navigates back to opening page from focus mode", () => {
+    mockLocation.search = "?mode=mistakes&openingName=Spanish%20Opening";
+    mockedUseTrainRepertoireContext.mockReturnValue(
+      buildTrainContext({
+        mode: "mistakes",
+      })
+    );
+
+    render(<TrainRepertoireViewContainer />);
+
+    fireEvent.click(screen.getByRole("button", { name: "focus-back" }));
+
+    expect(mockNavigate).toHaveBeenCalledWith(
+      "/train/repertoire/rep-1/opening/Spanish%20Opening"
+    );
+  });
+
+  it("falls back to history back when openingName is not present", () => {
+    mockLocation.search = "?mode=mistakes";
+    mockedUseTrainRepertoireContext.mockReturnValue(
+      buildTrainContext({
+        mode: "mistakes",
+      })
+    );
+
+    render(<TrainRepertoireViewContainer />);
+
+    fireEvent.click(screen.getByRole("button", { name: "focus-back" }));
+
+    expect(mockNavigate).toHaveBeenCalledWith(-1);
   });
 });

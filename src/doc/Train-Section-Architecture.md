@@ -35,12 +35,15 @@ Backend:
      - `openingName`
      - `variantName`
      - `variantNames` (pipe-separated)
+     - `mistakeKey`
+     - `mistakeKeys` (pipe-separated)
 
 Execution UI composition:
 
 - `TrainRepertoireViewContainer` orchestrates train state and modals.
 - `TrainRepertoireStandardWorkspace` renders normal-mode persistent side panels.
 - `TrainRepertoireFocusWorkspace` renders focus-mode contextual assistance as inline panel content.
+- `TrainRepertoireFocusWorkspace` also exposes a dedicated back action to return to the opening training page.
 
 ## Focus Mode State Machine (`mode=mistakes`)
 
@@ -82,9 +85,19 @@ Focus assist UX semantics:
 - assists unlock after first mistake in current focus session,
 - unlocked assists stay available during correction and confirm phases.
 - in focus mode, comments + variant guidance are rendered in an inline `Focus Assist` card below `Your turn` inside the training info panel.
-- focus assist card content uses tabs (`Comentarios`, `Variantes candidatas`).
+- focus assist card content uses tabs (`Comments`, `Candidate lines`).
 - the card stays in waiting state until the first error, then switches to active guidance content.
 - persistent comment/help panels are reserved for normal mode.
+
+Direct mistake review semantics (`mode=mistakes` + `mistakeKey(s)`):
+
+- starts directly in reinforcement queue mode using the selected mistake keys,
+- queue order is deterministic (`variantName`, then `mistakePly`, then `mistakeKey`),
+- replays only mistake targets (no variant phase and no full-run confirm),
+- replay baseline for this mode is line start (`ply 0`) so move progress stays aligned from move 1,
+- if the session targets a single variant, once the last mistake is solved the board auto-replays remaining moves to that variant end before closing the session,
+- does not persist variant review, mastery changes, or mistake-review ratings,
+- ends in-session without starting a new variant run.
 
 ## API Contract Notes
 

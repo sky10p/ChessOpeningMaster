@@ -5,6 +5,7 @@ import { TrainVariant } from "../../../../models/chess.models";
 import { RepertoireWorkspaceLayout } from "../../shared/RepertoireWorkspaceLayout";
 import TrainInfo from "../../../../components/design/chess/train/TrainInfo";
 import { FocusAssistCard } from "./FocusAssistCard";
+import { Button } from "../../../../components/ui";
 
 interface TrainRepertoireFocusWorkspaceProps {
   title: string;
@@ -22,6 +23,7 @@ interface TrainRepertoireFocusWorkspaceProps {
   markHintUsed: () => void;
   pendingErrorCount: number;
   hasAssistContent: boolean;
+  onBack?: () => void;
 }
 
 export const TrainRepertoireFocusWorkspace: React.FC<
@@ -42,6 +44,7 @@ export const TrainRepertoireFocusWorkspace: React.FC<
   markHintUsed,
   pendingErrorCount,
   hasAssistContent,
+  onBack,
 }) => {
   const assistPanel = (
     <FocusAssistCard
@@ -57,6 +60,18 @@ export const TrainRepertoireFocusWorkspace: React.FC<
 
   const panelContent = (
     <div className="h-full w-full min-h-0 overflow-y-auto p-4">
+      {onBack ? (
+        <div className="mb-3">
+          <Button
+            intent="secondary"
+            size="sm"
+            onClick={onBack}
+            className="w-full justify-center sm:w-auto"
+          >
+            Back to opening
+          </Button>
+        </div>
+      ) : null}
       <TrainInfo
         currentMoveNode={currentMoveNode}
         turn={turn}
