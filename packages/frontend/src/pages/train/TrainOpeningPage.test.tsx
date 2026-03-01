@@ -147,6 +147,39 @@ describe("TrainOpeningPage", () => {
     });
   });
 
+  it("navigates to review-only mistake session with due mistake keys only", async () => {
+    jest.spyOn(trainRepository, "getTrainOpening").mockResolvedValue({
+      ...openingPayload,
+      stats: {
+        ...openingPayload.stats,
+        dueMistakesCount: 1,
+      },
+      mistakes: [
+        openingPayload.mistakes[0],
+        {
+          ...openingPayload.mistakes[1],
+          mistakeKey: "future-k2",
+          dueAt: new Date("2099-01-01T00:00:00.000Z"),
+        },
+      ],
+    });
+
+    render(
+      <MemoryRouter>
+        <TrainOpeningPage />
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText("Italian Game")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Train Mistakes Only" }));
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith(
+        "/repertoire/train/rep-1?mode=mistakes&openingName=Italian+Game&mistakeKeys=k1"
+      );
+    });
+  });
+
   it("navigates to review-only session for a specific mistake key", async () => {
     jest.spyOn(trainRepository, "getTrainOpening").mockResolvedValue(openingPayload);
 
@@ -185,5 +218,29 @@ describe("TrainOpeningPage", () => {
     await waitFor(() => {
       expect(getTrainOpeningSpy).toHaveBeenCalledWith("rep-1", "100% accuracy");
     });
+  });
+
+  it("disables due-only mistake training when only scheduled mistakes exist", async () => {
+    jest.spyOn(trainRepository, "getTrainOpening").mockResolvedValue({
+      ...openingPayload,
+      stats: {
+        ...openingPayload.stats,
+        dueMistakesCount: 0,
+      },
+      mistakes: openingPayload.mistakes.map((mistake, index) => ({
+        ...mistake,
+        mistakeKey: `scheduled-${index + 1}`,
+        dueAt: new Date("2099-01-01T00:00:00.000Z"),
+      })),
+    });
+
+    render(
+      <MemoryRouter>
+        <TrainOpeningPage />
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText("Italian Game")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Train Mistakes Only" })).toBeDisabled();
   });
 });

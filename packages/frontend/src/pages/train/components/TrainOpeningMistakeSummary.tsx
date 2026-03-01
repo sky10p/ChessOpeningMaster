@@ -1,6 +1,8 @@
 import React from "react";
 import { VariantMistake } from "@chess-opening-master/common";
 import { Badge, Button, Card } from "../../../components/ui";
+import { toUtcDateKey } from "../../../utils/dateUtils";
+import { getDueTrainMistakes, isTrainMistakeDue } from "../mistakeUtils";
 
 interface TrainOpeningMistakeSummaryProps {
   mistakes: VariantMistake[];
@@ -8,18 +10,14 @@ interface TrainOpeningMistakeSummaryProps {
   onTrainSpecificMistake: (mistake: VariantMistake) => void;
 }
 
-const getTodayDayKey = (): string => new Date().toISOString().slice(0, 10);
-
-const isDue = (mistake: VariantMistake, todayDayKey: string): boolean =>
-  mistake.dueAt.getTime() <= Date.now() && mistake.lastReviewedDayKey !== todayDayKey;
-
 export const TrainOpeningMistakeSummary: React.FC<TrainOpeningMistakeSummaryProps> = ({
   mistakes,
   onReviewDueMistakes,
   onTrainSpecificMistake,
 }) => {
-  const todayDayKey = getTodayDayKey();
-  const dueMistakes = mistakes.filter((mistake) => isDue(mistake, todayDayKey));
+  const now = new Date();
+  const todayDayKey = toUtcDateKey(now);
+  const dueMistakes = getDueTrainMistakes(mistakes, now);
 
   return (
     <Card className="border-border-default bg-surface" padding="default" elevation="raised">
@@ -34,7 +32,7 @@ export const TrainOpeningMistakeSummary: React.FC<TrainOpeningMistakeSummaryProp
           intent="accent"
           size="sm"
           onClick={onReviewDueMistakes}
-          disabled={mistakes.length === 0}
+          disabled={dueMistakes.length === 0}
           className="justify-center sm:w-fit"
         >
           Train Mistakes Only
@@ -44,14 +42,11 @@ export const TrainOpeningMistakeSummary: React.FC<TrainOpeningMistakeSummaryProp
         ) : (
           <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
             {mistakes.slice(0, 16).map((mistake) => (
-              <div
-                key={mistake.mistakeKey}
-                className="rounded-md border border-border-subtle bg-surface-raised px-3 py-2"
-              >
+              <div key={mistake.mistakeKey} className="rounded-md border border-border-subtle bg-surface-raised px-3 py-2">
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-xs text-text-base break-all">{mistake.variantName}</p>
-                  <Badge variant={isDue(mistake, todayDayKey) ? "danger" : "default"} size="sm">
-                    {isDue(mistake, todayDayKey) ? "Due" : "Scheduled"}
+                  <Badge variant={isTrainMistakeDue(mistake, now, todayDayKey) ? "danger" : "default"} size="sm">
+                    {isTrainMistakeDue(mistake, now, todayDayKey) ? "Due" : "Scheduled"}
                   </Badge>
                 </div>
                 <p className="mt-1 text-xs text-text-muted break-all">

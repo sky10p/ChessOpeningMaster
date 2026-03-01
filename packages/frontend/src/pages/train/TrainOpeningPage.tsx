@@ -9,6 +9,7 @@ import { TrainOpeningMistakeSummary } from "./components/TrainOpeningMistakeSumm
 import { TrainOpeningVariantList } from "./components/TrainOpeningVariantList";
 import { PageFrame } from "../../components/design/layouts/PageFrame";
 import { PageRoot } from "../../components/design/layouts/PageRoot";
+import { getDueTrainMistakes } from "./mistakeUtils";
 
 const FALLBACK_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
@@ -79,24 +80,6 @@ const TrainOpeningPage: React.FC = () => {
     });
   };
 
-  const handleReviewDueMistakes = () => {
-    if (!payload) {
-      return;
-    }
-    const mistakeKeys = payload.mistakes
-      .map((mistake) => mistake.mistakeKey)
-      .filter(Boolean)
-      .join("|");
-    if (!mistakeKeys) {
-      return;
-    }
-    navigateToTrain({
-      mode: "mistakes",
-      openingName: payload.openingName,
-      mistakeKeys,
-    });
-  };
-
   const handleTrainSpecificMistake = (mistakeKey: string, variantName: string) => {
     if (!payload) {
       return;
@@ -159,6 +142,22 @@ const TrainOpeningPage: React.FC = () => {
   }
 
   const mastery = getMasteryBadge(payload.stats.masteryScore);
+  const dueMistakes = getDueTrainMistakes(payload.mistakes);
+
+  const handleReviewDueMistakes = () => {
+    const mistakeKeys = dueMistakes
+      .map((mistake) => mistake.mistakeKey)
+      .filter(Boolean)
+      .join("|");
+    if (!mistakeKeys) {
+      return;
+    }
+    navigateToTrain({
+      mode: "mistakes",
+      openingName: payload.openingName,
+      mistakeKeys,
+    });
+  };
 
   return (
     <PageRoot>
