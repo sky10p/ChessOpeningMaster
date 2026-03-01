@@ -1,14 +1,16 @@
 import React from "react";
+import { Badge } from "../../../../components/ui";
 
 interface TagDisplayProps {
   tags: string[];
 }
 
 const TagDisplay: React.FC<TagDisplayProps> = ({ tags }) => {
+  if (!tags || tags.length === 0) return null;
   return (
-    <div className="flex flex-wrap gap-1 mb-2">
+    <div className="flex flex-wrap gap-1">
       {tags.map((tag) => (
-        <span key={tag} className="bg-blue-700 text-white px-2 py-0.5 rounded text-xs">{tag}</span>
+        <Badge key={tag} variant="default" size="sm">{tag}</Badge>
       ))}
     </div>
   );

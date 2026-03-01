@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useCallback } from "react";
+import { ClockIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { useStudyGroups } from "./hooks/useStudyGroups";
 import { useStudyTimer } from "./hooks/useStudyTimer";
 import {
@@ -18,13 +19,12 @@ import NewStudyModal from "./components/modals/NewStudyModal";
 import NewEntryModal from "./components/modals/NewEntryModal";
 import EditEntryModal from "./components/modals/EditEntryModal";
 import DeleteEntryModal from "./components/modals/DeleteEntryModal";
-import { Button } from "../../components/ui";
+import { Button, EmptyState } from "../../components/ui";
 import DeleteSessionModal from "./components/modals/DeleteSessionModal";
 import ManualTimeModal from "./components/modals/ManualTimeModal";
 import { Study, StudyEntry } from "./models";
 import StudyDetail from "./components/StudyDetail";
 import StudyGroupMobile from "../../components/application/StudyGroupMobile";
-import ScrollContainer from "./components/containers/ScrollContainer";
 import { PageFrame } from "../../components/design/layouts/PageFrame";
 import { PageRoot } from "../../components/design/layouts/PageRoot";
 import { PageSurface } from "../../components/design/layouts/PageSurface";
@@ -67,7 +67,7 @@ const StudiesPage: React.FC = () => {
       const updated = await fetchStudy(activeGroupId, selectedStudy.id);
       setSelectedStudy(updated);
     }
-  }, [selectedStudy, activeGroupId, timerElapsed, timerStart, finishTimer]);
+  }, [selectedStudy, activeGroupId, timerElapsed, timerStart, finishTimer, setSelectedStudy]);
 
   const [showNewGroup, setShowNewGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
@@ -82,66 +82,59 @@ const StudiesPage: React.FC = () => {
   const [editEntry, setEditEntry] = useState<StudyEntry | null>(null);
   const [deleteEntryId, setDeleteEntryId] = useState<string | null>(null);
   const [deleteSessionId, setDeleteSessionId] = useState<string | null>(null);
-
-  const [tagFilter, setTagFilter] = useState<string>("");
+  const [tagFilter, setTagFilter] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
+  const activeGroup = useMemo(
+    () => groups.find((group) => group.id === activeGroupId) || null,
+    [groups, activeGroupId]
+  );
+
   const filteredStudies = useMemo<Study[]>(() => {
-    let studies = (groups.find((g) => g.id === activeGroupId)?.studies ||
-      []) as Study[];
+    let studies = (activeGroup?.studies || []) as Study[];
     if (selectedTags.length > 0) {
-      studies = studies.filter((s) =>
-        selectedTags.every((tag) => s.tags.includes(tag))
+      studies = studies.filter((study) =>
+        selectedTags.every((tag) => study.tags.includes(tag))
       );
     }
     return studies;
-  }, [groups, activeGroupId, selectedTags]);
+  }, [activeGroup, selectedTags]);
 
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-
-  const handleTagInput = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setTagFilter(e.target.value);
-    },
-    []
-  );
+  const handleTagInput = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setTagFilter(event.target.value);
+  }, []);
 
   const handleTagSelect = useCallback((tag: string) => {
-    setSelectedTags((prev) => (prev.includes(tag) ? prev : [...prev, tag]));
+    setSelectedTags((previousTags) => (previousTags.includes(tag) ? previousTags : [...previousTags, tag]));
     setTagFilter("");
   }, []);
 
   const handleTagRemove = useCallback((tag: string) => {
-    setSelectedTags((prev) => prev.filter((t) => t !== tag));
+    setSelectedTags((previousTags) => previousTags.filter((value) => value !== tag));
   }, []);
 
-  const handleSidebarEditGroup = (id: string, name: string) => {
-    editGroup(id, name);
-  };
+  const handleSidebarEditGroup = useCallback((id: string, name: string) => {
+    void editGroup(id, name);
+  }, [editGroup]);
 
-  const handleSidebarDeleteGroup = (id: string) => {
-    deleteGroup(id);
-  };
-  const handleDeleteSession = useCallback(
-    async (sessionId: string) => {
-      setDeleteSessionId(sessionId);
-      setShowDeleteSessionModal(true);
-    },
-    []
-  );
+  const handleSidebarDeleteGroup = useCallback((id: string) => {
+    void deleteGroup(id);
+  }, [deleteGroup]);
 
-  const confirmDeleteSession = useCallback(
-    async () => {
-      if (selectedStudy && activeGroupId && deleteSessionId) {
-        await deleteStudySession(activeGroupId, selectedStudy.id, deleteSessionId);
-        const updated = await fetchStudy(activeGroupId, selectedStudy.id);
-        setSelectedStudy(updated);
-      }
-      setShowDeleteSessionModal(false);
-      setDeleteSessionId(null);
-    },
-    [selectedStudy, activeGroupId, deleteSessionId]
-  );
+  const handleDeleteSession = useCallback(async (sessionId: string) => {
+    setDeleteSessionId(sessionId);
+    setShowDeleteSessionModal(true);
+  }, []);
+
+  const confirmDeleteSession = useCallback(async () => {
+    if (selectedStudy && activeGroupId && deleteSessionId) {
+      await deleteStudySession(activeGroupId, selectedStudy.id, deleteSessionId);
+      const updated = await fetchStudy(activeGroupId, selectedStudy.id);
+      setSelectedStudy(updated);
+    }
+    setShowDeleteSessionModal(false);
+    setDeleteSessionId(null);
+  }, [selectedStudy, activeGroupId, deleteSessionId, setSelectedStudy]);
 
   const handleDeleteStudy = useCallback(async () => {
     if (selectedStudy && activeGroupId) {
@@ -149,44 +142,62 @@ const StudiesPage: React.FC = () => {
       await refreshGroups();
       setSelectedStudy(null);
     }
-  }, [selectedStudy, activeGroupId, refreshGroups]);
+  }, [selectedStudy, activeGroupId, refreshGroups, setSelectedStudy]);
+
+  const handleCreateGroup = useCallback(() => {
+    if (newGroupName.trim()) {
+      void addGroup(newGroupName);
+      setShowNewGroup(false);
+      setNewGroupName("");
+      setGroupError(null);
+      return;
+    }
+    setGroupError("Group name is required");
+  }, [addGroup, newGroupName]);
+
+  const resetNewGroup = useCallback(() => {
+    setShowNewGroup(false);
+    setNewGroupName("");
+    setGroupError(null);
+  }, []);
 
   return (
     <PageRoot>
       <PageFrame className="h-full py-0 sm:py-2">
         <PageSurface>
-      <div className="w-full h-full flex flex-col md:flex-row md:items-start md:gap-4">
-        {!isMobile && (
-          <StudyGroupSidebar
-            groups={groups}
-            activeGroupId={activeGroupId}
-            onSelectGroup={setActiveGroupId}
-            onShowNewGroup={() => setShowNewGroup(true)}
-            showNewGroup={showNewGroup}
-            newGroupName={newGroupName}
-            onNewGroupNameChange={setNewGroupName}
-            onAddGroup={() => {
-              if (newGroupName.trim()) {
-                addGroup(newGroupName);
-                setShowNewGroup(false);
-                setNewGroupName("");
-                setGroupError(null);
-              } else {
-                setGroupError("Group name is required");
-              }
-            }}
-            onCancelNewGroup={() => {
-              setShowNewGroup(false);
-              setNewGroupName("");
-              setGroupError(null);
-            }}
-            groupError={groupError}
-            onEditGroup={handleSidebarEditGroup}
-            onDeleteGroup={handleSidebarDeleteGroup}
-          />
-        )}
-        <main className="flex-1 flex flex-col h-full overflow-hidden md:ml-0 ml-0 md:pl-0 pl-0 relative z-0 p-2 sm:p-4 max-w-full">
-          {isMobile && (
+          <header className="shrink-0 border-b border-border-default bg-surface px-4 py-3 sm:px-5">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="space-y-1">
+                <h1 className="text-base font-semibold text-text-base sm:text-lg">Studies</h1>
+                <p className="text-sm text-text-muted">
+                  Manage study groups, practice sessions, and external resources.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                {selectedStudy && (
+                  <Button
+                    type="button"
+                    intent="secondary"
+                    size="sm"
+                    onClick={() => setShowNewEntryModal(true)}
+                  >
+                    Add Entry
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  intent="primary"
+                  size="sm"
+                  onClick={() => setShowNewStudy(true)}
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  New Study
+                </Button>
+              </div>
+            </div>
+          </header>
+
+          <div className="shrink-0 md:hidden">
             <StudyGroupMobile
               groups={groups}
               activeGroupId={activeGroupId}
@@ -195,189 +206,218 @@ const StudiesPage: React.FC = () => {
               editGroup={editGroup}
               deleteGroup={deleteGroup}
             />
-          )}
-          <TagFilterBar
-            allTags={allTags as string[]}
-            selectedTags={selectedTags}
-            tagFilter={tagFilter}
-            onTagInput={handleTagInput}
-            onTagSelect={handleTagSelect}
-            onTagRemove={handleTagRemove}
-          />
-          <div className="flex-1 overflow-hidden p-2 sm:p-4 transition-all duration-300">
-            {loading ? (
-              <div className="text-center p-4 text-brand">
-                Loading studies...
-              </div>
-            ) : selectedStudy ? (
-              <ScrollContainer>
-                <StudyDetail
-                  study={selectedStudy as Study}
-                  onBack={handleBackToStudies}
-                  onShowNewEntry={() => setShowNewEntryModal(true)}
-                  entrySuccess={null}
-                  entryError={null}
-                  onEditEntry={(entry) => {
-                    setEditEntry(entry);
-                    setShowEditEntryModal(true);
-                  }}
-                  onDeleteEntry={(entryId) => {
-                    setDeleteEntryId(entryId);
-                    setShowDeleteEntryModal(true);
-                  }}
-                  onShowManualTime={() => setShowManualTimeModal(true)}
-                  timerState={{
-                    running: timerRunning,
-                    start: timerStart,
-                    elapsed: timerElapsed,
-                  }}
-                  onStartTimer={startTimer}
-                  onPauseTimer={pauseTimer}
-                  onResumeTimer={resumeTimer}
-                  onFinishTimer={handleFinishTimer}
-                  sessions={(selectedStudy as Study).sessions || []}
-                  onDeleteSession={handleDeleteSession}
-                  onDeleteStudy={handleDeleteStudy}
-                />
-              </ScrollContainer>
-            ) : (
-              <div className="h-full flex flex-col">
-                <div className="max-w-4xl mx-auto w-full">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
-                    <h2 className="text-xl font-bold text-text-base">
-                      {groups.find((g) => g.id === activeGroupId)?.name} Studies
-                    </h2>
-                    <Button
-                      intent="primary"
-                      size="sm"
-                      onClick={() => setShowNewStudy(true)}
-                    >
-                      + New Study
-                    </Button>
-                  </div>
-                </div>
-                <ScrollContainer className="max-w-4xl mx-auto w-full">
-                  <StudyList
-                    studies={filteredStudies}
-                    onSelectStudy={async (study: Study) => {
-                      if (!activeGroupId) return;
-                      const full = await fetchStudy(activeGroupId, study.id);
-                      setSelectedStudy(full);
-                    }}
-                  />
-                </ScrollContainer>
-              </div>
-            )}
           </div>
-        </main>
-      </div>
-      <NewStudyModal
-        open={showNewStudy}
-        onClose={() => {
-          setShowNewStudy(false);
-          setStudyError(null);
-        }}
-        onSave={(name, tags) => {
-          if (!name.trim()) {
-            setStudyError("Study name is required");
-            return;
-          }
-          addStudy(name, tags);
-          setShowNewStudy(false);
-          setStudyError(null);
-        }}
-        error={studyError}
-      />
-      <NewEntryModal
-        open={showNewEntryModal}
-        onClose={() => {
-          setShowNewEntryModal(false);
-        }}
-        onSave={async (title, externalUrl, description) => {
-          if (selectedStudy && activeGroupId) {
-            await addStudyEntry(activeGroupId, selectedStudy.id, {
-              title,
-              externalUrl,
-              description,
-            });
-            const full = await fetchStudy(activeGroupId, selectedStudy.id);
-            setSelectedStudy(full);
-          }
-          setShowNewEntryModal(false);
-        }}
-        error={null}
-      />
-      <EditEntryModal
-        open={showEditEntryModal}
-        initialTitle={editEntry?.title || ""}
-        initialExternalUrl={editEntry?.externalUrl || ""}
-        initialDescription={editEntry?.description || ""}
-        onClose={() => {
-          setShowEditEntryModal(false);
-          setEditEntry(null);
-        }}
-        onSave={async (title, externalUrl, description) => {
-          if (selectedStudy && activeGroupId && editEntry) {
-            await editStudyEntry(
-              activeGroupId,
-              selectedStudy.id,
-              editEntry.id,
-              { title, externalUrl, description }
-            );
-            const full = await fetchStudy(activeGroupId, selectedStudy.id);
-            setSelectedStudy(full);
-          }
-          setShowEditEntryModal(false);
-          setEditEntry(null);
-        }}
-        error={null}
-      />
-      <DeleteEntryModal
-        open={showDeleteEntryModal}
-        onClose={() => {
-          setShowDeleteEntryModal(false);
-          setDeleteEntryId(null);
-        }}
-        onDelete={async () => {
-          if (selectedStudy && activeGroupId && deleteEntryId) {
-            await deleteStudyEntry(
-              activeGroupId,
-              selectedStudy.id,
-              deleteEntryId
-            );
-            const full = await fetchStudy(activeGroupId, selectedStudy.id);
-            setSelectedStudy(full);
-          }
-          setShowDeleteEntryModal(false);
-          setDeleteEntryId(null);
-        }}
-        error={null}
-      />
-      <ManualTimeModal
-        open={showManualTimeModal}
-        onClose={() => setShowManualTimeModal(false)}
-        onSave={async (
-          manualMinutes: string,
-          manualComment: string,
-          manualDate: string
-        ) => {
-          if (selectedStudy && activeGroupId) {
-            const seconds = parseManualTime(manualMinutes);
-            if (seconds !== null) {
-              await addStudySession(activeGroupId, selectedStudy.id, {
-                start: manualDate,
-                duration: seconds,
-                manual: true,
-                comment: manualComment,
-              });
-              const full = await fetchStudy(activeGroupId, selectedStudy.id);
-              setSelectedStudy(full);
-            }
-          }
-          setShowManualTimeModal(false);
-        }}
-        error={null}
-      />
+
+          <div className="flex min-h-0 flex-1 overflow-hidden">
+            <div className="hidden min-h-0 shrink-0 md:flex">
+              <StudyGroupSidebar
+                groups={groups}
+                activeGroupId={activeGroupId}
+                onSelectGroup={setActiveGroupId}
+                onShowNewGroup={() => setShowNewGroup(true)}
+                showNewGroup={showNewGroup}
+                newGroupName={newGroupName}
+                onNewGroupNameChange={setNewGroupName}
+                onAddGroup={handleCreateGroup}
+                onCancelNewGroup={resetNewGroup}
+                groupError={groupError}
+                onEditGroup={handleSidebarEditGroup}
+                onDeleteGroup={handleSidebarDeleteGroup}
+              />
+            </div>
+
+            <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
+              <div className="sticky top-0 z-10 bg-surface/95 backdrop-blur">
+                <TagFilterBar
+                  allTags={allTags as string[]}
+                  selectedTags={selectedTags}
+                  tagFilter={tagFilter}
+                  onTagInput={handleTagInput}
+                  onTagSelect={handleTagSelect}
+                  onTagRemove={handleTagRemove}
+                />
+              </div>
+
+              <div className="px-3 py-4 sm:px-5 sm:py-5">
+                {loading ? (
+                  <EmptyState
+                    icon={ClockIcon}
+                    title="Loading studies..."
+                    description="Preparing your studies workspace."
+                  />
+                ) : selectedStudy ? (
+                  <StudyDetail
+                    study={selectedStudy}
+                    groupName={activeGroup?.name || "Studies"}
+                    onBack={handleBackToStudies}
+                    onShowNewEntry={() => setShowNewEntryModal(true)}
+                    entrySuccess={null}
+                    entryError={null}
+                    onEditEntry={(entry) => {
+                      setEditEntry(entry);
+                      setShowEditEntryModal(true);
+                    }}
+                    onDeleteEntry={(entryId) => {
+                      setDeleteEntryId(entryId);
+                      setShowDeleteEntryModal(true);
+                    }}
+                    onShowManualTime={() => setShowManualTimeModal(true)}
+                    timerState={{
+                      running: timerRunning,
+                      start: timerStart,
+                      elapsed: timerElapsed,
+                    }}
+                    onStartTimer={startTimer}
+                    onPauseTimer={pauseTimer}
+                    onResumeTimer={resumeTimer}
+                    onFinishTimer={handleFinishTimer}
+                    sessions={selectedStudy.sessions || []}
+                    onDeleteSession={handleDeleteSession}
+                    onDeleteStudy={handleDeleteStudy}
+                  />
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex flex-wrap items-end justify-between gap-3">
+                      <div className="space-y-1">
+                        <div className="text-xs font-semibold uppercase tracking-wide text-text-subtle">
+                          Current Group
+                        </div>
+                        <h2 className="text-xl font-bold text-text-base">
+                          {activeGroup?.name || "No group selected"}
+                        </h2>
+                        <p className="text-sm text-text-muted">
+                          {filteredStudies.length} {filteredStudies.length === 1 ? "study" : "studies"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <StudyList
+                      studies={filteredStudies}
+                      emptyAction={
+                        <Button type="button" intent="primary" size="sm" onClick={() => setShowNewStudy(true)}>
+                          <PlusIcon className="h-4 w-4" />
+                          New Study
+                        </Button>
+                      }
+                      onSelectStudy={async (study: Study) => {
+                        if (!activeGroupId) return;
+                        const full = await fetchStudy(activeGroupId, study.id);
+                        setSelectedStudy(full);
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            </main>
+          </div>
+
+          <NewStudyModal
+            open={showNewStudy}
+            onClose={() => {
+              setShowNewStudy(false);
+              setStudyError(null);
+            }}
+            onSave={(name, tags) => {
+              if (!name.trim()) {
+                setStudyError("Study name is required");
+                return;
+              }
+              void addStudy(name, tags);
+              setShowNewStudy(false);
+              setStudyError(null);
+            }}
+            error={studyError}
+          />
+          <NewEntryModal
+            open={showNewEntryModal}
+            onClose={() => {
+              setShowNewEntryModal(false);
+            }}
+            onSave={async (title, externalUrl, description) => {
+              if (selectedStudy && activeGroupId) {
+                await addStudyEntry(activeGroupId, selectedStudy.id, {
+                  title,
+                  externalUrl,
+                  description,
+                });
+                const full = await fetchStudy(activeGroupId, selectedStudy.id);
+                setSelectedStudy(full);
+              }
+              setShowNewEntryModal(false);
+            }}
+            error={null}
+          />
+          <EditEntryModal
+            open={showEditEntryModal}
+            initialTitle={editEntry?.title || ""}
+            initialExternalUrl={editEntry?.externalUrl || ""}
+            initialDescription={editEntry?.description || ""}
+            onClose={() => {
+              setShowEditEntryModal(false);
+              setEditEntry(null);
+            }}
+            onSave={async (title, externalUrl, description) => {
+              if (selectedStudy && activeGroupId && editEntry) {
+                await editStudyEntry(
+                  activeGroupId,
+                  selectedStudy.id,
+                  editEntry.id,
+                  { title, externalUrl, description }
+                );
+                const full = await fetchStudy(activeGroupId, selectedStudy.id);
+                setSelectedStudy(full);
+              }
+              setShowEditEntryModal(false);
+              setEditEntry(null);
+            }}
+            error={null}
+          />
+          <DeleteEntryModal
+            open={showDeleteEntryModal}
+            onClose={() => {
+              setShowDeleteEntryModal(false);
+              setDeleteEntryId(null);
+            }}
+            onDelete={async () => {
+              if (selectedStudy && activeGroupId && deleteEntryId) {
+                await deleteStudyEntry(
+                  activeGroupId,
+                  selectedStudy.id,
+                  deleteEntryId
+                );
+                const full = await fetchStudy(activeGroupId, selectedStudy.id);
+                setSelectedStudy(full);
+              }
+              setShowDeleteEntryModal(false);
+              setDeleteEntryId(null);
+            }}
+            error={null}
+          />
+          <ManualTimeModal
+            open={showManualTimeModal}
+            onClose={() => setShowManualTimeModal(false)}
+            onSave={async (
+              manualMinutes: string,
+              manualComment: string,
+              manualDate: string
+            ) => {
+              if (selectedStudy && activeGroupId) {
+                const seconds = parseManualTime(manualMinutes);
+                if (seconds !== null) {
+                  await addStudySession(activeGroupId, selectedStudy.id, {
+                    start: manualDate,
+                    duration: seconds,
+                    manual: true,
+                    comment: manualComment,
+                  });
+                  const full = await fetchStudy(activeGroupId, selectedStudy.id);
+                  setSelectedStudy(full);
+                }
+              }
+              setShowManualTimeModal(false);
+            }}
+            error={null}
+          />
           <DeleteSessionModal
             open={showDeleteSessionModal}
             onClose={() => {

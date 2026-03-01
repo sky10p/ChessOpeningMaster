@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { StudyGroup } from '../../pages/StudiesPage/models';
+import React, { useMemo, useState } from "react";
+import { PencilIcon, PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { Button, IconButton, Input, TabButton, Tabs } from "../ui";
+import { StudyGroup } from "../../pages/StudiesPage/models";
 
 interface MobileGroupProps {
   groups: StudyGroup[];
@@ -19,112 +21,182 @@ const StudyGroupMobile: React.FC<MobileGroupProps> = ({
   deleteGroup,
 }) => {
   const [showNew, setShowNew] = useState(false);
-  const [newName, setNewName] = useState('');
+  const [newName, setNewName] = useState("");
   const [showEdit, setShowEdit] = useState(false);
-  const [editName, setEditName] = useState('');
+  const [editName, setEditName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const activeGroup = useMemo(
+    () => groups.find((item) => item.id === activeGroupId) || null,
+    [groups, activeGroupId]
+  );
+
+  const handleStartEdit = () => {
+    if (!activeGroup) {
+      return;
+    }
+
+    setEditingId(activeGroup.id);
+    setEditName(activeGroup.name);
+    setError(null);
+    setShowEdit(true);
+  };
+
+  const handleDelete = () => {
+    if (!activeGroupId) {
+      return;
+    }
+
+    deleteGroup(activeGroupId);
+  };
+
   return (
-    <div className="mb-2">
+    <div className="border-b border-border-subtle bg-surface px-3 py-3">
       {!showNew && !showEdit && (
-        <div className="flex items-center space-x-2">
-          <select
-            value={activeGroupId || ''}
-            onChange={(e) => onSelectGroup(e.target.value)}
-            className="flex-1 p-2 border rounded bg-background text-textLight"
-          >
-            <option value="" disabled>Select group</option>
-            {groups.map((g) => (
-              <option key={g.id} value={g.id}>{g.name}</option>
+        <div className="space-y-2.5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="text-xs font-semibold uppercase tracking-wide text-text-subtle">
+                Study Groups
+              </div>
+              <div className="mt-1 truncate text-sm text-text-muted">
+                {activeGroup ? activeGroup.name : "No group selected"} · {groups.length}{" "}
+                {groups.length === 1 ? "group" : "groups"}
+              </div>
+            </div>
+            <div className="flex items-center gap-1">
+              <IconButton label="New group" onClick={() => setShowNew(true)}>
+                <PlusIcon className="h-4 w-4" />
+              </IconButton>
+              <IconButton label="Edit group" onClick={handleStartEdit} disabled={!activeGroupId}>
+                <PencilIcon className="h-4 w-4" />
+              </IconButton>
+              <IconButton
+                label="Delete group"
+                onClick={handleDelete}
+                disabled={!activeGroupId}
+                className="hover:text-danger"
+              >
+                <TrashIcon className="h-4 w-4" />
+              </IconButton>
+            </div>
+          </div>
+
+          <Tabs variant="pill" className="gap-1 overflow-x-auto p-0">
+            {groups.map((group) => (
+              <TabButton
+                key={group.id}
+                variant="pill"
+                active={group.id === activeGroupId}
+                className="shrink-0"
+                onClick={() => onSelectGroup(group.id)}
+              >
+                {group.name}
+              </TabButton>
             ))}
-          </select>
-          <button className="p-2 bg-blue-700 text-white rounded" onClick={() => setShowNew(true)}>+</button>
-          <button
-            className="p-2 bg-yellow-500 text-white rounded"
-            onClick={() => {
-              if (activeGroupId) {
-                const g = groups.find((g) => g.id === activeGroupId);
-                if (g) {
-                  setEditingId(g.id);
-                  setEditName(g.name);
-                  setShowEdit(true);
-                }
-              }
-            }}
-          >✎</button>
-          <button
-            className="p-2 bg-red-500 text-white rounded"
-            onClick={() => activeGroupId && deleteGroup(activeGroupId)}
-            disabled={!activeGroupId}
-          >🗑</button>
+          </Tabs>
         </div>
       )}
+
       {showNew && (
-        <div className="flex flex-col space-y-2">
-          <input
-            className="p-2 border rounded bg-background text-textLight"
+        <div className="flex flex-col gap-2">
+          <div className="text-xs font-semibold uppercase tracking-wide text-text-subtle">
+            New Group
+          </div>
+          <Input
+            size="sm"
             placeholder="New group name"
             value={newName}
-            onChange={(e) => setNewName(e.target.value)}
+            onChange={(event) => setNewName(event.target.value)}
             autoFocus
           />
-          {error && <span className="text-red-400 text-xs">{error}</span>}
-          <div className="flex space-x-2">
-            <button
-              className="flex-1 p-2 bg-blue-600 text-white rounded"
+          {error && <span className="text-xs text-danger">{error}</span>}
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              intent="primary"
+              size="sm"
+              className="flex-1 justify-center"
               onClick={() => {
                 if (newName.trim()) {
                   addGroup(newName);
                   setShowNew(false);
-                  setNewName('');
+                  setNewName("");
                   setError(null);
-                } else setError('Group name is required');
+                  return;
+                }
+
+                setError("Group name is required");
               }}
-            >Add</button>
-            <button
-              className="flex-1 p-2 bg-slate-700 text-white rounded"
+            >
+              Add
+            </Button>
+            <Button
+              type="button"
+              intent="secondary"
+              size="sm"
+              className="flex-1 justify-center"
               onClick={() => {
                 setShowNew(false);
-                setNewName('');
+                setNewName("");
                 setError(null);
               }}
-            >Cancel</button>
+            >
+              Cancel
+            </Button>
           </div>
         </div>
       )}
+
       {showEdit && (
-        <div className="flex flex-col space-y-2">
-          <input
-            className="p-2 border rounded bg-background text-textLight"
+        <div className="flex flex-col gap-2">
+          <div className="text-xs font-semibold uppercase tracking-wide text-text-subtle">
+            Edit Group
+          </div>
+          <Input
+            size="sm"
             placeholder="Edit group name"
             value={editName}
-            onChange={(e) => setEditName(e.target.value)}
+            onChange={(event) => setEditName(event.target.value)}
             autoFocus
           />
-          {error && <span className="text-red-400 text-xs">{error}</span>}
-          <div className="flex space-x-2">
-            <button
-              className="flex-1 p-2 bg-blue-600 text-white rounded"
+          {error && <span className="text-xs text-danger">{error}</span>}
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              intent="primary"
+              size="sm"
+              className="flex-1 justify-center"
               onClick={() => {
                 if (editingId && editName.trim()) {
                   editGroup(editingId, editName);
                   setShowEdit(false);
-                  setEditName('');
+                  setEditName("");
                   setEditingId(null);
                   setError(null);
-                } else setError('Group name is required');
+                  return;
+                }
+
+                setError("Group name is required");
               }}
-            >Save</button>
-            <button
-              className="flex-1 p-2 bg-slate-700 text-white rounded"
+            >
+              Save
+            </Button>
+            <Button
+              type="button"
+              intent="secondary"
+              size="sm"
+              className="flex-1 justify-center"
               onClick={() => {
                 setShowEdit(false);
-                setEditName('');
+                setEditName("");
                 setEditingId(null);
                 setError(null);
               }}
-            >Cancel</button>
+            >
+              Cancel
+            </Button>
           </div>
         </div>
       )}

@@ -232,6 +232,26 @@ Always provide a `label` prop for accessibility. Uses `ghost` intent by default.
 
 Same `size` and `state` props as `Input`.
 
+### 3.8 `EmptyState`
+
+```tsx
+<EmptyState
+  icon={FolderIcon}
+  title="No studies found"
+  description="Create a study or adjust filters."
+/>
+
+<EmptyState
+  variant="inline"
+  title="Loading..."
+  description="Fetching your next lesson."
+/>
+```
+
+Use `EmptyState` for loading, empty, and lightweight error surfaces instead of ad-hoc text blocks.
+Use `variant="card"` for standalone panels and `variant="inline"` for embedded list or tab states.
+It accepts an optional `icon` and `action`.
+
 ---
 
 ## 4. Class Composition Utility

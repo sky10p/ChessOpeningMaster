@@ -216,7 +216,6 @@ const GamesPage: React.FC = () => {
 
           <div
             className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-3 pb-20 pt-4 sm:px-5 sm:pb-10 space-y-4 sm:space-y-5"
-            style={{ WebkitOverflowScrolling: "touch" }}
           >
             {selectedTab === "insights" ? (
               <InsightsTab

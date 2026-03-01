@@ -1,5 +1,6 @@
 import React, { memo } from "react";
-import { Badge, Button, Input } from "../../../components/ui";
+import { XMarkIcon } from "@heroicons/react/24/outline";
+import { Badge, Button, IconButton, Input } from "../../../components/ui";
 
 interface TagFilterBarProps {
   allTags: string[];
@@ -18,23 +19,23 @@ const TagFilterBar: React.FC<TagFilterBarProps> = ({
   onTagSelect,
   onTagRemove,
 }) => (
-  <div className="flex flex-wrap items-center gap-2 p-4 border-b border-border-default bg-surface">
-    <span className="font-semibold text-text-base">Filter by tag:</span>
+  <div className="flex flex-wrap items-center gap-2 border-b border-border-subtle bg-surface px-3 py-3 sm:px-5">
+    <span className="text-sm text-text-muted">Filter by tag:</span>
     {selectedTags.map((tag) => (
       <Badge key={tag} variant="brand" size="sm" className="flex items-center gap-1">
         {tag}
-        <button
-          className="ml-1 hover:text-danger"
+        <IconButton
+          label={`Remove tag ${tag}`}
+          className="h-5 w-5 rounded-full p-0 hover:text-danger"
           onClick={() => onTagRemove(tag)}
-          aria-label={`Remove tag ${tag}`}
         >
-          ×
-        </button>
+          <XMarkIcon className="h-3.5 w-3.5" />
+        </IconButton>
       </Badge>
     ))}
     <Input
       size="sm"
-      className="w-40"
+      className="min-w-[12rem] flex-1 sm:max-w-xs"
       placeholder="Type to filter or add tag"
       value={tagFilter}
       onChange={onTagInput}
@@ -42,13 +43,13 @@ const TagFilterBar: React.FC<TagFilterBarProps> = ({
     />
     <datalist id="tag-suggestions">
       {allTags
-        .filter((t) => t.toLowerCase().includes(tagFilter.toLowerCase()) && !selectedTags.includes(t))
-        .map((t) => (
-          <option key={t} value={t} />
+        .filter((tag) => tag.toLowerCase().includes(tagFilter.toLowerCase()) && !selectedTags.includes(tag))
+        .map((tag) => (
+          <option key={tag} value={tag} />
         ))}
     </datalist>
     {tagFilter && allTags.includes(tagFilter) && !selectedTags.includes(tagFilter) && (
-      <Button intent="primary" size="sm" onClick={() => onTagSelect(tagFilter)}>
+      <Button type="button" intent="primary" size="sm" onClick={() => onTagSelect(tagFilter)}>
         Add Tag
       </Button>
     )}

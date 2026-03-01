@@ -1,4 +1,5 @@
-﻿import React, { useEffect } from "react";
+import React, { useEffect } from "react";
+import { Button, Input } from "../../../../components/ui";
 import { useFormState } from "../../../../hooks";
 
 interface EditGroupModalProps {
@@ -11,7 +12,7 @@ interface EditGroupModalProps {
 
 const EditGroupModal: React.FC<EditGroupModalProps> = ({ open, initialName, onClose, onSave, error }) => {
   const { values, handleChange, setForm } = useFormState({
-    name: initialName
+    name: initialName,
   });
 
   useEffect(() => {
@@ -19,28 +20,32 @@ const EditGroupModal: React.FC<EditGroupModalProps> = ({ open, initialName, onCl
       setForm({ name: initialName });
     }
   }, [initialName, open, setForm]);
+
   const handleSave = () => {
     onSave(values.name);
   };
+
   if (!open) return null;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 animate-fade-in">
-      <div className="bg-surface-raised rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md mx-2">
-        <h3 className="text-lg font-bold mb-4 text-white">Edit Group</h3>        <input
-          className="w-full px-3 py-2 mb-3 rounded border border-border-default bg-surface text-text-base"
-          placeholder="Group name *"
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-page/70 px-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-xl border border-border-default bg-surface-raised p-4 shadow-elevated sm:p-6">
+        <h3 className="mb-4 text-lg font-bold text-text-base">Edit Group</h3>
+        <Input
+          label="Group name"
+          placeholder="Group name"
           value={values.name}
-          onChange={(e) => handleChange('name', e.target.value)}
+          onChange={(event) => handleChange("name", event.target.value)}
           autoFocus
         />
-        {error && <div className="text-red-400 mb-2">{error}</div>}
-        <div className="flex gap-2 justify-end">
-          <button className="px-3 py-1 bg-blue-700 text-white rounded" onClick={handleSave}>
+        {error && <div className="mt-3 text-sm text-danger">{error}</div>}
+        <div className="mt-4 flex justify-end gap-2">
+          <Button type="button" intent="primary" onClick={handleSave}>
             Save
-          </button>
-          <button className="px-3 py-1 bg-slate-700 text-white rounded" onClick={onClose}>
+          </Button>
+          <Button type="button" intent="secondary" onClick={onClose}>
             Cancel
-          </button>
+          </Button>
         </div>
       </div>
     </div>

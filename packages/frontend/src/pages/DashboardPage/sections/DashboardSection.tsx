@@ -283,7 +283,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
           </div>
         )}
       </header>
-      <div style={{ maxHeight: "600px", overflowY: "auto" }} className="flex-1">
+      <div className="flex-1 overflow-y-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center">
             <span className="text-3xl font-bold text-blue-400">

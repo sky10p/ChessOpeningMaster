@@ -1,4 +1,5 @@
-﻿import React from "react";
+import React from "react";
+import { Button } from "../../../../components/ui";
 
 interface DeleteEntryModalProps {
   open: boolean;
@@ -8,28 +9,21 @@ interface DeleteEntryModalProps {
 }
 
 const DeleteEntryModal: React.FC<DeleteEntryModalProps> = ({ open, onClose, onDelete, error }) => {
-  const handleDelete = () => {
-    onDelete();
-  };
-  
-  const handleClose = () => {
-    onClose();
-  };
-
   if (!open) return null;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 animate-fade-in">
-      <div className="bg-surface-raised rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md mx-2">
-        <h3 className="text-lg font-bold mb-4 text-white">Delete Entry</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-page/70 px-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-xl border border-border-default bg-surface-raised p-4 shadow-elevated sm:p-6">
+        <h3 className="mb-4 text-lg font-bold text-text-base">Delete Entry</h3>
         <p className="mb-4 text-text-muted">Are you sure you want to delete this entry?</p>
-        {error && <div className="text-red-400 mb-2">{error}</div>}
-        <div className="flex gap-2 justify-end">
-          <button className="px-3 py-1 bg-red-700 text-white rounded" onClick={handleDelete}>
+        {error && <div className="mb-2 text-sm text-danger">{error}</div>}
+        <div className="flex justify-end gap-2">
+          <Button type="button" intent="danger" onClick={onDelete}>
             Delete
-          </button>
-          <button className="px-3 py-1 bg-slate-700 text-white rounded" onClick={handleClose}>
+          </Button>
+          <Button type="button" intent="secondary" onClick={onClose}>
             Cancel
-          </button>
+          </Button>
         </div>
       </div>
     </div>

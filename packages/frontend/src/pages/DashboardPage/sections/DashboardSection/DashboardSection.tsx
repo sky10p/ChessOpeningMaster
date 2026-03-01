@@ -122,7 +122,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
           mostRecentName={mostRecent?.name ?? null}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full overflow-x-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
           <VariantsReviewStatusChart data={reviewData} />
 
           <VerticalBarChart
@@ -130,7 +130,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
             title="Errors by Opening"
             label="Errors"
             barName="Errors"
-            barColor="#ef4444"
+            barColor="var(--color-danger)"
             tooltipValueLabel="errors"
             emptyMessage="No errors found"
             isMobile={isMobile}
@@ -174,7 +174,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
             title="Top 5 Mastered Openings"
             label="Mastered Lines"
             barName="Mastered Lines"
-            barColor="#22c55e"
+            barColor="var(--color-success)"
             tooltipValueLabel="lines"
             emptyMessage="No mastered openings found"
             isMobile={isMobile}

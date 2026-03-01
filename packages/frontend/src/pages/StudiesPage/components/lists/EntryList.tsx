@@ -1,4 +1,6 @@
-﻿import React from "react";
+import React from "react";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import { Button, EmptyState } from "../../../../components/ui";
 import { StudyEntry } from "../../models";
 
 interface EntryListProps {
@@ -7,47 +9,51 @@ interface EntryListProps {
   onDeleteEntry: (entryId: string) => void;
 }
 
-const EntryList: React.FC<EntryListProps> = ({ 
-  entries, 
-  onEditEntry, 
-  onDeleteEntry 
+const EntryList: React.FC<EntryListProps> = ({
+  entries,
+  onEditEntry,
+  onDeleteEntry,
 }) => {
+  if ((entries || []).length === 0) {
+    return (
+      <EmptyState
+        variant="inline"
+        title="No entries yet"
+        description="Add your first study entry to start building this resource."
+      />
+    );
+  }
+
   return (
     <ol className="space-y-3">
       {(entries || []).map((entry, idx) => (
-        <li key={entry.id} className="bg-surface rounded p-2 sm:p-3 flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-          <span className="font-bold text-text-subtle">{idx + 1}.</span>
-          <div className="flex-1">
-            <div className="font-semibold text-white break-words">{entry.title}</div>
-            <div className="text-text-muted text-sm mb-1 break-words">{entry.description}</div>
-            <a
-              href={entry.externalUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-400 underline text-xs"
-            >
-              View External Study ↗
-            </a>
+        <li key={entry.id} className="flex flex-col gap-3 rounded-lg border border-border-subtle bg-surface-raised p-3 md:flex-row md:items-start md:gap-4">
+          <span className="text-sm font-bold text-text-subtle">{idx + 1}.</span>
+          <div className="min-w-0 flex-1">
+            <div className="break-words font-semibold text-text-base">{entry.title}</div>
+            {entry.description && <div className="mt-1 break-words text-sm text-text-muted">{entry.description}</div>}
+            {entry.externalUrl && (
+              <a
+                href={entry.externalUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-flex items-center gap-1 text-xs text-brand underline"
+              >
+                View external study
+                <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" />
+              </a>
+            )}
           </div>
-          <div className="flex gap-2">
-            <button
-              className="px-2 py-1 bg-yellow-600 text-white rounded text-xs"
-              onClick={() => onEditEntry(entry)}
-            >
+          <div className="flex flex-wrap gap-2 md:justify-end">
+            <Button type="button" intent="secondary" size="xs" onClick={() => onEditEntry(entry)}>
               Edit
-            </button>
-            <button
-              className="px-2 py-1 bg-red-600 text-white rounded text-xs"
-              onClick={() => onDeleteEntry(entry.id)}
-            >
+            </Button>
+            <Button type="button" intent="danger" size="xs" onClick={() => onDeleteEntry(entry.id)}>
               Delete
-            </button>
+            </Button>
           </div>
         </li>
       ))}
-      {(entries || []).length === 0 && (
-        <li className="text-text-subtle text-sm">No studies yet.</li>
-      )}
     </ol>
   );
 };
