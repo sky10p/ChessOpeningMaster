@@ -1,4 +1,6 @@
 import React from "react";
+import { PlayIcon, PauseIcon, StopIcon, ClockIcon } from "@heroicons/react/24/outline";
+import { Button } from "../../../../components/ui";
 import { formatDuration } from "../../utils";
 
 interface TimerControlsProps {
@@ -23,37 +25,50 @@ const TimerControls: React.FC<TimerControlsProps> = ({
   onShowManualTime,
 }) => {
   return (
-    <div className="flex flex-wrap gap-4 items-center mb-2">
-      {!timerState.running && !timerState.start && (
-        <button className="px-3 py-1 bg-blue-700 text-white rounded" onClick={onStartTimer}>
-          Start Timer
-        </button>
-      )}
-      {timerState.running && (
-        <>
-          <span className="font-mono text-lg text-green-400">{formatDuration(timerState.elapsed)}</span>
-          <button className="px-2 py-1 bg-yellow-600 text-white rounded" onClick={onPauseTimer}>
-            Pause
-          </button>
-          <button className="px-2 py-1 bg-red-700 text-white rounded" onClick={onFinishTimer}>
-            End Session
-          </button>
-        </>
-      )}
-      {!timerState.running && timerState.start && (
-        <>
-          <span className="font-mono text-lg text-yellow-400">{formatDuration(timerState.elapsed)}</span>
-          <button className="px-2 py-1 bg-blue-700 text-white rounded" onClick={onResumeTimer}>
-            Resume
-          </button>
-          <button className="px-2 py-1 bg-red-700 text-white rounded" onClick={onFinishTimer}>
-            End Session
-          </button>
-        </>
-      )}
-      <button className="px-3 py-1 bg-slate-700 text-white rounded" onClick={onShowManualTime}>
-        + Add Time Manually
-      </button>
+    <div className="space-y-3">
+      <div className="rounded-xl border border-border-subtle bg-surface-raised px-4 py-3">
+        <div className="text-xs font-semibold uppercase tracking-wide text-text-subtle">Current Timer</div>
+        <div className="mt-1 font-mono text-2xl font-semibold text-text-base">
+          {formatDuration(timerState.elapsed)}
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {!timerState.running && !timerState.start && (
+          <Button type="button" intent="primary" size="sm" onClick={onStartTimer}>
+            <PlayIcon className="h-4 w-4" />
+            Start Timer
+          </Button>
+        )}
+        {timerState.running && (
+          <>
+            <Button type="button" intent="accent" size="sm" onClick={onPauseTimer}>
+              <PauseIcon className="h-4 w-4" />
+              Pause
+            </Button>
+            <Button type="button" intent="danger" size="sm" onClick={onFinishTimer}>
+              <StopIcon className="h-4 w-4" />
+              End Session
+            </Button>
+          </>
+        )}
+        {!timerState.running && timerState.start && (
+          <>
+            <Button type="button" intent="primary" size="sm" onClick={onResumeTimer}>
+              <PlayIcon className="h-4 w-4" />
+              Resume
+            </Button>
+            <Button type="button" intent="danger" size="sm" onClick={onFinishTimer}>
+              <StopIcon className="h-4 w-4" />
+              End Session
+            </Button>
+          </>
+        )}
+        <Button type="button" intent="secondary" size="sm" onClick={onShowManualTime}>
+          <ClockIcon className="h-4 w-4" />
+          Add Manual Time
+        </Button>
+      </div>
     </div>
   );
 };

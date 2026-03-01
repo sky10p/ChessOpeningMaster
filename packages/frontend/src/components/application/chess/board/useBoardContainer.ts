@@ -18,6 +18,10 @@ export const useBoardContainer = (isTraining: boolean) => {
   const [circleSquares, setCircleSquares] = useState<Set<Square>>(new Set());
   const [pieceMoved, setPieceMoved] = useState(false);
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const [pendingInvalidMove, setPendingInvalidMove] = useState<{
+    attemptedMoveLan: string;
+    positionFen: string;
+  } | null>(null);
 
   const isCorrectPieceSelected = (square: Square, turn: Color) => {
     const piece = chess.get(square);
@@ -54,9 +58,11 @@ export const useBoardContainer = (isTraining: boolean) => {
   };
 
   const handleMove = (from: string, to: string): boolean => {
+    const positionFen = chess.fen();
     const tempChess = new Chess(chess.fen());
     const move = safeMove(tempChess, from, to);
     if (move) {
+      const attemptedMoveLan = `${from}${to}${move.promotion || ""}`;
       let isMoveAllowed = true;
       if (isTraining && trainRepertoireContext) {
         const trainingMoves = trainRepertoireContext.allowedMoves.map(
@@ -68,11 +74,23 @@ export const useBoardContainer = (isTraining: boolean) => {
         );
       }
       if (isTraining && !isMoveAllowed) {
+        if (trainRepertoireContext?.trainingPhase === "reinforcement") {
+          trainRepertoireContext.markReinforcementFailure();
+          unselectPiece();
+          return false;
+        }
+        setPendingInvalidMove({
+          attemptedMoveLan,
+          positionFen,
+        });
         setErrorDialogOpen(true);
         return false;
       } else {
         setChess(tempChess);
         addMove(move);
+        if (isTraining && trainRepertoireContext?.trainingPhase === "reinforcement") {
+          trainRepertoireContext.markReinforcementSuccess(move.lan);
+        }
         unselectPiece();
         return true;
       }
@@ -85,6 +103,13 @@ export const useBoardContainer = (isTraining: boolean) => {
 
   const handleCountAsError = () => {
     trainRepertoireContext?.setLastErrors(trainRepertoireContext.lastErrors + 1);
+    if (pendingInvalidMove) {
+      trainRepertoireContext?.registerWrongMove(
+        pendingInvalidMove.attemptedMoveLan,
+        pendingInvalidMove.positionFen
+      );
+    }
+    setPendingInvalidMove(null);
     setErrorDialogOpen(false);
     unselectPiece();
   };
@@ -93,6 +118,7 @@ export const useBoardContainer = (isTraining: boolean) => {
     trainRepertoireContext?.setLastIgnoredErrors(
       trainRepertoireContext.lastIgnoredErrors + 1
     );
+    setPendingInvalidMove(null);
     setErrorDialogOpen(false);
     unselectPiece();
   };

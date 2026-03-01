@@ -6,6 +6,16 @@ export type ReviewRating = "again" | "hard" | "good" | "easy";
 
 export type SchedulerState = "new" | "learning" | "review";
 
+export type MistakeSnapshotItem = {
+  mistakeKey: string;
+  mistakePly: number;
+  variantStartPly: number;
+  positionFen: string;
+  expectedMoveLan: string;
+  expectedMoveSan?: string;
+  actualMoveLan?: string;
+};
+
 export type TrainVariantInfo = {
     repertoireId: string;
     variantName: string;
@@ -26,6 +36,12 @@ export type TrainVariantInfo = {
     openingName?: string;
     startingFen?: string;
     orientation?: BoardOrientation;
+    dailyErrorsDayKey?: string;
+    dailyErrorSnapshot?: MistakeSnapshotItem[];
+    dailyErrorCount?: number;
+    masteryScore?: number;
+    perfectRunStreak?: number;
+    masteryUpdatedAt?: Date;
 };
 
 export type VariantReviewInput = {
@@ -40,6 +56,7 @@ export type VariantReviewInput = {
   startingFen?: string;
   openingName?: string;
   orientation?: BoardOrientation;
+  mistakes?: MistakeSnapshotItem[];
 };
 
 export type VariantReviewRecord = VariantReviewInput & {
@@ -49,6 +66,41 @@ export type VariantReviewRecord = VariantReviewInput & {
   dueBeforeReviewAt: Date | null;
   nextDueAt: Date;
   schedulerVersion: string;
+};
+
+export type VariantMistake = {
+  repertoireId: string;
+  variantName: string;
+  openingName: string;
+  orientation?: BoardOrientation;
+  mistakeKey: string;
+  positionFen: string;
+  variantStartFen: string;
+  variantStartPly: number;
+  mistakePly: number;
+  expectedMoveLan: string;
+  expectedMoveSan?: string;
+  seenCount: number;
+  solvedCount: number;
+  dueAt: Date;
+  lastReviewedAt?: Date;
+  lastReviewedDayKey?: string;
+  state?: SchedulerState;
+  stability?: number;
+  difficulty?: number;
+  reps?: number;
+  lapses?: number;
+  intervalDays?: number;
+  ease?: number;
+  lastRating?: ReviewRating | null;
+  createdAt?: Date;
+  updatedAt?: Date;
+  archivedAt?: Date;
+};
+
+export type VariantMistakeReviewInput = {
+  mistakeKey: string;
+  rating: ReviewRating;
 };
 
 export type Variant = {

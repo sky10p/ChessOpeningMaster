@@ -255,4 +255,61 @@ describe('TrainInfo', () => {
     
     expect(screen.getByText('0 of 0 variants')).toBeInTheDocument();
   });
+
+  it('locks available variants hints when assistance is disabled', () => {
+    render(
+      <TrainInfo
+        {...defaultProps}
+        assistEnabled={false}
+        assistNotice="Focus mode: guidance remains locked until your first error."
+      />
+    );
+
+    expect(
+      screen.getByText('Focus mode: guidance remains locked until your first error.')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Guidance unlocks after your first error in focus mode.')
+    ).toBeInTheDocument();
+    expect(screen.queryByText('French Defense')).not.toBeInTheDocument();
+    expect(screen.queryByText('Caro-Kann Defense')).not.toBeInTheDocument();
+  });
+
+  it('shows unlocked assist notice when assistance is enabled', () => {
+    render(
+      <TrainInfo
+        {...defaultProps}
+        assistEnabled={true}
+        assistNotice="Focus error detected. Review comments and use guidance to find the correct move."
+      />
+    );
+
+    expect(
+      screen.getByText('Focus error detected. Review comments and use guidance to find the correct move.')
+    ).toBeInTheDocument();
+    expect(screen.getByText('French Defense')).toBeInTheDocument();
+  });
+
+  it('hides available variants section when configured', () => {
+    render(
+      <TrainInfo
+        {...defaultProps}
+        showAvailableVariantsSection={false}
+      />
+    );
+
+    expect(screen.queryByText('Available Variants to Play')).not.toBeInTheDocument();
+    expect(screen.queryByText('French Defense')).not.toBeInTheDocument();
+  });
+
+  it('renders supplemental panel below main progress section', () => {
+    render(
+      <TrainInfo
+        {...defaultProps}
+        supplementalPanel={<div>Focus Assist Inline</div>}
+      />
+    );
+
+    expect(screen.getByText('Focus Assist Inline')).toBeInTheDocument();
+  });
 });

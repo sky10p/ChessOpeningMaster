@@ -149,6 +149,88 @@ await act(async () => {
    - Path: ["d2d4"]
    - Expected: false
 
+### Train Focus / Mistakes Flow
+
+1. **Continuous replay to mistakes**
+   - Line: `e4 e5 Cf3 Cc6 Ab5` (`Cf3/Cc6/Ab5` SAN equivalent `Nf3/Nc6/Bb5`)
+   - Mistakes at `Cf3` and `Ab5`
+   - Expected replay:
+     - auto-play `e4`, `e5`
+     - user must play `Cf3`
+     - auto-play `Cc6`
+     - user must play `Ab5`
+
+2. **No false first-step failure**
+   - Setup a mistake whose stored start ply is later than the mistake ply
+   - Expected: progress should not mark step 1 as failed due to index clamping
+
+3. **Requeue and backtracking**
+   - Fail one reinforcement item so it is requeued behind a later item
+   - Expected:
+     - forward continuation when next target is ahead,
+     - reset + replay when requeued target is behind current board position
+
+4. **Three-phase focus loop**
+   - variant phase -> mistakes phase -> variant confirm phase
+   - Expected:
+     - confirm with mistakes returns to mistakes phase,
+     - clean confirm ends cycle and opens final rating modal
+
+5. **Final-only save in focus mode**
+   - In `mode=mistakes`, entering mistakes phase must not persist `variant-reviews`
+   - `variant-reviews` save occurs once after clean confirm completion
+
+6. **Focus progress semantics**
+   - Dots must represent only player-color moves from move 1 in the focused variant
+   - Expected:
+     - current marker advances with auto-replay board progression,
+     - failures are mapped by real `mistakePly`,
+     - solved previous failures render as orange (not green),
+     - initial variant pass errors stay red in that same pass (no immediate orange conversion),
+     - no misalignment from mixed-color ply indexing
+
+7. **Focus completion gating**
+   - In focus mode, finished state must remain hidden while mistakes/full-run phases or pending focus review are active.
+
+8. **Focus assist gating**
+   - Start focus session without errors: hints/available variants are locked.
+   - After first error: hints/available variants unlock and remain available during mistakes + full-run confirm.
+   - Validate both desktop (`TrainInfo`) and mobile (`HelpInfo`) behavior.
+   - Validate inline `Focus Assist` card remains in waiting state before first error.
+   - Validate card tabs (`Comments`, `Candidate lines`) after errors and correct content switch.
+   - Validate normal mode keeps persistent panel behavior and focus-only card is not rendered there.
+
+9. **Focus assist inline composition**
+   - Focus workspace renders `Focus Assist` as a supplemental card below `Your turn`.
+   - Mobile and desktop focus workspaces keep the same inline card behavior.
+   - No side-sheet/chip surfaces are rendered in focus mode.
+
+10. **Mastery impact clarity**
+   - Mastery card must show understandable before/after context and explicit point delta (gain/loss/no change).
+
+## UI Consistency Regression Strategy
+
+When a task includes UX/UI consistency cleanup, add or update tests covering:
+
+1. **Primitives enforcement**
+   - New touched UI should not introduce raw `button`, `input`, `textarea`, or `select` where project primitives are applicable.
+   - Prefer validating component usage via behavior-focused tests and targeted structural assertions in touched scope.
+
+2. **Canonical page frame/layout consistency**
+   - Top-level pages should keep the documented frame and spacing pattern.
+   - Add route/page tests that guard against accidental edge-to-edge regressions where framing is required.
+
+3. **Mobile/desktop parity**
+   - Verify the same semantic states and actions are preserved across breakpoints.
+   - Confirm that layout differences do not change meaning or flow outcomes.
+
+4. **Reusable pattern regression checks**
+   - When extracting reusable UI patterns, add regression tests for composition and key state transitions.
+   - Ensure previous duplicate/ad-hoc behavior does not reappear in touched scope.
+
+Expectation:
+- UI consistency fixes are not considered complete without matching test updates in touched scope.
+
 ## Mock Data Patterns
 
 ### Initial Repertoire Setup

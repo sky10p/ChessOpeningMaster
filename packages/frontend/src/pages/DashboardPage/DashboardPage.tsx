@@ -28,16 +28,19 @@ import {
   EyeIcon,
 } from "@heroicons/react/24/outline";
 import { Tabs, TabButton } from "../../components/ui";
+import { PageFrame } from "../../components/design/layouts/PageFrame";
+import { PageRoot } from "../../components/design/layouts/PageRoot";
+import { PageSurface } from "../../components/design/layouts/PageSurface";
 
 const SECTION_ICONS: Record<string, React.ReactNode> = {
-  dashboard:    <Squares2X2Icon className="w-4 h-4" />,
-  overview:     <ChartPieIcon className="w-4 h-4" />,
+  dashboard: <Squares2X2Icon className="w-4 h-4" />,
+  overview: <ChartPieIcon className="w-4 h-4" />,
   pathInsights: <MapIcon className="w-4 h-4" />,
-  repertoires:  <BookOpenIcon className="w-4 h-4" />,
-  openings:     <FolderOpenIcon className="w-4 h-4" />,
-  studies:      <AcademicCapIcon className="w-4 h-4" />,
-  errors:       <ExclamationTriangleIcon className="w-4 h-4" />,
-  unreviewed:   <EyeIcon className="w-4 h-4" />,
+  repertoires: <BookOpenIcon className="w-4 h-4" />,
+  openings: <FolderOpenIcon className="w-4 h-4" />,
+  studies: <AcademicCapIcon className="w-4 h-4" />,
+  errors: <ExclamationTriangleIcon className="w-4 h-4" />,
+  unreviewed: <EyeIcon className="w-4 h-4" />,
 };
 
 export const DashboardPage = () => {
@@ -50,7 +53,14 @@ export const DashboardPage = () => {
   const [repertoireNameFilter, setRepertoireNameFilter] = useState<string>("");
   const [openingNameFilter, setOpeningNameFilter] = useState<string>("");
   const [selectedSection, setSelectedSection] = useState<
-    "dashboard" | "pathInsights" | "overview" | "repertoires" | "openings" | "studies" | "errors" | "unreviewed"
+    | "dashboard"
+    | "pathInsights"
+    | "overview"
+    | "repertoires"
+    | "openings"
+    | "studies"
+    | "errors"
+    | "unreviewed"
   >("dashboard");
 
   React.useEffect(() => {
@@ -71,7 +81,15 @@ export const DashboardPage = () => {
   }, [location.search]);
 
   const handleSectionChange = (
-    section: "dashboard" | "pathInsights" | "overview" | "repertoires" | "openings" | "studies" | "errors" | "unreviewed"
+    section:
+      | "dashboard"
+      | "pathInsights"
+      | "overview"
+      | "repertoires"
+      | "openings"
+      | "studies"
+      | "errors"
+      | "unreviewed"
   ) => {
     setSelectedSection(section);
     const params = new URLSearchParams(location.search);
@@ -83,18 +101,21 @@ export const DashboardPage = () => {
     orientationFilter === "all"
       ? repertoires
       : repertoires.filter((r) => r.orientation === orientationFilter);
-  
+
   const nameFilteredRepertoires = repertoireNameFilter
-    ? filteredRepertoires.filter((r) => 
-        r.name.toLowerCase().includes(repertoireNameFilter.toLowerCase()))
+    ? filteredRepertoires.filter((r) =>
+        r.name.toLowerCase().includes(repertoireNameFilter.toLowerCase())
+      )
     : filteredRepertoires;
 
   const goToRepertoire = (repertoire: IRepertoire, variantName?: string) => {
-    navigate(`/repertoire/${repertoire._id}${variantName ? `?variantName=${variantName}` : ''}`);
+    navigate(`/repertoire/${repertoire._id}${variantName ? `?variantName=${variantName}` : ""}`);
   };
 
   const goToTrainRepertoire = (repertoire: IRepertoire, variantName?: string) => {
-    navigate(`/repertoire/train/${repertoire._id}${variantName ? `?variantName=${variantName}` : ''}`);
+    navigate(
+      `/repertoire/train/${repertoire._id}${variantName ? `?variantName=${variantName}` : ""}`
+    );
   };
 
   const getTrainVariants = (repertoire: IRepertoire): TrainVariant[] => {
@@ -106,7 +127,7 @@ export const DashboardPage = () => {
   };
 
   const getTrainVariantInfo = (
-    trainInfo: TrainVariantInfo[] 
+    trainInfo: TrainVariantInfo[]
   ): Record<string, TrainVariantInfo> => {
     const info: Record<string, TrainVariantInfo> = {};
     trainInfo.forEach((v) => {
@@ -115,105 +136,97 @@ export const DashboardPage = () => {
     return info;
   };
 
-  const getDifferentOpenings = (
-    repertoires: IRepertoireDashboard[]
-  ): string[] => {
-    const openings: string[] = [];
-    repertoires.forEach((repertoire) => {
+  const getDifferentOpenings = (repertoiresList: IRepertoireDashboard[]): string[] => {
+    const openingsList: string[] = [];
+    repertoiresList.forEach((repertoire) => {
       const move = repertoire.moveNodes;
       const variants: Variant[] = move
         ? MoveVariantNode.initMoveVariantNode(move).getVariants()
         : [];
       variants.forEach((v) => {
-        if (!openings.includes(v.name)) {
-          openings.push(v.name);
+        if (!openingsList.includes(v.name)) {
+          openingsList.push(v.name);
         }
       });
     });
-    return openings.sort();
+    return openingsList.sort();
   };
 
   const openings = getDifferentOpenings(filteredRepertoires);
 
   return (
-    <div className="w-full h-full min-h-0 self-stretch bg-page rounded-none sm:rounded-xl shadow-elevated flex flex-col overflow-hidden border border-border-subtle">
-      <Tabs variant="pill" className="sticky top-0 z-20 gap-1 p-2 sm:p-4 bg-surface border-b border-border-subtle">
-        {(
-          [
-            ["dashboard",    "Dashboard"],
-            ["overview",     "Overview"],
-            ["pathInsights", "Path Insights"],
-            ["repertoires",  "Repertoires"],
-            ["openings",     "Openings"],
-            ["studies",      "Studies"],
-            ["errors",       "Errors"],
-            ["unreviewed",   "Unreviewed"],
-          ] as const
-        ).map(([id, label]) => (
-          <TabButton
-            key={id}
+    <PageRoot>
+      <PageFrame className="h-full py-0 sm:py-2">
+        <PageSurface>
+          <Tabs
             variant="pill"
-            active={selectedSection === id}
-            onClick={() => handleSectionChange(id)}
+            className="sticky top-0 z-20 gap-1 p-2 sm:p-4 bg-surface border-b border-border-subtle"
           >
-            {SECTION_ICONS[id]}
-            {label}
-          </TabButton>
-        ))}
-      </Tabs>
-      <div className="sm:hidden flex items-center justify-center gap-1 px-3 py-1.5 bg-surface/90 border-b border-border-subtle text-[11px] uppercase tracking-wide text-text-subtle">
-        <ArrowsRightLeftIcon className="h-3.5 w-3.5 text-text-subtle animate-pulse" />
-        <span>Swipe left/right for tabs</span>
-      </div>
-      <div className="flex-1 flex flex-col relative min-h-0">
-        {selectedSection === 'dashboard' && (
-          <DashboardSection
-            repertoires={repertoires}
-            loading={loading}
-          />
-        )}
-        {selectedSection === 'overview' && (
-          <OverviewSection
-            repertoires={repertoires}
-          />
-        )}
-        {selectedSection === 'pathInsights' && <PathInsightsSection />}
-        {selectedSection === 'repertoires' && (
-          <RepertoiresSection
-            orientationFilter={orientationFilter}
-            setOrientationFilter={setOrientationFilter}
-            repertoireNameFilter={repertoireNameFilter}
-            setRepertoireNameFilter={setRepertoireNameFilter}
-            nameFilteredRepertoires={nameFilteredRepertoires}
-            goToRepertoire={goToRepertoire}
-            goToTrainRepertoire={goToTrainRepertoire}
-            getTrainVariants={getTrainVariants}
-            getTrainVariantInfo={getTrainVariantInfo}
-            updateRepertoires={updateRepertoires}
-          />
-        )}
-        {selectedSection === 'openings' && (
-          <OpeningsSection
-            openingNameFilter={openingNameFilter}
-            setOpeningNameFilter={setOpeningNameFilter}
-            openings={openings}
-            filteredRepertoires={filteredRepertoires}
-            getTrainVariantInfo={getTrainVariantInfo}
-            goToRepertoire={goToRepertoire}
-            goToTrainRepertoire={goToTrainRepertoire}
-            loading={loading}
-          />
-        )}
-        {selectedSection === 'studies' && (
-          <StudiesSection />
-        )}
-        {selectedSection === 'errors' && (
-          <ErrorsSection repertoires={repertoires} />
-        )}
-        {selectedSection === 'unreviewed' && (
-          <UnreviewedSection repertoires={repertoires} />
-        )}
-      </div>
-    </div>
+            {(
+              [
+                ["dashboard", "Dashboard"],
+                ["overview", "Overview"],
+                ["pathInsights", "Path Insights"],
+                ["repertoires", "Repertoires"],
+                ["openings", "Openings"],
+                ["studies", "Studies"],
+                ["errors", "Errors"],
+                ["unreviewed", "Unreviewed"],
+              ] as const
+            ).map(([id, label]) => (
+              <TabButton
+                key={id}
+                variant="pill"
+                active={selectedSection === id}
+                onClick={() => handleSectionChange(id)}
+              >
+                {SECTION_ICONS[id]}
+                {label}
+              </TabButton>
+            ))}
+          </Tabs>
+          <div className="sm:hidden flex items-center justify-center gap-1 px-3 py-1.5 bg-surface/90 border-b border-border-subtle text-[11px] uppercase tracking-wide text-text-subtle">
+            <ArrowsRightLeftIcon className="h-3.5 w-3.5 text-text-subtle animate-pulse" />
+            <span>Swipe left/right for tabs</span>
+          </div>
+          <div className="flex-1 flex flex-col relative min-h-0">
+            {selectedSection === "dashboard" && (
+              <DashboardSection repertoires={repertoires} loading={loading} />
+            )}
+            {selectedSection === "overview" && <OverviewSection repertoires={repertoires} />}
+            {selectedSection === "pathInsights" && <PathInsightsSection />}
+            {selectedSection === "repertoires" && (
+              <RepertoiresSection
+                orientationFilter={orientationFilter}
+                setOrientationFilter={setOrientationFilter}
+                repertoireNameFilter={repertoireNameFilter}
+                setRepertoireNameFilter={setRepertoireNameFilter}
+                nameFilteredRepertoires={nameFilteredRepertoires}
+                goToRepertoire={goToRepertoire}
+                goToTrainRepertoire={goToTrainRepertoire}
+                getTrainVariants={getTrainVariants}
+                getTrainVariantInfo={getTrainVariantInfo}
+                updateRepertoires={updateRepertoires}
+              />
+            )}
+            {selectedSection === "openings" && (
+              <OpeningsSection
+                openingNameFilter={openingNameFilter}
+                setOpeningNameFilter={setOpeningNameFilter}
+                openings={openings}
+                filteredRepertoires={filteredRepertoires}
+                getTrainVariantInfo={getTrainVariantInfo}
+                goToRepertoire={goToRepertoire}
+                goToTrainRepertoire={goToTrainRepertoire}
+                loading={loading}
+              />
+            )}
+            {selectedSection === "studies" && <StudiesSection />}
+            {selectedSection === "errors" && <ErrorsSection repertoires={repertoires} />}
+            {selectedSection === "unreviewed" && <UnreviewedSection repertoires={repertoires} />}
+          </div>
+        </PageSurface>
+      </PageFrame>
+    </PageRoot>
   );
 };

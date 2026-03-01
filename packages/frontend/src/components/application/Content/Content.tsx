@@ -10,6 +10,8 @@ import StudiesPage from "../../../pages/StudiesPage/StudiesPage";
 import LoginPage from "../../../pages/auth/LoginPage";
 import RegisterPage from "../../../pages/auth/RegisterPage";
 import GamesPage from "../../../pages/games/GamesPage";
+import TrainPage from "../../../pages/train/TrainPage";
+import TrainOpeningPage from "../../../pages/train/TrainOpeningPage";
 
 interface ContentProps {
   authEnabled: boolean;
@@ -42,6 +44,11 @@ const Content: React.FC<ContentProps> = ({ authEnabled, authenticated, allowDefa
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/studies" element={<StudiesPage />} />
         <Route path="/path" element={<PathPage />} />
+        <Route path="/train" element={<TrainPage />} />
+        <Route
+          path="/train/repertoire/:repertoireId/opening/:openingName"
+          element={<TrainOpeningPage />}
+        />
         <Route path="/games" element={<GamesPage />} />
         <Route path="/" element={<Navigate to="/dashboard" />} />
       </Routes>

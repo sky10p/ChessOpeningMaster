@@ -70,4 +70,29 @@ describe('HelpInfo', () => {
     expect(onHintReveal).toHaveBeenCalledTimes(2);
     expect(screen.getByText('e2e4')).toBeInTheDocument();
   });
+
+  it('keeps helps locked when assistance is disabled', () => {
+    const onHintReveal = jest.fn();
+
+    render(
+      <HelpInfo
+        allowedMoves={[moveA, moveB]}
+        isYourTurn={true}
+        currentMoveNode={createMoveNode('root', 0)}
+        onHintReveal={onHintReveal}
+        assistEnabled={false}
+        assistNotice="Focus mode: guidance remains locked until your first error."
+      />
+    );
+
+    expect(
+      screen.getByText('Focus mode: guidance remains locked until your first error.')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Hints unlock in focus mode after your first error.')
+    ).toBeInTheDocument();
+    expect(screen.queryByLabelText('Toggle Available Moves')).not.toBeInTheDocument();
+    expect(screen.queryByText('e2e4')).not.toBeInTheDocument();
+    expect(onHintReveal).not.toHaveBeenCalled();
+  });
 });

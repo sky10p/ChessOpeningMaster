@@ -1,4 +1,5 @@
-﻿import React from "react";
+import React from "react";
+import { Button, Input, Textarea } from "../../../../components/ui";
 import { useForm } from "../../../../hooks";
 
 interface NewEntryModalProps {
@@ -8,86 +9,100 @@ interface NewEntryModalProps {
   error?: string | null;
 }
 
-const NewEntryModal: React.FC<NewEntryModalProps> = ({ open, onClose, onSave, error }) => {    const {
+const NewEntryModal: React.FC<NewEntryModalProps> = ({ open, onClose, onSave, error }) => {
+  const {
     values,
     errors,
     touched,
     handleChange,
     handleBlur,
     reset,
-    isValid
+    isValid,
   } = useForm(
     {
       title: "",
       externalUrl: "",
-      description: ""
-    },    {
+      description: "",
+    },
+    {
       title: {
         required: true,
         minLength: 3,
-        errorMessage: "Title is required and must be at least 3 characters"
+        errorMessage: "Title is required and must be at least 3 characters",
       },
       externalUrl: {
         required: false,
         custom: (value) => {
-          if (!value || (value as string).trim() === '') return true;
+          if (!value || (value as string).trim() === "") {
+            return true;
+          }
           return /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/.test(value as string);
         },
-        errorMessage: "Please enter a valid URL"
-      }
+        errorMessage: "Please enter a valid URL",
+      },
     }
   );
-    const handleSave = () => {
-    const formIsValid = isValid();
-    
-    if (formIsValid) {
+
+  const handleSave = () => {
+    if (isValid()) {
       onSave(values.title, values.externalUrl, values.description);
       reset();
-    } else {
-      Object.keys(values).forEach(key => {
-        handleBlur(key as keyof typeof values);
-      });
+      return;
     }
+
+    Object.keys(values).forEach((key) => {
+      handleBlur(key as keyof typeof values);
+    });
   };
-    const handleClose = () => {
+
+  const handleClose = () => {
     reset();
     onClose();
   };
+
   if (!open) return null;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 animate-fade-in">
-      <div className="bg-surface-raised rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md mx-2">
-        <h3 className="text-lg font-bold mb-4 text-white">Add Study</h3>        <input
-          className={`w-full px-3 py-2 mb-3 rounded border ${touched.title && errors.title ? 'border-red-500' : 'border-border-default'} bg-surface text-text-base`}
-          placeholder="Title *"
-          value={values.title}
-          onChange={(e) => handleChange('title', e.target.value)}
-          onBlur={() => handleBlur('title')}
-          autoFocus
-        />
-        {touched.title && errors.title && <div className="text-red-400 text-sm mt-1 mb-2">{errors.title}</div>}        <input
-          className={`w-full px-3 py-2 mb-3 rounded border ${touched.externalUrl && errors.externalUrl ? 'border-red-500' : 'border-border-default'} bg-surface text-text-base`}
-          placeholder="External study link (optional)"
-          value={values.externalUrl}
-          onChange={(e) => handleChange('externalUrl', e.target.value)}
-          onBlur={() => handleBlur('externalUrl')}
-        />
-        {touched.externalUrl && errors.externalUrl && <div className="text-red-400 text-sm mt-1 mb-2">{errors.externalUrl}</div>}        <textarea
-          className={`w-full px-3 py-2 mb-3 rounded border ${touched.description && errors.description ? 'border-red-500' : 'border-border-default'} bg-surface text-text-base`}
-          placeholder="Description or comment"
-          value={values.description}
-          onChange={(e) => handleChange('description', e.target.value)}
-          onBlur={() => handleBlur('description')}
-          rows={3}
-        />
-        {touched.description && errors.description && <div className="text-red-400 text-sm mt-1 mb-2">{errors.description}</div>}
-        {error && <div className="text-red-400 mb-2">{error}</div>}
-        <div className="flex gap-2 justify-end">          <button className="px-3 py-1 bg-blue-700 text-white rounded" onClick={handleSave}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-page/70 px-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-xl border border-border-default bg-surface-raised p-4 shadow-elevated sm:p-6">
+        <h3 className="mb-4 text-lg font-bold text-text-base">Add Entry</h3>
+        <div className="space-y-3">
+          <Input
+            label="Title"
+            placeholder="Title"
+            value={values.title}
+            onChange={(event) => handleChange("title", event.target.value)}
+            onBlur={() => handleBlur("title")}
+            error={Boolean(touched.title && errors.title)}
+            errorMessage={touched.title ? errors.title : undefined}
+            autoFocus
+          />
+          <Input
+            label="External study link"
+            placeholder="https://..."
+            value={values.externalUrl}
+            onChange={(event) => handleChange("externalUrl", event.target.value)}
+            onBlur={() => handleBlur("externalUrl")}
+            error={Boolean(touched.externalUrl && errors.externalUrl)}
+            errorMessage={touched.externalUrl ? errors.externalUrl : undefined}
+          />
+          <Textarea
+            label="Description"
+            placeholder="Description or comment"
+            rows={3}
+            value={values.description}
+            onChange={(event) => handleChange("description", event.target.value)}
+            onBlur={() => handleBlur("description")}
+          />
+        </div>
+        {error && <div className="mt-3 text-sm text-danger">{error}</div>}
+        <div className="mt-4 flex justify-end gap-2">
+          <Button type="button" intent="primary" onClick={handleSave}>
             Save
-          </button>
-          <button className="px-3 py-1 bg-slate-700 text-white rounded" onClick={handleClose}>
+          </Button>
+          <Button type="button" intent="secondary" onClick={handleClose}>
             Cancel
-          </button>
+          </Button>
         </div>
       </div>
     </div>

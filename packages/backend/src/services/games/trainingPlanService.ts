@@ -22,9 +22,11 @@ export async function generateTrainingPlanForUser(
   const mergedWeights: TrainingPlanWeights = { ...DEFAULT_TRAINING_PLAN_WEIGHTS, ...weights };
   const stats = await getGamesStatsSummaryForUser(userId, toTrainingStatsFilters(filters));
   const db = getDB();
-  const matchedLines = stats.linesToStudy.filter((line) => line.mappedGames > 0 && Boolean(line.variantName || line.repertoireName));
+  const matchedLines = stats.linesToStudy.filter(
+    (line) => line.mappedGames > 0 && (line.variantName || line.repertoireName)
+  );
   const highSignalUnmappedLines = stats.linesToStudy.filter((line) =>
-    (!line.mappedGames || !Boolean(line.variantName || line.repertoireName))
+    (!line.mappedGames || !(line.variantName || line.repertoireName))
     && (
       (line.trainingErrors || 0) > 0
       || line.deviationRate >= 0.35

@@ -50,7 +50,14 @@ Data is stored in MongoDB. Backend routes are protected by auth middleware excep
 - Generate and track a training plan from imported game signals.
 - Review insights, training priorities, sync state, and imported data management.
 
-### 5) Authentication and user scope
+### 5) Train (Opening-Focused Training)
+
+- Dedicated train overview at `/train` grouped by repertoire/opening.
+- Opening detail pages at `/train/repertoire/:repertoireId/opening/:openingName`.
+- Reinforcement flow for variant mistakes, with in-session requeue until solved.
+- Full-run confirmation stage after mistake reinforcement.
+
+### 6) Authentication and user scope
 
 - Optional auth mode (login/register/session/logout).
 - Optional default-user local mode (when enabled by backend config).
@@ -64,6 +71,8 @@ Data is stored in MongoDB. Backend routes are protected by auth middleware excep
 - `/create-repertoire` — create repertoire
 - `/repertoire/:id` — edit repertoire
 - `/repertoire/train/:id` — train repertoire
+- `/train` — train overview (repertoire-grouped openings)
+- `/train/repertoire/:repertoireId/opening/:openingName` — opening-level train detail
 - `/studies` — study groups/studies workflow
 - `/path` — next lesson + path forecast/analytics
 - `/games` — 4-tab games intelligence workspace (`Insights`, `Training`, `Sync`, `Data`)
@@ -98,12 +107,23 @@ Notes:
 3. Stats and training plan are generated/regenerated.
 4. User works queue items in `Training`, tracks quality in `Insights`, and manages data in `Data`.
 
+### D) Train reinforcement flow
+
+1. User opens `/train` and selects an opening card.
+2. User reviews opening-level due variants/mistakes on opening detail page.
+3. User starts training in `/repertoire/train/:id` with query filters (`mode`, `openingName`, `variantName`, `variantNames`).
+4. On variant completion:
+   - results modal shows metrics + mastery delta,
+   - user can enter mistake reinforcement loop,
+   - user finishes with full-run confirmation.
+
 ## Backend route surface (by domain)
 
 - Auth: `/auth/*`
 - Repertoires: `/repertoires/*`
 - Studies: `/studies/*`
 - Path: `/paths`, `/paths/plan`, `/paths/analytics`
+- Train: `/train/overview`, `/train/repertoires/:id/openings/:openingName`
 - Position comments: `/positions/*`
 - Games: `/games/*`
 
@@ -126,6 +146,8 @@ Notes:
 
 Detailed implementation docs are in `src/doc/`, especially:
 - `PathPage-Next-Lesson-Logic.md`
+- `Train-Error-Reinforcement-Mode.md`
+- `Train-Section-Architecture.md`
 - `Game-Imports-Guide.md`
 - `Game-Import-Service-Architecture.md`
 - `Training-Queue-Guide.md`

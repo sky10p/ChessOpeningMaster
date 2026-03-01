@@ -4,7 +4,7 @@ import { XMarkIcon, EllipsisVerticalIcon, ArrowRightOnRectangleIcon, SunIcon, Mo
 import chessNavbarBackground from "../../../assets/chess-navbar-background.jpg";
 import { NavbarLink } from "./model";
 import { ChartPieIcon, StarIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
-import { AcademicCapIcon, FlagIcon } from "@heroicons/react/24/outline";
+import { AcademicCapIcon, BoltIcon, FlagIcon } from "@heroicons/react/24/outline";
 import { useTheme } from "../../../hooks/useTheme";
 
 interface NavbarProps {
@@ -100,6 +100,15 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
             >
               <FlagIcon className="h-5 w-5 text-pink-400 mr-3" />
               <span>Path</span>
+            </Link>
+
+            <Link
+              to="/train"
+              className="nav-link group mt-2"
+              onClick={() => setOpen(false)}
+            >
+              <BoltIcon className="h-5 w-5 text-amber-400 mr-3" />
+              <span>Train</span>
             </Link>
             
             {/* Repertoires dropdown */}

@@ -1,6 +1,6 @@
-﻿import React from "react";
-import { useForm, useFormField } from "../../../../hooks";
-import { FormField } from "../../../../components/forms";
+import React from "react";
+import { Button, Input, Textarea } from "../../../../components/ui";
+import { useForm } from "../../../../hooks";
 
 interface NewEntryModalProps {
   open: boolean;
@@ -18,82 +18,82 @@ const NewEntryModalEnhanced: React.FC<NewEntryModalProps> = ({ open, onClose, on
     handleBlur,
     handleSubmit,
     reset,
-    isValid
+    isValid,
   } = useForm(
     {
       title: "",
       externalUrl: "",
-      description: ""
+      description: "",
     },
     {
       title: {
         required: true,
         minLength: 3,
-        errorMessage: "Title is required and must be at least 3 characters"
+        errorMessage: "Title is required and must be at least 3 characters",
       },
       externalUrl: {
         required: true,
         pattern: /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/,
-        errorMessage: "Please enter a valid URL"
-      }
+        errorMessage: "Please enter a valid URL",
+      },
     }
   );
-  
-  const { getFieldProps } = useFormField(values, errors, touched, handleChange, handleBlur);
 
   const handleSave = (formValues: typeof values) => {
     const { title, externalUrl, description } = formValues;
     onSave(title, externalUrl, description);
     reset();
   };
-  
+
   const handleClose = () => {
     reset();
     onClose();
   };
-  
+
   if (!open) return null;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 animate-fade-in">
-      <div className="bg-surface-raised rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md mx-2">
-        <h3 className="text-lg font-bold mb-4 text-text-base">Add Study</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-page/70 px-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-xl border border-border-default bg-surface-raised p-4 shadow-elevated sm:p-6">
+        <h3 className="mb-4 text-lg font-bold text-text-base">Add Entry</h3>
         <form onSubmit={handleSubmit(handleSave)}>
-          <FormField
-            {...getFieldProps('title')}
-            placeholder="Title *"
-            required
-            autoFocus
-          />
-          
-          <FormField
-            {...getFieldProps('externalUrl')}
-            placeholder="External study link *"
-            required
-          />
-          
-          <FormField
-            {...getFieldProps('description')}
-            placeholder="Description or comment"
-            type="textarea"
-            rows={3}
-          />
-          
-          {error && <div className="text-danger mb-2">{error}</div>}
-          <div className="flex gap-2 justify-end">
-            <button 
-              type="submit" 
-              className="px-3 py-1 bg-brand text-text-on-brand rounded disabled:opacity-50"
-              disabled={!isValid()}
-            >
+          <div className="space-y-3">
+            <Input
+              label="Title"
+              placeholder="Title"
+              value={values.title}
+              onChange={(event) => handleChange("title", event.target.value)}
+              onBlur={() => handleBlur("title")}
+              error={Boolean(touched.title && errors.title)}
+              errorMessage={touched.title ? errors.title : undefined}
+              autoFocus
+            />
+            <Input
+              label="External study link"
+              placeholder="https://..."
+              value={values.externalUrl}
+              onChange={(event) => handleChange("externalUrl", event.target.value)}
+              onBlur={() => handleBlur("externalUrl")}
+              error={Boolean(touched.externalUrl && errors.externalUrl)}
+              errorMessage={touched.externalUrl ? errors.externalUrl : undefined}
+            />
+            <Textarea
+              label="Description"
+              placeholder="Description or comment"
+              rows={3}
+              value={values.description}
+              onChange={(event) => handleChange("description", event.target.value)}
+              onBlur={() => handleBlur("description")}
+            />
+          </div>
+          {error && <div className="mt-3 text-sm text-danger">{error}</div>}
+          <div className="mt-4 flex justify-end gap-2">
+            <Button type="submit" intent="primary" disabled={!isValid()}>
               Save
-            </button>
-            <button
-              type="button" 
-              className="px-3 py-1 bg-surface-raised text-text-base border border-border-default rounded" 
-              onClick={handleClose}
-            >
+            </Button>
+            <Button type="button" intent="secondary" onClick={handleClose}>
               Cancel
-            </button>
+            </Button>
           </div>
         </form>
       </div>

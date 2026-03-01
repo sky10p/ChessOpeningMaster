@@ -6,9 +6,20 @@ export {
   Variant,
   ReviewRating,
   SchedulerState,
+  MistakeSnapshotItem,
+  VariantMistake,
+  VariantMistakeReviewInput,
   VariantReviewInput,
   VariantReviewRecord,
 } from "./types/Variants";
+export {
+  TrainOpeningSummary,
+  TrainOverviewRepertoire,
+  TrainOverviewResponse,
+  TrainOpeningVariantItem,
+  TrainOpeningStats,
+  TrainOpeningResponse,
+} from "./types/Train";
 export { MoveVariantNode } from "./types/MoveVariantNode";
 export {
   Path,

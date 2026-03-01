@@ -8,6 +8,7 @@ import paths from "./routes/paths";
 import positionsRouter from "./routes/positionComments";
 import authRouter from "./routes/auth";
 import gamesRouter from "./routes/games";
+import trainRouter from "./routes/train";
 import errorHandler from "./middleware/errorHandler";
 import { authMiddleware } from "./middleware/auth";
 import { ensureDefaultUserAndMigrateData } from "./services/authService";
@@ -61,6 +62,7 @@ app.use("/studies", studiesRouter);
 app.use("/paths", paths);
 app.use("/positions", positionsRouter);
 app.use("/games", gamesRouter);
+app.use("/train", trainRouter);
 
 app.use(errorHandler);
 

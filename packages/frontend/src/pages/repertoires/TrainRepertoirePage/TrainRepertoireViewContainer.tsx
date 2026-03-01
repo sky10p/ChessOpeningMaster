@@ -6,7 +6,6 @@ import { useHeaderDispatch } from "../../../contexts/HeaderContext";
 import { useDialogContext } from "../../../contexts/DialogContext";
 import { TrainVariant, Variant } from "../../../models/chess.models";
 import { getSpacedRepetitionVariants } from "../../../utils/chess/spacedRepetition/spacedRepetition";
-import { HintInfo } from "../../../components/design/chess/train/HintInfo";
 import BoardContainer from "../../../components/application/chess/board/BoardContainer";
 import {
   InformationCircleIcon,
@@ -14,15 +13,18 @@ import {
   ChatBubbleLeftIcon,
   ClipboardDocumentIcon,
 } from "@heroicons/react/24/outline";
-import TrainInfo from "../../../components/design/chess/train/TrainInfo";
-import HelpInfo from "../../../components/design/chess/train/HelpInfo";
 import { CheckListIcon } from "../../../components/icons/CheckListIcon";
 import { ExamIcon } from "../../../components/icons/ExamIcon";
 import { useFooterDispatch } from "../../../contexts/FooterContext";
-import { RepertoireWorkspaceLayout } from "../shared/RepertoireWorkspaceLayout";
 import { ReviewRating } from "@chess-opening-master/common";
 import { useAlertContext } from "../../../contexts/AlertContext";
-import { ReviewRatingDialog } from "../../../components/design/dialogs/ReviewRatingDialog";
+import { VariantResultsModal } from "./components/VariantResultsModal";
+import { MistakeReinforcementPanel } from "./components/MistakeReinforcementPanel";
+import { MistakeRatingSheet } from "./components/MistakeRatingSheet";
+import { FullRunConfirmPanel } from "./components/FullRunConfirmPanel";
+import { FocusModeMoveProgress } from "./components/FocusModeMoveProgress";
+import { TrainRepertoireStandardWorkspace } from "./components/TrainRepertoireStandardWorkspace";
+import { TrainRepertoireFocusWorkspace } from "./components/TrainRepertoireFocusWorkspace";
 
 const TrainRepertoireViewContainer: React.FC = () => {
   const [panelSelected, setPanelSelected] = React.useState<
@@ -47,6 +49,16 @@ const TrainRepertoireViewContainer: React.FC = () => {
     pendingVariantReview,
     submitPendingVariantReview,
     markHintUsed,
+    mode,
+    trainingPhase,
+    reinforcementSession,
+    startMistakeReinforcement,
+    startPendingReviewReinforcement,
+    submitCurrentMistakeRating,
+    isSavingMistakeRating,
+    focusModeProgress,
+    fullRunConfirmState,
+    finishFullRunConfirm,
   } = useTrainRepertoireContext();
   const [selectedRating, setSelectedRating] = React.useState<ReviewRating>("good");
   const [isSavingRating, setIsSavingRating] = React.useState(false);
@@ -55,6 +67,28 @@ const TrainRepertoireViewContainer: React.FC = () => {
     removeIcon: removeIconFooter,
     setIsVisible,
   } = useFooterDispatch();
+  const autoFixReviewKeyRef = React.useRef<string | null>(null);
+
+  const isFocusMode = mode === "mistakes";
+  const focusOpeningName = useMemo(() => {
+    const queryParams = new URLSearchParams(location.search);
+    return queryParams.get("openingName");
+  }, [location.search]);
+  const focusStatuses = focusModeProgress?.statuses || [];
+  const focusFailedCount = focusStatuses.filter((status) => status === "failed").length;
+  const focusErrorMarkerCount = focusStatuses.filter(
+    (status) => status === "failed" || status === "recovered"
+  ).length;
+
+  const focusCycleInProgress =
+    isFocusMode &&
+    (trainingPhase !== "standard" ||
+      Boolean(reinforcementSession) ||
+      Boolean(fullRunConfirmState) ||
+      Boolean(pendingVariantReview));
+  const finishedTrainVisible = isFocusMode
+    ? finishedTrain && !focusCycleInProgress
+    : finishedTrain;
 
   useEffect(() => {
     if (!pendingVariantReview) {
@@ -110,7 +144,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
         onClick: () => {
           const queryParams = new URLSearchParams(location.search);
           const variantName = queryParams.get("variantName");
-          const editUrl = variantName 
+          const editUrl = variantName
             ? `/repertoire/${repertoireId}?variantName=${encodeURIComponent(variantName)}`
             : `/repertoire/${repertoireId}`;
           navigate(editUrl);
@@ -142,26 +176,35 @@ const TrainRepertoireViewContainer: React.FC = () => {
 
   useEffect(() => {
     setIsVisible(true);
-    const footerIcons = [
-      {
-        key: "info",
-        label: "Train info",
-        icon: <InformationCircleIcon className="h-6 w-6" />,
-        onClick: () => setPanelSelected("info"),
-      },
-      {
-        key: "trainComments",
-        label: "Comments",
-        icon: <ChatBubbleLeftIcon className="h-6 w-6" />,
-        onClick: () => setPanelSelected("trainComments"),
-      },
-      {
-        key: "help",
-        label: "Help",
-        icon: <ClipboardDocumentIcon className="h-6 w-6" />,
-        onClick: () => setPanelSelected("help"),
-      },
-    ];
+    const footerIcons = isFocusMode
+      ? [
+          {
+            key: "info",
+            label: "Train info",
+            icon: <InformationCircleIcon className="h-6 w-6" />,
+            onClick: () => setPanelSelected("info"),
+          },
+        ]
+      : [
+          {
+            key: "info",
+            label: "Train info",
+            icon: <InformationCircleIcon className="h-6 w-6" />,
+            onClick: () => setPanelSelected("info"),
+          },
+          {
+            key: "trainComments",
+            label: "Comments",
+            icon: <ChatBubbleLeftIcon className="h-6 w-6" />,
+            onClick: () => setPanelSelected("trainComments"),
+          },
+          {
+            key: "help",
+            label: "Help",
+            icon: <ClipboardDocumentIcon className="h-6 w-6" />,
+            onClick: () => setPanelSelected("help"),
+          },
+        ];
 
     footerIcons.forEach(({ key, label, icon, onClick }) => {
       addIconFooter({ key, label, icon, onClick });
@@ -173,132 +216,193 @@ const TrainRepertoireViewContainer: React.FC = () => {
         removeIconFooter(key);
       });
     };
-  }, [addIconFooter, removeIconFooter, setIsVisible]);
+  }, [addIconFooter, isFocusMode, removeIconFooter, setIsVisible]);
 
-  const mobilePanelContent = useMemo(
-    () => (
-      <div className="w-full h-full min-h-0 p-4 overflow-y-auto">
-        {panelSelected === "info" && (
-          <TrainInfo
-            currentMoveNode={currentMoveNode}
-            turn={turn}
-            isYourTurn={isYourTurn}
-            finishedTrain={finishedTrain}
-            trainVariants={trainVariants}
-            lastTrainVariant={lastTrainVariant}
-            repertoireId={repertoireId}
-            onHintReveal={markHintUsed}
-          />
-        )}
-        {panelSelected === "help" && (
-          <HelpInfo
-            allowedMoves={allowedMoves}
-            isYourTurn={isYourTurn}
-            currentMoveNode={currentMoveNode}
-            onHintReveal={markHintUsed}
-          />
-        )}
-        {panelSelected === "trainComments" && (
-          <HintInfo
-            currentMoveNode={currentMoveNode}
-            orientation={orientation}
-            updateComment={updateComment}
-          />
-        )}
-      </div>
-    ),
-    [
-      panelSelected,
-      currentMoveNode,
-      turn,
-      isYourTurn,
-      finishedTrain,
-      trainVariants,
-      lastTrainVariant,
-      allowedMoves,
-      repertoireId,
-      orientation,
-      updateComment,
-      markHintUsed,
-    ]
+  const handleFinishWithoutReinforcement = React.useCallback(
+    async (rating: ReviewRating) => {
+      if (isSavingRating || !pendingVariantReview) {
+        return;
+      }
+      try {
+        setIsSavingRating(true);
+        await submitPendingVariantReview(rating);
+      } catch (error) {
+        showAlert("Failed to save review rating", "error", 1800);
+      } finally {
+        setIsSavingRating(false);
+      }
+    },
+    [isSavingRating, pendingVariantReview, showAlert, submitPendingVariantReview]
   );
 
-  const desktopPanelContent = useMemo(
-    () => (
-      <div className="w-full h-full p-4 flex flex-col gap-4">
-        <div className="h-2/5 min-h-[200px]">
-          <HintInfo
-            currentMoveNode={currentMoveNode}
-            orientation={orientation}
-            updateComment={updateComment}
-          />
-        </div>
-        <TrainInfo
-          currentMoveNode={currentMoveNode}
-          turn={turn}
-          isYourTurn={isYourTurn}
-          finishedTrain={finishedTrain}
-          trainVariants={trainVariants}
-          lastTrainVariant={lastTrainVariant}
-          repertoireId={repertoireId}
-          onHintReveal={markHintUsed}
-        />
-      </div>
-    ),
-    [
-      currentMoveNode,
-      orientation,
-      updateComment,
-      turn,
-      isYourTurn,
-      finishedTrain,
-      trainVariants,
-      lastTrainVariant,
-      repertoireId,
-      markHintUsed,
-    ]
-  );
-
-  const handleReviewRating = async (rating: ReviewRating) => {
+  const handleResultsModalClose = () => {
     if (isSavingRating || !pendingVariantReview) {
       return;
     }
+    if (
+      isFocusMode &&
+      pendingVariantReview.focusCycleStage !== "final" &&
+      pendingVariantReview.reinforcementMistakes.length > 0
+    ) {
+      void handleFixMistakesNow();
+      return;
+    }
+    void handleFinishWithoutReinforcement(selectedRating);
+  };
+
+  const handleFixMistakesNow = React.useCallback(async () => {
+    if (isSavingRating || !pendingVariantReview) {
+      return;
+    }
+    const reviewToReinforce = pendingVariantReview;
     try {
       setIsSavingRating(true);
-      await submitPendingVariantReview(rating);
+      if (isFocusMode && reviewToReinforce.focusCycleStage !== "final") {
+        startPendingReviewReinforcement(reviewToReinforce);
+      } else {
+        await submitPendingVariantReview(selectedRating);
+        startMistakeReinforcement(reviewToReinforce);
+      }
     } catch (error) {
-      showAlert("Failed to save review rating", "error", 1800);
+      showAlert("Failed to start reinforcement mode", "error", 1800);
     } finally {
       setIsSavingRating(false);
     }
-  };
+  }, [
+    isSavingRating,
+    pendingVariantReview,
+    selectedRating,
+    showAlert,
+    isFocusMode,
+    startPendingReviewReinforcement,
+    startMistakeReinforcement,
+    submitPendingVariantReview,
+  ]);
 
-  const handleReviewDialogClose = () => {
-    if (isSavingRating || !pendingVariantReview) {
+  const handleMistakeRating = React.useCallback(
+    async (rating: ReviewRating) => {
+      try {
+        await submitCurrentMistakeRating(rating);
+      } catch {
+        showAlert("Failed to save mistake rating", "error", 1800);
+      }
+    },
+    [showAlert, submitCurrentMistakeRating]
+  );
+
+  useEffect(() => {
+    if (
+      !isFocusMode ||
+      trainingPhase !== "standard" ||
+      !pendingVariantReview ||
+      pendingVariantReview.focusCycleStage === "final" ||
+      pendingVariantReview.reinforcementMistakes.length === 0 ||
+      isSavingRating
+    ) {
       return;
     }
-    void handleReviewRating(selectedRating);
-  };
+    const reviewKey = `${pendingVariantReview.variantName}::${pendingVariantReview.startingFen}`;
+    if (autoFixReviewKeyRef.current === reviewKey) {
+      return;
+    }
+    autoFixReviewKeyRef.current = reviewKey;
+    void handleFixMistakesNow();
+  }, [
+    handleFixMistakesNow,
+    isSavingRating,
+    isFocusMode,
+    pendingVariantReview,
+    trainingPhase,
+  ]);
+
+  const boardActions = useMemo(
+    () =>
+      focusModeProgress ? (
+        <FocusModeMoveProgress progress={focusModeProgress} />
+      ) : undefined,
+    [focusModeProgress]
+  );
+
+  const handleFocusBack = React.useCallback(() => {
+    if (focusOpeningName) {
+      navigate(
+        `/train/repertoire/${repertoireId}/opening/${encodeURIComponent(
+          focusOpeningName
+        )}`
+      );
+      return;
+    }
+    navigate(-1);
+  }, [focusOpeningName, navigate, repertoireId]);
 
   return (
     <>
-      <RepertoireWorkspaceLayout
-        title={`Training ${repertoireName}`}
-        board={<BoardContainer isTraining={true} />}
-        mobilePanel={mobilePanelContent}
-        desktopPanel={desktopPanelContent}
-      />
-      <ReviewRatingDialog
+      {isFocusMode ? (
+        <TrainRepertoireFocusWorkspace
+          title={`Training ${repertoireName}`}
+          board={<BoardContainer isTraining={true} />}
+          boardActions={boardActions}
+          currentMoveNode={currentMoveNode}
+          orientation={orientation}
+          updateComment={updateComment}
+          turn={turn}
+          isYourTurn={isYourTurn}
+          finishedTrain={finishedTrainVisible}
+          trainVariants={trainVariants}
+          lastTrainVariant={lastTrainVariant}
+          repertoireId={repertoireId}
+          markHintUsed={markHintUsed}
+          pendingErrorCount={focusFailedCount}
+          hasAssistContent={focusErrorMarkerCount > 0}
+          onBack={handleFocusBack}
+        />
+      ) : (
+        <TrainRepertoireStandardWorkspace
+          title={`Training ${repertoireName}`}
+          board={<BoardContainer isTraining={true} />}
+          boardActions={boardActions}
+          panelSelected={panelSelected}
+          currentMoveNode={currentMoveNode}
+          orientation={orientation}
+          updateComment={updateComment}
+          turn={turn}
+          isYourTurn={isYourTurn}
+          finishedTrain={finishedTrainVisible}
+          trainVariants={trainVariants}
+          lastTrainVariant={lastTrainVariant}
+          allowedMoves={allowedMoves}
+          repertoireId={repertoireId}
+          markHintUsed={markHintUsed}
+        />
+      )}
+
+      <VariantResultsModal
         open={Boolean(pendingVariantReview)}
         pendingVariantReview={pendingVariantReview}
         selectedRating={selectedRating}
-        isSavingRating={isSavingRating}
-        onClose={handleReviewDialogClose}
+        isSaving={isSavingRating}
+        onFinish={handleResultsModalClose}
+        onFixMistakes={handleFixMistakesNow}
         onSelectRating={(rating) => {
           setSelectedRating(rating);
-          void handleReviewRating(rating);
         }}
       />
+      {trainingPhase === "reinforcement" && reinforcementSession ? (
+        <>
+          <MistakeReinforcementPanel session={reinforcementSession} />
+          <MistakeRatingSheet
+            open={reinforcementSession.awaitingRating}
+            isSaving={isSavingMistakeRating}
+            onRate={handleMistakeRating}
+          />
+        </>
+      ) : null}
+      {trainingPhase === "fullRunConfirm" && fullRunConfirmState ? (
+        <FullRunConfirmPanel
+          state={fullRunConfirmState}
+          onFinish={finishFullRunConfirm}
+        />
+      ) : null}
     </>
   );
 };

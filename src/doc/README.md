@@ -1,168 +1,118 @@
 # Documentation Index
 
-This directory contains comprehensive documentation for the ChessKeep project, specifically designed to help AI agents understand the architecture and troubleshoot issues.
+This directory contains architecture and implementation guides for ChessKeep.
 
 ## Documentation Files
 
-### 📄 [Project Summary](summary.md)
-**Shareable high-level overview for product, pages, and flow**
-- Product purpose and core capabilities
-- Frontend page map and route overview
-- Main user flows (repertoire, path, games)
-- Architecture and backend domain organization
+### [Project Summary](summary.md)
+- Product purpose and main flows
+- Frontend route map
+- Backend domain overview
 
-### 🏗️ [RepertoireContext Architecture Guide](RepertoireContext-Architecture.md)
-**Essential for understanding the core system**
-- Directory structure after refactoring
-- Key functions and their purposes
-- Integration points and dependencies
-- Migration notes from single-file to modular structure
+### [RepertoireContext Architecture Guide](RepertoireContext-Architecture.md)
+- Core context structure and responsibilities
+- Integration points and data flow
 
-### 🔄 [Variant Selection Logic](Variant-Selection-Logic.md) 
-**Critical for understanding chess opening management**
-- Core algorithm for variant switching
-- Compatibility checking using LAN notation
-- Automatic variant creation scenarios
-- Debugging tips for variant-related issues
+### [Variant Selection Logic](Variant-Selection-Logic.md)
+- Variant compatibility and switching behavior
+- LAN-based path matching rules
 
-### 🧪 [Testing Strategy](Testing-Strategy.md)
-**Must-read for test development and debugging**
-- Test file organization and patterns
-- Chess.js mock requirements (especially LAN properties)
-- Common test scenarios for variant logic
-- Mock data creation patterns
+### [Testing Strategy](Testing-Strategy.md)
+- Testing patterns and mock requirements
+- Common frontend/backend scenarios
 
-### ⚛️ [React Effect & Data Fetching Guide](React-Effect-Data-Fetching-Guide.md)
-**Required reading before introducing new `useEffect` logic**
-- When to avoid `useEffect` entirely
+### [UI Consistency Governance](UI-Consistency-Governance.md)
+- Mandatory frontend UX/UI consistency workflow
+- Touched-scope cleanup rules and reusable pattern decision rules
+
+### [React Effect & Data Fetching Guide](React-Effect-Data-Fetching-Guide.md)
+- When to avoid `useEffect`
 - Safe data-fetching effect patterns
-- Dependency and cleanup requirements
-- Testing checklist for async effects
 
-### 🔐 [User Auth Backend](User-Auth-Backend.md)
-**Required for backend features that read or write user data**
-- Auth endpoint behavior and lifecycle
-- Token and cookie model
-- Request user scoping rules for controllers
-- Migration and default-user compatibility behavior
+### [User Auth Backend](User-Auth-Backend.md)
+- Auth lifecycle and request user scoping
+- Token/session behavior and migration compatibility
 
-### 🧭 [User Auth Frontend](User-Auth-Frontend.md)
-**Required for frontend features that depend on authentication state**
-- App bootstrap auth/session flow
-- Login/register/default-user UX behavior
-- Route gating and logout behavior
-- API repository usage and credential handling
+### [User Auth Frontend](User-Auth-Frontend.md)
+- Auth bootstrap, route gating, login/register flow
 
-### 📘 [PathPage and Next Lesson Logic](PathPage-Next-Lesson-Logic.md)
-**Required for changes to `/path`, `usePaths`, or path-selection backend logic**
-- `/path` page behavior and action flow
-- `GET /paths` category and no-category behavior
-- Deterministic due-first selection and category rules
-- Weighted new-variant selection details and fallback order
+### [PathPage and Next Lesson Logic](PathPage-Next-Lesson-Logic.md)
+- `/path` endpoint usage and deterministic selection rules
+- Category/no-category behavior and no same-day repeats
 
-### 🧠 [Spaced Repetition Upgrade Plan](Spaced-Repetition-Upgrade-Plan.md)
-**Required for migration from legacy `errors + lastDate` scheduling to rating-based SRS**
-- No same-day repeat rules
-- `Again/Hard/Good/Easy` rating workflow and auto-suggestion
-- Path planning/analytics API and UI design
-- Phased rollout and acceptance criteria
+### [Train Error Reinforcement Mode](Train-Error-Reinforcement-Mode.md)
+- Variant results -> reinforcement -> full-run confirm flow
+- Monotonic same-day daily snapshot rule
+- Mistake-SRS lifecycle and replay behavior
 
-### ♟️ [Game Imports and Training Plan Guide](Game-Imports-Guide.md)
-**Required for `/games` page behavior (My Games / Games Intelligence)**
-- 4-tab UI model (`Insights`, `Training`, `Sync`, `Data`)
-- Shared filters and startup auto-sync behavior
-- Provider sync, manual PGN import, force-sync-all, and deletion flows
-- How user-visible messages map to backend operations
+### [Train Section Architecture](Train-Section-Architecture.md)
+- `/train` and opening detail routes
+- Train API contracts and data flow
+- Mastery formulas and due definitions
 
-### 🧱 [Game Import Service Architecture](Game-Import-Service-Architecture.md)
-**Required for backend changes under `services/games` or `/games` routes/controllers**
-- Service/module boundaries and dependency direction
-- Import/rematch/plan orchestration flow
-- Auto-sync cadence and security/token encryption constraints
-- User scoping and indexing expectations for game data
+### [Spaced Repetition Upgrade Plan](Spaced-Repetition-Upgrade-Plan.md)
+- Rating-based scheduler model and migration details
 
-### 🧭 [Training Queue Guide](Training-Queue-Guide.md)
-**Required for Training tab logic and queue interpretation**
-- End-to-end data flow from imports/stats/plan to UI
-- Actionable queue vs signal lines semantics
-- Mapping-needed handling and `pathHint` behavior
-- Practical workflow after sync/import/rematch/plan updates
+### [Game Imports and Training Plan Guide](Game-Imports-Guide.md)
+- `/games` UX model and sync/import workflows
 
-### 🔧 [Troubleshooting Guide](Troubleshooting-Guide.md)
-**First stop when encountering issues**
-- Common TypeScript compilation errors
-- Runtime variant selection problems
-- Test failure diagnosis and solutions
-- Build and development environment issues
+### [Game Import Service Architecture](Game-Import-Service-Architecture.md)
+- Backend orchestration modules and dependencies
+
+### [Training Queue Guide](Training-Queue-Guide.md)
+- Queue semantics and interpretation rules for games training
+
+### [Troubleshooting Guide](Troubleshooting-Guide.md)
+- Common build/runtime/test issues and fixes
 
 ### [Dashboard Spaced Repetition Insights](Dashboard-Spaced-Repetition-Insights.md)
-**Required for Dashboard `Path Insights` tab and charts that consume path/spaced-repetition insights**
-- Dashboard insights architecture and data flow
-- Mapping Dashboard filters to path-insight filters
-- Due-load, rating, opening-forecast, and next-variant chart behavior
-- Testing expectations for mocked insights data
+- Dashboard path/scheduler analytics data flow
 
 ## Quick Start for Agents
 
 ### Understanding the Codebase
-1. Start with [AGENTS.md](../AGENTS.md) for project overview
-2. Read [RepertoireContext Architecture](RepertoireContext-Architecture.md) for core system understanding
-3. Review [Variant Selection Logic](Variant-Selection-Logic.md) for chess-specific behavior
-4. Read [User Auth Backend](User-Auth-Backend.md) and [User Auth Frontend](User-Auth-Frontend.md) before changing user-related logic
-5. Read [PathPage and Next Lesson Logic](PathPage-Next-Lesson-Logic.md) before changing `/path` or next-lesson selection
-6. Read [Spaced Repetition Upgrade Plan](Spaced-Repetition-Upgrade-Plan.md) before changing training scheduling model
-7. Read [Game Imports and Training Plan Guide](Game-Imports-Guide.md) before changing `/games` page UX or filters
-8. Read [Game Import Service Architecture](Game-Import-Service-Architecture.md) before changing `/games` backend services
-9. Read [Training Queue Guide](Training-Queue-Guide.md) before changing Games training prioritization
+1. Start with [AGENTS.md](../AGENTS.md).
+2. Read [RepertoireContext Architecture Guide](RepertoireContext-Architecture.md).
+3. Read [Variant Selection Logic](Variant-Selection-Logic.md).
+4. Read [UI Consistency Governance](UI-Consistency-Governance.md) before any UI change.
+5. Read [User Auth Backend](User-Auth-Backend.md) and [User Auth Frontend](User-Auth-Frontend.md).
+6. Read [PathPage and Next Lesson Logic](PathPage-Next-Lesson-Logic.md) before changing `/path`.
+7. Read [Train Error Reinforcement Mode](Train-Error-Reinforcement-Mode.md) before changing train reinforcement behavior.
+8. Read [Train Section Architecture](Train-Section-Architecture.md) before changing `/train` routes or APIs.
+9. Read [Spaced Repetition Upgrade Plan](Spaced-Repetition-Upgrade-Plan.md) for scheduler model changes.
+10. Read [Game Imports and Training Plan Guide](Game-Imports-Guide.md) for `/games` UX changes.
+11. Read [Game Import Service Architecture](Game-Import-Service-Architecture.md) for `/games` backend changes.
+12. Read [Training Queue Guide](Training-Queue-Guide.md) for games training prioritization.
 
 ### Debugging Issues
-1. Check [Troubleshooting Guide](Troubleshooting-Guide.md) for common problems
-2. Review [Testing Strategy](Testing-Strategy.md) for test-related issues
-3. Use debug patterns documented in each guide
+1. Check [Troubleshooting Guide](Troubleshooting-Guide.md).
+2. Review [Testing Strategy](Testing-Strategy.md).
 
 ### Making Changes
-1. Understand the variant selection algorithm before modifying navigation
-2. Update Chess.js mocks when adding new test moves
-3. Always test variant compatibility when changing move logic
-4. Follow the established directory structure for context organization
-5. Follow [React Effect & Data Fetching Guide](React-Effect-Data-Fetching-Guide.md) before adding new data-fetching effects
-6. Validate selection behavior with [PathPage and Next Lesson Logic](PathPage-Next-Lesson-Logic.md) before changing path rules
-7. Follow [Spaced Repetition Upgrade Plan](Spaced-Repetition-Upgrade-Plan.md) for scheduler/rating migrations
-8. Read [Dashboard Spaced Repetition Insights](Dashboard-Spaced-Repetition-Insights.md) before changing Dashboard SRS/path charts
-9. Validate Games tab behavior against [Game Imports and Training Plan Guide](Game-Imports-Guide.md)
-10. Validate backend orchestration assumptions against [Game Import Service Architecture](Game-Import-Service-Architecture.md)
+1. Preserve variant compatibility and navigation invariants.
+2. Update Chess.js mocks when adding move-dependent tests.
+3. Follow [React Effect & Data Fetching Guide](React-Effect-Data-Fetching-Guide.md) for effect usage.
+4. Validate `/path` logic against [PathPage and Next Lesson Logic](PathPage-Next-Lesson-Logic.md).
+5. Validate train reinforcement behavior with [Train Error Reinforcement Mode](Train-Error-Reinforcement-Mode.md).
+6. Validate `/train` contracts with [Train Section Architecture](Train-Section-Architecture.md).
+7. Validate scheduler/rating changes with [Spaced Repetition Upgrade Plan](Spaced-Repetition-Upgrade-Plan.md).
+8. Validate games UX and backend assumptions with [Game Imports and Training Plan Guide](Game-Imports-Guide.md) and [Game Import Service Architecture](Game-Import-Service-Architecture.md).
+9. Run the touched-scope consistency sweep from [UI Consistency Governance](UI-Consistency-Governance.md) for any UI task.
 
 ## Key Technical Concepts
 
 ### LAN (Logical Algebraic Notation)
-- Format: "e2e4", "g1f3", etc.
-- Used for move path compatibility checking
-- Required in Chess.js mock move objects
-- Critical for variant selection algorithm
+- Format: `e2e4`, `g1f3`
+- Required for move path compatibility logic
 
 ### Variant Compatibility
-- Variants must match move paths exactly using LAN notation
-- System automatically switches when incompatible
-- New variants created when no compatible variant exists
+- Variants match by exact LAN path
+- Incompatible edits trigger variant switching/creation behavior
 
 ### Navigation Flow
-- All navigation methods call `updateVariants(targetNode)`
-- Uses `buildMovePath()` from common package for path generation
-- Triggers auto-save and state synchronization
-
-## Architecture Highlights
-
-### Modular Structure
-The RepertoireContext was refactored into a clean directory structure with proper separation of concerns.
-
-### Comprehensive Testing
-49 tests specifically cover variant selection logic, with 340+ total tests across all packages.
-
-### Robust Error Handling
-Extensive troubleshooting documentation covers common issues and their solutions.
+- Navigation helpers update variants and board context together
+- Move-path reconstruction is central for deterministic selection
 
 ---
 
-*This documentation is maintained to help AI agents quickly understand and work with the ChessKeep codebase. Update these files when making architectural changes.*
-
-
+Update these docs whenever route behavior, data contracts, or architecture changes.

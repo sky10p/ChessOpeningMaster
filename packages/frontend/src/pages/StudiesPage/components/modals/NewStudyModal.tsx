@@ -1,4 +1,5 @@
-﻿import React from "react";
+import React from "react";
+import { Button, Input } from "../../../../components/ui";
 import { useFormState } from "../../../../hooks";
 
 interface NewStudyModalProps {
@@ -11,43 +12,53 @@ interface NewStudyModalProps {
 const NewStudyModal: React.FC<NewStudyModalProps> = ({ open, onClose, onSave, error }) => {
   const { values, handleChange, resetForm } = useFormState({
     name: "",
-    tagString: ""
+    tagString: "",
   });
+
   const handleSave = () => {
-    const { name, tagString } = values;
-    const tags = tagString.split(",").map(t => t.trim()).filter(Boolean);
-    onSave(name, tags);
+    const tags = values.tagString
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+
+    onSave(values.name, tags);
     resetForm();
   };
-  
+
   const handleClose = () => {
     resetForm();
     onClose();
   };
+
   if (!open) return null;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 animate-fade-in">
-      <div className="bg-surface-raised rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md mx-2">
-        <h3 className="text-lg font-bold mb-4 text-text-base">New Study</h3>        <input
-          className="w-full px-3 py-2 mb-3 rounded border border-border-default bg-surface text-text-base"
-          placeholder="Study name *"
-          value={values.name}
-          onChange={(e) => handleChange('name', e.target.value)}
-          autoFocus
-        />
-        <input
-          className="w-full px-3 py-2 mb-3 rounded border border-border-default bg-surface text-text-base"
-          placeholder="Tags (comma separated)"
-          value={values.tagString}
-          onChange={(e) => handleChange('tagString', e.target.value)}
-        />
-        {error && <div className="text-danger mb-2">{error}</div>}
-        <div className="flex gap-2 justify-end">          <button className="px-3 py-1 bg-brand text-text-on-brand rounded" onClick={handleSave}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-page/70 px-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-xl border border-border-default bg-surface-raised p-4 shadow-elevated sm:p-6">
+        <h3 className="mb-4 text-lg font-bold text-text-base">New Study</h3>
+        <div className="space-y-3">
+          <Input
+            label="Study name"
+            placeholder="Study name"
+            value={values.name}
+            onChange={(event) => handleChange("name", event.target.value)}
+            autoFocus
+          />
+          <Input
+            label="Tags"
+            placeholder="Comma-separated tags"
+            value={values.tagString}
+            onChange={(event) => handleChange("tagString", event.target.value)}
+          />
+        </div>
+        {error && <div className="mt-3 text-sm text-danger">{error}</div>}
+        <div className="mt-4 flex justify-end gap-2">
+          <Button type="button" intent="primary" onClick={handleSave}>
             Save
-          </button>
-          <button className="px-3 py-1 bg-surface-raised text-text-base border border-border-default rounded" onClick={handleClose}>
+          </Button>
+          <Button type="button" intent="secondary" onClick={handleClose}>
             Cancel
-          </button>
+          </Button>
         </div>
       </div>
     </div>

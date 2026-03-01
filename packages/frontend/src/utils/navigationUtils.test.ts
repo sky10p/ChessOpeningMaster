@@ -119,6 +119,16 @@ describe('useNavigationUtils', () => {
     });
   });
 
+  describe('goToTrainOpening', () => {
+    it('should navigate to train opening detail route', () => {
+      const { result } = renderHook(() => useNavigationUtils());
+
+      result.current.goToTrainOpening('test-repertoire-id', 'Italian Game');
+
+      expect(mockNavigate).toHaveBeenCalledWith('/train/repertoire/test-repertoire-id/opening/Italian%20Game');
+    });
+  });
+
   describe('resolveId functionality', () => {
     it('should correctly resolve ID from different repertoire objects', () => {
       const { result } = renderHook(() => useNavigationUtils());

@@ -1,4 +1,6 @@
-﻿import React, { useMemo } from "react";
+import React, { useMemo } from "react";
+import { TrashIcon } from "@heroicons/react/24/outline";
+import { EmptyState, IconButton } from "../../../../components/ui";
 import { formatDuration } from "../../utils";
 import { StudySession } from "../../models";
 import CalendarRangeDateFilter from "../../../../components/basic/CalendarRangeDateFilter";
@@ -11,9 +13,9 @@ interface SessionsListProps {
   totalTime: number;
 }
 
-const SessionsList: React.FC<SessionsListProps> = ({ 
-  sessions, 
-  onDeleteSession
+const SessionsList: React.FC<SessionsListProps> = ({
+  sessions,
+  onDeleteSession,
 }) => {
   const {
     startDate,
@@ -23,25 +25,25 @@ const SessionsList: React.FC<SessionsListProps> = ({
     setToday,
     setThisWeek,
     setThisMonth,
-    filteredItems: filteredSessions
+    filteredItems: filteredSessions,
   } = useDateRangeFilter(
     sessions,
     (session) => session.start
   );
-  
+
   const filteredTotalTime = useMemo(() => {
     return filteredSessions.reduce((total, session) => total + session.duration, 0);
   }, [filteredSessions]);
-  
+
   const dateRangeDisplayText = getDateRangeDisplayText(startDate, endDate);
-  
+
   return (
-    <div className="mb-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
-        <div className="text-text-muted text-sm">
+    <div className="space-y-3">
+      <div className="space-y-2">
+        <div className="text-sm text-text-muted">
           {dateRangeDisplayText} time: {formatDuration(filteredTotalTime)}
         </div>
-        
+
         <CalendarRangeDateFilter
           startDate={startDate}
           endDate={endDate}
@@ -52,28 +54,40 @@ const SessionsList: React.FC<SessionsListProps> = ({
           onSetThisMonth={setThisMonth}
         />
       </div>
-      
-      <ol className="space-y-1">
-        {filteredSessions.map((s) => (
-          <li key={s.id} className="text-xs text-text-subtle flex flex-col sm:flex-row gap-1 sm:gap-2 items-start sm:items-center">
-            <span>{new Date(s.start).toLocaleDateString()} {s.manual ? "(manual)" : ""}</span>
-            <span className="font-mono">{formatDuration(s.duration)}</span>
-            {s.comment && <span className="italic text-text-subtle">{s.comment}</span>}
-            <button
-              className="ml-auto px-2 py-0.5 bg-red-600 text-white rounded text-xs"
-              title="Delete session"
-              onClick={() => onDeleteSession(s.id)}
+
+      {filteredSessions.length === 0 ? (
+        <EmptyState
+          variant="inline"
+          title="No sessions found"
+          description="Try a different date range or log your next study session."
+        />
+      ) : (
+        <ol className="space-y-2">
+          {filteredSessions.map((session) => (
+            <li
+              key={session.id}
+              className="flex flex-col gap-2 rounded-lg border border-border-subtle bg-surface-raised px-3 py-2"
             >
-              🗑
-            </button>
-          </li>
-        ))}
-        {filteredSessions.length === 0 && (
-          <li className="text-text-subtle">
-            No sessions found for this date range.
-          </li>
-        )}
-      </ol>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 space-y-1">
+                  <div className="text-sm font-medium text-text-base">
+                    {new Date(session.start).toLocaleDateString()} {session.manual ? "(manual)" : ""}
+                  </div>
+                  <div className="font-mono text-xs text-text-muted">{formatDuration(session.duration)}</div>
+                  {session.comment && <div className="text-xs italic text-text-subtle">{session.comment}</div>}
+                </div>
+                <IconButton
+                  label="Delete session"
+                  title="Delete session"
+                  onClick={() => onDeleteSession(session.id)}
+                >
+                  <TrashIcon className="h-4 w-4" />
+                </IconButton>
+              </div>
+            </li>
+          ))}
+        </ol>
+      )}
     </div>
   );
 };

@@ -32,9 +32,22 @@ export const useNavigationUtils = () => {
     [navigate]
   );
 
+  const goToTrainOpening = useCallback(
+    (repertoireIdOrObject: string | IRepertoire, openingName: string) => {
+      const repertoireId = resolveId(repertoireIdOrObject);
+      navigate(
+        `/train/repertoire/${repertoireId}/opening/${encodeURIComponent(
+          openingName
+        )}`
+      );
+    },
+    [navigate]
+  );
+
   return {
     goToRepertoire,
     goToTrainRepertoire,
     goToTrainRepertoireWithVariants,
+    goToTrainOpening,
   };
 };
