@@ -65,7 +65,7 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
                     setOpen(false);
                   }}
                 >
-                  <span className="text-amber-400 mr-3">{link.icon}</span>
+                  <span className="text-accent mr-3">{link.icon}</span>
                   <span>{link.name}</span>
                 </button>
               ) : (
@@ -75,7 +75,7 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
                   className="nav-link group"
                   onClick={() => setOpen(false)}
                 >
-                  <span className="text-amber-400 mr-3">{link.icon}</span>
+                  <span className="text-accent mr-3">{link.icon}</span>
                   <span>{link.name}</span>
                 </Link>
               )
@@ -89,7 +89,7 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
               className="nav-link group"
               onClick={() => setOpen(false)}
             >
-              <ChartPieIcon className="h-5 w-5 text-blue-400 mr-3" />
+              <ChartPieIcon className="h-5 w-5 text-brand mr-3" />
               Dashboard
             </Link>
 
@@ -98,7 +98,7 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
               className="nav-link group mt-2"
               onClick={() => setOpen(false)}
             >
-              <FlagIcon className="h-5 w-5 text-pink-400 mr-3" />
+              <FlagIcon className="h-5 w-5 text-brand mr-3" />
               <span>Path</span>
             </Link>
 
@@ -107,7 +107,7 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
               className="nav-link group mt-2"
               onClick={() => setOpen(false)}
             >
-              <BoltIcon className="h-5 w-5 text-amber-400 mr-3" />
+              <BoltIcon className="h-5 w-5 text-accent mr-3" />
               <span>Train</span>
             </Link>
             
@@ -118,7 +118,7 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
                 onClick={() => setFavouritesOpen(!favouritesOpen)}
               >
                 <div className="flex items-center">
-                  <StarIcon className="h-5 w-5 text-amber-400 mr-3" />
+                  <StarIcon className="h-5 w-5 text-accent mr-3" />
                   <span>Repertoires</span>
                 </div>
                 <ChevronDownIcon
@@ -157,7 +157,7 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
               className="nav-link group mt-2"
               onClick={() => setOpen(false)}
             >
-              <AcademicCapIcon className="h-5 w-5 text-emerald-400 mr-3" />
+              <AcademicCapIcon className="h-5 w-5 text-success mr-3" />
               <span>Studies</span>
             </Link>
             {showLogout ? (
@@ -168,7 +168,7 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
                   setOpen(false);
                 }}
               >
-                <ArrowRightOnRectangleIcon className="h-5 w-5 text-red-400 mr-3" />
+                <ArrowRightOnRectangleIcon className="h-5 w-5 text-danger mr-3" />
                 <span>Logout</span>
               </button>
             ) : null}

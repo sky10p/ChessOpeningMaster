@@ -96,7 +96,7 @@ export const UnreviewedVariantsChart: React.FC<UnreviewedVariantsChartProps> = (
                               e.stopPropagation();
                               onVariantsClick(repertoireId, variants.map((v) => v.fullName));
                             }}
-                            className="px-2 py-0.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                            className="px-2 py-0.5 text-xs bg-brand text-text-on-brand rounded hover:bg-brand-hover transition-colors"
                             title={`Train all unreviewed for ${variants[0]?.repertoireName || "Repertoire"}`}
                           >
                             Train all unreviewed
@@ -136,7 +136,7 @@ export const UnreviewedVariantsChart: React.FC<UnreviewedVariantsChartProps> = (
                                     {onVariantClick && (
                                       <button
                                         onClick={(e) => handleVariantTrain(variant.fullName, e)}
-                                        className="px-2 py-0.5 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                                        className="px-2 py-0.5 text-xs bg-success text-text-on-brand rounded hover:opacity-90 transition-opacity"
                                         title="Train this variant"
                                       >
                                         Train

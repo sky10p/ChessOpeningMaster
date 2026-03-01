@@ -22,7 +22,7 @@ export const OpeningsProgressCard: React.FC<OpeningsProgressCardProps> = ({
   const top5 = sorted.slice(0, 5);
 
   const title = isNeedWork ? "Need Work" : "Well Learned";
-  const titleColor = isNeedWork ? "text-red-400" : "text-green-400";
+  const titleColor = isNeedWork ? "text-danger" : "text-success";
 
   return (
     <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col">
@@ -31,7 +31,7 @@ export const OpeningsProgressCard: React.FC<OpeningsProgressCardProps> = ({
         {onViewAllClick && (
           <button
             onClick={onViewAllClick}
-            className="text-xs text-blue-400 hover:text-blue-300"
+            className="text-xs text-brand hover:text-brand-hover transition-colors"
           >
             View all →
           </button>

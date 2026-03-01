@@ -73,13 +73,13 @@ export const RepertoireFilterDropdown: React.FC<RepertoireFilterDropdownProps> =
           <div className="p-2 border-b border-border-default flex justify-between">
             <button 
               onClick={() => { selectAllRepertoires(); }}
-              className="text-xs text-blue-400 hover:text-blue-300"
+              className="text-xs text-brand hover:text-brand-hover transition-colors"
             >
               Select All
             </button>
             <button 
               onClick={() => { deselectAllRepertoires(); }}
-              className="text-xs text-blue-400 hover:text-blue-300"
+              className="text-xs text-brand hover:text-brand-hover transition-colors"
             >
               Deselect All
             </button>
@@ -93,7 +93,7 @@ export const RepertoireFilterDropdown: React.FC<RepertoireFilterDropdownProps> =
                     id={`rep-${repertoire._id}`} 
                     checked={selectedRepertoires.includes(repertoire._id)}
                     onChange={() => toggleRepertoireSelection(repertoire._id)}
-                    className="mr-2 form-checkbox h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
+                    className="mr-2 form-checkbox h-4 w-4 text-brand transition duration-150 ease-in-out"
                   />
                   <label htmlFor={`rep-${repertoire._id}`} className="text-text-muted text-sm">
                     {repertoire.name}
@@ -110,7 +110,7 @@ export const RepertoireFilterDropdown: React.FC<RepertoireFilterDropdownProps> =
           <div className="p-2 border-t border-border-default">
             <button 
               onClick={() => setIsDropdownOpen(false)}
-              className="w-full bg-blue-600 text-white py-1 rounded text-xs hover:bg-blue-700"
+              className="w-full bg-brand text-text-on-brand py-1 rounded text-xs hover:bg-brand-hover transition-colors"
             >
               Apply
             </button>

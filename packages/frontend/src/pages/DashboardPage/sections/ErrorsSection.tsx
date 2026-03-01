@@ -1,10 +1,11 @@
-﻿import React, { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { IRepertoireDashboard } from "@chess-opening-master/common";
 import { generateVariantsWithErrorsByOpening, getRelevantVariants } from "./DashboardSection/utils";
 import { OpeningWithVariants } from "./DashboardSection/types";
 import { ExpandableVariantsChart } from "../components/ExpandableVariantsChart";
 import { RepertoireFilterDropdown } from "../components/RepertoireFilterDropdown";
 import { useNavigationUtils } from "../../../utils/navigationUtils";
+import { Input, Select } from "../../../components/ui";
 
 interface ErrorsSectionProps {
   repertoires: IRepertoireDashboard[];
@@ -120,9 +121,9 @@ export const ErrorsSection: React.FC<ErrorsSectionProps> = ({ repertoires }) => 
               <button
                 key={option}
                 onClick={() => setOrientationFilter(option)}
-                className={`px-3 py-1 rounded text-sm ${
+                className={`px-3 py-1 rounded text-sm transition-colors duration-200 ${
                   orientationFilter === option
-                    ? "bg-blue-600 text-white"
+                    ? "bg-brand text-text-on-brand"
                     : "bg-surface-raised text-text-muted hover:bg-interactive"
                 }`}
               >
@@ -143,34 +144,31 @@ export const ErrorsSection: React.FC<ErrorsSectionProps> = ({ repertoires }) => 
             </div>
             <div>
               <label className="block text-xs text-text-subtle mb-1">Search opening</label>
-              <input
+              <Input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="e.g. Sicilian"
-                className="w-full bg-surface-raised text-text-base px-3 py-2 border border-border-default rounded-lg text-sm"
               />
             </div>
             <div>
               <label className="block text-xs text-text-subtle mb-1">Min errors</label>
-              <input
+              <Input
                 type="number"
                 min={0}
-                value={minErrors}
+                value={String(minErrors)}
                 onChange={(e) => setMinErrors(Math.max(0, Number(e.target.value) || 0))}
-                className="w-full bg-surface-raised text-text-base px-3 py-2 border border-border-default rounded-lg text-sm"
               />
             </div>
             <div>
               <label className="block text-xs text-text-subtle mb-1">Sort by</label>
-              <select
+              <Select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="w-full bg-surface-raised text-text-base px-3 py-2 border border-border-default rounded-lg text-sm"
               >
                 <option value="errors">Total errors</option>
                 <option value="variants">Error variants</option>
                 <option value="name">Opening name</option>
-              </select>
+              </Select>
             </div>
           </div>
         </div>
@@ -178,19 +176,19 @@ export const ErrorsSection: React.FC<ErrorsSectionProps> = ({ repertoires }) => 
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center">
-          <span className="text-3xl font-bold text-red-400">
+          <span className="text-3xl font-bold text-danger">
             {summary.totalErrors}
           </span>
           <span className="text-text-muted mt-1">Total Errors</span>
         </div>
         <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center">
-          <span className="text-3xl font-bold text-amber-400">
+          <span className="text-3xl font-bold text-warning">
             {summary.totalErrorVariants}
           </span>
           <span className="text-text-muted mt-1">Variants With Errors</span>
         </div>
         <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center">
-          <span className="text-3xl font-bold text-purple-400">
+          <span className="text-3xl font-bold text-brand">
             {summary.totalOpenings}
           </span>
           <span className="text-text-muted mt-1">Openings With Errors</span>

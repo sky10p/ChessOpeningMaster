@@ -94,7 +94,7 @@ export const ExpandableVariantsChart: React.FC<ExpandableVariantsChartProps> = (
                     </span>
                   </div>
                   <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                    <span className="text-xs text-red-400 font-semibold">
+                    <span className="text-xs text-danger font-semibold">
                       {totalErrors} error{totalErrors !== 1 ? "s" : ""}
                     </span>
                     <span className="text-xs text-text-subtle">
@@ -109,7 +109,7 @@ export const ExpandableVariantsChart: React.FC<ExpandableVariantsChartProps> = (
                               e.stopPropagation();
                               onVariantsClick(repertoireId, variants.map((v) => v.fullName));
                             }}
-                            className="px-2 py-0.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                            className="px-2 py-0.5 text-xs bg-brand text-text-on-brand rounded hover:bg-brand-hover transition-colors"
                             title={`Train all errors for ${variants[0]?.repertoireName || "Repertoire"}`}
                           >
                             Train all errors
@@ -149,13 +149,13 @@ export const ExpandableVariantsChart: React.FC<ExpandableVariantsChartProps> = (
                                     {onVariantClick && (
                                       <button
                                         onClick={(e) => handleVariantTrain(variant.fullName, e)}
-                                        className="px-2 py-0.5 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                                        className="px-2 py-0.5 text-xs bg-success text-text-on-brand rounded hover:opacity-90 transition-opacity"
                                         title="Train this variant"
                                       >
                                         Train
                                       </button>
                                     )}
-                                    <span className="text-red-400 font-semibold">
+                                    <span className="text-danger font-semibold">
                                       {variant.errors} error{variant.errors !== 1 ? "s" : ""}
                                     </span>
                                   </div>

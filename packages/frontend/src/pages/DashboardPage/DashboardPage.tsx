@@ -11,19 +11,15 @@ import { TrainVariant, Variant } from "../../models/chess.models";
 import { RepertoiresSection } from "./sections/RepertoiresSection";
 import { OpeningsSection } from "./sections/OpeningsSection";
 import { DashboardSection } from "./sections/DashboardSection/index";
-import { OverviewSection } from "./sections/OverviewSection";
-import { StudiesSection } from "./sections/StudiesSection";
 import { ErrorsSection } from "./sections/ErrorsSection";
 import { UnreviewedSection } from "./sections/UnreviewedSection";
 import { PathInsightsSection } from "./sections/PathInsightsSection";
 import { ArrowsRightLeftIcon } from "@heroicons/react/24/solid";
 import {
   Squares2X2Icon,
-  ChartPieIcon,
   MapIcon,
   BookOpenIcon,
   FolderOpenIcon,
-  AcademicCapIcon,
   ExclamationTriangleIcon,
   EyeIcon,
 } from "@heroicons/react/24/outline";
@@ -34,11 +30,9 @@ import { PageSurface } from "../../components/design/layouts/PageSurface";
 
 const SECTION_ICONS: Record<string, React.ReactNode> = {
   dashboard: <Squares2X2Icon className="w-4 h-4" />,
-  overview: <ChartPieIcon className="w-4 h-4" />,
   pathInsights: <MapIcon className="w-4 h-4" />,
   repertoires: <BookOpenIcon className="w-4 h-4" />,
   openings: <FolderOpenIcon className="w-4 h-4" />,
-  studies: <AcademicCapIcon className="w-4 h-4" />,
   errors: <ExclamationTriangleIcon className="w-4 h-4" />,
   unreviewed: <EyeIcon className="w-4 h-4" />,
 };
@@ -55,10 +49,8 @@ export const DashboardPage = () => {
   const [selectedSection, setSelectedSection] = useState<
     | "dashboard"
     | "pathInsights"
-    | "overview"
     | "repertoires"
     | "openings"
-    | "studies"
     | "errors"
     | "unreviewed"
   >("dashboard");
@@ -69,10 +61,8 @@ export const DashboardPage = () => {
     if (
       section === "dashboard" ||
       section === "pathInsights" ||
-      section === "overview" ||
       section === "repertoires" ||
       section === "openings" ||
-      section === "studies" ||
       section === "errors" ||
       section === "unreviewed"
     ) {
@@ -84,10 +74,8 @@ export const DashboardPage = () => {
     section:
       | "dashboard"
       | "pathInsights"
-      | "overview"
       | "repertoires"
       | "openings"
-      | "studies"
       | "errors"
       | "unreviewed"
   ) => {
@@ -165,11 +153,9 @@ export const DashboardPage = () => {
             {(
               [
                 ["dashboard", "Dashboard"],
-                ["overview", "Overview"],
                 ["pathInsights", "Path Insights"],
                 ["repertoires", "Repertoires"],
                 ["openings", "Openings"],
-                ["studies", "Studies"],
                 ["errors", "Errors"],
                 ["unreviewed", "Unreviewed"],
               ] as const
@@ -193,7 +179,6 @@ export const DashboardPage = () => {
             {selectedSection === "dashboard" && (
               <DashboardSection repertoires={repertoires} loading={loading} />
             )}
-            {selectedSection === "overview" && <OverviewSection repertoires={repertoires} />}
             {selectedSection === "pathInsights" && <PathInsightsSection />}
             {selectedSection === "repertoires" && (
               <RepertoiresSection
@@ -221,7 +206,6 @@ export const DashboardPage = () => {
                 loading={loading}
               />
             )}
-            {selectedSection === "studies" && <StudiesSection />}
             {selectedSection === "errors" && <ErrorsSection repertoires={repertoires} />}
             {selectedSection === "unreviewed" && <UnreviewedSection repertoires={repertoires} />}
           </div>

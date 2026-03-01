@@ -21,11 +21,11 @@ export const getRatioColor = (ratio: number): string => {
 };
 
 export const getRatioTextColor = (ratio: number): string => {
-  if (ratio >= 80) return "text-green-400";
-  if (ratio >= 60) return "text-lime-400";
-  if (ratio >= 40) return "text-yellow-400";
-  if (ratio >= 20) return "text-orange-400";
-  return "text-red-400";
+  if (ratio >= 80) return "text-success";
+  if (ratio >= 60) return "text-warning";
+  if (ratio >= 40) return "text-accent";
+  if (ratio >= 20) return "text-accent";
+  return "text-danger";
 };
 
 export const getRelevantVariants = (

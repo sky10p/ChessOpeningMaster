@@ -176,8 +176,8 @@ export const SpacedRepetitionInsightsPanel: React.FC<SpacedRepetitionInsightsPan
         </button>
       </div>
 
-      {loading && <div className="text-blue-400 animate-pulse">Loading spaced-repetition insights...</div>}
-      {!loading && error && <div className="text-red-400">{error}</div>}
+      {loading && <div className="text-brand animate-pulse">Loading spaced-repetition insights...</div>}
+      {!loading && error && <div className="text-danger">{error}</div>}
 
       {!loading && !error && plan && analytics && (
         <div className="space-y-4">

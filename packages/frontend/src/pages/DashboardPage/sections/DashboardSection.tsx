@@ -218,9 +218,9 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
         <div className="flex flex-wrap gap-2 mt-2 mb-2">
           <button
             onClick={() => setFilter("all")}
-            className={`px-3 py-1 rounded ${
+            className={`px-3 py-1 rounded transition-colors duration-200 ${
               filter === "all"
-                ? "bg-blue-600 text-white"
+                ? "bg-brand text-text-on-brand"
                 : "bg-surface-raised text-text-muted hover:bg-interactive"
             }`}
           >
@@ -228,9 +228,9 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
           </button>
           <button
             onClick={() => setFilter("white")}
-            className={`px-3 py-1 rounded ${
+            className={`px-3 py-1 rounded transition-colors duration-200 ${
               filter === "white"
-                ? "bg-blue-600 text-white"
+                ? "bg-brand text-text-on-brand"
                 : "bg-surface-raised text-text-muted hover:bg-interactive"
             }`}
           >
@@ -238,9 +238,9 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
           </button>
           <button
             onClick={() => setFilter("black")}
-            className={`px-3 py-1 rounded ${
+            className={`px-3 py-1 rounded transition-colors duration-200 ${
               filter === "black"
-                ? "bg-blue-600 text-white"
+                ? "bg-brand text-text-on-brand"
                 : "bg-surface-raised text-text-muted hover:bg-interactive"
             }`}
           >
@@ -248,9 +248,9 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
           </button>
           <button
             onClick={() => setFilter("errors")}
-            className={`px-3 py-1 rounded ${
+            className={`px-3 py-1 rounded transition-colors duration-200 ${
               filter === "errors"
-                ? "bg-blue-600 text-white"
+                ? "bg-brand text-text-on-brand"
                 : "bg-surface-raised text-text-muted hover:bg-interactive"
             }`}
           >
@@ -258,9 +258,9 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
           </button>
           <button
             onClick={() => setFilter("unreviewed")}
-            className={`px-3 py-1 rounded ${
+            className={`px-3 py-1 rounded transition-colors duration-200 ${
               filter === "unreviewed"
-                ? "bg-blue-600 text-white"
+                ? "bg-brand text-text-on-brand"
                 : "bg-surface-raised text-text-muted hover:bg-interactive"
             }`}
           >
@@ -286,19 +286,19 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
       <div className="flex-1 overflow-y-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center">
-            <span className="text-3xl font-bold text-blue-400">
+            <span className="text-3xl font-bold text-brand">
               {totalRepertoires}
             </span>
             <span className="text-text-muted mt-1">Total Repertoires</span>
           </div>
           <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center">
-            <span className="text-3xl font-bold text-amber-400">
+            <span className="text-3xl font-bold text-accent">
               {totalVariants}
             </span>
             <span className="text-text-muted mt-1">Total Variants</span>
           </div>
           <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center">
-            <span className="text-3xl font-bold text-purple-400">
+            <span className="text-3xl font-bold text-accent truncate max-w-full">
               {mostRecent ? mostRecent.name : "-"}
             </span>
             <span className="text-text-muted mt-1">Most Recently Updated</span>
@@ -417,25 +417,25 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
                 </span>
               </div>
               <div className="flex flex-col items-center">
-                <span className="text-2xl font-bold text-red-400">
+                <span className="text-2xl font-bold text-danger">
                   {reviewedWithErrors}
                 </span>
                 <span className="text-text-muted mt-1 text-sm">Overall Errors</span>
               </div>
               <div className="flex flex-col items-center">
-                <span className="text-2xl font-bold text-blue-400">
+                <span className="text-2xl font-bold text-brand">
                   {reviewedToday}
                 </span>
                 <span className="text-text-muted mt-1 text-sm">Reviewed Today</span>
               </div>
               <div className="flex flex-col items-center">
-                <span className="text-2xl font-bold text-red-400">
+                <span className="text-2xl font-bold text-danger">
                   {reviewedTodayErrors}
                 </span>
                 <span className="text-text-muted mt-1 text-sm">Errors Today</span>
               </div>
               <div className="flex flex-col items-center">
-                <span className="text-2xl font-bold text-green-400">
+                <span className="text-2xl font-bold text-success">
                   {reviewedTodayOk}
                 </span>
                 <span className="text-text-muted mt-1 text-sm">OK Today</span>

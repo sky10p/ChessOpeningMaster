@@ -36,14 +36,14 @@ export const OpeningRepertoiresList: React.FC<OpeningRepertoiresListProps> = ({
             {r.name}
           </span>
           <button
-            className="ml-1 px-2 py-0.5 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="ml-1 px-2 py-0.5 bg-brand text-text-on-brand rounded hover:bg-brand-hover text-xs focus:outline-none focus:ring-2 focus:ring-brand transition-colors"
             onClick={() => goToRepertoire(r)}
           >
             View
           </button>
           {goToTrainRepertoire && (
             <button
-              className="ml-1 px-2 py-0.5 bg-green-600 text-white rounded hover:bg-green-700 text-xs focus:outline-none focus:ring-2 focus:ring-green-400"
+              className="ml-1 px-2 py-0.5 bg-success text-text-on-brand rounded hover:opacity-90 text-xs focus:outline-none focus:ring-2 focus:ring-success transition-opacity"
               onClick={() => goToTrainRepertoire(r)}
             >
               Train

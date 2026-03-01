@@ -1,10 +1,11 @@
-﻿import React, { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { IRepertoireDashboard } from "@chess-opening-master/common";
 import { generateUnreviewedVariantsByOpening, getRelevantVariants } from "./DashboardSection/utils";
 import { OpeningWithUnreviewedVariants } from "./DashboardSection/types";
 import { UnreviewedVariantsChart } from "../components/UnreviewedVariantsChart";
 import { RepertoireFilterDropdown } from "../components/RepertoireFilterDropdown";
 import { useNavigationUtils } from "../../../utils/navigationUtils";
+import { Input, Select } from "../../../components/ui";
 
 interface UnreviewedSectionProps {
   repertoires: IRepertoireDashboard[];
@@ -107,9 +108,9 @@ export const UnreviewedSection: React.FC<UnreviewedSectionProps> = ({ repertoire
               <button
                 key={option}
                 onClick={() => setOrientationFilter(option)}
-                className={`px-3 py-1 rounded text-sm ${
+                className={`px-3 py-1 rounded text-sm transition-colors duration-200 ${
                   orientationFilter === option
-                    ? "bg-blue-600 text-white"
+                    ? "bg-brand text-text-on-brand"
                     : "bg-surface-raised text-text-muted hover:bg-interactive"
                 }`}
               >
@@ -130,33 +131,30 @@ export const UnreviewedSection: React.FC<UnreviewedSectionProps> = ({ repertoire
             </div>
             <div>
               <label className="block text-xs text-text-subtle mb-1">Search opening</label>
-              <input
+              <Input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="e.g. French"
-                className="w-full bg-surface-raised text-text-base px-3 py-2 border border-border-default rounded-lg text-sm"
               />
             </div>
             <div>
               <label className="block text-xs text-text-subtle mb-1">Min unreviewed</label>
-              <input
+              <Input
                 type="number"
                 min={0}
-                value={minUnreviewed}
+                value={String(minUnreviewed)}
                 onChange={(e) => setMinUnreviewed(Math.max(0, Number(e.target.value) || 0))}
-                className="w-full bg-surface-raised text-text-base px-3 py-2 border border-border-default rounded-lg text-sm"
               />
             </div>
             <div>
               <label className="block text-xs text-text-subtle mb-1">Sort by</label>
-              <select
+              <Select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="w-full bg-surface-raised text-text-base px-3 py-2 border border-border-default rounded-lg text-sm"
               >
                 <option value="unreviewed">Unreviewed count</option>
                 <option value="name">Opening name</option>
-              </select>
+              </Select>
             </div>
           </div>
         </div>
@@ -164,13 +162,13 @@ export const UnreviewedSection: React.FC<UnreviewedSectionProps> = ({ repertoire
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center">
-          <span className="text-3xl font-bold text-amber-400">
+          <span className="text-3xl font-bold text-warning">
             {summary.totalUnreviewed}
           </span>
           <span className="text-text-muted mt-1">Unreviewed Variants</span>
         </div>
         <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center">
-          <span className="text-3xl font-bold text-purple-400">
+          <span className="text-3xl font-bold text-brand">
             {summary.totalOpenings}
           </span>
           <span className="text-text-muted mt-1">Openings With Unreviewed</span>

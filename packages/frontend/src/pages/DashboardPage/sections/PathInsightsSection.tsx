@@ -37,9 +37,9 @@ export const PathInsightsSection: React.FC = () => {
             <button
               key={value}
               onClick={() => setFilter(value)}
-              className={`px-3 py-1 rounded ${
+              className={`px-3 py-1 rounded transition-colors duration-200 ${
                 filter === value
-                  ? "bg-blue-600 text-white"
+                  ? "bg-brand text-text-on-brand"
                   : "bg-surface-raised text-text-muted hover:bg-interactive"
               }`}
             >
