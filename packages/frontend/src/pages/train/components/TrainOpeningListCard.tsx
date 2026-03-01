@@ -28,8 +28,8 @@ export const TrainOpeningListCard: React.FC<TrainOpeningListCardProps> = ({ open
 
   return (
     <Card
-      className="w-[21rem] min-w-[21rem] border-border-default bg-surface"
-      elevation="high"
+      className="h-full w-[20rem] min-w-[20rem] border-border-subtle bg-surface-raised"
+      elevation="raised"
       interactive
       padding="none"
     >

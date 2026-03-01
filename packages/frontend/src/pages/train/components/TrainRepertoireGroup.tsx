@@ -82,25 +82,6 @@ export const TrainRepertoireGroup: React.FC<TrainRepertoireGroupProps> = ({ grou
     event.preventDefault();
   };
 
-  const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
-    const scroller = scrollerRef.current;
-    if (!scroller) {
-      return;
-    }
-    if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) {
-      return;
-    }
-    const maxLeft = scroller.scrollWidth - scroller.clientWidth;
-    if (maxLeft <= 0) {
-      return;
-    }
-    const nextLeft = Math.min(maxLeft, Math.max(0, scroller.scrollLeft + event.deltaY));
-    if (nextLeft !== scroller.scrollLeft) {
-      scroller.scrollLeft = nextLeft;
-      event.preventDefault();
-    }
-  };
-
   const handlePointerEnd = () => {
     if (!dragStateRef.current.active) {
       return;
@@ -146,15 +127,14 @@ export const TrainRepertoireGroup: React.FC<TrainRepertoireGroupProps> = ({ grou
             </Badge>
           </div>
         </div>
-        <p className="text-xs text-text-muted">Drag cards horizontally or use wheel/trackpad.</p>
-        <div className="relative">
+        <p className="text-xs text-text-muted">Drag cards horizontally or use trackpad.</p>
+        <div className="relative rounded-xl border border-border-subtle bg-surface-raised p-2">
           <div
             ref={scrollerRef}
             className={cn(
-              "flex gap-3 overflow-x-auto pb-1 pr-1",
+              "flex gap-3 overflow-x-auto overflow-y-hidden pb-1 pr-1",
               isDragging ? "cursor-grabbing select-none" : "md:cursor-grab"
             )}
-            onWheel={handleWheel}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerEnd}
@@ -164,13 +144,14 @@ export const TrainRepertoireGroup: React.FC<TrainRepertoireGroupProps> = ({ grou
             {group.openings.map((opening) => (
               <div
                 key={`${group.repertoireId}::${opening.openingName}`}
+                className="shrink-0"
               >
                 <TrainOpeningListCard opening={opening} />
               </div>
             ))}
           </div>
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-4 bg-gradient-to-r from-surface to-transparent" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-4 bg-gradient-to-l from-surface to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-4 bg-gradient-to-r from-surface-raised to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-4 bg-gradient-to-l from-surface-raised to-transparent" />
         </div>
       </div>
     </Card>
