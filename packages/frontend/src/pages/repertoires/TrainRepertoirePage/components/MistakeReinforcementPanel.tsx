@@ -2,21 +2,31 @@ import React from "react";
 import { ReinforcementSession } from "../../../../contexts/TrainRepertoireContext";
 import { Card } from "../../../../components/ui";
 import { MistakeProgressHeader } from "./MistakeProgressHeader";
+import { cn } from "../../../../utils/cn";
 
 interface MistakeReinforcementPanelProps {
   session: ReinforcementSession;
+  placement?: "inline" | "overlay" | "desktopOverlay";
 }
 
 export const MistakeReinforcementPanel: React.FC<
   MistakeReinforcementPanelProps
-> = ({ session }) => {
+> = ({ session, placement = "overlay" }) => {
   const currentMistake = session.queue[0];
+  const isInline = placement === "inline";
+  const isDesktopOverlay = placement === "desktopOverlay";
 
   return (
     <Card
-      className="fixed left-3 right-3 top-16 z-40 border-border-default bg-surface shadow-elevated sm:left-auto sm:right-4 sm:top-20 sm:w-[360px]"
+      className={cn(
+        "border-border-default bg-surface",
+        isInline
+          ? "w-full"
+          : "fixed left-3 right-3 top-16 z-40 sm:left-auto sm:right-4 sm:top-20 sm:w-[360px]",
+        isDesktopOverlay && "hidden sm:block"
+      )}
       padding="compact"
-      elevation="high"
+      elevation={isInline ? "raised" : "high"}
     >
       <div className="space-y-3">
         <MistakeProgressHeader solved={session.solved} total={session.total} />

@@ -23,6 +23,7 @@ interface TrainRepertoireFocusWorkspaceProps {
   markHintUsed: () => void;
   pendingErrorCount: number;
   hasAssistContent: boolean;
+  statusPanel?: React.ReactNode;
   onBack?: () => void;
 }
 
@@ -44,6 +45,7 @@ export const TrainRepertoireFocusWorkspace: React.FC<
   markHintUsed,
   pendingErrorCount,
   hasAssistContent,
+  statusPanel,
   onBack,
 }) => {
   const assistPanel = (
@@ -72,6 +74,7 @@ export const TrainRepertoireFocusWorkspace: React.FC<
           </Button>
         </div>
       ) : null}
+      {statusPanel ? <div className="mb-3 sm:hidden">{statusPanel}</div> : null}
       <TrainInfo
         currentMoveNode={currentMoveNode}
         turn={turn}
