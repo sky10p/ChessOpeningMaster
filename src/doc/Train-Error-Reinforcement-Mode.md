@@ -38,7 +38,7 @@ It preserves existing variant training while adding targeted correction.
 
 From `/train/repertoire/:repertoireId/opening/:openingName`:
 
-- `Train Mistakes Only` starts a reinforcement queue built from all selected mistake keys for that opening.
+- `Train Mistakes Only` starts a reinforcement queue built only from mistake keys that are currently due for that opening.
 - `Train This Mistake` starts the same flow but with one mistake key.
 
 Behavior contract:
@@ -48,6 +48,7 @@ Behavior contract:
 - selected mistakes are processed in deterministic line order (`variantName`, then `mistakePly`),
 - board replay still advances step-by-step to each mistake parent before user input,
 - when reviewing a single variant, after solving the last queued mistake, replay continues automatically to the end of that variant line,
+- the CTA is disabled when the opening has no due mistakes, even if scheduled mistakes still exist,
 - solved mistakes are handled in-session only,
 - no `variant-reviews` save is triggered,
 - no mastery update is triggered,

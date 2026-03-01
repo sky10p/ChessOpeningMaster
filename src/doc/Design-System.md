@@ -288,10 +288,20 @@ Use layout primitives from `packages/frontend/src/components/design/layouts`:
 
 Rules:
 - Default to `PageRoot + PageFrame` on top-level route pages.
-- Use `PageSurface` for workspace-style pages (`Dashboard`, `Games`, `Path`, `Studies`) that need a framed full-height surface.
+- Use `PageSurface` for workspace-style pages (`Dashboard`, `Games`, `Path`, `Studies`, `Train`) that need a framed full-height surface.
 - Mobile gutters are edge-to-edge by default (`PageFrame` uses `px-0` on mobile); desktop/tablet adds horizontal gutter from `sm`.
 - Do not introduce custom edge-to-edge wrappers unless there is a documented product/layout reason.
 - If a different max width is required, set `PageFrame.maxWidthClass` and document the reason in the page architecture doc.
+
+### Horizontal scrollers inside workspace pages
+
+Use horizontal card rails only as nested content regions inside a normal vertically scrolling page.
+
+Rules:
+- Keep page vertical scroll as the primary desktop scroll behavior.
+- Support horizontal movement with drag and trackpad gestures when needed.
+- Do not remap mouse-wheel vertical delta into horizontal scrolling for desktop card rails.
+- Give the rail its own inner surface (`bg-surface-raised` + subtle border) so cards do not read as floating directly on the page base.
 ### Page shell
 
 ```tsx

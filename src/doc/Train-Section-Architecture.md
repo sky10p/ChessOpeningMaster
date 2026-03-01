@@ -25,7 +25,8 @@ Backend:
 
 2. Train opening page (`/train/repertoire/:repertoireId/opening/:openingName`)
    - loads `GET /train/repertoires/:id/openings/:openingName`,
-   - renders opening stats, variants list, mistake summary, and action CTAs.
+   - renders opening stats, variants list, mistake summary, and action CTAs,
+   - `Train Mistakes Only` is enabled only when the opening has due mistake items and builds `mistakeKeys` from that due-only subset.
 
 3. Training execution (`/repertoire/train/:id`)
    - receives query mode:
@@ -92,6 +93,7 @@ Focus assist UX semantics:
 Direct mistake review semantics (`mode=mistakes` + `mistakeKey(s)`):
 
 - starts directly in reinforcement queue mode using the selected mistake keys,
+- when launched from the opening-page `Train Mistakes Only` CTA, the selected mistake keys are the due-only subset for that opening,
 - queue order is deterministic (`variantName`, then `mistakePly`, then `mistakeKey`),
 - replays only mistake targets (no variant phase and no full-run confirm),
 - replay baseline for this mode is line start (`ply 0`) so move progress stays aligned from move 1,
