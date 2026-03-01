@@ -1,5 +1,11 @@
 import { getDB } from "../db/mongo";
-import { MoveVariantNode, NewVariantPath, StudiedVariantPath, Variant } from "@chess-opening-master/common";
+import {
+  getOpeningNameFromVariant,
+  MoveVariantNode,
+  NewVariantPath,
+  StudiedVariantPath,
+  Variant,
+} from "@chess-opening-master/common";
 import { VariantInfo } from "../models/VariantInfo";
 
 interface VariantResult {
@@ -41,7 +47,7 @@ export const getAllVariants = async (userId: string): Promise<VariantResult> => 
         const variantInfo = variantsInfoMap.get(variant.fullName);
         
         if (variantInfo) {
-          const openingName = deriveOpeningName(variant.fullName);
+          const openingName = getOpeningNameFromVariant(variant.fullName);
           studiedVariants.push({
               type: "variant",
               id: variantInfo._id.toString(),
@@ -59,7 +65,7 @@ export const getAllVariants = async (userId: string): Promise<VariantResult> => 
           });
         }
       } else {
-        const openingName = deriveOpeningName(variant.fullName);
+        const openingName = getOpeningNameFromVariant(variant.fullName);
         newVariants.push({
             type: "newVariant",
             repertoireId: String(repertoire._id),
@@ -73,10 +79,4 @@ export const getAllVariants = async (userId: string): Promise<VariantResult> => 
   }
 
   return { newVariants, studiedVariants };
-}
-
-function deriveOpeningName(variantName: string): string {
-  const segments = variantName.split(":");
-  const opening = segments[0]?.trim();
-  return opening || variantName;
 }

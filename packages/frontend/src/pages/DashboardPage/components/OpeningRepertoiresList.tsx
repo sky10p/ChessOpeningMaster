@@ -1,7 +1,7 @@
 ﻿import React from "react";
 import { VariantsProgressBar } from "../../../components/design/SelectTrainVariants/VariantsProgressBar";
 import { IRepertoireDashboard, TrainVariantInfo } from "@chess-opening-master/common";
-import { MoveVariantNode } from "../../../models/VariantNode";
+import { getRepertoireVariants } from "../utils/openingIndex";
 
 interface OpeningRepertoiresListProps {
   opening: string;
@@ -20,12 +20,9 @@ export const OpeningRepertoiresList: React.FC<OpeningRepertoiresListProps> = ({
 }) => (
   <div className="flex flex-col gap-2 mt-2">
     {repertoiresWithOpening.map((r) => {
-      const variants = r.moveNodes
-        ? MoveVariantNode.initMoveVariantNode(r.moveNodes)
-            .getVariants()
-            .filter((v) => v.name === opening)
-            .map((v) => ({ variant: v, state: "inProgress" as const }))
-        : [];
+      const variants = getRepertoireVariants(r)
+        .filter((variant) => variant.name === opening)
+        .map((variant) => ({ variant, state: "inProgress" as const }));
       const variantInfo = getTrainVariantInfo(r.variantsInfo);
       return (
         <div key={r._id} className="flex items-center gap-2 bg-surface-raised rounded-lg px-2 py-1">

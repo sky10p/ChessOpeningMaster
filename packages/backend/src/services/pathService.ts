@@ -15,6 +15,7 @@ import {
   PathPlanPoint,
   PathForecastDay,
   PathForecastVariant,
+  getOpeningNameFromVariant,
 } from "@chess-opening-master/common";
 import { getRepertoireName } from "./repertoireService";
 import { extractId } from "../utils/idUtils";
@@ -764,11 +765,6 @@ function sortTopFenCount(
     .slice(0, limit);
 }
 
-function deriveOpeningNameFromVariant(variantName: string): string {
-  const openingName = variantName.split(":")[0]?.trim();
-  return openingName || variantName;
-}
-
 function resolveRawDueDay(
   variant: { dueAt?: unknown; lastDate?: unknown },
   fallbackDay: Date
@@ -804,7 +800,7 @@ function mapToForecastVariant(
     repertoireId: variant.repertoireId,
     repertoireName: variant.repertoireName,
     dueDate: getUtcDayKey(dueDay),
-    openingName: (variant.openingName || deriveOpeningNameFromVariant(variant.name)).trim(),
+    openingName: (variant.openingName || getOpeningNameFromVariant(variant.name)).trim(),
     orientation: variant.orientation,
     errors: variant.errors,
   };
@@ -853,7 +849,7 @@ function buildForecastDays(
       continue;
     }
     bucket.dueCount += 1;
-    const openingName = (variant.openingName || deriveOpeningNameFromVariant(variant.name)).trim();
+    const openingName = (variant.openingName || getOpeningNameFromVariant(variant.name)).trim();
     bucket.openingCounts.set(openingName, (bucket.openingCounts.get(openingName) || 0) + 1);
     if (bucket.variants.length < 4) {
       bucket.variants.push(variant);
@@ -975,7 +971,7 @@ export const getPathPlan = async (
     .map((variant) => mapToForecastVariant(variant, resolveForecastDueDay(variant, today)));
   const openingCounts = new Map<string, number>();
   for (const variant of dueEligibleVariants) {
-    const openingName = (variant.openingName || deriveOpeningNameFromVariant(variant.name)).trim();
+    const openingName = (variant.openingName || getOpeningNameFromVariant(variant.name)).trim();
     openingCounts.set(openingName, (openingCounts.get(openingName) || 0) + 1);
   }
   const upcomingOpenings = sortTopNamedCount(

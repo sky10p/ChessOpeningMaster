@@ -99,6 +99,13 @@ This directory contains architecture and implementation guides for ChessKeep.
 8. Validate games UX and backend assumptions with [Game Imports and Training Plan Guide](Game-Imports-Guide.md) and [Game Import Service Architecture](Game-Import-Service-Architecture.md).
 9. Run the touched-scope consistency sweep from [UI Consistency Governance](UI-Consistency-Governance.md) for any UI task.
 
+### Package Ownership
+1. Keep backend-only logic in `packages/backend`.
+2. Keep frontend-only logic in `packages/frontend`.
+3. Move logic to `packages/common` only when the same pure domain helper is used by both frontend and backend.
+4. Do not move persistence, request handling, user scoping, or UI orchestration code into `packages/common`.
+5. Typical `packages/common` candidates are shared type-driven helpers such as opening-name derivation, variant metadata helpers, and pure scoring or merge functions.
+
 ## Key Technical Concepts
 
 ### LAN (Logical Algebraic Notation)

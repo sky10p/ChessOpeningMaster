@@ -2,12 +2,10 @@ import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   IRepertoire,
-  IRepertoireDashboard,
   TrainVariantInfo,
 } from "@chess-opening-master/common";
 import { useDashboard } from "../../hooks/useDashboard";
-import { MoveVariantNode } from "../../models/VariantNode";
-import { TrainVariant, Variant } from "../../models/chess.models";
+import { TrainVariant } from "../../models/chess.models";
 import { RepertoiresSection } from "./sections/RepertoiresSection";
 import { OpeningsSection } from "./sections/OpeningsSection";
 import { DashboardSection } from "./sections/DashboardSection/index";
@@ -31,6 +29,10 @@ import { Tabs, TabButton } from "../../components/ui";
 import { PageFrame } from "../../components/design/layouts/PageFrame";
 import { PageRoot } from "../../components/design/layouts/PageRoot";
 import { PageSurface } from "../../components/design/layouts/PageSurface";
+import {
+  getDashboardTrainVariants,
+  toTrainVariantInfoMap,
+} from "./utils/openingIndex";
 
 const SECTION_ICONS: Record<string, React.ReactNode> = {
   dashboard: <Squares2X2Icon className="w-4 h-4" />,
@@ -119,40 +121,12 @@ export const DashboardPage = () => {
   };
 
   const getTrainVariants = (repertoire: IRepertoire): TrainVariant[] => {
-    const move = repertoire.moveNodes
-      ? MoveVariantNode.initMoveVariantNode(repertoire.moveNodes)
-      : new MoveVariantNode();
-    const variants: Variant[] = move.getVariants();
-    return variants.map((v) => ({ variant: v, state: "inProgress" }));
+    return getDashboardTrainVariants(repertoire);
   };
 
   const getTrainVariantInfo = (
     trainInfo: TrainVariantInfo[]
-  ): Record<string, TrainVariantInfo> => {
-    const info: Record<string, TrainVariantInfo> = {};
-    trainInfo.forEach((v) => {
-      info[v.variantName] = v;
-    });
-    return info;
-  };
-
-  const getDifferentOpenings = (repertoiresList: IRepertoireDashboard[]): string[] => {
-    const openingsList: string[] = [];
-    repertoiresList.forEach((repertoire) => {
-      const move = repertoire.moveNodes;
-      const variants: Variant[] = move
-        ? MoveVariantNode.initMoveVariantNode(move).getVariants()
-        : [];
-      variants.forEach((v) => {
-        if (!openingsList.includes(v.name)) {
-          openingsList.push(v.name);
-        }
-      });
-    });
-    return openingsList.sort();
-  };
-
-  const openings = getDifferentOpenings(filteredRepertoires);
+  ): Record<string, TrainVariantInfo> => toTrainVariantInfoMap(trainInfo);
 
   return (
     <PageRoot>
@@ -213,7 +187,6 @@ export const DashboardPage = () => {
               <OpeningsSection
                 openingNameFilter={openingNameFilter}
                 setOpeningNameFilter={setOpeningNameFilter}
-                openings={openings}
                 filteredRepertoires={filteredRepertoires}
                 getTrainVariantInfo={getTrainVariantInfo}
                 goToRepertoire={goToRepertoire}
