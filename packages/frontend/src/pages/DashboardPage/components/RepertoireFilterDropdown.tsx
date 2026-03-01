@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useId, useMemo, useState } from "react";
 import {
   CheckIcon,
   ChevronDownIcon,
@@ -22,6 +22,9 @@ export const RepertoireFilterDropdown: React.FC<RepertoireFilterDropdownProps> =
   setSelectedRepertoires,
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownId = useId();
+  const panelId = `${dropdownId}-panel`;
+  const optionsId = `${dropdownId}-options`;
 
   const filteredRepertoiresByOrientation = useMemo(() => {
     if (orientationFilter === "all") {
@@ -74,6 +77,8 @@ export const RepertoireFilterDropdown: React.FC<RepertoireFilterDropdownProps> =
         intent="secondary"
         size="sm"
         onClick={() => setIsDropdownOpen((open) => !open)}
+        aria-expanded={isDropdownOpen}
+        aria-controls={panelId}
         className="w-full justify-between border-border-default bg-surface-raised text-left text-xs sm:text-sm"
       >
         <span className="truncate">{summaryLabel}</span>
@@ -86,6 +91,7 @@ export const RepertoireFilterDropdown: React.FC<RepertoireFilterDropdownProps> =
 
       {isDropdownOpen ? (
         <Card
+          id={panelId}
           padding="none"
           elevation="high"
           className="absolute left-0 top-full z-50 mt-1 min-w-full overflow-hidden border-border-default bg-surface"
@@ -111,7 +117,12 @@ export const RepertoireFilterDropdown: React.FC<RepertoireFilterDropdownProps> =
             </Button>
           </div>
 
-          <div className="max-h-60 space-y-1 overflow-y-auto p-2">
+          <div
+            id={optionsId}
+            role="group"
+            aria-label="Repertoire filters"
+            className="max-h-60 space-y-1 overflow-y-auto p-2"
+          >
             {filteredRepertoiresByOrientation.length > 0 ? (
               filteredRepertoiresByOrientation.map((repertoire) => {
                 const selected = selectedRepertoires.includes(repertoire._id);
@@ -122,6 +133,7 @@ export const RepertoireFilterDropdown: React.FC<RepertoireFilterDropdownProps> =
                     intent={selected ? "secondary" : "ghost"}
                     size="sm"
                     onClick={() => toggleRepertoireSelection(repertoire._id)}
+                    aria-pressed={selected}
                     className="w-full justify-between px-2 py-2"
                   >
                     <span className="min-w-0 text-left">
@@ -136,6 +148,9 @@ export const RepertoireFilterDropdown: React.FC<RepertoireFilterDropdownProps> =
                       {selected ? (
                         <CheckIcon className="h-3.5 w-3.5 text-brand" />
                       ) : null}
+                    </span>
+                    <span className="sr-only">
+                      {selected ? "Selected" : "Not selected"}
                     </span>
                   </Button>
                 );

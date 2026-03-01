@@ -243,6 +243,48 @@ describe("Openings section behaviors", () => {
     expect(screen.queryByText("Ruy Lopez")).not.toBeInTheDocument();
   });
 
+  it("filters openings by orientation and repertoire selection together", () => {
+    jest.spyOn(useDashboardModule, "useDashboard").mockReturnValue({
+      repertoires: [
+        makeRep("1", "White Rep 1", "white", "Ruy Lopez"),
+        makeRep("2", "White Rep 2", "white", "Italian Game"),
+        makeRep("3", "Black Rep 1", "black", "Sicilian Defense"),
+      ],
+      loading: false,
+      setRepertoires: jest.fn(),
+      updateRepertoires: jest.fn().mockResolvedValue(undefined),
+    });
+    render(
+      <BrowserRouter>
+        <DashboardPage />
+      </BrowserRouter>
+    );
+
+    fireEvent.click(screen.getByRole("tab", { name: /openings/i }));
+
+    fireEvent.change(screen.getByLabelText("Color"), {
+      target: { value: "white" },
+    });
+
+    expect(screen.getByRole("button", { name: /all white repertoires/i })).toBeInTheDocument();
+    expect(screen.getByText("Ruy Lopez")).toBeInTheDocument();
+    expect(screen.getByText("Italian Game")).toBeInTheDocument();
+    expect(screen.queryByText("Sicilian Defense")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /all white repertoires/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^clear$/i }));
+
+    expect(screen.getByText(/no repertoires/i)).toBeInTheDocument();
+    expect(screen.queryByText("Ruy Lopez")).not.toBeInTheDocument();
+    expect(screen.queryByText("Italian Game")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /^select all$/i }));
+
+    expect(screen.getByText("Ruy Lopez")).toBeInTheDocument();
+    expect(screen.getByText("Italian Game")).toBeInTheDocument();
+    expect(screen.queryByText("Sicilian Defense")).not.toBeInTheDocument();
+  });
+
   it("View button is present and clickable in Openings section", () => {
     jest.spyOn(useDashboardModule, "useDashboard").mockReturnValue({
       repertoires: [makeRep("1", "Rep1", "white", "Ruy Lopez")],
@@ -259,5 +301,27 @@ describe("Openings section behaviors", () => {
     const viewBtn = screen.getByRole("button", { name: /View repertoire/i });
     expect(viewBtn).toBeInTheDocument();
     fireEvent.click(viewBtn);
+  });
+
+  it("announces repertoire selection state in the dropdown", () => {
+    jest.spyOn(useDashboardModule, "useDashboard").mockReturnValue({
+      repertoires: [makeRep("1", "Rep1", "white", "Ruy Lopez")],
+      loading: false,
+      setRepertoires: jest.fn(),
+      updateRepertoires: jest.fn().mockResolvedValue(undefined),
+    });
+    render(
+      <BrowserRouter>
+        <DashboardPage />
+      </BrowserRouter>
+    );
+    fireEvent.click(screen.getByRole("tab", { name: /openings/i }));
+    fireEvent.click(screen.getByRole("button", { name: /all repertoires/i }));
+
+    const repertoireToggle = screen.getByRole("button", { name: /rep1/i });
+    expect(repertoireToggle).toHaveAttribute("aria-pressed", "true");
+
+    fireEvent.click(repertoireToggle);
+    expect(repertoireToggle).toHaveAttribute("aria-pressed", "false");
   });
 });

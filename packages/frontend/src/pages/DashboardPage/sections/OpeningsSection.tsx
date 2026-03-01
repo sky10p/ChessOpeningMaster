@@ -66,6 +66,15 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
     return { variants, infoMap };
   }, [getTrainVariantInfo, getVariantsByOrientation]);
 
+  const filteredRepertoireCountByOrientation = useMemo(() => {
+    if (orientationFilter === "all") {
+      return filteredRepertoires.length;
+    }
+    return filteredRepertoires.filter(
+      (repertoire) => repertoire.orientation === orientationFilter
+    ).length;
+  }, [filteredRepertoires, orientationFilter]);
+
   const filterByStatus = useCallback((opening: string) => {
     if (statusFilter === 'all') return true;
     const { variants, infoMap } = getVariantInfoByOrientation(opening);
@@ -89,12 +98,12 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
   
   const filterByRepertoire = useCallback((opening: string) => {
     if (selectedRepertoires.length === 0) return false;
-    if (selectedRepertoires.length === filteredRepertoires.length) return true;
+    if (selectedRepertoires.length === filteredRepertoireCountByOrientation) return true;
     
     return getOpeningRepertoires(openingIndex, opening, orientationFilter).some((repertoire) =>
       selectedRepertoires.includes(repertoire._id)
     );
-  }, [selectedRepertoires, filteredRepertoires.length, openingIndex, orientationFilter]);
+  }, [selectedRepertoires, filteredRepertoireCountByOrientation, openingIndex, orientationFilter]);
 
   const filteredOpenings = useMemo(
     () =>
