@@ -70,16 +70,19 @@ jest.mock("./components/TrainRepertoireFocusWorkspace", () => ({
     pendingErrorCount,
     hasAssistContent,
     finishedTrain,
+    statusPanel,
     onBack,
   }: {
     pendingErrorCount: number;
     hasAssistContent: boolean;
     finishedTrain: boolean;
+    statusPanel?: React.ReactNode;
     onBack?: () => void;
   }) => (
     <div data-testid="focus-workspace">
       {finishedTrain ? "finished" : "in-progress"}|errors:{pendingErrorCount}|assist:
       {hasAssistContent ? "on" : "off"}
+      {statusPanel}
       {onBack ? (
         <button onClick={onBack} type="button">
           focus-back
@@ -105,7 +108,11 @@ jest.mock("./components/VariantResultsModal", () => ({
 }));
 
 jest.mock("./components/MistakeReinforcementPanel", () => ({
-  MistakeReinforcementPanel: () => null,
+  MistakeReinforcementPanel: ({
+    placement,
+  }: {
+    placement?: "inline" | "overlay";
+  }) => <div>{`mistake-panel:${placement ?? "overlay"}`}</div>,
 }));
 
 jest.mock("./components/MistakeRatingSheet", () => ({
@@ -113,7 +120,11 @@ jest.mock("./components/MistakeRatingSheet", () => ({
 }));
 
 jest.mock("./components/FullRunConfirmPanel", () => ({
-  FullRunConfirmPanel: () => null,
+  FullRunConfirmPanel: ({
+    placement,
+  }: {
+    placement?: "inline" | "overlay";
+  }) => <div>{`full-run-panel:${placement ?? "overlay"}`}</div>,
 }));
 
 jest.mock("./components/FocusModeMoveProgress", () => ({
@@ -272,6 +283,67 @@ describe("TrainRepertoireViewContainer", () => {
     expect(screen.getByTestId("focus-workspace")).toHaveTextContent(
       "in-progress|errors:0|assist:off"
     );
+  });
+
+  it("renders reinforcement panel inline in focus workspace and overlay for desktop", () => {
+    mockedUseTrainRepertoireContext.mockReturnValue(
+      buildTrainContext({
+        mode: "mistakes",
+        trainingPhase: "reinforcement",
+        reinforcementSession: {
+          queue: [
+            {
+              mistakeKey: "Spanish: Main Line::3::g1f3::0",
+              mistakePly: 3,
+              variantStartPly: 0,
+              positionFen: "fen-2",
+              expectedMoveLan: "g1f3",
+              expectedMoveSan: "Nf3",
+              actualMoveLan: "d2d4",
+              variantName: "Spanish: Main Line",
+            },
+          ],
+          solved: 0,
+          total: 1,
+          awaitingRating: false,
+          source: "review",
+          variantName: "Spanish: Main Line",
+          openingName: "Spanish",
+        },
+      })
+    );
+
+    render(<TrainRepertoireViewContainer />);
+
+    expect(screen.getByTestId("focus-workspace")).toHaveTextContent(
+      "mistake-panel:inline"
+    );
+    expect(screen.getByText("mistake-panel:overlay")).toBeInTheDocument();
+  });
+
+  it("renders full run confirm panel inline in focus workspace and overlay for desktop", () => {
+    mockedUseTrainRepertoireContext.mockReturnValue(
+      buildTrainContext({
+        mode: "mistakes",
+        trainingPhase: "fullRunConfirm",
+        fullRunConfirmState: {
+          variantName: "Spanish: Main Line",
+          openingName: "Spanish",
+          startedAtMs: 1,
+          completed: false,
+          perfect: false,
+          masteryBefore: 20,
+          masteryAfter: 20,
+        },
+      })
+    );
+
+    render(<TrainRepertoireViewContainer />);
+
+    expect(screen.getByTestId("focus-workspace")).toHaveTextContent(
+      "full-run-panel:inline"
+    );
+    expect(screen.getByText("full-run-panel:overlay")).toBeInTheDocument();
   });
 
   it("renders standard workspace in normal mode", () => {

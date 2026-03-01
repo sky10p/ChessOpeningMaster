@@ -2,21 +2,29 @@ import React from "react";
 import { FullRunConfirmState } from "../../../../contexts/TrainRepertoireContext";
 import { Badge, Button, Card } from "../../../../components/ui";
 import { MasteryDeltaCard } from "./MasteryDeltaCard";
+import { cn } from "../../../../utils/cn";
 
 interface FullRunConfirmPanelProps {
   state: FullRunConfirmState;
   onFinish: () => void;
+  placement?: "inline" | "overlay";
 }
 
 export const FullRunConfirmPanel: React.FC<FullRunConfirmPanelProps> = ({
   state,
   onFinish,
+  placement = "overlay",
 }) => {
   return (
     <Card
-      className="fixed left-3 right-3 top-16 z-40 border-border-default bg-surface shadow-elevated sm:left-auto sm:right-4 sm:top-20 sm:w-[380px]"
+      className={cn(
+        "border-border-default bg-surface",
+        placement === "overlay"
+          ? "fixed left-3 right-3 top-16 z-40 hidden shadow-elevated sm:block sm:left-auto sm:right-4 sm:top-20 sm:w-[380px]"
+          : "w-full shadow-surface"
+      )}
       padding="default"
-      elevation="high"
+      elevation={placement === "overlay" ? "high" : "raised"}
     >
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-2">

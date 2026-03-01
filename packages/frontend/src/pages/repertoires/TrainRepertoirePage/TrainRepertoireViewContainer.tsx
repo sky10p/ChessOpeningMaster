@@ -322,6 +322,31 @@ const TrainRepertoireViewContainer: React.FC = () => {
       ) : undefined,
     [focusModeProgress]
   );
+  const focusStatusPanel = useMemo(() => {
+    if (trainingPhase === "reinforcement" && reinforcementSession) {
+      return (
+        <MistakeReinforcementPanel
+          session={reinforcementSession}
+          placement="inline"
+        />
+      );
+    }
+    if (trainingPhase === "fullRunConfirm" && fullRunConfirmState) {
+      return (
+        <FullRunConfirmPanel
+          state={fullRunConfirmState}
+          onFinish={finishFullRunConfirm}
+          placement="inline"
+        />
+      );
+    }
+    return undefined;
+  }, [
+    finishFullRunConfirm,
+    fullRunConfirmState,
+    reinforcementSession,
+    trainingPhase,
+  ]);
 
   const handleFocusBack = React.useCallback(() => {
     if (focusOpeningName) {
@@ -354,6 +379,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
           markHintUsed={markHintUsed}
           pendingErrorCount={focusFailedCount}
           hasAssistContent={focusErrorMarkerCount > 0}
+          statusPanel={focusStatusPanel}
           onBack={handleFocusBack}
         />
       ) : (
@@ -389,7 +415,10 @@ const TrainRepertoireViewContainer: React.FC = () => {
       />
       {trainingPhase === "reinforcement" && reinforcementSession ? (
         <>
-          <MistakeReinforcementPanel session={reinforcementSession} />
+          <MistakeReinforcementPanel
+            session={reinforcementSession}
+            placement="overlay"
+          />
           <MistakeRatingSheet
             open={reinforcementSession.awaitingRating}
             isSaving={isSavingMistakeRating}
@@ -401,6 +430,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
         <FullRunConfirmPanel
           state={fullRunConfirmState}
           onFinish={finishFullRunConfirm}
+          placement="overlay"
         />
       ) : null}
     </>
