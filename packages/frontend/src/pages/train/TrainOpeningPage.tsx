@@ -83,8 +83,13 @@ const TrainOpeningPage: React.FC = () => {
     if (!payload) {
       return;
     }
+    const todayDayKey = new Date().toISOString().slice(0, 10);
     const mistakeKeys = payload.mistakes
-      .map((mistake) => mistake.mistakeKey)
+      .filter(
+        (m) =>
+          m.dueAt.getTime() <= Date.now() && m.lastReviewedDayKey !== todayDayKey
+      )
+      .map((m) => m.mistakeKey)
       .filter(Boolean)
       .join("|");
     if (!mistakeKeys) {

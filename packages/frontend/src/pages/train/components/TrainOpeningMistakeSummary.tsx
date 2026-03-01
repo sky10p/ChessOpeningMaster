@@ -34,7 +34,7 @@ export const TrainOpeningMistakeSummary: React.FC<TrainOpeningMistakeSummaryProp
           intent="accent"
           size="sm"
           onClick={onReviewDueMistakes}
-          disabled={mistakes.length === 0}
+          disabled={dueMistakes.length === 0}
           className="justify-center sm:w-fit"
         >
           Train Mistakes Only
