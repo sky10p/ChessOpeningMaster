@@ -338,4 +338,64 @@ describe("variantReviewService", () => {
       })
     );
   });
+
+  it("archives all active mistakes when a later-day review provides an explicit empty snapshot", async () => {
+    const repertoireId = new ObjectId().toHexString();
+    jest.setSystemTime(new Date("2026-02-16T12:00:00.000Z"));
+    mockRepertoiresFindOne.mockResolvedValue({
+      _id: new ObjectId(repertoireId),
+      userId: "user-1",
+    });
+    mockVariantsInfoFindOne
+      .mockResolvedValueOnce({
+        userId: "user-1",
+        repertoireId,
+        variantName: "Opening: A",
+        errors: 2,
+        dailyErrorsDayKey: "2026-02-15",
+        dailyErrorCount: 2,
+        dailyErrorSnapshot: [
+          {
+            mistakeKey: "Opening: A::4::e7e5::0",
+            mistakePly: 4,
+            variantStartPly: 0,
+            positionFen: "fen-a",
+            expectedMoveLan: "e7e5",
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        userId: "user-1",
+        repertoireId,
+        variantName: "Opening: A",
+        errors: 0,
+      });
+    mockVariantsInfoUpdateOne.mockResolvedValue({ acknowledged: true });
+    mockVariantReviewHistoryInsertOne.mockResolvedValue({ acknowledged: true });
+
+    await saveVariantReview({
+      userId: "user-1",
+      repertoireId,
+      variantName: "Opening: A",
+      rating: "good",
+      wrongMoves: 0,
+      mistakes: [],
+    });
+
+    expect(mockVariantMistakesUpdateOne).not.toHaveBeenCalled();
+    expect(mockVariantMistakesUpdateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: "user-1",
+        repertoireId,
+        variantName: "Opening: A",
+        archivedAt: { $exists: false },
+      }),
+      expect.objectContaining({
+        $set: expect.objectContaining({
+          archivedAt: new Date("2026-02-16T12:00:00.000Z"),
+        }),
+      })
+    );
+    expect(mockVariantMistakesUpdateMany.mock.calls[0][0]).not.toHaveProperty("mistakeKey");
+  });
 });

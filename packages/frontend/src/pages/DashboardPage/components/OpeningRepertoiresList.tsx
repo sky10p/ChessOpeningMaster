@@ -9,7 +9,7 @@ interface OpeningRepertoiresListProps {
   repertoiresWithOpening: IRepertoireDashboard[];
   getTrainVariantInfo: (trainInfo: TrainVariantInfo[]) => Record<string, TrainVariantInfo>;
   goToRepertoire: (repertoire: IRepertoireDashboard) => void;
-  goToTrainOpening?: (repertoire: IRepertoireDashboard) => void;
+  goToTrainOpening?: (repertoire: IRepertoireDashboard, openingName: string) => void;
 }
 
 export const OpeningRepertoiresList: React.FC<OpeningRepertoiresListProps> = ({
@@ -35,7 +35,7 @@ export const OpeningRepertoiresList: React.FC<OpeningRepertoiresListProps> = ({
           </span>
           <Button intent="primary" size="xs" className="ml-1" onClick={() => goToRepertoire(r)}>View</Button>
           {goToTrainOpening && (
-            <Button intent="accent" size="xs" className="ml-1" onClick={() => goToTrainOpening(r)}>Train</Button>
+            <Button intent="accent" size="xs" className="ml-1" onClick={() => goToTrainOpening(r, opening)}>Train</Button>
           )}
           <div className="flex-1">
             <VariantsProgressBar

@@ -8,10 +8,11 @@ import {
 import { Path, PathPlanSummary } from "@chess-opening-master/common";
 import { Button, EmptyState, MetricTitle } from "../../../components/ui";
 import { isEmptyPath, isNewVariantPath, isStudiedVariantPath, isStudyPath } from "../helpers";
+import { toUtcDateKey } from "../../../utils/dateUtils";
 
 const formatDate = (date: string | Date): string => {
   const dateObject = typeof date === "string" ? new Date(date) : date;
-  return dateObject.toLocaleDateString();
+  return toUtcDateKey(dateObject);
 };
 
 interface PathLessonViewProps {

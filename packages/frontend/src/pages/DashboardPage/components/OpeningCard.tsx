@@ -219,9 +219,7 @@ export const OpeningCard: React.FC<OpeningCardProps> = ({
             repertoiresWithOpening={repertoiresWithOpening}
             getTrainVariantInfo={getTrainVariantInfo}
             goToRepertoire={(repertoire) => goToRepertoire(repertoire, opening)}
-            goToTrainOpening={(repertoire) =>
-              goToTrainOpening(repertoire, opening)
-            }
+            goToTrainOpening={goToTrainOpening}
           />
         </div>
       )}

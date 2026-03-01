@@ -169,6 +169,7 @@ describe("DashboardPage", () => {
     fireEvent.click(screen.getByRole("button", { name: /see errors/i }));
 
     await waitFor(() => {
+      expect(window.location.search).toBe("?section=openings&status=errors");
       expect(screen.getByRole("tab", { name: /openings/i })).toHaveAttribute(
         "aria-selected",
         "true"

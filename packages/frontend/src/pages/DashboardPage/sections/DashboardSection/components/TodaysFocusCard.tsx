@@ -81,7 +81,7 @@ export const TodaysFocusCard: React.FC<TodaysFocusCardProps> = ({
     if (focus.tone === "danger") {
       navigate({
         pathname: location.pathname,
-        search: "section=openings&status=errors",
+        search: "?section=openings&status=errors",
       });
       return;
     }
