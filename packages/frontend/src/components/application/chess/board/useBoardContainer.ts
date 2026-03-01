@@ -58,11 +58,11 @@ export const useBoardContainer = (isTraining: boolean) => {
   };
 
   const handleMove = (from: string, to: string): boolean => {
-    const attemptedMoveLan = `${from}${to}`;
     const positionFen = chess.fen();
     const tempChess = new Chess(chess.fen());
     const move = safeMove(tempChess, from, to);
     if (move) {
+      const attemptedMoveLan = `${from}${to}${move.promotion || ""}`;
       let isMoveAllowed = true;
       if (isTraining && trainRepertoireContext) {
         const trainingMoves = trainRepertoireContext.allowedMoves.map(

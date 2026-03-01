@@ -138,7 +138,7 @@ describe("TrainOpeningPage", () => {
     );
 
     expect(await screen.findByText("Italian Game")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Train Mistakes Only" }));
+    fireEvent.click(screen.getByRole("button", { name: "Train Due Mistakes" }));
 
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith(
@@ -171,7 +171,7 @@ describe("TrainOpeningPage", () => {
     );
 
     expect(await screen.findByText("Italian Game")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Train Mistakes Only" }));
+    fireEvent.click(screen.getByRole("button", { name: "Train Due Mistakes" }));
 
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith(
@@ -241,6 +241,6 @@ describe("TrainOpeningPage", () => {
     );
 
     expect(await screen.findByText("Italian Game")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Train Mistakes Only" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Train Due Mistakes" })).toBeDisabled();
   });
 });

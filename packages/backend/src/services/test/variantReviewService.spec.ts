@@ -101,6 +101,44 @@ describe("variantReviewService", () => {
     expect(result.variantInfo.repertoireId).toBe(repertoireId);
   });
 
+  it("derives openingName from variantName instead of storing the full variant label", async () => {
+    const repertoireId = new ObjectId().toHexString();
+    mockRepertoiresFindOne.mockResolvedValue({ _id: new ObjectId(repertoireId), userId: "user-1" });
+    mockVariantsInfoFindOne
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        userId: "user-1",
+        repertoireId,
+        variantName: "Italian Game: Main Line",
+        openingName: "Italian Game",
+        errors: 0,
+      });
+    mockVariantsInfoUpdateOne.mockResolvedValue({ acknowledged: true });
+    mockVariantReviewHistoryInsertOne.mockResolvedValue({ acknowledged: true });
+
+    await saveVariantReview({
+      userId: "user-1",
+      repertoireId,
+      variantName: "Italian Game: Main Line",
+      rating: "good",
+    });
+
+    expect(mockVariantsInfoUpdateOne).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({
+        $set: expect.objectContaining({
+          openingName: "Italian Game",
+        }),
+      }),
+      { upsert: true }
+    );
+    expect(mockVariantReviewHistoryInsertOne).toHaveBeenCalledWith(
+      expect.objectContaining({
+        openingName: "Italian Game",
+      })
+    );
+  });
+
   it("keeps same-day daily errors monotonic when later run has fewer errors", async () => {
     const repertoireId = new ObjectId().toHexString();
     mockRepertoiresFindOne.mockResolvedValue({

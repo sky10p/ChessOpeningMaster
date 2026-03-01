@@ -45,6 +45,11 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
 
+function deriveOpeningName(variantName: string): string {
+  const openingName = variantName.split(":")[0]?.trim();
+  return openingName || variantName;
+}
+
 function normalizeMistakeSnapshot(
   mistakes: MistakeSnapshotItem[] | undefined,
   variantName: string
@@ -201,7 +206,8 @@ export async function saveVariantReview(input: SaveVariantReviewInput): Promise<
   const nextPerfectRunStreak = perfectRun
     ? normalizeNonNegativeInt(existing?.perfectRunStreak) + 1
     : 0;
-  const openingName = input.openingName || existing?.openingName || input.variantName;
+  const openingName =
+    input.openingName || existing?.openingName || deriveOpeningName(input.variantName);
   const startingFen = input.startingFen || existing?.startingFen;
   const orientation = input.orientation || existing?.orientation;
 
