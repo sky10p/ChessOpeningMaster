@@ -111,7 +111,7 @@ jest.mock("./components/MistakeReinforcementPanel", () => ({
   MistakeReinforcementPanel: ({
     placement,
   }: {
-    placement?: "inline" | "overlay";
+    placement?: "inline" | "overlay" | "desktopOverlay";
   }) => <div>{`mistake-panel:${placement ?? "overlay"}`}</div>,
 }));
 
@@ -123,7 +123,7 @@ jest.mock("./components/FullRunConfirmPanel", () => ({
   FullRunConfirmPanel: ({
     placement,
   }: {
-    placement?: "inline" | "overlay";
+    placement?: "inline" | "overlay" | "desktopOverlay";
   }) => <div>{`full-run-panel:${placement ?? "overlay"}`}</div>,
 }));
 
@@ -285,7 +285,7 @@ describe("TrainRepertoireViewContainer", () => {
     );
   });
 
-  it("renders reinforcement panel inline in focus workspace and overlay for desktop", () => {
+  it("renders reinforcement panel inline in focus workspace and desktop-only overlay in focus mode", () => {
     mockedUseTrainRepertoireContext.mockReturnValue(
       buildTrainContext({
         mode: "mistakes",
@@ -318,10 +318,10 @@ describe("TrainRepertoireViewContainer", () => {
     expect(screen.getByTestId("focus-workspace")).toHaveTextContent(
       "mistake-panel:inline"
     );
-    expect(screen.getByText("mistake-panel:overlay")).toBeInTheDocument();
+    expect(screen.getByText("mistake-panel:desktopOverlay")).toBeInTheDocument();
   });
 
-  it("renders full run confirm panel inline in focus workspace and overlay for desktop", () => {
+  it("renders full run confirm panel inline in focus workspace and desktop-only overlay in focus mode", () => {
     mockedUseTrainRepertoireContext.mockReturnValue(
       buildTrainContext({
         mode: "mistakes",
@@ -343,6 +343,59 @@ describe("TrainRepertoireViewContainer", () => {
     expect(screen.getByTestId("focus-workspace")).toHaveTextContent(
       "full-run-panel:inline"
     );
+    expect(screen.getByText("full-run-panel:desktopOverlay")).toBeInTheDocument();
+  });
+
+  it("keeps reinforcement overlay mobile-visible in standard mode", () => {
+    mockedUseTrainRepertoireContext.mockReturnValue(
+      buildTrainContext({
+        mode: "standard",
+        trainingPhase: "reinforcement",
+        reinforcementSession: {
+          queue: [
+            {
+              mistakeKey: "Spanish: Main Line::3::g1f3::0",
+              mistakePly: 3,
+              variantStartPly: 0,
+              positionFen: "fen-2",
+              expectedMoveLan: "g1f3",
+              expectedMoveSan: "Nf3",
+              actualMoveLan: "d2d4",
+              variantName: "Spanish: Main Line",
+            },
+          ],
+          solved: 0,
+          total: 1,
+          awaitingRating: false,
+          source: "review",
+        },
+      })
+    );
+
+    render(<TrainRepertoireViewContainer />);
+
+    expect(screen.getByText("mistake-panel:overlay")).toBeInTheDocument();
+  });
+
+  it("keeps full run overlay mobile-visible in standard mode", () => {
+    mockedUseTrainRepertoireContext.mockReturnValue(
+      buildTrainContext({
+        mode: "standard",
+        trainingPhase: "fullRunConfirm",
+        fullRunConfirmState: {
+          variantName: "Spanish: Main Line",
+          openingName: "Spanish",
+          startedAtMs: 1,
+          completed: false,
+          perfect: false,
+          masteryBefore: 20,
+          masteryAfter: 20,
+        },
+      })
+    );
+
+    render(<TrainRepertoireViewContainer />);
+
     expect(screen.getByText("full-run-panel:overlay")).toBeInTheDocument();
   });
 

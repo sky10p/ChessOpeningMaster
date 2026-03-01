@@ -417,7 +417,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
         <>
           <MistakeReinforcementPanel
             session={reinforcementSession}
-            placement="overlay"
+            placement={isFocusMode ? "desktopOverlay" : "overlay"}
           />
           <MistakeRatingSheet
             open={reinforcementSession.awaitingRating}
@@ -430,7 +430,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
         <FullRunConfirmPanel
           state={fullRunConfirmState}
           onFinish={finishFullRunConfirm}
-          placement="overlay"
+          placement={isFocusMode ? "desktopOverlay" : "overlay"}
         />
       ) : null}
     </>

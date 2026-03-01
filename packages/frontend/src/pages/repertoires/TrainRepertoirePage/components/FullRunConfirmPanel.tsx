@@ -7,7 +7,7 @@ import { cn } from "../../../../utils/cn";
 interface FullRunConfirmPanelProps {
   state: FullRunConfirmState;
   onFinish: () => void;
-  placement?: "inline" | "overlay";
+  placement?: "inline" | "overlay" | "desktopOverlay";
 }
 
 export const FullRunConfirmPanel: React.FC<FullRunConfirmPanelProps> = ({
@@ -15,16 +15,20 @@ export const FullRunConfirmPanel: React.FC<FullRunConfirmPanelProps> = ({
   onFinish,
   placement = "overlay",
 }) => {
+  const isInline = placement === "inline";
+  const isDesktopOverlay = placement === "desktopOverlay";
+
   return (
     <Card
       className={cn(
         "border-border-default bg-surface",
-        placement === "overlay"
-          ? "fixed left-3 right-3 top-16 z-40 hidden shadow-elevated sm:block sm:left-auto sm:right-4 sm:top-20 sm:w-[380px]"
-          : "w-full shadow-surface"
+        isInline
+          ? "w-full"
+          : "fixed left-3 right-3 top-16 z-40 sm:left-auto sm:right-4 sm:top-20 sm:w-[380px]",
+        isDesktopOverlay && "hidden sm:block"
       )}
       padding="default"
-      elevation={placement === "overlay" ? "high" : "raised"}
+      elevation={isInline ? "raised" : "high"}
     >
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-2">

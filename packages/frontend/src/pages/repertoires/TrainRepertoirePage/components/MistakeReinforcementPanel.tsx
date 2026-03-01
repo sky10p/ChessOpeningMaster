@@ -6,24 +6,27 @@ import { cn } from "../../../../utils/cn";
 
 interface MistakeReinforcementPanelProps {
   session: ReinforcementSession;
-  placement?: "inline" | "overlay";
+  placement?: "inline" | "overlay" | "desktopOverlay";
 }
 
 export const MistakeReinforcementPanel: React.FC<
   MistakeReinforcementPanelProps
 > = ({ session, placement = "overlay" }) => {
   const currentMistake = session.queue[0];
+  const isInline = placement === "inline";
+  const isDesktopOverlay = placement === "desktopOverlay";
 
   return (
     <Card
       className={cn(
         "border-border-default bg-surface",
-        placement === "overlay"
-          ? "fixed left-3 right-3 top-16 z-40 hidden shadow-elevated sm:block sm:left-auto sm:right-4 sm:top-20 sm:w-[360px]"
-          : "w-full shadow-surface"
+        isInline
+          ? "w-full"
+          : "fixed left-3 right-3 top-16 z-40 sm:left-auto sm:right-4 sm:top-20 sm:w-[360px]",
+        isDesktopOverlay && "hidden sm:block"
       )}
       padding="compact"
-      elevation={placement === "overlay" ? "high" : "raised"}
+      elevation={isInline ? "raised" : "high"}
     >
       <div className="space-y-3">
         <MistakeProgressHeader solved={session.solved} total={session.total} />
