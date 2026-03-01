@@ -110,7 +110,7 @@ export const HintInfo: React.FC<HintInfoProps> = ({
               : "text-lg font-semibold text-text-base"
           }
         >
-          Comentarios
+          Comments
         </h6>
         <Button
           onClick={handleUpdateComment}

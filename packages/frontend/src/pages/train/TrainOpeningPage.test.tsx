@@ -6,14 +6,12 @@ import TrainOpeningPage from "./TrainOpeningPage";
 import * as trainRepository from "../../repository/train/train";
 
 const mockNavigate = jest.fn();
+const mockUseParams = jest.fn();
 
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
   useNavigate: () => mockNavigate,
-  useParams: () => ({
-    repertoireId: "rep-1",
-    openingName: "Italian%20Game",
-  }),
+  useParams: () => mockUseParams(),
 }));
 
 const openingPayload = {
@@ -105,6 +103,10 @@ const openingPayload = {
 describe("TrainOpeningPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseParams.mockReturnValue({
+      repertoireId: "rep-1",
+      openingName: "Italian Game",
+    });
   });
 
   it("navigates with standard mode query when train all variants is clicked", async () => {
@@ -161,6 +163,27 @@ describe("TrainOpeningPage", () => {
       expect(mockNavigate).toHaveBeenCalledWith(
         "/repertoire/train/rep-1?mode=mistakes&openingName=Italian+Game&variantName=Italian+Game%3A+Main+Line&mistakeKey=k1"
       );
+    });
+  });
+
+  it("loads an opening name containing a literal percent character", async () => {
+    const getTrainOpeningSpy = jest
+      .spyOn(trainRepository, "getTrainOpening")
+      .mockResolvedValue(openingPayload);
+
+    mockUseParams.mockReturnValue({
+      repertoireId: "rep-1",
+      openingName: "100% accuracy",
+    });
+
+    render(
+      <MemoryRouter>
+        <TrainOpeningPage />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(getTrainOpeningSpy).toHaveBeenCalledWith("rep-1", "100% accuracy");
     });
   });
 });

@@ -22,7 +22,7 @@ export async function getTrainOpeningSummary(
 ) {
   try {
     const repertoireId = req.params.id;
-    const openingName = decodeURIComponent(req.params.openingName || "").trim();
+    const openingName = (req.params.openingName || "").trim();
     if (!openingName) {
       return res.status(400).json({ message: "openingName is required" });
     }

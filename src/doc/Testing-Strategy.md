@@ -197,7 +197,7 @@ await act(async () => {
    - After first error: hints/available variants unlock and remain available during mistakes + full-run confirm.
    - Validate both desktop (`TrainInfo`) and mobile (`HelpInfo`) behavior.
    - Validate inline `Focus Assist` card remains in waiting state before first error.
-   - Validate card tabs (`Comentarios`, `Variantes candidatas`) after errors and correct content switch.
+   - Validate card tabs (`Comments`, `Candidate lines`) after errors and correct content switch.
    - Validate normal mode keeps persistent panel behavior and focus-only card is not rendered there.
 
 9. **Focus assist inline composition**

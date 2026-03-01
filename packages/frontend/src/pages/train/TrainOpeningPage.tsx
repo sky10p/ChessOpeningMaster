@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { TrainOpeningResponse } from "@chess-opening-master/common";
 import { Badge, Button, Card } from "../../components/ui";
@@ -27,10 +27,6 @@ const getMasteryBadge = (
 const TrainOpeningPage: React.FC = () => {
   const navigate = useNavigate();
   const { repertoireId = "", openingName = "" } = useParams();
-  const decodedOpeningName = useMemo(
-    () => decodeURIComponent(openingName || ""),
-    [openingName]
-  );
   const [payload, setPayload] = useState<TrainOpeningResponse | null>(null);
   const [status, setStatus] = useState<"loading" | "success" | "error">(
     "loading"
@@ -41,7 +37,7 @@ const TrainOpeningPage: React.FC = () => {
     const load = async () => {
       try {
         setStatus("loading");
-        const response = await getTrainOpening(repertoireId, decodedOpeningName);
+        const response = await getTrainOpening(repertoireId, openingName);
         if (!ignore) {
           setPayload(response);
           setStatus("success");
@@ -52,13 +48,13 @@ const TrainOpeningPage: React.FC = () => {
         }
       }
     };
-    if (repertoireId && decodedOpeningName) {
+    if (repertoireId && openingName) {
       void load();
     }
     return () => {
       ignore = true;
     };
-  }, [decodedOpeningName, repertoireId]);
+  }, [openingName, repertoireId]);
 
   const navigateToTrain = (params: Record<string, string | undefined>) => {
     const query = new URLSearchParams();
