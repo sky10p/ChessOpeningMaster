@@ -5,6 +5,8 @@ import { OpeningWithUnreviewedVariants } from "./DashboardSection/types";
 import { UnreviewedVariantsChart } from "../components/UnreviewedVariantsChart";
 import { RepertoireFilterDropdown } from "../components/RepertoireFilterDropdown";
 import { useNavigationUtils } from "../../../utils/navigationUtils";
+import { useIsMobile } from "../../../hooks/useIsMobile";
+import { Button, Input, Select } from "../../../components/ui";
 
 interface UnreviewedSectionProps {
   repertoires: IRepertoireDashboard[];
@@ -16,6 +18,7 @@ type OrientationFilter = "all" | "white" | "black";
 
 export const UnreviewedSection: React.FC<UnreviewedSectionProps> = ({ repertoires }) => {
   const { goToTrainRepertoire, goToTrainRepertoireWithVariants } = useNavigationUtils();
+  const isMobile = useIsMobile();
   const [orientationFilter, setOrientationFilter] = useState<OrientationFilter>("all");
   const [selectedRepertoires, setSelectedRepertoires] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -104,17 +107,14 @@ export const UnreviewedSection: React.FC<UnreviewedSectionProps> = ({ repertoire
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap gap-2">
             {(["all", "white", "black"] as OrientationFilter[]).map((option) => (
-              <button
+              <Button
                 key={option}
+                intent={orientationFilter === option ? "primary" : "secondary"}
+                size="xs"
                 onClick={() => setOrientationFilter(option)}
-                className={`px-3 py-1 rounded text-sm ${
-                  orientationFilter === option
-                    ? "bg-blue-600 text-white"
-                    : "bg-surface-raised text-text-muted hover:bg-interactive"
-                }`}
               >
                 {option === "all" ? "All" : option === "white" ? "White" : "Black"}
-              </button>
+              </Button>
             ))}
           </div>
 
@@ -130,33 +130,30 @@ export const UnreviewedSection: React.FC<UnreviewedSectionProps> = ({ repertoire
             </div>
             <div>
               <label className="block text-xs text-text-subtle mb-1">Search opening</label>
-              <input
+              <Input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="e.g. French"
-                className="w-full bg-surface-raised text-text-base px-3 py-2 border border-border-default rounded-lg text-sm"
               />
             </div>
             <div>
               <label className="block text-xs text-text-subtle mb-1">Min unreviewed</label>
-              <input
+              <Input
                 type="number"
                 min={0}
                 value={minUnreviewed}
                 onChange={(e) => setMinUnreviewed(Math.max(0, Number(e.target.value) || 0))}
-                className="w-full bg-surface-raised text-text-base px-3 py-2 border border-border-default rounded-lg text-sm"
               />
             </div>
             <div>
               <label className="block text-xs text-text-subtle mb-1">Sort by</label>
-              <select
+              <Select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="w-full bg-surface-raised text-text-base px-3 py-2 border border-border-default rounded-lg text-sm"
               >
                 <option value="unreviewed">Unreviewed count</option>
                 <option value="name">Opening name</option>
-              </select>
+              </Select>
             </div>
           </div>
         </div>
@@ -164,13 +161,13 @@ export const UnreviewedSection: React.FC<UnreviewedSectionProps> = ({ repertoire
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center">
-          <span className="text-3xl font-bold text-amber-400">
+          <span className="text-3xl font-bold text-warning">
             {summary.totalUnreviewed}
           </span>
           <span className="text-text-muted mt-1">Unreviewed Variants</span>
         </div>
         <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center">
-          <span className="text-3xl font-bold text-purple-400">
+          <span className="text-3xl font-bold text-brand">
             {summary.totalOpenings}
           </span>
           <span className="text-text-muted mt-1">Openings With Unreviewed</span>
@@ -182,7 +179,7 @@ export const UnreviewedSection: React.FC<UnreviewedSectionProps> = ({ repertoire
           data={filteredOpenings}
           title="Unreviewed Variants by Opening"
           emptyMessage="No unreviewed variants found with the selected filters"
-          isMobile={typeof window !== "undefined" && window.innerWidth < 768}
+          isMobile={isMobile}
           onVariantClick={handleVariantClick}
           onVariantsClick={handleVariantsClick}
         />

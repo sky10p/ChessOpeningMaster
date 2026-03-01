@@ -2,13 +2,14 @@
 import { VariantsProgressBar } from "../../../components/design/SelectTrainVariants/VariantsProgressBar";
 import { IRepertoireDashboard, TrainVariantInfo } from "@chess-opening-master/common";
 import { getRepertoireVariants } from "../utils/openingIndex";
+import { Button } from "../../../components/ui";
 
 interface OpeningRepertoiresListProps {
   opening: string;
   repertoiresWithOpening: IRepertoireDashboard[];
   getTrainVariantInfo: (trainInfo: TrainVariantInfo[]) => Record<string, TrainVariantInfo>;
   goToRepertoire: (repertoire: IRepertoireDashboard) => void;
-  goToTrainRepertoire?: (repertoire: IRepertoireDashboard) => void;
+  goToTrainOpening?: (repertoire: IRepertoireDashboard, openingName: string) => void;
 }
 
 export const OpeningRepertoiresList: React.FC<OpeningRepertoiresListProps> = ({
@@ -16,7 +17,7 @@ export const OpeningRepertoiresList: React.FC<OpeningRepertoiresListProps> = ({
   repertoiresWithOpening,
   getTrainVariantInfo,
   goToRepertoire,
-  goToTrainRepertoire,
+  goToTrainOpening,
 }) => (
   <div className="flex flex-col gap-2 mt-2">
     {repertoiresWithOpening.map((r) => {
@@ -32,19 +33,9 @@ export const OpeningRepertoiresList: React.FC<OpeningRepertoiresListProps> = ({
           >
             {r.name}
           </span>
-          <button
-            className="ml-1 px-2 py-0.5 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs focus:outline-none focus:ring-2 focus:ring-blue-400"
-            onClick={() => goToRepertoire(r)}
-          >
-            View
-          </button>
-          {goToTrainRepertoire && (
-            <button
-              className="ml-1 px-2 py-0.5 bg-green-600 text-white rounded hover:bg-green-700 text-xs focus:outline-none focus:ring-2 focus:ring-green-400"
-              onClick={() => goToTrainRepertoire(r)}
-            >
-              Train
-            </button>
+          <Button intent="primary" size="xs" className="ml-1" onClick={() => goToRepertoire(r)}>View</Button>
+          {goToTrainOpening && (
+            <Button intent="accent" size="xs" className="ml-1" onClick={() => goToTrainOpening(r, opening)}>Train</Button>
           )}
           <div className="flex-1">
             <VariantsProgressBar

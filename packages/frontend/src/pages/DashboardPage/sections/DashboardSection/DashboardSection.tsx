@@ -5,6 +5,7 @@ import { useNavigationUtils } from "../../../../utils/navigationUtils";
 import { DashboardSectionProps, FilterType } from "./types";
 import { getRelevantVariants } from "./utils";
 import { useDashboardData } from "./hooks/useDashboardData";
+import { CollapsibleSection } from "../../../../components/ui";
 import {
   FilterButtons,
   StatsCards,
@@ -14,6 +15,8 @@ import {
   ProgressSummary,
   InvalidOrientationWarning,
   OpeningsProgressCard,
+  TodaysFocusCard,
+  TrainingQueuePreview,
 } from "./components";
 
 export const DashboardSection: React.FC<DashboardSectionProps> = ({
@@ -115,73 +118,83 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
         <InvalidOrientationWarning repertoires={invalidOrientationReps} />
       </header>
 
-      <div className="flex-1">
+      <div className="flex-1 space-y-4">
+        <TodaysFocusCard stats={progressStats} totalVariants={totalVariants} />
+
+        <TrainingQueuePreview />
+
         <StatsCards
           totalRepertoires={totalRepertoires}
           totalVariants={totalVariants}
           mostRecentName={mostRecent?.name ?? null}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-          <VariantsReviewStatusChart data={reviewData} />
+        <CollapsibleSection title="Performance" subtitle="Errors, review status & progress">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+              <VariantsReviewStatusChart data={reviewData} />
 
-          <VerticalBarChart
-            data={errorsByOpeningTop5}
-            title="Errors by Opening"
-            label="Errors"
-            barName="Errors"
-            barColor="var(--color-danger)"
-            tooltipValueLabel="errors"
-            emptyMessage="No errors found"
-            isMobile={isMobile}
-            yAxisWidth={yAxisWidth}
-            barChartMargin={barChartMargin}
-            onOpeningClick={handleOpeningClick}
-          />
+              <VerticalBarChart
+                data={errorsByOpeningTop5}
+                title="Errors by Opening"
+                label="Errors"
+                barName="Errors"
+                barColor="var(--color-danger)"
+                tooltipValueLabel="errors"
+                emptyMessage="No errors found"
+                isMobile={isMobile}
+                yAxisWidth={yAxisWidth}
+                barChartMargin={barChartMargin}
+                onOpeningClick={handleOpeningClick}
+              />
 
-          <OpeningsProgressCard
-            data={allOpeningsProgress}
-            type="needWork"
-            onOpeningClick={handleOpeningClick}
-            onViewAllClick={handleViewAllOpenings}
-          />
+              <OpeningsProgressCard
+                data={allOpeningsProgress}
+                type="needWork"
+                onOpeningClick={handleOpeningClick}
+                onViewAllClick={handleViewAllOpenings}
+              />
 
-          <OpeningsProgressCard
-            data={allOpeningsProgress}
-            type="wellLearned"
-            onOpeningClick={handleOpeningClick}
-            onViewAllClick={handleViewAllOpenings}
-          />
+              <ProgressSummary stats={progressStats} />
+            </div>
+          </CollapsibleSection>
 
-          <ExpandableVariantsChart
-            data={variantsWithErrorsByOpeningTop5}
-            title="Variants with Errors by Opening"
-            emptyMessage="No variants with errors found"
-            isMobile={isMobile}
-            onVariantClick={handleVariantClick}
-            onVariantsClick={handleVariantsClick}
-          />
+          <CollapsibleSection title="Mastery & Activity" subtitle="Well-learned openings & review history" defaultOpen={false}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+              <OpeningsProgressCard
+                data={allOpeningsProgress}
+                type="wellLearned"
+                onOpeningClick={handleOpeningClick}
+                onViewAllClick={handleViewAllOpenings}
+              />
 
-          <ReviewActivityChart
-            data={reviewActivityDataLast10}
-            hasActivity={hasReviewActivity}
-          />
+              <VerticalBarChart
+                data={masteredOpenings}
+                title="Top 5 Mastered Openings"
+                label="Mastered Lines"
+                barName="Mastered Lines"
+                barColor="var(--color-success)"
+                tooltipValueLabel="lines"
+                emptyMessage="No mastered openings found"
+                isMobile={isMobile}
+                yAxisWidth={yAxisWidth}
+                barChartMargin={barChartMargin}
+              />
 
-          <ProgressSummary stats={progressStats} />
+              <ExpandableVariantsChart
+                data={variantsWithErrorsByOpeningTop5}
+                title="Variants with Errors by Opening"
+                emptyMessage="No variants with errors found"
+                isMobile={isMobile}
+                onVariantClick={handleVariantClick}
+                onVariantsClick={handleVariantsClick}
+              />
 
-          <VerticalBarChart
-            data={masteredOpenings}
-            title="Top 5 Mastered Openings"
-            label="Mastered Lines"
-            barName="Mastered Lines"
-            barColor="var(--color-success)"
-            tooltipValueLabel="lines"
-            emptyMessage="No mastered openings found"
-            isMobile={isMobile}
-            yAxisWidth={yAxisWidth}
-            barChartMargin={barChartMargin}
-          />
-        </div>
+              <ReviewActivityChart
+                data={reviewActivityDataLast10}
+                hasActivity={hasReviewActivity}
+              />
+            </div>
+          </CollapsibleSection>
       </div>
     </section>
   );

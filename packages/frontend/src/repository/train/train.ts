@@ -27,12 +27,46 @@ const parseTrainOpening = (payload: TrainOpeningResponse): TrainOpeningResponse 
   mistakes: parseMistakes(payload.mistakes),
 });
 
+const TRAIN_OVERVIEW_CACHE_TTL_MS = 30000;
+
+let cachedTrainOverview:
+  | {
+      expiresAt: number;
+      payload: TrainOverviewResponse;
+    }
+  | null = null;
+let pendingTrainOverviewRequest: Promise<TrainOverviewResponse> | null = null;
+
 export const getTrainOverview = async (): Promise<TrainOverviewResponse> => {
   const response = await apiFetch(`${API_URL}/train/overview`);
   if (!response.ok) {
     throw new Error("Failed to load train overview");
   }
   return response.json();
+};
+
+export const getCachedTrainOverview = async (): Promise<TrainOverviewResponse> => {
+  const now = Date.now();
+
+  if (cachedTrainOverview && cachedTrainOverview.expiresAt > now) {
+    return cachedTrainOverview.payload;
+  }
+
+  if (!pendingTrainOverviewRequest) {
+    pendingTrainOverviewRequest = getTrainOverview()
+      .then((payload) => {
+        cachedTrainOverview = {
+          payload,
+          expiresAt: Date.now() + TRAIN_OVERVIEW_CACHE_TTL_MS,
+        };
+        return payload;
+      })
+      .finally(() => {
+        pendingTrainOverviewRequest = null;
+      });
+  }
+
+  return pendingTrainOverviewRequest;
 };
 
 export const getTrainOpening = async (

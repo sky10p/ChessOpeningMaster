@@ -37,8 +37,6 @@ const Content: React.FC<ContentProps> = ({ authEnabled, authenticated, allowDefa
     <MainContainer>
       <Routes>
         <Route path="/create-repertoire" element={<CreateRepertoire />} />
-        <Route path="/edit-repertoire" element={<div>Edit repertoire</div>} />
-        <Route path="/remove-repertoire" element={<div>Delete repertoire</div>} />
         <Route path="/repertoire/:id" element={<EditRepertoirePage />} />
         <Route path="/repertoire/train/:id" element={<TrainRepertoirePage />} />
         <Route path="/dashboard" element={<DashboardPage />} />

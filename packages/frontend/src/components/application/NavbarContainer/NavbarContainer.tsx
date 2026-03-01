@@ -80,6 +80,8 @@ const NavbarContainer: React.FC<NavbarContainerProps> = ({ authEnabled, onLogged
     showConfirmDialog({
       title: "Delete Repertoire",
       contentText: `Are you sure you want to delete ${repertoire.name}?`,
+      confirmLabel: "Delete",
+      confirmIntent: "danger",
       onConfirm: async () => {
         await deleteRepertoire(repertoire._id);
         updateRepertoires();

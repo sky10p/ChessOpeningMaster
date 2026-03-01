@@ -3,6 +3,7 @@ import { RepertoireCard } from "../components/RepertoireCard";
 import { getVariantsProgressInfo } from '../../../components/design/SelectTrainVariants/utils';
 import { IRepertoireDashboard, TrainVariantInfo } from "@chess-opening-master/common";
 import { TrainVariant } from "../../../models/chess.models";
+import { Input, Select } from "../../../components/ui";
 
 interface RepertoiresSectionProps {
   orientationFilter: "all" | "white" | "black";
@@ -66,31 +67,29 @@ export const RepertoiresSection: React.FC<RepertoiresSectionProps> = ({
           <p className="text-text-muted text-xs sm:text-base leading-snug mb-2 sm:mb-4 truncate">Manage and review your chess repertoires. Filter by color or name to quickly find what you need.</p>
         </header>
         <div className="flex flex-col md:flex-row gap-2 md:gap-4">
-          <select
+          <Select
             value={orientationFilter}
             onChange={(e) => setOrientationFilter(e.target.value as "all" | "white" | "black")}
-            className="bg-surface-raised text-text-base px-3 py-2 border border-border-default rounded-lg shadow-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition ease-in-out duration-150 text-xs sm:text-sm"
           >
             <option value="all">All</option>
             <option value="white">White</option>
             <option value="black">Black</option>
-          </select>
-          <select
+          </Select>
+          <Select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as 'all' | 'errors' | 'successful' | 'new')}
-            className="bg-surface-raised text-text-base px-3 py-2 border border-border-default rounded-lg shadow-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition ease-in-out duration-150 text-xs sm:text-sm"
           >
             <option value="all">All</option>
             <option value="errors">With Errors</option>
             <option value="successful">Successful</option>
             <option value="new">New Variants</option>
-          </select>
-          <input
+          </Select>
+          <Input
             type="text"
             placeholder="Filter repertoires"
             value={repertoireNameFilter}
             onChange={(e) => setRepertoireNameFilter(e.target.value)}
-            className="bg-surface-raised text-text-base px-3 py-2 border border-border-default rounded-lg shadow-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition ease-in-out duration-150 flex-grow text-xs sm:text-sm"
+            className="flex-grow"
           />
         </div>
       </div>

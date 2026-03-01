@@ -22,6 +22,7 @@ import {
   QuestionMarkCircleIcon,
 } from "@heroicons/react/24/outline";
 import { getTodayPlanProgress } from "../../../../../utils/path/todayPlanProgress";
+import { Button } from "../../../../../components/ui";
 
 interface SpacedRepetitionInsightsPanelProps {
   plan: PathPlanSummary | null;
@@ -166,45 +167,45 @@ export const SpacedRepetitionInsightsPanel: React.FC<SpacedRepetitionInsightsPan
             <MetricInfoTooltip text="Maximum number of new variants the planner can introduce per day within this view." />
           </div>
         </div>
-        <button
-          type="button"
-          className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold"
+        <Button
+          intent="accent"
+          size="sm"
           onClick={() => navigate("/path")}
         >
           Open Path
           <ArrowTopRightOnSquareIcon className="h-4 w-4" />
-        </button>
+        </Button>
       </div>
 
-      {loading && <div className="text-blue-400 animate-pulse">Loading spaced-repetition insights...</div>}
-      {!loading && error && <div className="text-red-400">{error}</div>}
+      {loading && <div className="text-brand animate-pulse">Loading spaced-repetition insights...</div>}
+      {!loading && error && <div className="text-danger">{error}</div>}
 
       {!loading && !error && plan && analytics && (
         <div className="space-y-4">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <MetricCard
-              label="Overdue"
+              label="Overdue now"
               value={plan.overdueCount}
-              valueClassName="text-red-300"
-              helpText="Variants whose due date already passed and are still waiting for review."
+              valueClassName="text-danger"
+              helpText="Variants whose due date is already in the past and are still pending review."
             />
             <MetricCard
               label="Due today"
               value={plan.dueTodayCount}
-              valueClassName="text-yellow-300"
+              valueClassName="text-warning"
               helpText="Variants scheduled exactly for today."
             />
             <MetricCard
               label="Due next 7d"
               value={dueThisWeek}
-              valueClassName="text-cyan-300"
-              helpText="Total reviews scheduled in the first 7 days of the forecast window, including today."
+              valueClassName="text-brand"
+              helpText="Total due reviews scheduled in the first 7 days of the forecast window, including today."
             />
             <MetricCard
               label="Suggested new"
               value={plan.suggestedNewToday}
-              valueClassName="text-blue-300"
-              helpText="Recommended new variants to add today after accounting for due workload and New/Day limit."
+              valueClassName="text-brand"
+              helpText="Recommended new variants to add today after accounting for due workload and New/Day cap."
             />
           </div>
 
@@ -213,13 +214,13 @@ export const SpacedRepetitionInsightsPanel: React.FC<SpacedRepetitionInsightsPan
             <div className="grid grid-cols-2 gap-2 text-center">
               <div className="rounded bg-interactive/70 px-2 py-2">
                 <div className="text-[11px] text-text-subtle">Reviews (due)</div>
-                <div className="text-lg font-semibold text-cyan-300">
+                <div className="text-lg font-semibold text-brand">
                   {todayProgress.completedReviewsToday} / {todayProgress.reviewTargetToday}
                 </div>
               </div>
               <div className="rounded bg-interactive/70 px-2 py-2">
                 <div className="text-[11px] text-text-subtle">New learned (first-time)</div>
-                <div className="text-lg font-semibold text-blue-300">
+                <div className="text-lg font-semibold text-brand">
                   {todayProgress.completedNewToday} / {todayProgress.newTargetToday}
                 </div>
               </div>
@@ -227,21 +228,21 @@ export const SpacedRepetitionInsightsPanel: React.FC<SpacedRepetitionInsightsPan
             <div className="mt-2 grid grid-cols-3 gap-2 text-center">
               <div className="rounded bg-interactive/70 px-2 py-2">
                 <div className="text-[11px] text-text-subtle">Target</div>
-                <div className="text-lg font-semibold text-cyan-300">{todayProgress.plannedTodayTarget}</div>
+                <div className="text-lg font-semibold text-brand">{todayProgress.plannedTodayTarget}</div>
               </div>
               <div className="rounded bg-interactive/70 px-2 py-2">
                 <div className="text-[11px] text-text-subtle">Completed</div>
-                <div className="text-lg font-semibold text-emerald-300">{todayProgress.completedToday}</div>
+                <div className="text-lg font-semibold text-success">{todayProgress.completedToday}</div>
               </div>
               <div className="rounded bg-interactive/70 px-2 py-2">
                 <div className="text-[11px] text-text-subtle">Remaining</div>
-                <div className="text-lg font-semibold text-blue-300">{todayProgress.remainingToTarget}</div>
+                <div className="text-lg font-semibold text-brand">{todayProgress.remainingToTarget}</div>
               </div>
             </div>
             <div className="mt-2 text-xs text-text-subtle">
               Reviews remaining: {todayProgress.remainingReviewsTarget} · New remaining: {todayProgress.remainingNewTarget}
             </div>
-            <div className={`mt-1 text-sm ${todayProgress.exceededTarget ? "text-emerald-300" : "text-text-muted"}`}>
+            <div className={`mt-1 text-sm ${todayProgress.exceededTarget ? "text-success" : "text-text-muted"}`}>
               {todayProgress.todayPlanMessage}
             </div>
           </div>
@@ -311,11 +312,11 @@ export const SpacedRepetitionInsightsPanel: React.FC<SpacedRepetitionInsightsPan
                       <div key={entry.opening} className="rounded border border-border-default px-2 py-2">
                         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
                           <div className="text-sm text-text-base leading-snug break-words">{entry.opening}</div>
-                          <div className="text-xs font-semibold text-emerald-300">{entry.count}</div>
+                          <div className="text-xs font-semibold text-success">{entry.count}</div>
                         </div>
                         <div className="mt-2 h-2 overflow-hidden rounded bg-interactive">
                           <div
-                            className="h-full rounded bg-emerald-500"
+                            className="h-full rounded bg-success"
                             style={{ width: `${widthPercent}%` }}
                           />
                         </div>

@@ -4,30 +4,21 @@ import { useDialogContext } from "../../contexts/DialogContext";
 import { useNavigationUtils } from "../../utils/navigationUtils";
 import { useNavigate } from "react-router-dom";
 import {
-  AcademicCapIcon,
   ArrowPathIcon,
-  BookOpenIcon,
-  CalendarDaysIcon,
-  ChartBarIcon,
   FunnelIcon,
-  QuestionMarkCircleIcon,
-  ListBulletIcon,
-  XMarkIcon,
-  CheckCircleIcon,
 } from "@heroicons/react/24/outline";
-import { Button, Badge, Input, Select, IconButton, EmptyState } from "../../components/ui";
+import { Button, Badge, Input, Select } from "../../components/ui";
 import {
   BoardOrientation,
   PathCategory,
-  PathForecastDay,
-  PathNamedCount,
-  ReviewRating,
 } from "@chess-opening-master/common";
-import { isEmptyPath, isNewVariantPath, isStudiedVariantPath, isStudyPath } from "./helpers";
+import { isStudiedVariantPath, isStudyPath, isNewVariantPath } from "./helpers";
 import { getTodayPlanProgress } from "../../utils/path/todayPlanProgress";
 import { PageFrame } from "../../components/design/layouts/PageFrame";
 import { PageRoot } from "../../components/design/layouts/PageRoot";
 import { PageSurface } from "../../components/design/layouts/PageSurface";
+import { PathLessonView } from "./components/PathLessonView";
+import { PathForecastView } from "./components/PathForecastView";
 
 type FilterOrientation = BoardOrientation | "all";
 type PathView = "lesson" | "forecast";
@@ -42,13 +33,6 @@ type PathFiltersState = {
 };
 
 const DEFAULT_DAILY_NEW_LIMIT = 5;
-
-const formatDate = (date: string | Date): string => {
-  const newDate = new Date(date);
-  return newDate.toISOString().slice(0, 10);
-};
-
-const formatShortDate = (date: string): string => date.slice(5);
 
 const getTodayDateKey = (): string => new Date().toISOString().slice(0, 10);
 
@@ -82,47 +66,6 @@ const categoryLabels: Record<PathCategory | "all", string> = {
   oldVariants: "Old variants",
   studyToReview: "Study reviews",
 };
-
-const ratingOrder: ReviewRating[] = ["again", "hard", "good", "easy"];
-
-const ratingColorClass: Record<ReviewRating, string> = {
-  again: "text-danger",
-  hard: "text-warning",
-  good: "text-success",
-  easy: "text-brand",
-};
-
-interface MetricInfoTooltipProps {
-  text: string;
-}
-
-const MetricInfoTooltip: React.FC<MetricInfoTooltipProps> = ({ text }) => (
-  <span className="group relative inline-flex items-center">
-    <IconButton
-      type="button"
-      label="Metric info"
-      title="Metric info"
-      className="text-text-subtle hover:text-text-muted"
-    >
-      <QuestionMarkCircleIcon className="h-4 w-4" />
-    </IconButton>
-    <span className="pointer-events-none absolute left-0 top-full z-20 mt-2 hidden w-64 rounded-lg border border-border-default bg-surface px-3 py-2 text-xs text-text-base shadow-xl group-hover:block group-focus-within:block">
-      {text}
-    </span>
-  </span>
-);
-
-interface MetricTitleProps {
-  label: string;
-  helpText: string;
-}
-
-const MetricTitle: React.FC<MetricTitleProps> = ({ label, helpText }) => (
-  <div className="text-xs text-text-muted flex items-center gap-1">
-    <span>{label}</span>
-    <MetricInfoTooltip text={helpText} />
-  </div>
-);
 
 const PathPage: React.FC = () => {
   const {
@@ -209,6 +152,8 @@ const PathPage: React.FC = () => {
       showConfirmDialog({
         title: "Remove Variant from Path",
         contentText: `Are you sure you want to remove "${path.name}" from your learning path? This will reset all training progress for this variant and it will no longer appear in your spaced repetition schedule.`,
+        confirmLabel: "Remove",
+        confirmIntent: "danger",
         onConfirm: async () => {
           await removeVariantFromPath(path.id);
         },
@@ -228,12 +173,7 @@ const PathPage: React.FC = () => {
     setSelectedCategory("all");
   };
 
-  const forecastDays = plan?.forecastDays || [];
-  const nextVariants = plan?.nextVariants || [];
-  const upcomingOpenings = plan?.upcomingOpenings || [];
-  const maxForecastDayLoad = Math.max(...forecastDays.map((entry) => entry.dueCount), 1);
-  const nextSevenDueCount = forecastDays.slice(0, 7).reduce((sum, entry) => sum + entry.dueCount, 0);
-  const hasForecastLoad = forecastDays.some((entry) => entry.dueCount > 0);
+  const nextSevenDueCount = (plan?.forecastDays || []).slice(0, 7).reduce((sum, entry) => sum + entry.dueCount, 0);
   const {
     reviewTargetToday,
     newTargetToday,
@@ -247,207 +187,6 @@ const PathPage: React.FC = () => {
     exceededTarget,
     todayPlanMessage,
   } = useMemo(() => getTodayPlanProgress(plan), [plan]);
-
-  const renderTopNamedCounts = (entries: PathNamedCount[], emptyMessage: string) => {
-    if (entries.length === 0) {
-      return <div className="text-text-subtle text-sm">{emptyMessage}</div>;
-    }
-    return (
-      <div className="space-y-2">
-        {entries.map((entry) => (
-          <div key={entry.name} className="flex justify-between text-sm">
-            <span className="text-text-muted truncate pr-3">{entry.name}</span>
-            <span className="text-accent font-semibold">{entry.count}</span>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  const renderLessonCard = () => {
-    if (loading) {
-      return (
-        <EmptyState
-          variant="inline"
-          title="Loading..."
-          description="Loading your next lesson..."
-          className="animate-pulse"
-        />
-      );
-    }
-    if (error) {
-      return (
-        <EmptyState
-          variant="inline"
-          title="Error"
-          description={error}
-          className="text-danger"
-        />
-      );
-    }
-    if (!path) {
-      return (
-        <EmptyState
-          variant="inline"
-          title="No Match"
-          description="No lesson available matching your criteria."
-        />
-      );
-    }
-
-    if (isStudiedVariantPath(path)) {
-      return (
-        <>
-          <BookOpenIcon className="h-8 w-8 text-brand mb-2" />
-          <div className="font-semibold text-lg text-accent mb-1 text-center">
-            Repertoire to review: {path.repertoireName}
-          </div>
-          <div className="text-text-base mb-1">
-            <span className="font-medium">Name:</span> {path.name}
-          </div>
-          <div className="text-text-muted mb-1">
-            <span className="font-medium">Errors:</span> {path.errors}
-          </div>
-          <div className="text-text-muted mb-1">
-            <span className="font-medium">Last Reviewed:</span> {formatDate(path.lastDate)}
-          </div>
-          {path.dueAt && (
-            <div className="text-text-muted mb-1">
-              <span className="font-medium">Due At:</span> {formatDate(path.dueAt)}
-            </div>
-          )}
-          <div className="flex flex-col sm:flex-row gap-3 mt-4 w-full">
-            <Button
-              intent="primary"
-              size="md"
-              className="w-full justify-center"
-              onClick={goToReviewVariant}
-            >
-              Start Review
-            </Button>
-            <Button
-              intent="secondary"
-              size="md"
-              className="w-full justify-center"
-              onClick={goToTrainVariant}
-            >
-              Start Training
-            </Button>
-          </div>
-          <Button
-            intent="danger"
-            size="md"
-            className="mt-4 w-full justify-center"
-            onClick={handleRemoveVariant}
-          >
-            <XMarkIcon className="h-5 w-5" />
-            Remove this variant from path
-          </Button>
-        </>
-      );
-    }
-
-    if (isNewVariantPath(path)) {
-      return (
-        <>
-          <BookOpenIcon className="h-8 w-8 text-brand mb-2" />
-          <div className="font-semibold text-lg text-accent mb-1 text-center">
-            New Repertoire to learn: {path.repertoireName}
-          </div>
-          <div className="text-text-base mb-1">
-            <span className="font-medium">Name:</span> {path.name}
-          </div>
-          <div className="text-text-muted mb-1">
-            <span className="font-medium">Status:</span> Not yet started
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3 mt-4 w-full">
-            <Button
-              intent="primary"
-              size="md"
-              className="w-full justify-center"
-              onClick={goToReviewVariant}
-            >
-              Start Review
-            </Button>
-            <Button
-              intent="secondary"
-              size="md"
-              className="w-full justify-center"
-              onClick={goToTrainVariant}
-            >
-              Start Training
-            </Button>
-          </div>
-        </>
-      );
-    }
-
-    if (isStudyPath(path)) {
-      return (
-        <>
-          <AcademicCapIcon className="h-8 w-8 text-success mb-2" />
-          <div className="font-semibold text-lg text-success mb-1">Study to Review</div>
-          <div className="text-text-base mb-1">
-            <span className="font-medium">Name:</span> {path.name}
-          </div>
-          <div className="text-text-muted mb-1">
-            <span className="font-medium">Last Session:</span> {path.lastSession}
-          </div>
-          <Button
-            intent="accent"
-            size="md"
-            className="mt-4 w-full sm:w-auto justify-center"
-            onClick={goToStudy}
-          >
-            Go to Study
-          </Button>
-        </>
-      );
-    }
-
-    if (isEmptyPath(path)) {
-      return (
-        <EmptyState
-          variant="inline"
-          icon={CheckCircleIcon}
-          title="All Caught Up!"
-          description="You have no variants or studies to review right now. Adjust filters or return tomorrow for new due lessons."
-        />
-      );
-    }
-
-    return null;
-  };
-
-  const renderForecastDay = (day: PathForecastDay) => {
-    const barWidth = day.dueCount === 0 ? 0 : (day.dueCount / maxForecastDayLoad) * 100;
-    return (
-      <div key={day.date} className="rounded-xl border border-border-subtle bg-surface/70 p-3">
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <div className="text-sm font-semibold text-text-base">{day.date === plan?.todayKey ? "Today" : formatShortDate(day.date)}</div>
-          <div className="text-xs text-text-muted">{day.dueCount} due</div>
-        </div>
-        <div className="h-2 rounded bg-surface-raised overflow-hidden mb-2">
-          <div className="h-full bg-brand" style={{ width: `${barWidth}%` }} />
-        </div>
-        <div className="flex flex-wrap gap-1 mb-2">
-          {day.topOpenings.length === 0 && <span className="text-xs text-text-subtle">No due openings</span>}
-          {day.topOpenings.map((opening) => (
-            <span key={`${day.date}-${opening.name}`} className="text-xs px-2 py-1 rounded bg-surface-raised text-text-muted border border-border-default">
-              {opening.name} ({opening.count})
-            </span>
-          ))}
-        </div>
-        <div className="space-y-1">
-          {day.variants.map((variant) => (
-            <div key={`${day.date}-${variant.repertoireId}-${variant.variantName}`} className="text-xs text-text-muted truncate">
-              {variant.repertoireName}: {variant.variantName}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
 
   return (
     <PageRoot>
@@ -580,7 +319,12 @@ const PathPage: React.FC = () => {
                 <div className="flex flex-col">
                   <label htmlFor="daily-new-limit" className="text-text-muted mb-1 text-sm flex items-center gap-1">
                     <span>Daily new limit</span>
-                    <MetricInfoTooltip text="Maximum number of brand-new variants to introduce per day. It does not affect due reviews." />
+                    <span
+                      className="inline-flex items-center justify-center h-4 w-4 rounded-full border border-border-subtle text-text-subtle cursor-help text-[10px]"
+                      title="Maximum number of brand-new variants to introduce per day. It does not affect due reviews."
+                    >
+                      ?
+                    </span>
                   </label>
                   <Input
                     id="daily-new-limit"
@@ -595,210 +339,40 @@ const PathPage: React.FC = () => {
           </div>
 
           {selectedView === "lesson" && (
-            <>
-              <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
-                <div className="xl:col-span-8 bg-surface border border-border-default rounded-2xl shadow p-4 sm:p-6 w-full flex flex-col items-center justify-center min-h-[280px]">
-                  {renderLessonCard()}
-                </div>
-                <div className="xl:col-span-4 space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-surface border border-border-default rounded-xl p-3">
-                      <MetricTitle
-                        label="Overdue now"
-                        helpText="Variants whose due date is already in the past and are still pending review."
-                      />
-                      <div className="text-xl font-semibold text-danger">{plan?.overdueCount ?? 0}</div>
-                    </div>
-                    <div className="bg-surface border border-border-default rounded-xl p-3">
-                      <div className="text-xs text-text-muted">Due today</div>
-                      <div className="text-xl font-semibold text-warning">{plan?.dueTodayCount ?? 0}</div>
-                    </div>
-                    <div className="bg-surface border border-border-default rounded-xl p-3">
-                      <MetricTitle
-                        label="Next 7 days"
-                        helpText="Total due reviews scheduled in the first 7 days of the forecast window, including today."
-                      />
-                      <div className="text-xl font-semibold text-brand">{nextSevenDueCount}</div>
-                    </div>
-                    <div className="bg-surface border border-border-default rounded-xl p-3">
-                      <MetricTitle
-                        label="Suggested new"
-                        helpText="Recommended new variants to add today after considering current due workload and New/Day cap."
-                      />
-                      <div className="text-xl font-semibold text-accent">{plan?.suggestedNewToday ?? 0}</div>
-                    </div>
-                  </div>
-
-                  <div className="bg-surface border border-border-default rounded-xl p-4 flex flex-col gap-3">
-                    <div>
-                      <div className="text-sm text-text-base font-semibold">Need a bigger-picture plan?</div>
-                      <div className="text-sm text-text-muted">Open Path forecast to see likely openings and variants by day.</div>
-                    </div>
-                    <Button
-                      type="button"
-                      intent="accent"
-                      size="sm"
-                      className="w-full justify-center"
-                      onClick={() => setSelectedView("forecast")}
-                    >
-                      Open forecast
-                    </Button>
-                  </div>
-
-                  <div className="bg-surface border border-border-default rounded-xl p-4 flex flex-col gap-2">
-                    <div className="text-sm text-text-base font-semibold">Today vs plan</div>
-                    <div className="grid grid-cols-2 gap-2 text-center">
-                      <div className="rounded bg-interactive px-2 py-2">
-                        <div className="text-[11px] text-text-muted">Reviews (due)</div>
-                        <div className="text-lg font-semibold text-brand">{completedReviewsToday} / {reviewTargetToday}</div>
-                      </div>
-                      <div className="rounded bg-interactive px-2 py-2">
-                        <div className="text-[11px] text-text-muted">New learned (first-time)</div>
-                        <div className="text-lg font-semibold text-accent">{completedNewToday} / {newTargetToday}</div>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2 text-center">
-                      <div className="rounded bg-interactive px-2 py-2">
-                        <div className="text-[11px] text-text-muted">Target</div>
-                        <div className="text-lg font-semibold text-brand">{plannedTodayTarget}</div>
-                      </div>
-                      <div className="rounded bg-interactive px-2 py-2">
-                        <div className="text-[11px] text-text-muted">Completed</div>
-                        <div className="text-lg font-semibold text-success">{completedToday}</div>
-                      </div>
-                      <div className="rounded bg-interactive px-2 py-2">
-                        <div className="text-[11px] text-text-muted">Remaining</div>
-                        <div className="text-lg font-semibold text-accent">{remainingToTarget}</div>
-                      </div>
-                    </div>
-                    <div className="text-xs text-text-muted">
-                      Reviews remaining: {remainingReviewsTarget} · New remaining: {remainingNewTarget}
-                    </div>
-                    <div className="text-xs text-text-subtle">
-                      New learned increases only when a variant is reviewed for the first time in this filter scope.
-                    </div>
-                    <div className={`text-sm ${exceededTarget ? "text-success" : "text-text-muted"}`}>
-                      {todayPlanMessage}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </>
+            <PathLessonView
+              path={path}
+              loading={loading}
+              error={error}
+              plan={plan}
+              nextSevenDueCount={nextSevenDueCount}
+              completedReviewsToday={completedReviewsToday}
+              reviewTargetToday={reviewTargetToday}
+              completedNewToday={completedNewToday}
+              newTargetToday={newTargetToday}
+              plannedTodayTarget={plannedTodayTarget}
+              completedToday={completedToday}
+              remainingToTarget={remainingToTarget}
+              remainingReviewsTarget={remainingReviewsTarget}
+              remainingNewTarget={remainingNewTarget}
+              exceededTarget={exceededTarget}
+              todayPlanMessage={todayPlanMessage}
+              onGoToReviewVariant={goToReviewVariant}
+              onGoToTrainVariant={goToTrainVariant}
+              onGoToStudy={goToStudy}
+              onRemoveVariant={handleRemoveVariant}
+              onSwitchToForecast={() => setSelectedView("forecast")}
+            />
           )}
 
           {selectedView === "forecast" && (
-            <div className="space-y-4">
-              {(insightsLoading || loading) && (
-                <div className="bg-surface border border-border-subtle rounded-xl p-4 text-brand animate-pulse">
-                  Loading path forecast...
-                </div>
-              )}
-
-              {insightsError && (
-                <div className="bg-surface border border-danger rounded-xl p-4 text-danger">{insightsError}</div>
-              )}
-
-              {!insightsLoading && analytics && (
-                <div className="bg-surface border border-border-subtle rounded-2xl p-4">
-                  <div className="text-sm text-text-muted mb-2">Recent review quality ({analytics.rangeStart} to {analytics.rangeEnd})</div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {ratingOrder.map((rating) => (
-                      <div key={rating} className="rounded bg-surface-raised px-3 py-2 text-center">
-                        <div className={`text-sm capitalize ${ratingColorClass[rating]}`}>{rating}</div>
-                        <div className="text-lg text-text-base font-semibold">{analytics.ratingBreakdown[rating]}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {!insightsLoading && plan && (
-                <>
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                    <div className="bg-surface border border-border-subtle rounded-xl p-3">
-                      <MetricTitle
-                        label="Due now"
-                        helpText="All variants currently due for review, including overdue and due-today items."
-                      />
-                      <div className="text-xl font-semibold text-danger">{plan.reviewDueCount}</div>
-                    </div>
-                    <div className="bg-surface border border-border-subtle rounded-xl p-3">
-                      <MetricTitle
-                        label="Next 7 days"
-                        helpText="Total due reviews scheduled in the first 7 days of the forecast window, including today."
-                      />
-                      <div className="text-xl font-semibold text-brand">{nextSevenDueCount}</div>
-                    </div>
-                    <div className="bg-surface border border-border-subtle rounded-xl p-3">
-                      <div className="text-xs text-text-subtle">Variants in queue</div>
-                      <div className="text-xl font-semibold text-text-base">{nextVariants.length}</div>
-                    </div>
-                    <div className="bg-surface border border-border-subtle rounded-xl p-3">
-                      <MetricTitle
-                        label="Suggested new/day"
-                        helpText="How many new variants are recommended today within the active New/Day cap."
-                      />
-                      <div className="text-xl font-semibold text-accent">{plan.suggestedNewToday}</div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-                    <div className="xl:col-span-2 bg-surface border border-border-subtle rounded-2xl p-4">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-                        <div className="flex items-center gap-2">
-                          <CalendarDaysIcon className="h-5 w-5 text-brand" />
-                          <h2 className="text-base font-semibold text-text-base">Likely Study Path (14 days)</h2>
-                        </div>
-                        <div className="text-xs text-text-subtle">Daily due load + representative variants</div>
-                      </div>
-                      {hasForecastLoad ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-3">
-                          {forecastDays.map(renderForecastDay)}
-                        </div>
-                      ) : (
-                        <div className="rounded-xl border border-border-subtle bg-surface/60 p-4 text-sm text-text-subtle">
-                          No due forecast inside the current filter scope.
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="bg-surface border border-border-subtle rounded-2xl p-4">
-                        <div className="flex items-center gap-2 mb-3">
-                          <ListBulletIcon className="h-5 w-5 text-accent" />
-                          <h2 className="text-base font-semibold text-text-base">Likely Next Variants</h2>
-                        </div>
-                        <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
-                          {nextVariants.length === 0 && (
-                            <div className="text-sm text-text-subtle">No due variants in this filter scope.</div>
-                          )}
-                          {nextVariants.map((variant) => (
-                            <div key={`${variant.repertoireId}-${variant.variantName}-${variant.dueDate}`} className="rounded border border-border-subtle bg-surface/60 p-2">
-                              <div className="flex items-center justify-between gap-2">
-                                <div className="text-xs text-text-subtle">{variant.dueDate}</div>
-                                {variant.orientation && (
-                                  <div className="text-[10px] uppercase tracking-wide text-text-subtle">{variant.orientation}</div>
-                                )}
-                              </div>
-                              <div className="text-sm text-text-base truncate">{variant.variantName}</div>
-                              <div className="text-xs text-text-subtle truncate">{variant.repertoireName}</div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="bg-surface border border-border-subtle rounded-2xl p-4">
-                        <div className="flex items-center gap-2 mb-3">
-                          <ChartBarIcon className="h-5 w-5 text-success" />
-                          <h2 className="text-base font-semibold text-text-base">Openings Entering Soon</h2>
-                        </div>
-                        {renderTopNamedCounts(upcomingOpenings, "No opening forecast in this scope.")}
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
+            <PathForecastView
+              plan={plan}
+              analytics={analytics}
+              insightsLoading={insightsLoading}
+              loading={loading}
+              insightsError={insightsError}
+              nextSevenDueCount={nextSevenDueCount}
+            />
           )}
           </div>
           </div>

@@ -4,6 +4,7 @@ import { formatPercent } from "../utils";
 import { Card, SectionTitle } from "../components/InsightCard";
 import { WDLBar, WDLMiniBar } from "../components/WDLBar";
 import MonthChart from "../components/MonthChart";
+import { Button } from "../../../components/ui";
 
 type InsightsTabProps = {
   stats: GamesStatsSummary | null;
@@ -94,9 +95,9 @@ const InsightsTab: React.FC<InsightsTabProps> = ({
               <div key={v.variantKey} className="flex items-center justify-between py-2 border-b border-border-subtle last:border-0 gap-2">
                 <p className="text-sm text-text-muted truncate">{v.variantName}</p>
                 <div className="flex items-center gap-2 shrink-0">
-                  <p className="text-sm font-semibold text-rose-400 tabular-nums">{formatPercent(v.successRate)}</p>
+                  <p className="text-sm font-semibold text-danger tabular-nums">{formatPercent(v.successRate)}</p>
                   {v.repertoireId ? (
-                    <button className="text-xs px-2 py-0.5 rounded-md bg-blue-600 hover:bg-blue-500 text-white transition-colors" onClick={() => openTrainRepertoire(v.repertoireId as string, v.variantName)}>Train</button>
+                    <Button intent="primary" size="xs" onClick={() => openTrainRepertoire(v.repertoireId as string, v.variantName)}>Train</Button>
                   ) : null}
                 </div>
               </div>
@@ -111,9 +112,9 @@ const InsightsTab: React.FC<InsightsTabProps> = ({
               <div key={v.variantKey} className="flex items-center justify-between py-2 border-b border-border-subtle last:border-0 gap-2">
                 <p className="text-sm text-text-muted truncate">{v.variantName}</p>
                 <div className="flex items-center gap-2 shrink-0">
-                  <p className="text-sm font-semibold text-emerald-400 tabular-nums">{formatPercent(v.successRate)}</p>
+                  <p className="text-sm font-semibold text-success tabular-nums">{formatPercent(v.successRate)}</p>
                   {v.repertoireId ? (
-                    <button className="text-xs px-2 py-0.5 rounded-md bg-surface-raised hover:bg-slate-700 text-text-muted border border-border-default transition-colors" onClick={() => openRepertoire(v.repertoireId as string, v.variantName)}>View</button>
+                    <Button intent="secondary" size="xs" onClick={() => openRepertoire(v.repertoireId as string, v.variantName)}>View</Button>
                   ) : null}
                 </div>
               </div>
@@ -134,7 +135,7 @@ const InsightsTab: React.FC<InsightsTabProps> = ({
                   <p className="text-sm text-text-muted truncate">{o.openingName}</p>
                   <p className="text-xs text-text-subtle shrink-0 tabular-nums">{o.games}g · {formatPercent(o.successRate)}</p>
                 </div>
-                <p className="mt-0.5 text-[11px] font-mono text-slate-600 truncate">{o.sampleLine.slice(0, 6).join(" ")}</p>
+                <p className="mt-0.5 text-[11px] font-mono text-text-subtle truncate">{o.sampleLine.slice(0, 6).join(" ")}</p>
               </div>
             ))
         }
@@ -146,7 +147,7 @@ const InsightsTab: React.FC<InsightsTabProps> = ({
           : <ul className="space-y-2.5">
               {trainingIdeas.map((idea) => (
                 <li key={idea} className="flex items-start gap-2 text-sm text-text-muted leading-snug">
-                  <span className="text-blue-400 shrink-0 select-none mt-0.5">›</span>
+                  <span className="text-brand shrink-0 select-none mt-0.5">›</span>
                   {idea}
                 </li>
               ))}
@@ -170,17 +171,17 @@ const InsightsTab: React.FC<InsightsTabProps> = ({
                     <span className="text-sm font-semibold tabular-nums text-text-base">{formatPercent(v.successRate)}</span>
                     {v.repertoireId ? (
                       <>
-                        <button className="text-xs px-2 py-0.5 rounded-md bg-surface-raised hover:bg-slate-700 text-text-muted border border-border-default transition-colors" onClick={() => openRepertoire(v.repertoireId as string, v.variantName)}>View</button>
-                        <button className="text-xs px-2 py-0.5 rounded-md bg-blue-600 hover:bg-blue-500 text-white transition-colors" onClick={() => openTrainRepertoire(v.repertoireId as string, v.variantName)}>Train</button>
+                        <Button intent="secondary" size="xs" onClick={() => openRepertoire(v.repertoireId as string, v.variantName)}>View</Button>
+                        <Button intent="primary" size="xs" onClick={() => openTrainRepertoire(v.repertoireId as string, v.variantName)}>Train</Button>
                       </>
                     ) : null}
                   </div>
                 </div>
                 <WDLMiniBar wins={v.wins} draws={v.draws} losses={v.losses} />
-                <div className="mt-1 flex gap-3 text-[11px] text-slate-600 tabular-nums">
-                  <span className="text-emerald-600">{v.wins}W</span>
+                <div className="mt-1 flex gap-3 text-[11px] text-text-subtle tabular-nums">
+                  <span className="text-success">{v.wins}W</span>
                   <span>{v.draws}D</span>
-                  <span className="text-rose-600">{v.losses}L</span>
+                  <span className="text-danger">{v.losses}L</span>
                   {typeof v.averageMappingConfidence === "number" ? <span>Map {formatPercent(v.averageMappingConfidence)}</span> : null}
                 </div>
               </div>

@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { TrainOpeningResponse } from "@chess-opening-master/common";
-import { Badge, Button, Card } from "../../components/ui";
+import { Button, Card, MasteryBadge } from "../../components/ui";
 import { getTrainOpening } from "../../repository/train/train";
 import { StaticChessboard } from "../../components/design/chess/StaticChessboard";
 import { TrainOpeningActions } from "./components/TrainOpeningActions";
@@ -10,28 +10,28 @@ import { TrainOpeningVariantList } from "./components/TrainOpeningVariantList";
 import { PageFrame } from "../../components/design/layouts/PageFrame";
 import { PageRoot } from "../../components/design/layouts/PageRoot";
 import { getDueTrainMistakes } from "./mistakeUtils";
+import { useNavigationUtils } from "../../utils/navigationUtils";
 
 const FALLBACK_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-const getMasteryBadge = (
-  score: number
-): { label: string; variant: "success" | "warning" | "brand" } => {
-  if (score >= 85) {
-    return { label: "Mastered", variant: "success" };
-  }
-  if (score >= 55) {
-    return { label: "In Progress", variant: "brand" };
-  }
-  return { label: "Needs Work", variant: "warning" };
-};
-
 const TrainOpeningPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { goToRepertoire } = useNavigationUtils();
   const { repertoireId = "", openingName = "" } = useParams();
   const [payload, setPayload] = useState<TrainOpeningResponse | null>(null);
   const [status, setStatus] = useState<"loading" | "success" | "error">(
     "loading"
   );
+
+  const backTarget = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    const returnTo = params.get("returnTo");
+    if (!returnTo || !returnTo.startsWith("/")) {
+      return "/train";
+    }
+    return returnTo;
+  }, [location.search]);
 
   useEffect(() => {
     let ignore = false;
@@ -114,6 +114,17 @@ const TrainOpeningPage: React.FC = () => {
     });
   };
 
+  const handleViewOpening = () => {
+    if (!payload) {
+      return;
+    }
+    goToRepertoire(repertoireId, payload.openingName);
+  };
+
+  const handleViewVariant = (variantName: string) => {
+    goToRepertoire(repertoireId, variantName);
+  };
+
   if (status === "loading") {
     return (
       <PageRoot>
@@ -131,8 +142,8 @@ const TrainOpeningPage: React.FC = () => {
           <Card className="border-border-default bg-surface" padding="default">
             <p className="text-sm text-text-muted">Unable to load opening training details.</p>
             <div className="mt-3">
-              <Button intent="secondary" size="sm" onClick={() => navigate("/train")}>
-                Back to Train
+              <Button intent="secondary" size="sm" onClick={() => navigate(backTarget)}>
+                Back
               </Button>
             </div>
           </Card>
@@ -141,7 +152,6 @@ const TrainOpeningPage: React.FC = () => {
     );
   }
 
-  const mastery = getMasteryBadge(payload.stats.masteryScore);
   const dueMistakes = getDueTrainMistakes(payload.mistakes);
 
   const handleReviewDueMistakes = () => {
@@ -163,7 +173,7 @@ const TrainOpeningPage: React.FC = () => {
     <PageRoot>
       <PageFrame className="max-w-6xl py-4 sm:py-6">
         <div className="mb-3">
-          <Button intent="ghost" size="sm" onClick={() => navigate("/train")}>
+          <Button intent="ghost" size="sm" onClick={() => navigate(backTarget)}>
             Back
           </Button>
         </div>
@@ -186,12 +196,7 @@ const TrainOpeningPage: React.FC = () => {
                   </h1>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant={mastery.variant} size="sm">
-                    {mastery.label}
-                  </Badge>
-                  <Badge variant="brand" size="sm">
-                    Mastery {payload.stats.masteryScore}%
-                  </Badge>
+                  <MasteryBadge score={payload.stats.masteryScore} size="sm" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -232,9 +237,11 @@ const TrainOpeningPage: React.FC = () => {
             <TrainOpeningActions
               totalVariantsCount={payload.variants.length}
               onStartNormalMode={handleStartNormalMode}
+              onViewOpening={handleViewOpening}
             />
             <TrainOpeningVariantList
               variants={payload.variants}
+              onViewVariant={handleViewVariant}
               onTrainVariantNormal={handleTrainVariantNormal}
               onTrainVariantFocus={handleTrainVariantFocus}
             />

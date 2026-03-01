@@ -13,6 +13,7 @@ describe("variantReviewService", () => {
   const mockVariantsInfoUpdateOne = jest.fn();
   const mockVariantReviewHistoryInsertOne = jest.fn();
   const mockVariantMistakesUpdateOne = jest.fn();
+  const mockVariantMistakesUpdateMany = jest.fn();
 
   const mockDB = {
     collection: jest.fn((name: string) => {
@@ -35,6 +36,7 @@ describe("variantReviewService", () => {
       if (name === "variantMistakes") {
         return {
           updateOne: mockVariantMistakesUpdateOne,
+          updateMany: mockVariantMistakesUpdateMany,
         };
       }
       throw new Error(`Unknown collection: ${name}`);
@@ -83,6 +85,7 @@ describe("variantReviewService", () => {
       });
     mockVariantsInfoUpdateOne.mockResolvedValue({ acknowledged: true });
     mockVariantReviewHistoryInsertOne.mockResolvedValue({ acknowledged: true });
+    mockVariantMistakesUpdateMany.mockResolvedValue({ acknowledged: true });
 
     const result = await saveVariantReview({
       userId: "user-1",
@@ -251,5 +254,148 @@ describe("variantReviewService", () => {
       { upsert: true }
     );
     expect(mockVariantMistakesUpdateOne).toHaveBeenCalled();
+    expect(mockVariantMistakesUpdateMany).not.toHaveBeenCalled();
+  });
+
+  it("archives omitted mistake items when a later-day review provides a new snapshot", async () => {
+    const repertoireId = new ObjectId().toHexString();
+    jest.setSystemTime(new Date("2026-02-16T12:00:00.000Z"));
+    mockRepertoiresFindOne.mockResolvedValue({
+      _id: new ObjectId(repertoireId),
+      userId: "user-1",
+    });
+    mockVariantsInfoFindOne
+      .mockResolvedValueOnce({
+        userId: "user-1",
+        repertoireId,
+        variantName: "Opening: A",
+        errors: 3,
+        dailyErrorsDayKey: "2026-02-15",
+        dailyErrorCount: 3,
+        dailyErrorSnapshot: [
+          {
+            mistakeKey: "Opening: A::4::e7e5::0",
+            mistakePly: 4,
+            variantStartPly: 0,
+            positionFen: "fen-a",
+            expectedMoveLan: "e7e5",
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        userId: "user-1",
+        repertoireId,
+        variantName: "Opening: A",
+        errors: 1,
+      });
+    mockVariantsInfoUpdateOne.mockResolvedValue({ acknowledged: true });
+    mockVariantReviewHistoryInsertOne.mockResolvedValue({ acknowledged: true });
+    mockVariantMistakesUpdateOne.mockResolvedValue({ acknowledged: true });
+
+    await saveVariantReview({
+      userId: "user-1",
+      repertoireId,
+      variantName: "Opening: A",
+      rating: "good",
+      wrongMoves: 1,
+      startingFen: "start-fen",
+      mistakes: [
+        {
+          mistakeKey: "Opening: A::6::b8c6::0",
+          mistakePly: 6,
+          variantStartPly: 0,
+          positionFen: "fen-b",
+          expectedMoveLan: "b8c6",
+        },
+      ],
+    });
+
+    expect(mockVariantsInfoUpdateOne).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({
+        $set: expect.objectContaining({
+          errors: 1,
+          dailyErrorCount: 1,
+          dailyErrorSnapshot: [
+            expect.objectContaining({
+              mistakeKey: "Opening: A::6::b8c6::0",
+            }),
+          ],
+        }),
+      }),
+      { upsert: true }
+    );
+    expect(mockVariantMistakesUpdateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        variantName: "Opening: A",
+        archivedAt: { $exists: false },
+        mistakeKey: { $nin: ["Opening: A::6::b8c6::0"] },
+      }),
+      expect.objectContaining({
+        $set: expect.objectContaining({
+          archivedAt: new Date("2026-02-16T12:00:00.000Z"),
+        }),
+      })
+    );
+  });
+
+  it("archives all active mistakes when a later-day review provides an explicit empty snapshot", async () => {
+    const repertoireId = new ObjectId().toHexString();
+    jest.setSystemTime(new Date("2026-02-16T12:00:00.000Z"));
+    mockRepertoiresFindOne.mockResolvedValue({
+      _id: new ObjectId(repertoireId),
+      userId: "user-1",
+    });
+    mockVariantsInfoFindOne
+      .mockResolvedValueOnce({
+        userId: "user-1",
+        repertoireId,
+        variantName: "Opening: A",
+        errors: 2,
+        dailyErrorsDayKey: "2026-02-15",
+        dailyErrorCount: 2,
+        dailyErrorSnapshot: [
+          {
+            mistakeKey: "Opening: A::4::e7e5::0",
+            mistakePly: 4,
+            variantStartPly: 0,
+            positionFen: "fen-a",
+            expectedMoveLan: "e7e5",
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        userId: "user-1",
+        repertoireId,
+        variantName: "Opening: A",
+        errors: 0,
+      });
+    mockVariantsInfoUpdateOne.mockResolvedValue({ acknowledged: true });
+    mockVariantReviewHistoryInsertOne.mockResolvedValue({ acknowledged: true });
+
+    await saveVariantReview({
+      userId: "user-1",
+      repertoireId,
+      variantName: "Opening: A",
+      rating: "good",
+      wrongMoves: 0,
+      mistakes: [],
+    });
+
+    expect(mockVariantMistakesUpdateOne).not.toHaveBeenCalled();
+    expect(mockVariantMistakesUpdateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: "user-1",
+        repertoireId,
+        variantName: "Opening: A",
+        archivedAt: { $exists: false },
+      }),
+      expect.objectContaining({
+        $set: expect.objectContaining({
+          archivedAt: new Date("2026-02-16T12:00:00.000Z"),
+        }),
+      })
+    );
+    expect(mockVariantMistakesUpdateMany.mock.calls[0][0]).not.toHaveProperty("mistakeKey");
   });
 });

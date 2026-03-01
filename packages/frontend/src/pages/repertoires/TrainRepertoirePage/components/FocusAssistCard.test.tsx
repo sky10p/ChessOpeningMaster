@@ -2,6 +2,7 @@ import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { FocusAssistCard } from "./FocusAssistCard";
+import { MoveVariantNode } from "../../../../models/VariantNode";
 
 jest.mock("../../../../components/design/chess/train/HintInfo", () => ({
   HintInfo: () => <div data-testid="assist-comments">comments</div>,
@@ -14,7 +15,7 @@ jest.mock("../../../../components/design/chess/train/TrainAvailableVariantsPanel
 const baseProps = {
   hasErrors: false,
   pendingErrorCount: 0,
-  currentMoveNode: { id: "root", position: 0 } as any,
+  currentMoveNode: new MoveVariantNode(),
   orientation: "white" as const,
   updateComment: jest.fn(async () => undefined),
   trainVariants: [],

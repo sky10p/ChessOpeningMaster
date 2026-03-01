@@ -26,7 +26,7 @@ export const TrainOpeningMistakeSummary: React.FC<TrainOpeningMistakeSummaryProp
         <h3 className="text-lg font-semibold text-text-base">Mistakes</h3>
         {mistakes.length > 0 && (
           <Badge variant={dueMistakes.length > 0 ? "warning" : "default"} size="sm">
-            {dueMistakes.length} due
+            {dueMistakes.length} Due
           </Badge>
         )}
       </div>

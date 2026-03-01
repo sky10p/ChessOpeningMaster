@@ -123,7 +123,7 @@ export const TrainRepertoireGroup: React.FC<TrainRepertoireGroupProps> = ({ grou
               {group.openings.length} openings
             </Badge>
             <Badge variant="warning" size="sm">
-              {dueVariants + dueMistakes} due
+              {dueVariants + dueMistakes} Due
             </Badge>
           </div>
         </div>

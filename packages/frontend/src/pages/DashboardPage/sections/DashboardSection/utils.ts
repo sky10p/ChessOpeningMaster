@@ -13,19 +13,19 @@ import {
 import { getRepertoireVariants } from "../../utils/openingIndex";
 
 export const getRatioColor = (ratio: number): string => {
-  if (ratio >= 80) return "bg-green-500";
-  if (ratio >= 60) return "bg-lime-500";
-  if (ratio >= 40) return "bg-yellow-500";
-  if (ratio >= 20) return "bg-orange-500";
-  return "bg-red-500";
+  if (ratio >= 80) return "bg-success";
+  if (ratio >= 60) return "bg-success/70";
+  if (ratio >= 40) return "bg-warning";
+  if (ratio >= 20) return "bg-warning/70";
+  return "bg-danger";
 };
 
 export const getRatioTextColor = (ratio: number): string => {
-  if (ratio >= 80) return "text-green-400";
-  if (ratio >= 60) return "text-lime-400";
-  if (ratio >= 40) return "text-yellow-400";
-  if (ratio >= 20) return "text-orange-400";
-  return "text-red-400";
+  if (ratio >= 80) return "text-success";
+  if (ratio >= 60) return "text-success/70";
+  if (ratio >= 40) return "text-warning";
+  if (ratio >= 20) return "text-warning/70";
+  return "text-danger";
 };
 
 export const getRelevantVariants = (

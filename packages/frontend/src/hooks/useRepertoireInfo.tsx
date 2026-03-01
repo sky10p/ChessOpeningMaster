@@ -57,6 +57,8 @@ export const useRepertoireInfo = () => {
     showConfirmDialog({
       title: "Delete variant",
       contentText: "Are you sure you want to delete this variant?",
+      confirmLabel: "Delete",
+      confirmIntent: "danger",
       onConfirm: async () => {
         const variantsWithoutDeleted = variants.filter(
           (v: Variant) => v.fullName !== variant.fullName
@@ -158,6 +160,8 @@ export const useRepertoireInfo = () => {
             !isCancelled && showConfirmDialog({
               title: "Delete variants",
               contentText: "Are you sure you want to delete the selected variants?",
+              confirmLabel: "Delete",
+              confirmIntent: "danger",
               onConfirm: async () => {
                 const variantsWithoutDeleted = variants.filter(
                   (v: Variant) =>

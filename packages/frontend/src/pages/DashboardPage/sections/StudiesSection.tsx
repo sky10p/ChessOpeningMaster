@@ -1,4 +1,5 @@
 ﻿import React, { useState, useEffect, useMemo } from "react";
+import { Button } from "../../../components/ui";
 import {
   PieChart,
   Pie,
@@ -300,36 +301,36 @@ export const StudiesSection: React.FC = () => {
       <div className="flex-1 overflow-y-auto">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           <div className="bg-surface-raised rounded-lg p-4 shadow border border-border-default flex flex-col items-center">
-            <span className="text-3xl font-bold text-blue-400">{totalStudies}</span>
+            <span className="text-3xl font-bold text-brand">{totalStudies}</span>
             <span className="text-text-muted mt-1">Total Studies</span>
           </div>
           <div className="bg-surface-raised rounded-lg p-4 shadow border border-border-default flex flex-col items-center">
-            <span className="text-3xl font-bold text-amber-400">{totalSessions}</span>
+            <span className="text-3xl font-bold text-warning">{totalSessions}</span>
             <span className="text-text-muted mt-1">Total Sessions</span>
           </div>
           <div className="bg-surface-raised rounded-lg p-4 shadow border border-border-default flex flex-col items-center">
-            <span className="text-3xl font-bold text-purple-400">
+            <span className="text-3xl font-bold text-brand">
               {Math.floor(totalTimeSpentSeconds / 3600)}h {Math.floor((totalTimeSpentSeconds % 3600) / 60)}m
             </span>
             <span className="text-text-muted mt-1">Total Time Spent</span>
           </div>
         </div>
 
-        <div className="flex justify-end mb-4">
-          <div className="bg-surface-raised rounded-lg overflow-hidden">
-            <button
-              className={`px-4 py-2 ${timeframeOption === "week" ? "bg-blue-700" : ""}`}
-              onClick={() => setTimeframeOption("week")}
-            >
-              Weekly
-            </button>
-            <button
-              className={`px-4 py-2 ${timeframeOption === "month" ? "bg-blue-700" : ""}`}
-              onClick={() => setTimeframeOption("month")}
-            >
-              Monthly
-            </button>
-          </div>
+        <div className="flex justify-end mb-4 gap-2">
+          <Button
+            intent={timeframeOption === "week" ? "primary" : "secondary"}
+            size="sm"
+            onClick={() => setTimeframeOption("week")}
+          >
+            Weekly
+          </Button>
+          <Button
+            intent={timeframeOption === "month" ? "primary" : "secondary"}
+            size="sm"
+            onClick={() => setTimeframeOption("month")}
+          >
+            Monthly
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-6">
@@ -440,7 +441,7 @@ export const StudiesSection: React.FC = () => {
                         <td className="py-2 px-4 text-right">
                           {study.lastPracticed ? study.lastPracticed.toLocaleDateString() : 'Never'}
                         </td>
-                        <td className={`py-2 px-4 text-right ${study.daysSinceLastPractice > 30 ? 'text-red-400' : 'text-yellow-400'}`}>
+                        <td className={`py-2 px-4 text-right ${study.daysSinceLastPractice > 30 ? 'text-danger' : 'text-warning'}`}>
                           {study.daysSinceLastPractice === Infinity ? '—' : `${study.daysSinceLastPractice} days`}
                         </td>
                       </tr>

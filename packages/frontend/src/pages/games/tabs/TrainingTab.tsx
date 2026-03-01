@@ -1,6 +1,7 @@
 ﻿import React from "react";
 import { LineStudyCandidate, TrainingPlanItem } from "@chess-opening-master/common";
 import { buildLineTitle, formatDateTime, formatPercent } from "../utils";
+import { Button, Checkbox } from "../../../components/ui";
 
 type TrainingTabProps = {
   trainingPlanId?: string;
@@ -25,22 +26,22 @@ const SectionTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 );
 
 const confidenceTone = (confidence: number): string => {
-  if (confidence >= 0.8) return "text-emerald-400 border-emerald-900/60 bg-emerald-950/20";
-  if (confidence >= 0.6) return "text-amber-300 border-amber-900/60 bg-amber-950/20";
-  return "text-rose-300 border-rose-900/60 bg-rose-950/20";
+  if (confidence >= 0.8) return "text-success border-success/30 bg-success/5";
+  if (confidence >= 0.6) return "text-warning border-warning/30 bg-warning/5";
+  return "text-danger border-danger/30 bg-danger/5";
 };
 
 const pathHintTone: Record<"errors" | "due" | "map" | "new" | "study", string> = {
-  errors: "text-rose-300 border-rose-900/60 bg-rose-950/20",
-  due: "text-amber-300 border-amber-900/60 bg-amber-950/20",
-  map: "text-violet-300 border-violet-900/60 bg-violet-950/20",
-  new: "text-blue-300 border-blue-900/60 bg-blue-950/20",
+  errors: "text-danger border-danger/30 bg-danger/5",
+  due: "text-warning border-warning/30 bg-warning/5",
+  map: "text-brand border-brand/30 bg-brand/5",
+  new: "text-brand border-brand/30 bg-brand/5",
   study: "text-text-muted border-border-default bg-surface-raised/40",
 };
 
 const pathHintLabel: Record<"errors" | "due" | "map" | "new" | "study", string> = {
   errors: "Errors-first",
-  due: "Due-now",
+  due: "Due now",
   map: "Needs-mapping",
   new: "High-activity",
   study: "Build-line",
@@ -54,8 +55,8 @@ const ActionButtons: React.FC<{
   if (!target) return null;
   return (
     <div className="flex gap-1.5 shrink-0">
-      <button className="text-xs px-2.5 py-1 rounded-md bg-surface-raised hover:bg-slate-700 text-text-muted border border-border-default transition-colors" onClick={() => openRepertoire(target.repertoireId, target.variantName)}>View</button>
-      <button className="text-xs px-2.5 py-1 rounded-md bg-blue-600 hover:bg-blue-500 text-white transition-colors" onClick={() => openTrainRepertoire(target.repertoireId, target.variantName)}>Train</button>
+      <Button intent="secondary" size="xs" onClick={() => openRepertoire(target.repertoireId, target.variantName)}>View</Button>
+      <Button intent="primary" size="xs" onClick={() => openTrainRepertoire(target.repertoireId, target.variantName)}>Train</Button>
     </div>
   );
 };
@@ -76,9 +77,9 @@ const TrainingTab: React.FC<TrainingTabProps> = ({
     <div className="flex flex-wrap gap-2">
       {[
         { label: "Actionable", value: actionableTrainingItems.length, color: "text-text-base" },
-        { label: "High Priority", value: highPriorityTrainingItems, color: "text-amber-400" },
-        { label: "With Errors", value: trainingItemsWithErrors, color: "text-rose-400" },
-        { label: "Off-Book", value: offBookSignalCount, color: "text-blue-400" },
+        { label: "High Priority", value: highPriorityTrainingItems, color: "text-warning" },
+        { label: "With Errors", value: trainingItemsWithErrors, color: "text-danger" },
+        { label: "Off-Book", value: offBookSignalCount, color: "text-brand" },
       ].map(({ label, value, color }) => (
         <div key={label} className="flex items-center gap-2 px-3 py-2 bg-surface rounded-lg border border-border-subtle">
           <span className={`text-sm font-semibold ${color}`}>{value}</span>
@@ -114,7 +115,7 @@ const TrainingTab: React.FC<TrainingTabProps> = ({
                       <span>Priority {item.priority.toFixed(1)}</span>
                       <span>{item.effort}</span>
                       <span>{item.games}g</span>
-                      {item.trainingErrors ? <span className="text-rose-400">{item.trainingErrors} errors</span> : null}
+                      {item.trainingErrors ? <span className="text-danger">{item.trainingErrors} errors</span> : null}
                       {item.trainingDueAt ? <span>Due {formatDateTime(item.trainingDueAt)}</span> : null}
                     </div>
                     <div className="flex flex-wrap items-center gap-2 text-[11px]">
@@ -129,11 +130,11 @@ const TrainingTab: React.FC<TrainingTabProps> = ({
                       </span>
                     </div>
                     {whyNow.length > 0
-                      ? <p className="text-xs text-blue-200">Why now: {whyNow.slice(0, 2).join(" · ")}</p>
+                      ? <p className="text-xs text-brand">Why now: {whyNow.slice(0, 2).join(" · ")}</p>
                       : null
                     }
                     {item.reasons.length > 0
-                      ? <p className="text-xs text-amber-300">{item.reasons.slice(0, 2).join(" · ")}</p>
+                      ? <p className="text-xs text-warning">{item.reasons.slice(0, 2).join(" · ")}</p>
                       : null
                     }
                     {item.tasks.length > 0
@@ -141,11 +142,10 @@ const TrainingTab: React.FC<TrainingTabProps> = ({
                       : null
                     }
                     <label className="flex items-center gap-2 text-xs text-text-subtle cursor-pointer w-fit">
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         checked={item.done}
                         onChange={(e) => { if (trainingPlanId) { void markDone(trainingPlanId, item.lineKey, e.target.checked); } }}
-                        className="rounded border-slate-600"
+                        className="shrink-0"
                       />
                       Mark done
                     </label>
@@ -175,10 +175,10 @@ const TrainingTab: React.FC<TrainingTabProps> = ({
                     <p className="text-xs font-mono text-text-subtle">{line.movesSan.join(" ")}</p>
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-text-subtle">
                       <span>{line.games}g</span>
-                      <span className="text-emerald-500">{line.wins}W</span>
+                      <span className="text-success">{line.wins}W</span>
                       <span className="text-text-subtle">{line.draws}D</span>
-                      <span className="text-rose-400">{line.losses}L</span>
-                      {line.trainingErrors ? <span className="text-rose-400">{line.trainingErrors} errors</span> : null}
+                      <span className="text-danger">{line.losses}L</span>
+                      {line.trainingErrors ? <span className="text-danger">{line.trainingErrors} errors</span> : null}
                       <span>Conf. {formatPercent(line.averageMappingConfidence)}</span>
                       <span>Dev. {formatPercent(line.deviationRate)}</span>
                     </div>

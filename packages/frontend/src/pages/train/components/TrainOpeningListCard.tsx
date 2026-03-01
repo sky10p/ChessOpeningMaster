@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { TrainOpeningSummary } from "@chess-opening-master/common";
-import { Badge, Card } from "../../../components/ui";
+import { Badge, Card, MasteryBadge } from "../../../components/ui";
 import { StaticChessboard } from "../../../components/design/chess/StaticChessboard";
 
 interface TrainOpeningListCardProps {
@@ -10,20 +10,7 @@ interface TrainOpeningListCardProps {
 
 const FALLBACK_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-const getMasteryBadge = (
-  score: number
-): { label: string; variant: "success" | "warning" | "brand" } => {
-  if (score >= 85) {
-    return { label: "Mastered", variant: "success" };
-  }
-  if (score >= 55) {
-    return { label: "In Progress", variant: "brand" };
-  }
-  return { label: "Needs Work", variant: "warning" };
-};
-
 export const TrainOpeningListCard: React.FC<TrainOpeningListCardProps> = ({ opening }) => {
-  const mastery = getMasteryBadge(opening.masteryScore);
   const dueTotal = opening.dueVariantsCount + opening.dueMistakesCount;
 
   return (
@@ -48,9 +35,7 @@ export const TrainOpeningListCard: React.FC<TrainOpeningListCardProps> = ({ open
               {opening.openingName}
             </h3>
           </div>
-          <Badge variant={mastery.variant} size="sm" className="shrink-0">
-            {mastery.label}
-          </Badge>
+          <MasteryBadge score={opening.masteryScore} size="sm" className="shrink-0" />
         </div>
         <div className="grid grid-cols-[7rem_1fr] gap-3">
           <div className="overflow-hidden rounded-lg border border-border-subtle bg-surface-raised">

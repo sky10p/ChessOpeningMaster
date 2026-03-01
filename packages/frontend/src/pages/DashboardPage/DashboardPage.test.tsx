@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import * as useDashboardModule from "../../hooks/useDashboard";
 import { DashboardPage } from "./DashboardPage";
@@ -8,6 +8,7 @@ import "@testing-library/jest-dom";
 import { IRepertoireDashboard } from "@chess-opening-master/common";
 import { Color, Square, PieceSymbol } from "chess.js";
 import * as pathInsightsHookModule from "./sections/DashboardSection/hooks/usePathInsights";
+import * as trainRepository from "../../repository/train/train";
 
 class ResizeObserver {
     observe() {}
@@ -31,6 +32,10 @@ const mockRepertoires: IRepertoireDashboard[] = [
 
 describe("DashboardPage", () => {
   beforeEach(() => {
+    jest.spyOn(trainRepository, "getCachedTrainOverview").mockImplementation(
+      () => new Promise(() => undefined)
+    );
+
     jest.spyOn(pathInsightsHookModule, "usePathInsights").mockReturnValue({
       pathPlan: {
         todayKey: "2026-02-15",
@@ -106,6 +111,71 @@ describe("DashboardPage", () => {
     fireEvent.click(screen.getByRole("tab", { name: /path insights/i }));
     expect(screen.getByText(/forecast your review queue/i)).toBeInTheDocument();
     expect(screen.getByText(/spaced repetition insights/i)).toBeInTheDocument();
+  });
+
+  it("navigates to openings with errors selected from the dashboard CTA", async () => {
+    window.history.pushState({}, "", "/dashboard?section=dashboard");
+
+    const errorRepertoire: IRepertoireDashboard = {
+      _id: "1",
+      name: "Test Repertoire",
+      orientation: "white",
+      moveNodes: {
+        id: "root",
+        move: null,
+        children: [
+          {
+            id: "variant-1",
+            move: {
+              from: "e2" as Square,
+              to: "e4" as Square,
+              lan: "e2e4",
+              san: "e4",
+              color: "w" as Color,
+              flags: "b",
+              piece: "p" as PieceSymbol,
+              before: "start_fen",
+              after: "after_e2e4_fen",
+            },
+            variantName: "Italian Game",
+            children: [],
+          },
+        ],
+      },
+      variantsInfo: [
+        {
+          variantName: "Italian Game",
+          repertoireId: "1",
+          errors: 2,
+          lastDate: new Date(),
+        },
+      ],
+      order: 0,
+    };
+
+    jest.spyOn(useDashboardModule, "useDashboard").mockReturnValue({
+      repertoires: [errorRepertoire],
+      loading: false,
+      setRepertoires: jest.fn(),
+      updateRepertoires: jest.fn().mockResolvedValue(undefined),
+    });
+
+    render(
+      <BrowserRouter>
+        <DashboardPage />
+      </BrowserRouter>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /see errors/i }));
+
+    await waitFor(() => {
+      expect(window.location.search).toBe("?section=openings&status=errors");
+      expect(screen.getByRole("tab", { name: /openings/i })).toHaveAttribute(
+        "aria-selected",
+        "true"
+      );
+      expect(screen.getByLabelText("Status")).toHaveValue("errors");
+    });
   });
 });
 

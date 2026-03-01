@@ -1,5 +1,6 @@
 ﻿import React from "react";
 import { FilterType } from "../types";
+import { Button } from "../../../../../components/ui";
 
 interface FilterButtonsProps {
   filter: FilterType;
@@ -21,17 +22,14 @@ export const FilterButtons: React.FC<FilterButtonsProps> = ({
   return (
     <div className="flex flex-wrap gap-2 mt-2 mb-2">
       {FILTER_OPTIONS.map(({ value, label }) => (
-        <button
+        <Button
           key={value}
+          intent={filter === value ? "primary" : "secondary"}
+          size="xs"
           onClick={() => onFilterChange(value)}
-          className={`px-3 py-1 rounded ${
-            filter === value
-              ? "bg-blue-600 text-white"
-              : "bg-surface-raised text-text-muted hover:bg-interactive"
-          }`}
         >
           {label}
-        </button>
+        </Button>
       ))}
     </div>
   );

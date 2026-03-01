@@ -4,6 +4,7 @@ import { Badge, Button, Card } from "../../../components/ui";
 
 interface TrainOpeningVariantListProps {
   variants: TrainOpeningVariantItem[];
+  onViewVariant: (variantName: string) => void;
   onTrainVariantNormal: (variantName: string) => void;
   onTrainVariantFocus: (variantName: string) => void;
 }
@@ -36,6 +37,7 @@ const getStatusVariant = (
 
 export const TrainOpeningVariantList: React.FC<TrainOpeningVariantListProps> = ({
   variants,
+  onViewVariant,
   onTrainVariantNormal,
   onTrainVariantFocus,
 }) => {
@@ -74,7 +76,15 @@ export const TrainOpeningVariantList: React.FC<TrainOpeningVariantListProps> = (
                   Rating {variant.lastRating || "none"}
                 </span>
               </div>
-              <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                <Button
+                  intent="ghost"
+                  size="sm"
+                  onClick={() => onViewVariant(variant.variantName)}
+                  className="justify-center"
+                >
+                  View Variant
+                </Button>
                 <Button
                   intent="secondary"
                   size="sm"

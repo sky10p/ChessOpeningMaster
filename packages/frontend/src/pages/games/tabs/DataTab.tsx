@@ -1,6 +1,7 @@
 ﻿import React from "react";
 import { ImportedGame } from "@chess-opening-master/common";
 import { buildLineTitle, formatDateTime, formatPercent, getOpeningLabel } from "../utils";
+import { Button } from "../../../components/ui";
 
 type DataTabProps = {
   games: ImportedGame[];
@@ -13,8 +14,8 @@ type DataTabProps = {
 };
 
 const resultColor = (result: string) => {
-  if (result === "1-0") return "text-emerald-400";
-  if (result === "0-1") return "text-rose-400";
+  if (result === "1-0") return "text-success";
+  if (result === "0-1") return "text-danger";
   return "text-text-subtle";
 };
 
@@ -34,25 +35,15 @@ const DataTab: React.FC<DataTabProps> = ({
         <span className="text-text-subtle"> games in current view</span>
       </p>
       <div className="flex gap-2">
-        <button
-          className="px-3 py-1.5 rounded-lg bg-surface-raised hover:bg-rose-900/60 text-rose-400 text-xs border border-border-default hover:border-rose-800 transition-colors"
-          onClick={() => { void clearFiltered(); }}
-        >
-          Delete filtered
-        </button>
-        <button
-          className="px-3 py-1.5 rounded-lg bg-surface-raised hover:bg-rose-900/60 text-rose-400 text-xs border border-border-default hover:border-rose-800 transition-colors"
-          onClick={() => { void clearAll(); }}
-        >
-          Delete all
-        </button>
+        <Button intent="danger" size="xs" onClick={() => { void clearFiltered(); }}>Delete filtered</Button>
+        <Button intent="danger" size="xs" onClick={() => { void clearAll(); }}>Delete all</Button>
       </div>
     </div>
 
     {gamesByMonthGroups.map(([month, monthGames]) => (
       <div key={month} className="bg-surface rounded-xl border border-border-subtle overflow-hidden">
         <p className="text-xs font-semibold uppercase tracking-widest text-text-subtle px-4 pt-3 pb-2 border-b border-border-subtle">{month}</p>
-        <div className="divide-y divide-slate-800">
+        <div className="divide-y divide-border-default">
           {monthGames.map((game) => {
             const opening = getOpeningLabel(game);
             return (
@@ -73,16 +64,16 @@ const DataTab: React.FC<DataTabProps> = ({
                         {game.openingMapping.requiresManualReview ? <span className="text-amber-400"> · needs review</span> : null}
                       </p>
                     ) : null}
-                    <p className="text-xs font-mono text-slate-600 truncate">{game.movesSan.slice(0, 12).join(" ")}</p>
+                    <p className="text-xs font-mono text-text-subtle truncate">{game.movesSan.slice(0, 12).join(" ")}</p>
                   </div>
                   <div className="flex flex-col gap-1.5 shrink-0">
                     {game.openingMapping.repertoireId ? (
                       <>
-                        <button className="text-xs px-2.5 py-1 rounded-md bg-surface-raised hover:bg-slate-700 text-text-muted border border-border-default transition-colors" onClick={() => openRepertoire(game.openingMapping.repertoireId as string, game.openingMapping.variantName || opening)}>View</button>
-                        <button className="text-xs px-2.5 py-1 rounded-md bg-blue-600 hover:bg-blue-500 text-white transition-colors" onClick={() => openTrainRepertoire(game.openingMapping.repertoireId as string, game.openingMapping.variantName || opening)}>Train</button>
+                        <Button intent="secondary" size="xs" onClick={() => openRepertoire(game.openingMapping.repertoireId as string, game.openingMapping.variantName || opening)}>View</Button>
+                        <Button intent="primary" size="xs" onClick={() => openTrainRepertoire(game.openingMapping.repertoireId as string, game.openingMapping.variantName || opening)}>Train</Button>
                       </>
                     ) : null}
-                    <button className="text-xs px-2.5 py-1 rounded-md bg-surface-raised hover:bg-rose-900/60 text-rose-400 border border-border-default hover:border-rose-800 transition-colors" onClick={() => { void removeGame(game.id); }}>Delete</button>
+                    <Button intent="danger" size="xs" onClick={() => { void removeGame(game.id); }}>Delete</Button>
                   </div>
                 </div>
               </div>

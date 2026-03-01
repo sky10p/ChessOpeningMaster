@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthRequestError, login, loginWithDefaultUser } from "../../repository/auth/auth";
-import { Button, Input } from "../../components/ui";
+import { Button, Checkbox, Input } from "../../components/ui";
 
 interface LoginPageProps {
   allowDefaultUser: boolean;
@@ -78,11 +78,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ allowDefaultUser, onAuthenticated
       <form className="flex flex-col gap-4 p-6" onSubmit={submit}>
         {allowDefaultUser ? (
           <label className="flex items-center gap-3 rounded-lg border border-border-default bg-interactive px-3 py-2 text-sm text-text-base">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={useDefaultUser}
               onChange={(event) => setUseDefaultUser(event.target.checked)}
-              className="h-4 w-4 accent-brand"
+              className="shrink-0"
             />
             Access with local default user without password
           </label>

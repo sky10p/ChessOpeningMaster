@@ -107,6 +107,7 @@ For `variantsInfo` daily error snapshots:
   - snapshot count cannot decrease.
 - New UTC day:
   - prior day snapshot is replaced by the new day snapshot.
+  - an explicit empty snapshot means the variant had no remaining mistakes in that new-day review.
 
 This protects daily learning records from same-day overwrites.
 
@@ -117,6 +118,8 @@ Mistake SRS items (`variantMistakes`) are seeded from variant review snapshots a
 - first creation stores mistake identity + replay metadata (`mistakeKey`, `positionFen`, `variantStartFen`, `mistakePly`, expected move),
 - rating updates scheduling fields (`dueAt`, `intervalDays`, `ease`, `reps`, `lapses`, state),
 - same-day re-review is blocked via `lastReviewedDayKey` checks in due queries.
+- when a later UTC-day review provides an explicit snapshot for a variant, active mistake items missing from that snapshot are archived.
+- if that later-day explicit snapshot is empty, all active mistake items for that variant are archived.
 
 `variantMistakes` updates do not mutate the same-day locked variant daily snapshot.
 

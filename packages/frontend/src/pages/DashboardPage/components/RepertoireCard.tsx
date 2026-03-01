@@ -32,6 +32,7 @@ export const RepertoireCard: React.FC<RepertoireCardProps> = ({
       showConfirmDialog({
         title: "Enable Repertoire",
         contentText: `Are you sure you want to enable "${repertoire.name}"?`,
+        confirmLabel: "Enable",
         onConfirm: async () => {
           await enableRepertoire(repertoire._id);
           updateRepertoires();
@@ -41,6 +42,7 @@ export const RepertoireCard: React.FC<RepertoireCardProps> = ({
       showConfirmDialog({
         title: "Disable Repertoire",
         contentText: `Are you sure you want to disable "${repertoire.name}"? It will be visually marked as disabled in the dashboard.`,
+        confirmLabel: "Disable",
         onConfirm: async () => {
           await disableRepertoire(repertoire._id);
           updateRepertoires();

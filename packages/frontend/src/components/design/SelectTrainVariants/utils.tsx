@@ -2,6 +2,11 @@ import { TrainVariantInfo } from "@chess-opening-master/common";
 import { TrainVariant } from "../../../models/chess.models";
 import { VariantsProgressCounts, VariantsProgressInfo } from "./models";
 
+export type VariantInfoKeyResolver = (variant: TrainVariant) => string;
+
+const defaultVariantInfoKeyResolver: VariantInfoKeyResolver = (variant) =>
+  variant.variant.fullName;
+
 export const VARIANT_COLORS = {
   noErrors: "#4CAF50", // Green
   oneError: "#FFEB3B", // Yellow
@@ -20,9 +25,10 @@ export const VARIANT_TEXT_COLORS = {
 
 export const getColor = (
   variant: TrainVariant,
-  variantInfo: Record<string, TrainVariantInfo>
+  variantInfo: Record<string, TrainVariantInfo>,
+  variantInfoKeyResolver: VariantInfoKeyResolver = defaultVariantInfoKeyResolver
 ) => {
-  const info = variantInfo[variant.variant.fullName];
+  const info = variantInfo[variantInfoKeyResolver(variant)];
   if (info === undefined) {
     return VARIANT_COLORS.unresolved;
   }
@@ -40,9 +46,10 @@ export const getColor = (
 
 export const getTextColor = (
   variant: TrainVariant,
-  variantInfo: Record<string, TrainVariantInfo>
+  variantInfo: Record<string, TrainVariantInfo>,
+  variantInfoKeyResolver: VariantInfoKeyResolver = defaultVariantInfoKeyResolver
 ): string | undefined => {
-  const color = getColor(variant, variantInfo);
+  const color = getColor(variant, variantInfo, variantInfoKeyResolver);
   if (color === VARIANT_COLORS.unresolved) {
     return undefined;
   }
@@ -51,7 +58,8 @@ export const getTextColor = (
 
 export const getVariantsProgressInfo = (
   variants: TrainVariant[],
-  variantInfo: Record<string, TrainVariantInfo>
+  variantInfo: Record<string, TrainVariantInfo>,
+  variantInfoKeyResolver: VariantInfoKeyResolver = defaultVariantInfoKeyResolver
 ): VariantsProgressInfo => {
   const totalVariants = variants.length;
   const counts: VariantsProgressCounts = {
@@ -66,7 +74,7 @@ export const getVariantsProgressInfo = (
   let hasNewVariants = false;
 
   variants.forEach((variant) => {
-    const info = variantInfo[variant.variant.fullName];
+    const info = variantInfo[variantInfoKeyResolver(variant)];
     if (info === undefined) {
       counts.unresolved++;
     } else if (info.errors === 0) {
