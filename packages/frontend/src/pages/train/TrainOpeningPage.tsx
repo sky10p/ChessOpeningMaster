@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { TrainOpeningResponse } from "@chess-opening-master/common";
-import { Badge, Button, Card } from "../../components/ui";
+import { Badge, Button, Card, MasteryBadge } from "../../components/ui";
 import { getTrainOpening } from "../../repository/train/train";
 import { StaticChessboard } from "../../components/design/chess/StaticChessboard";
 import { TrainOpeningActions } from "./components/TrainOpeningActions";
@@ -12,18 +12,6 @@ import { PageRoot } from "../../components/design/layouts/PageRoot";
 import { getDueTrainMistakes } from "./mistakeUtils";
 
 const FALLBACK_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-
-const getMasteryBadge = (
-  score: number
-): { label: string; variant: "success" | "warning" | "brand" } => {
-  if (score >= 85) {
-    return { label: "Mastered", variant: "success" };
-  }
-  if (score >= 55) {
-    return { label: "In Progress", variant: "brand" };
-  }
-  return { label: "Needs Work", variant: "warning" };
-};
 
 const TrainOpeningPage: React.FC = () => {
   const navigate = useNavigate();
@@ -141,7 +129,6 @@ const TrainOpeningPage: React.FC = () => {
     );
   }
 
-  const mastery = getMasteryBadge(payload.stats.masteryScore);
   const dueMistakes = getDueTrainMistakes(payload.mistakes);
 
   const handleReviewDueMistakes = () => {
@@ -164,7 +151,7 @@ const TrainOpeningPage: React.FC = () => {
       <PageFrame className="max-w-6xl py-4 sm:py-6">
         <div className="mb-3">
           <Button intent="ghost" size="sm" onClick={() => navigate("/train")}>
-            Back
+            Back to Train
           </Button>
         </div>
         <Card className="mb-4 border-border-default bg-surface" padding="default">
@@ -186,9 +173,7 @@ const TrainOpeningPage: React.FC = () => {
                   </h1>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant={mastery.variant} size="sm">
-                    {mastery.label}
-                  </Badge>
+                  <MasteryBadge score={payload.stats.masteryScore} size="sm" />
                   <Badge variant="brand" size="sm">
                     Mastery {payload.stats.masteryScore}%
                   </Badge>

@@ -13,7 +13,7 @@ export const ProgressSummary: React.FC<ProgressSummaryProps> = ({ stats }) => {
       </h3>
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 w-full">
         <div className="flex flex-col items-center">
-          <span className="text-2xl font-bold text-amber-400">
+          <span className="text-2xl font-bold text-warning">
             {stats.neverReviewed}
           </span>
           <span className="text-text-muted mt-1 text-sm text-center">
@@ -21,25 +21,25 @@ export const ProgressSummary: React.FC<ProgressSummaryProps> = ({ stats }) => {
           </span>
         </div>
         <div className="flex flex-col items-center">
-          <span className="text-2xl font-bold text-red-400">
+          <span className="text-2xl font-bold text-danger">
             {stats.reviewedWithErrors}
           </span>
           <span className="text-text-muted mt-1 text-sm">Overall Errors</span>
         </div>
         <div className="flex flex-col items-center">
-          <span className="text-2xl font-bold text-blue-400">
+          <span className="text-2xl font-bold text-brand">
             {stats.reviewedToday}
           </span>
           <span className="text-text-muted mt-1 text-sm">Reviewed Today</span>
         </div>
         <div className="flex flex-col items-center">
-          <span className="text-2xl font-bold text-red-400">
+          <span className="text-2xl font-bold text-danger">
             {stats.reviewedTodayErrors}
           </span>
           <span className="text-text-muted mt-1 text-sm">Errors Today</span>
         </div>
         <div className="flex flex-col items-center">
-          <span className="text-2xl font-bold text-green-400">
+          <span className="text-2xl font-bold text-success">
             {stats.reviewedTodayOk}
           </span>
           <span className="text-text-muted mt-1 text-sm">OK Today</span>

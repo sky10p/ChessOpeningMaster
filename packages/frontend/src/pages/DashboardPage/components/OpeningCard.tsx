@@ -110,7 +110,7 @@ export const OpeningCard: React.FC<OpeningCardProps> = ({
               <Badge
                 size="sm"
                 variant="success"
-                className="bg-emerald-500 text-white border-emerald-400 font-bold shadow"
+                className="font-bold shadow"
               >
                 Mastered
               </Badge>
@@ -120,7 +120,7 @@ export const OpeningCard: React.FC<OpeningCardProps> = ({
             <Badge
               size="sm"
               variant="info"
-              className="bg-sky-500 text-white border-sky-400 font-bold shadow flex-shrink-0"
+              className="font-bold shadow flex-shrink-0"
             >
               {repCount}×
             </Badge>

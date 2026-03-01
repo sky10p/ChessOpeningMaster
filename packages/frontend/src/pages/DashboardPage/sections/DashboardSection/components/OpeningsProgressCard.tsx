@@ -1,6 +1,7 @@
 ﻿import React from "react";
 import { OpeningProgressData } from "../types";
 import { getRatioColor, getRatioTextColor } from "../utils";
+import { Button } from "../../../../../components/ui";
 
 interface OpeningsProgressCardProps {
   data: OpeningProgressData[];
@@ -22,19 +23,20 @@ export const OpeningsProgressCard: React.FC<OpeningsProgressCardProps> = ({
   const top5 = sorted.slice(0, 5);
 
   const title = isNeedWork ? "Need Work" : "Well Learned";
-  const titleColor = isNeedWork ? "text-red-400" : "text-green-400";
+  const titleColor = isNeedWork ? "text-danger" : "text-success";
 
   return (
     <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col">
       <div className="flex items-center justify-between mb-3">
         <h3 className={`text-lg font-semibold ${titleColor}`}>{title}</h3>
         {onViewAllClick && (
-          <button
+          <Button
+            intent="ghost"
+            size="xs"
             onClick={onViewAllClick}
-            className="text-xs text-blue-400 hover:text-blue-300"
           >
             View all →
-          </button>
+          </Button>
         )}
       </div>
 

@@ -1,4 +1,5 @@
 ﻿import React from "react";
+import { Button } from "../../../components/ui";
 
 export type UnreviewedVariant = {
   fullName: string;
@@ -84,23 +85,24 @@ export const UnreviewedVariantsChart: React.FC<UnreviewedVariantsChartProps> = (
                     </span>
                   </div>
                   <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                    <span className="text-xs text-amber-400 font-semibold">
+                    <span className="text-xs text-warning font-semibold">
                       {item.count} unreviewed
                     </span>
                     {onVariantsClick && groupedEntries.length > 0 && (
                       <div className="flex flex-wrap gap-1 justify-end">
                         {groupedEntries.map(([repertoireId, variants]) => (
-                          <button
+                          <Button
                             key={repertoireId}
+                            intent="primary"
+                            size="xs"
                             onClick={(e) => {
                               e.stopPropagation();
                               onVariantsClick(repertoireId, variants.map((v) => v.fullName));
                             }}
-                            className="px-2 py-0.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
                             title={`Train all unreviewed for ${variants[0]?.repertoireName || "Repertoire"}`}
                           >
                             Train all unreviewed
-                          </button>
+                          </Button>
                         ))}
                       </div>
                     )}
@@ -134,15 +136,16 @@ export const UnreviewedVariantsChart: React.FC<UnreviewedVariantsChartProps> = (
                                   </span>
                                   <div className="flex items-center gap-2 flex-shrink-0">
                                     {onVariantClick && (
-                                      <button
+                                      <Button
+                                        intent="accent"
+                                        size="xs"
                                         onClick={(e) => handleVariantTrain(variant.fullName, e)}
-                                        className="px-2 py-0.5 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
                                         title="Train this variant"
                                       >
                                         Train
-                                      </button>
+                                      </Button>
                                     )}
-                                    <span className="text-amber-400 font-semibold">
+                                    <span className="text-warning font-semibold">
                                       Unreviewed
                                     </span>
                                   </div>

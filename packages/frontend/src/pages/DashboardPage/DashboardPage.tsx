@@ -11,8 +11,6 @@ import { OpeningsSection } from "./sections/OpeningsSection";
 import { DashboardSection } from "./sections/DashboardSection/index";
 import { OverviewSection } from "./sections/OverviewSection";
 import { StudiesSection } from "./sections/StudiesSection";
-import { ErrorsSection } from "./sections/ErrorsSection";
-import { UnreviewedSection } from "./sections/UnreviewedSection";
 import { PathInsightsSection } from "./sections/PathInsightsSection";
 import { ArrowsRightLeftIcon } from "@heroicons/react/24/solid";
 import {
@@ -22,8 +20,6 @@ import {
   BookOpenIcon,
   FolderOpenIcon,
   AcademicCapIcon,
-  ExclamationTriangleIcon,
-  EyeIcon,
 } from "@heroicons/react/24/outline";
 import { Tabs, TabButton } from "../../components/ui";
 import { PageFrame } from "../../components/design/layouts/PageFrame";
@@ -41,8 +37,6 @@ const SECTION_ICONS: Record<string, React.ReactNode> = {
   repertoires: <BookOpenIcon className="w-4 h-4" />,
   openings: <FolderOpenIcon className="w-4 h-4" />,
   studies: <AcademicCapIcon className="w-4 h-4" />,
-  errors: <ExclamationTriangleIcon className="w-4 h-4" />,
-  unreviewed: <EyeIcon className="w-4 h-4" />,
 };
 
 export const DashboardPage = () => {
@@ -61,9 +55,10 @@ export const DashboardPage = () => {
     | "repertoires"
     | "openings"
     | "studies"
-    | "errors"
-    | "unreviewed"
   >("dashboard");
+  const [overviewInitialView, setOverviewInitialView] = useState<
+    "progress" | "errors" | "unreviewed"
+  >("progress");
 
   React.useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -74,11 +69,15 @@ export const DashboardPage = () => {
       section === "overview" ||
       section === "repertoires" ||
       section === "openings" ||
-      section === "studies" ||
-      section === "errors" ||
-      section === "unreviewed"
+      section === "studies"
     ) {
       setSelectedSection(section);
+    } else if (section === "errors") {
+      setSelectedSection("overview");
+      setOverviewInitialView("errors");
+    } else if (section === "unreviewed") {
+      setSelectedSection("overview");
+      setOverviewInitialView("unreviewed");
     }
   }, [location.search]);
 
@@ -90,10 +89,11 @@ export const DashboardPage = () => {
       | "repertoires"
       | "openings"
       | "studies"
-      | "errors"
-      | "unreviewed"
   ) => {
     setSelectedSection(section);
+    if (section === "overview") {
+      setOverviewInitialView("progress");
+    }
     const params = new URLSearchParams(location.search);
     params.set("section", section);
     navigate({ pathname: location.pathname, search: params.toString() }, { replace: true });
@@ -144,8 +144,6 @@ export const DashboardPage = () => {
                 ["repertoires", "Repertoires"],
                 ["openings", "Openings"],
                 ["studies", "Studies"],
-                ["errors", "Errors"],
-                ["unreviewed", "Unreviewed"],
               ] as const
             ).map(([id, label]) => (
               <TabButton
@@ -167,7 +165,7 @@ export const DashboardPage = () => {
             {selectedSection === "dashboard" && (
               <DashboardSection repertoires={repertoires} loading={loading} />
             )}
-            {selectedSection === "overview" && <OverviewSection repertoires={repertoires} />}
+            {selectedSection === "overview" && <OverviewSection repertoires={repertoires} initialView={overviewInitialView} />}
             {selectedSection === "pathInsights" && <PathInsightsSection />}
             {selectedSection === "repertoires" && (
               <RepertoiresSection
@@ -195,8 +193,6 @@ export const DashboardPage = () => {
               />
             )}
             {selectedSection === "studies" && <StudiesSection />}
-            {selectedSection === "errors" && <ErrorsSection repertoires={repertoires} />}
-            {selectedSection === "unreviewed" && <UnreviewedSection repertoires={repertoires} />}
           </div>
         </PageSurface>
       </PageFrame>

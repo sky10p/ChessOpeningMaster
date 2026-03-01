@@ -1,11 +1,19 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, RenderOptions } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { MemoryRouter } from 'react-router-dom';
 import TrainInfo from '../TrainInfo';
 import { TrainVariant } from '../../../../../models/chess.models';
 import { MoveVariantNode } from '../../../../../models/VariantNode';
 import { Turn } from '@chess-opening-master/common';
 import * as pgnUtils from '../../../../../utils/chess/pgn/pgn.utils';
+
+const RouterWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <MemoryRouter>{children}</MemoryRouter>
+);
+
+const renderWithRouter = (ui: React.ReactElement, options?: Omit<RenderOptions, 'wrapper'>) =>
+  render(ui, { wrapper: RouterWrapper, ...options });
 
 const mockGoToRepertoire = jest.fn();
 
@@ -63,7 +71,7 @@ describe('TrainInfo', () => {
   });
 
   it('renders correctly with basic props', () => {
-    render(<TrainInfo {...defaultProps} />);
+    renderWithRouter(<TrainInfo {...defaultProps} />);
     
     expect(screen.getByText('Your turn')).toBeInTheDocument();
     expect(screen.getByText('Play one of your allowed moves according to your repertoire.')).toBeInTheDocument();
@@ -72,7 +80,7 @@ describe('TrainInfo', () => {
   });
 
   it('displays last finished variant section when lastTrainVariant is provided', () => {
-    render(<TrainInfo {...defaultProps} />);
+    renderWithRouter(<TrainInfo {...defaultProps} />);
     
     expect(screen.getByText('Last Finished Variant')).toBeInTheDocument();
     expect(screen.getByText('Italian Game')).toBeInTheDocument();
@@ -86,7 +94,7 @@ describe('TrainInfo', () => {
       lastTrainVariant: undefined,
     };
     
-    render(<TrainInfo {...propsWithoutLastVariant} />);
+    renderWithRouter(<TrainInfo {...propsWithoutLastVariant} />);
     
     expect(screen.queryByText('Last Finished Variant')).not.toBeInTheDocument();
     expect(screen.queryByText('Copy PGN')).not.toBeInTheDocument();
@@ -94,7 +102,7 @@ describe('TrainInfo', () => {
   });
 
   it('calls goToRepertoire with correct parameters when Edit button is clicked', () => {
-    render(<TrainInfo {...defaultProps} />);
+    renderWithRouter(<TrainInfo {...defaultProps} />);
     
     const editButton = screen.getByText('Edit');
     fireEvent.click(editButton);
@@ -109,7 +117,7 @@ describe('TrainInfo', () => {
       lastTrainVariant: undefined,
     };
     
-    render(<TrainInfo {...propsWithoutLastVariant} />);
+    renderWithRouter(<TrainInfo {...propsWithoutLastVariant} />);
     
     expect(screen.queryByText('Edit')).not.toBeInTheDocument();
     expect(mockGoToRepertoire).not.toHaveBeenCalled();
@@ -120,7 +128,7 @@ describe('TrainInfo', () => {
     const mockedPgnUtils = pgnUtils as jest.Mocked<typeof pgnUtils>;
     mockedPgnUtils.variantToPgn.mockResolvedValue(mockPgn);
     
-    render(<TrainInfo {...defaultProps} />);
+    renderWithRouter(<TrainInfo {...defaultProps} />);
     
     const copyButton = screen.getByText('Copy PGN');
     fireEvent.click(copyButton);
@@ -140,7 +148,7 @@ describe('TrainInfo', () => {
   });
 
   it('displays correct turn information when it is your turn', () => {
-    render(<TrainInfo {...defaultProps} />);
+    renderWithRouter(<TrainInfo {...defaultProps} />);
     
     expect(screen.getByText('Your turn')).toBeInTheDocument();
     expect(screen.getByAltText('white king')).toBeInTheDocument();
@@ -153,7 +161,7 @@ describe('TrainInfo', () => {
       turn: 'black' as Turn,
     };
     
-    render(<TrainInfo {...opponentTurnProps} />);
+    renderWithRouter(<TrainInfo {...opponentTurnProps} />);
     
     expect(screen.getByText("Opponent's turn")).toBeInTheDocument();
     expect(screen.getByText('Wait for your opponent to play.')).toBeInTheDocument();
@@ -166,7 +174,7 @@ describe('TrainInfo', () => {
       finishedTrain: true,
     };
     
-    render(<TrainInfo {...finishedProps} />);
+    renderWithRouter(<TrainInfo {...finishedProps} />);
     
     expect(screen.getByText('Finished Training')).toBeInTheDocument();
     expect(screen.queryByAltText('white king')).not.toBeInTheDocument();
@@ -174,14 +182,14 @@ describe('TrainInfo', () => {
   });
 
   it('displays progress bar with correct percentage', () => {
-    render(<TrainInfo {...defaultProps} />);
+    renderWithRouter(<TrainInfo {...defaultProps} />);
     
     const progressBar = document.querySelector('.bg-accent.h-2\\.5.rounded-full');
     expect(progressBar).toHaveStyle('width: 33.33333333333333%');
   });
 
   it('displays available variants to play', () => {
-    render(<TrainInfo {...defaultProps} />);
+    renderWithRouter(<TrainInfo {...defaultProps} />);
     
     expect(screen.getByText('French Defense')).toBeInTheDocument();
     expect(screen.getByText('Caro-Kann Defense')).toBeInTheDocument();
@@ -189,7 +197,7 @@ describe('TrainInfo', () => {
   });
 
   it('expands variant disclosure to show moves when clicked', () => {
-    render(<TrainInfo {...defaultProps} />);
+    renderWithRouter(<TrainInfo {...defaultProps} />);
     
     const frenchDefenseButton = screen.getByText('French Defense');
     fireEvent.click(frenchDefenseButton);
@@ -200,7 +208,7 @@ describe('TrainInfo', () => {
   });
 
   it('calls onHintReveal when expanding available variant moves', () => {
-    render(<TrainInfo {...defaultProps} />);
+    renderWithRouter(<TrainInfo {...defaultProps} />);
 
     const frenchDefenseButton = screen.getByText('French Defense');
     fireEvent.click(frenchDefenseButton);
@@ -209,7 +217,7 @@ describe('TrainInfo', () => {
   });
 
   it('collapses expanded moves after next move is played', () => {
-    const { rerender } = render(<TrainInfo {...defaultProps} />);
+    const { rerender } = renderWithRouter(<TrainInfo {...defaultProps} />);
 
     const frenchDefenseButton = screen.getByText('French Defense');
     fireEvent.click(frenchDefenseButton);
@@ -238,7 +246,7 @@ describe('TrainInfo', () => {
       ],
     };
     
-    render(<TrainInfo {...noVariantsProps} />);
+    renderWithRouter(<TrainInfo {...noVariantsProps} />);
     
     expect(screen.getByText('2 of 2 variants')).toBeInTheDocument();
     expect(screen.queryByText('French Defense')).not.toBeInTheDocument();
@@ -251,13 +259,13 @@ describe('TrainInfo', () => {
       trainVariants: [],
     };
     
-    render(<TrainInfo {...noTrainVariantsProps} />);
+    renderWithRouter(<TrainInfo {...noTrainVariantsProps} />);
     
     expect(screen.getByText('0 of 0 variants')).toBeInTheDocument();
   });
 
   it('locks available variants hints when assistance is disabled', () => {
-    render(
+    renderWithRouter(
       <TrainInfo
         {...defaultProps}
         assistEnabled={false}
@@ -276,7 +284,7 @@ describe('TrainInfo', () => {
   });
 
   it('shows unlocked assist notice when assistance is enabled', () => {
-    render(
+    renderWithRouter(
       <TrainInfo
         {...defaultProps}
         assistEnabled={true}
@@ -291,7 +299,7 @@ describe('TrainInfo', () => {
   });
 
   it('hides available variants section when configured', () => {
-    render(
+    renderWithRouter(
       <TrainInfo
         {...defaultProps}
         showAvailableVariantsSection={false}
@@ -303,7 +311,7 @@ describe('TrainInfo', () => {
   });
 
   it('renders supplemental panel below main progress section', () => {
-    render(
+    renderWithRouter(
       <TrainInfo
         {...defaultProps}
         supplementalPanel={<div>Focus Assist Inline</div>}

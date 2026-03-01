@@ -6,3 +6,6 @@ export { Tabs, TabButton, type TabsProps, type TabButtonProps } from "./Tabs";
 export { Input, Textarea, type InputProps, type TextareaProps } from "./Input";
 export { Select, type SelectProps } from "./Select";
 export { EmptyState, type EmptyStateProps } from "./EmptyState";
+export { MasteryBadge, getMasteryTier, type MasteryBadgeProps } from "./MasteryBadge";
+export { CollapsibleSection, type CollapsibleSectionProps } from "./CollapsibleSection";
+export { MetricTitle, type MetricTitleProps } from "./MetricTitle";

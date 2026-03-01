@@ -11,7 +11,7 @@ export const InvalidOrientationWarning: React.FC<InvalidOrientationWarningProps>
   if (repertoires.length === 0) return null;
 
   return (
-    <div className="text-yellow-400 text-xs mb-2">
+    <div className="text-warning text-xs mb-2">
       Warning: {repertoires.length} repertoire(s) have missing or invalid
       orientation and will only appear in "All".
       <br />

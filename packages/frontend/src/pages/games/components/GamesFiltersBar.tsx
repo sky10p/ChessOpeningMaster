@@ -1,6 +1,7 @@
 import React from "react";
 import { GlobalFilterState } from "../types";
 import GamesFiltersFields from "./GamesFiltersFields";
+import { Button } from "../../../components/ui";
 
 type GamesFiltersBarProps = {
   filtersDraft: GlobalFilterState;
@@ -10,22 +11,12 @@ type GamesFiltersBarProps = {
 };
 
 const GamesFiltersBar: React.FC<GamesFiltersBarProps> = ({ filtersDraft, setFiltersDraft, applyFilters, resetFilters }) => (
-  <section className="hidden sm:block px-4 py-2.5 border-b border-slate-800 bg-slate-900/60">
+  <section className="hidden sm:block px-4 py-2.5 border-b border-border-default bg-surface">
     <div className="flex flex-wrap items-end gap-2">
       <GamesFiltersFields filtersDraft={filtersDraft} setFiltersDraft={setFiltersDraft} />
       <div className="flex gap-1.5 ml-auto shrink-0">
-        <button
-          className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium transition-colors"
-          onClick={applyFilters}
-        >
-          Apply
-        </button>
-        <button
-          className="px-4 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs font-medium transition-colors border border-slate-600"
-          onClick={resetFilters}
-        >
-          Reset
-        </button>
+        <Button intent="primary" size="xs" onClick={applyFilters}>Apply Filters</Button>
+        <Button intent="secondary" size="xs" onClick={resetFilters}>Reset</Button>
       </div>
     </div>
   </section>

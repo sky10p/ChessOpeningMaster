@@ -7,3 +7,5 @@ export { ProgressSummary } from "./ProgressSummary";
 export { InvalidOrientationWarning } from "./InvalidOrientationWarning";
 export { OpeningsProgressCard } from "./OpeningsProgressCard";
 export { SpacedRepetitionInsightsPanel } from "./SpacedRepetitionInsightsPanel";
+export { TodaysFocusCard } from "./TodaysFocusCard";
+export { TrainingQueuePreview } from "./TrainingQueuePreview";

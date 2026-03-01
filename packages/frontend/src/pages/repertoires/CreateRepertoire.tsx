@@ -26,12 +26,12 @@ const CreateRepertoire: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-page text-text-base">
       <div className="max-w-md w-full p-8 bg-surface rounded-xl shadow-elevated">
-        <h1 className="text-2xl font-bold text-center mb-4">Crear nuevo repertorio</h1>
-        <p className="text-center mb-4 text-text-muted">Ingresa el nombre de tu nuevo repertorio de aperturas personalizado.</p>
+        <h1 className="text-2xl font-bold text-center mb-4">Create New Repertoire</h1>
+        <p className="text-center mb-4 text-text-muted">Enter a name for your new custom opening repertoire.</p>
         <Input
           type="text"
           className="mb-4"
-          placeholder="Nombre del repertorio"
+          placeholder="Repertoire name"
           value={repertoireName}
           onChange={handleChange}
         />
@@ -41,7 +41,7 @@ const CreateRepertoire: React.FC = () => {
             size="md"
             onClick={handleCreateRepertoire}
           >
-            Crear repertorio
+            Create Repertoire
           </Button>
         </div>
       </div>

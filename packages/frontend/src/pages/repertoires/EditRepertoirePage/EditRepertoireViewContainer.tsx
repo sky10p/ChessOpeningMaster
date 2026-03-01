@@ -24,6 +24,8 @@ import { useFooterDispatch } from "../../../contexts/FooterContext";
 import { useKeyboardNavigation } from "../../../hooks/useKeyboardNavigation";
 import { RepertoireWorkspaceLayout } from "../shared/RepertoireWorkspaceLayout";
 import { useAlertContext } from "../../../contexts/AlertContext";
+import { useRepertoireMastery } from "../../../hooks/useRepertoireMastery";
+import { MasteryBadge } from "../../../components/ui/MasteryBadge";
 
 type FooterSection = "variants" | "comments" | "statistics" | "stockfish";
 
@@ -47,6 +49,7 @@ const EditRepertoireViewContainer: React.FC = () => {
   
   const { toggleMenu } = useMenuContext();
   const { showAlert } = useAlertContext();
+  const masteryScore = useRepertoireMastery(repertoireId);
   const { addIcon: addIconHeader, removeIcon: removeIconHeader } =
     useHeaderDispatch();
   const {
@@ -156,6 +159,7 @@ const EditRepertoireViewContainer: React.FC = () => {
   return (
     <RepertoireWorkspaceLayout
       title={repertoireName}
+      titleExtra={masteryScore !== null ? <MasteryBadge score={masteryScore} size="sm" /> : undefined}
       board={<BoardContainer />}
       boardActions={<BoardActionsContainer />}
       mobilePanel={

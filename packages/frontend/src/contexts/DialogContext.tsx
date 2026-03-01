@@ -30,6 +30,8 @@ interface TextAreaDialogProps {
 interface ConfirmDialog {
   title?: string;
   contentText?: string;
+  confirmLabel?: string;
+  confirmIntent?: "accent" | "danger" | "primary";
   onConfirm: () => void;
   onDialogClose?: () => void;
 }
@@ -120,6 +122,8 @@ interface State {
   initialValue: string;
   textAreaDialogProps: TextAreaDialogProps | null;
   onDialogClose?: (isCancelled: boolean) => void;
+  confirmLabel?: string;
+  confirmIntent?: "accent" | "danger" | "primary";
   onTextConfirm: (text: string) => void;
   onConfirm: () => void;
   onTrainVariantsConfirm: (trainVariants: TrainVariant[]) => void;
@@ -148,6 +152,8 @@ const initialState: State = {
   contentText: "",
   initialValue: "",
   onDialogClose: undefined,
+  confirmLabel: undefined,
+  confirmIntent: undefined,
   textAreaDialogProps: null,
   onTextConfirm: () => {},
   onConfirm: () => {},
@@ -210,6 +216,8 @@ function reducer(state: typeof initialState, action: Action): State {
         openConfirmDialog: true,
         title: action.payload.title ?? "Confirm operation",
         contentText: action.payload.contentText ?? "Are you sure?",
+        confirmLabel: action.payload.confirmLabel,
+        confirmIntent: action.payload.confirmIntent,
         onConfirm: action.payload.onConfirm,
         onDialogClose: action.payload.onDialogClose,
       };
@@ -424,6 +432,8 @@ export const DialogContextProvider = ({
           contentText={state.contentText}
           onConfirm={handleConfirm}
           title={state.title}
+          confirmLabel={state.confirmLabel}
+          confirmIntent={state.confirmIntent}
         />
       )}
       {state.openTrainVariantsDialog && (

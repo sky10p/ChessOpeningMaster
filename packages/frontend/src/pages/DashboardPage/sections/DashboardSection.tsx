@@ -1,5 +1,6 @@
 ﻿import React, { useState, useMemo } from "react";
 import { IRepertoireDashboard } from "@chess-opening-master/common";
+import { Button } from "../../../components/ui";
 import {
   PieChart,
   Pie,
@@ -216,59 +217,44 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
           Key statistics and metrics for your chess repertoires.
         </p>
         <div className="flex flex-wrap gap-2 mt-2 mb-2">
-          <button
+          <Button
+            intent={filter === "all" ? "primary" : "secondary"}
+            size="sm"
             onClick={() => setFilter("all")}
-            className={`px-3 py-1 rounded ${
-              filter === "all"
-                ? "bg-blue-600 text-white"
-                : "bg-surface-raised text-text-muted hover:bg-interactive"
-            }`}
           >
             All
-          </button>
-          <button
+          </Button>
+          <Button
+            intent={filter === "white" ? "primary" : "secondary"}
+            size="sm"
             onClick={() => setFilter("white")}
-            className={`px-3 py-1 rounded ${
-              filter === "white"
-                ? "bg-blue-600 text-white"
-                : "bg-surface-raised text-text-muted hover:bg-interactive"
-            }`}
           >
             Only White
-          </button>
-          <button
+          </Button>
+          <Button
+            intent={filter === "black" ? "primary" : "secondary"}
+            size="sm"
             onClick={() => setFilter("black")}
-            className={`px-3 py-1 rounded ${
-              filter === "black"
-                ? "bg-blue-600 text-white"
-                : "bg-surface-raised text-text-muted hover:bg-interactive"
-            }`}
           >
             Only Black
-          </button>
-          <button
+          </Button>
+          <Button
+            intent={filter === "errors" ? "primary" : "secondary"}
+            size="sm"
             onClick={() => setFilter("errors")}
-            className={`px-3 py-1 rounded ${
-              filter === "errors"
-                ? "bg-blue-600 text-white"
-                : "bg-surface-raised text-text-muted hover:bg-interactive"
-            }`}
           >
             Only Errors
-          </button>
-          <button
+          </Button>
+          <Button
+            intent={filter === "unreviewed" ? "primary" : "secondary"}
+            size="sm"
             onClick={() => setFilter("unreviewed")}
-            className={`px-3 py-1 rounded ${
-              filter === "unreviewed"
-                ? "bg-blue-600 text-white"
-                : "bg-surface-raised text-text-muted hover:bg-interactive"
-            }`}
           >
             Only Unreviewed
-          </button>
+          </Button>
         </div>
         {invalidOrientationReps.length > 0 && (
-          <div className="text-yellow-400 text-xs mb-2">
+          <div className="text-warning text-xs mb-2">
             Warning: {invalidOrientationReps.length} repertoire(s) have missing
             or invalid orientation and will only appear in "All".
             <br />
@@ -286,19 +272,19 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
       <div className="flex-1 overflow-y-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center">
-            <span className="text-3xl font-bold text-blue-400">
+            <span className="text-3xl font-bold text-brand">
               {totalRepertoires}
             </span>
             <span className="text-text-muted mt-1">Total Repertoires</span>
           </div>
           <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center">
-            <span className="text-3xl font-bold text-amber-400">
+            <span className="text-3xl font-bold text-warning">
               {totalVariants}
             </span>
             <span className="text-text-muted mt-1">Total Variants</span>
           </div>
           <div className="bg-surface rounded-lg p-4 shadow border border-border-subtle flex flex-col items-center">
-            <span className="text-3xl font-bold text-purple-400">
+            <span className="text-3xl font-bold text-brand">
               {mostRecent ? mostRecent.name : "-"}
             </span>
             <span className="text-text-muted mt-1">Most Recently Updated</span>
@@ -409,7 +395,7 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 w-full">
               <div className="flex flex-col items-center">
-                <span className="text-2xl font-bold text-amber-400">
+                <span className="text-2xl font-bold text-warning">
                   {neverReviewed}
                 </span>
                 <span className="text-text-muted mt-1 text-sm text-center">
@@ -417,25 +403,25 @@ export const DashboardSection: React.FC<DashboardSectionProps> = ({
                 </span>
               </div>
               <div className="flex flex-col items-center">
-                <span className="text-2xl font-bold text-red-400">
+                <span className="text-2xl font-bold text-danger">
                   {reviewedWithErrors}
                 </span>
                 <span className="text-text-muted mt-1 text-sm">Overall Errors</span>
               </div>
               <div className="flex flex-col items-center">
-                <span className="text-2xl font-bold text-blue-400">
+                <span className="text-2xl font-bold text-brand">
                   {reviewedToday}
                 </span>
                 <span className="text-text-muted mt-1 text-sm">Reviewed Today</span>
               </div>
               <div className="flex flex-col items-center">
-                <span className="text-2xl font-bold text-red-400">
+                <span className="text-2xl font-bold text-danger">
                   {reviewedTodayErrors}
                 </span>
                 <span className="text-text-muted mt-1 text-sm">Errors Today</span>
               </div>
               <div className="flex flex-col items-center">
-                <span className="text-2xl font-bold text-green-400">
+                <span className="text-2xl font-bold text-success">
                   {reviewedTodayOk}
                 </span>
                 <span className="text-text-muted mt-1 text-sm">OK Today</span>

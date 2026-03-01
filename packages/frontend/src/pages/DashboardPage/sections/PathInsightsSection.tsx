@@ -5,6 +5,7 @@ import {
   usePathInsights,
 } from "./DashboardSection/hooks/usePathInsights";
 import { FilterType } from "./DashboardSection/types";
+import { Button } from "../../../components/ui";
 
 type PathInsightsFilter = "all" | "white" | "black";
 
@@ -34,17 +35,14 @@ export const PathInsightsSection: React.FC = () => {
         </p>
         <div className="flex flex-wrap gap-2 mt-2">
           {FILTER_OPTIONS.map(({ value, label }) => (
-            <button
+            <Button
               key={value}
+              intent={filter === value ? "primary" : "secondary"}
+              size="xs"
               onClick={() => setFilter(value)}
-              className={`px-3 py-1 rounded ${
-                filter === value
-                  ? "bg-blue-600 text-white"
-                  : "bg-surface-raised text-text-muted hover:bg-interactive"
-              }`}
             >
               {label}
-            </button>
+            </Button>
           ))}
         </div>
       </header>

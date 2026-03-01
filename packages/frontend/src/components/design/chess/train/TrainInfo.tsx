@@ -1,5 +1,6 @@
 import React from "react";
 import { PencilIcon } from "@heroicons/react/20/solid";
+import { useNavigate } from "react-router-dom";
 import whiteKing from "../../../../assets/white-king.svg";
 import blackKing from "../../../../assets/black-king.svg";
 import { TrainVariant } from "../../../../models/chess.models";
@@ -40,6 +41,7 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
   supplementalPanel,
 }) => {
   const { goToRepertoire } = useNavigationUtils();
+  const navigate = useNavigate();
 
   const currentVariant = trainVariants.filter(
     (variant) => variant.state === "finished"
@@ -109,7 +111,19 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
             ? "Play one of your allowed moves according to your repertoire."
             : "Wait for your opponent to play."}
         </p>
-      ) : null}
+      ) : (
+        <div className="mb-4 flex flex-wrap gap-2">
+          <Button intent="primary" size="sm" onClick={() => navigate("/train")}>
+            Back to Train
+          </Button>
+          <Button intent="secondary" size="sm" onClick={() => navigate("/path")}>
+            Review Path
+          </Button>
+          <Button intent="secondary" size="sm" onClick={() => navigate("/dashboard")}>
+            Dashboard
+          </Button>
+        </div>
+      )}
       <div className="mb-4">
         <span className="text-sm text-text-muted">
           {`${currentVariant} of ${totalVariants} variants`}

@@ -78,10 +78,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ allowDefaultUser, onAuthenticated
       <form className="flex flex-col gap-4 p-6" onSubmit={submit}>
         {allowDefaultUser ? (
           <label className="flex items-center gap-3 rounded-lg border border-border-default bg-interactive px-3 py-2 text-sm text-text-base">
-            <input
+            <Input
               type="checkbox"
               checked={useDefaultUser}
-              onChange={(event) => setUseDefaultUser(event.target.checked)}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => setUseDefaultUser(event.target.checked)}
               className="h-4 w-4 accent-brand"
             />
             Access with local default user without password
