@@ -1,9 +1,16 @@
-﻿import React, { useState, useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  CheckIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+} from "@heroicons/react/24/outline";
 import { IRepertoireDashboard } from "@chess-opening-master/common";
+import { Button, Card } from "../../../components/ui";
+import { cn } from "../../../utils/cn";
 
 interface RepertoireFilterDropdownProps {
   filteredRepertoires: IRepertoireDashboard[];
-  orientationFilter: 'all' | 'white' | 'black';
+  orientationFilter: "all" | "white" | "black";
   selectedRepertoires: string[];
   setSelectedRepertoires: React.Dispatch<React.SetStateAction<string[]>>;
 }
@@ -15,108 +22,144 @@ export const RepertoireFilterDropdown: React.FC<RepertoireFilterDropdownProps> =
   setSelectedRepertoires,
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  
+
   const filteredRepertoiresByOrientation = useMemo(() => {
-    if (orientationFilter === 'all') {
+    if (orientationFilter === "all") {
       return filteredRepertoires;
-    } else {
-      return filteredRepertoires.filter(r => r.orientation === orientationFilter);
     }
+    return filteredRepertoires.filter(
+      (repertoire) => repertoire.orientation === orientationFilter
+    );
   }, [filteredRepertoires, orientationFilter]);
 
   useEffect(() => {
-    if (filteredRepertoiresByOrientation && filteredRepertoiresByOrientation.length > 0) {
-      setSelectedRepertoires(filteredRepertoiresByOrientation.map(r => r._id));
-    } else {
-      setSelectedRepertoires([]);
+    if (filteredRepertoiresByOrientation.length > 0) {
+      setSelectedRepertoires(
+        filteredRepertoiresByOrientation.map((repertoire) => repertoire._id)
+      );
+      return;
     }
+    setSelectedRepertoires([]);
   }, [filteredRepertoiresByOrientation, setSelectedRepertoires]);
 
   const toggleRepertoireSelection = (repertoireId: string) => {
-    setSelectedRepertoires(prev => {
-      if (prev.includes(repertoireId)) {
-        return prev.filter(id => id !== repertoireId);
-      } else {
-        return [...prev, repertoireId];
-      }
-    });
+    setSelectedRepertoires((prev) =>
+      prev.includes(repertoireId)
+        ? prev.filter((id) => id !== repertoireId)
+        : [...prev, repertoireId]
+    );
   };
 
   const selectAllRepertoires = () => {
-    setSelectedRepertoires(filteredRepertoiresByOrientation.map(r => r._id));
+    setSelectedRepertoires(
+      filteredRepertoiresByOrientation.map((repertoire) => repertoire._id)
+    );
   };
 
   const deselectAllRepertoires = () => {
     setSelectedRepertoires([]);
   };
 
+  const summaryLabel =
+    selectedRepertoires.length === 0
+      ? "No repertoires"
+      : selectedRepertoires.length === filteredRepertoiresByOrientation.length
+        ? `All ${orientationFilter !== "all" ? orientationFilter : ""} repertoires`.trim()
+        : `${selectedRepertoires.length} repertoire(s)`;
+
   return (
-    <div className="relative">
-      <button 
-        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-        className="w-full bg-surface-raised text-text-base px-3 py-2 border border-border-default rounded-lg shadow-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition ease-in-out duration-150 text-xs sm:text-sm flex justify-between items-center"
+    <div className={cn("relative", isDropdownOpen && "z-20")}>
+      <Button
+        type="button"
+        intent="secondary"
+        size="sm"
+        onClick={() => setIsDropdownOpen((open) => !open)}
+        className="w-full justify-between border-border-default bg-surface-raised text-left text-xs sm:text-sm"
       >
-        <span>
-          {selectedRepertoires.length === 0 
-            ? 'No repertoires' 
-            : selectedRepertoires.length === filteredRepertoiresByOrientation.length 
-              ? `All ${orientationFilter !== 'all' ? orientationFilter : ''} repertoires`.trim() 
-              : `${selectedRepertoires.length} repertoire(s)`}
-        </span>
-        <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-        </svg>
-      </button>
-      
-      {isDropdownOpen && (
-        <div className="absolute z-50 mt-1 w-full bg-surface-raised border border-border-default rounded-lg shadow-lg">
-          <div className="p-2 border-b border-border-default flex justify-between">
-            <button 
-              onClick={() => { selectAllRepertoires(); }}
-              className="text-xs text-blue-400 hover:text-blue-300"
+        <span className="truncate">{summaryLabel}</span>
+        {isDropdownOpen ? (
+          <ChevronUpIcon className="h-4 w-4 shrink-0" />
+        ) : (
+          <ChevronDownIcon className="h-4 w-4 shrink-0" />
+        )}
+      </Button>
+
+      {isDropdownOpen ? (
+        <Card
+          padding="none"
+          elevation="high"
+          className="absolute left-0 top-full z-50 mt-1 min-w-full overflow-hidden border-border-default bg-surface"
+        >
+          <div className="flex items-center justify-between gap-2 border-b border-border-subtle p-2">
+            <Button
+              type="button"
+              intent="ghost"
+              size="sm"
+              onClick={selectAllRepertoires}
+              className="px-2"
             >
-              Select All
-            </button>
-            <button 
-              onClick={() => { deselectAllRepertoires(); }}
-              className="text-xs text-blue-400 hover:text-blue-300"
+              Select all
+            </Button>
+            <Button
+              type="button"
+              intent="ghost"
+              size="sm"
+              onClick={deselectAllRepertoires}
+              className="px-2"
             >
-              Deselect All
-            </button>
+              Clear
+            </Button>
           </div>
-          <div className="max-h-60 overflow-y-auto p-2">
+
+          <div className="max-h-60 space-y-1 overflow-y-auto p-2">
             {filteredRepertoiresByOrientation.length > 0 ? (
-              filteredRepertoiresByOrientation.map(repertoire => (
-                <div key={repertoire._id} className="flex items-center mb-2">
-                  <input 
-                    type="checkbox" 
-                    id={`rep-${repertoire._id}`} 
-                    checked={selectedRepertoires.includes(repertoire._id)}
-                    onChange={() => toggleRepertoireSelection(repertoire._id)}
-                    className="mr-2 form-checkbox h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
-                  />
-                  <label htmlFor={`rep-${repertoire._id}`} className="text-text-muted text-sm">
-                    {repertoire.name}
-                    <span className="ml-2 text-xs text-text-subtle">
-                      ({repertoire.orientation})
+              filteredRepertoiresByOrientation.map((repertoire) => {
+                const selected = selectedRepertoires.includes(repertoire._id);
+                return (
+                  <Button
+                    key={repertoire._id}
+                    type="button"
+                    intent={selected ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => toggleRepertoireSelection(repertoire._id)}
+                    className="w-full justify-between px-2 py-2"
+                  >
+                    <span className="min-w-0 text-left">
+                      <span className="block truncate text-text-base">
+                        {repertoire.name}
+                      </span>
+                      <span className="block text-[11px] uppercase tracking-wide text-text-subtle">
+                        {repertoire.orientation}
+                      </span>
                     </span>
-                  </label>
-                </div>
-              ))
+                    <span className="ml-3 flex h-5 w-5 items-center justify-center rounded border border-border-default bg-surface-raised">
+                      {selected ? (
+                        <CheckIcon className="h-3.5 w-3.5 text-brand" />
+                      ) : null}
+                    </span>
+                  </Button>
+                );
+              })
             ) : (
-              <div className="text-text-subtle text-center py-4">No matching repertoires</div>
+              <div className="py-4 text-center text-text-subtle">
+                No matching repertoires
+              </div>
             )}
           </div>
-          <div className="p-2 border-t border-border-default">
-            <button 
+
+          <div className="border-t border-border-subtle p-2">
+            <Button
+              type="button"
+              intent="primary"
+              size="sm"
               onClick={() => setIsDropdownOpen(false)}
-              className="w-full bg-blue-600 text-white py-1 rounded text-xs hover:bg-blue-700"
+              className="w-full justify-center"
             >
-              Apply
-            </button>
+              Done
+            </Button>
           </div>
-        </div>
-      )}
+        </Card>
+      ) : null}
     </div>
   );
 };

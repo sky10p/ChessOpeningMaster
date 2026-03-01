@@ -133,6 +133,107 @@ describe("trainService", () => {
     expect(result.repertoires[0].openings[0].dueVariantsCount).toBe(2);
   });
 
+  it("ignores stale variant records that do not map to live repertoire openings", async () => {
+    const moveNodes = createSicilianMoveTree();
+    const treeVariants = MoveVariantNode.initMoveVariantNode(moveNodes as never).getVariants();
+    const firstVariantName = treeVariants[0].fullName;
+    const mockDb = {
+      collection: jest.fn((name: string) => {
+        if (name === "repertoires") {
+          return {
+            find: jest.fn().mockReturnValue(
+              createFindResult([
+                {
+                  _id: { toString: () => "rep-1" },
+                  name: "Rep 1",
+                  orientation: "white",
+                  moveNodes,
+                },
+              ])
+            ),
+          };
+        }
+        if (name === "variantsInfo") {
+          return {
+            find: jest.fn().mockReturnValue({
+              toArray: jest.fn().mockResolvedValue([
+                {
+                  repertoireId: "rep-1",
+                  variantName: firstVariantName,
+                  openingName: "Sicilian Defense",
+                  errors: 1,
+                  dueAt: new Date("2026-02-15T00:00:00.000Z"),
+                  masteryScore: 60,
+                },
+                {
+                  repertoireId: "rep-1",
+                  variantName: "French Defense: Ghost Line",
+                  openingName: "French Defense",
+                  errors: 3,
+                  dueAt: new Date("2026-02-15T00:00:00.000Z"),
+                  masteryScore: 20,
+                },
+              ]),
+            }),
+          };
+        }
+        if (name === "variantMistakes") {
+          return {
+            find: jest.fn().mockReturnValue({
+              toArray: jest.fn().mockResolvedValue([
+                {
+                  repertoireId: "rep-1",
+                  variantName: firstVariantName,
+                  openingName: "Sicilian Defense",
+                  mistakeKey: "live-k1",
+                  positionFen: "fen",
+                  variantStartFen: "start-fen",
+                  variantStartPly: 0,
+                  mistakePly: 4,
+                  expectedMoveLan: "d7d6",
+                  dueAt: new Date("2026-02-15T00:00:00.000Z"),
+                  seenCount: 0,
+                  solvedCount: 0,
+                  createdAt: fixedNow,
+                  updatedAt: fixedNow,
+                },
+                {
+                  repertoireId: "rep-1",
+                  variantName: "French Defense: Ghost Line",
+                  openingName: "French Defense",
+                  mistakeKey: "ghost-k1",
+                  positionFen: "fen",
+                  variantStartFen: "start-fen",
+                  variantStartPly: 0,
+                  mistakePly: 2,
+                  expectedMoveLan: "e7e6",
+                  dueAt: new Date("2026-02-15T00:00:00.000Z"),
+                  seenCount: 0,
+                  solvedCount: 0,
+                  createdAt: fixedNow,
+                  updatedAt: fixedNow,
+                },
+              ]),
+            }),
+          };
+        }
+        throw new Error(`Unknown collection: ${name}`);
+      }),
+    };
+    (mongo.getDB as jest.Mock).mockReturnValue(mockDb);
+
+    const result = await getTrainOverview("user-1");
+
+    expect(result.repertoires).toHaveLength(1);
+    expect(result.repertoires[0].openings).toHaveLength(1);
+    expect(result.repertoires[0].openings[0]).toMatchObject({
+      openingName: "Sicilian Defense",
+      totalVariantsCount: 2,
+      dueVariantsCount: 2,
+      dueMistakesCount: 1,
+    });
+  });
+
   it("returns opening detail with all opening variants, due counts, and mistakes", async () => {
     const moveNodes = createSicilianMoveTree();
     const treeVariants = MoveVariantNode.initMoveVariantNode(moveNodes as never).getVariants();

@@ -1,15 +1,19 @@
 ﻿import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { IRepertoireDashboard, TrainVariantInfo } from "@chess-opening-master/common";
-import { MoveVariantNode } from "../../../models/VariantNode";
 import { OpeningCard } from "../components/OpeningCard";
 import { OpeningCardSkeleton } from "../components/OpeningCardSkeleton";
 import { getVariantsProgressInfo } from "../../../components/design/SelectTrainVariants/utils";
 import { RepertoireFilterDropdown } from "../components/RepertoireFilterDropdown";
+import { Input, Select } from "../../../components/ui";
+import {
+  buildDashboardOpeningIndex,
+  getOpeningRepertoires,
+  getOpeningTrainVariants,
+} from "../utils/openingIndex";
 
 interface OpeningsSectionProps {
   openingNameFilter: string;
   setOpeningNameFilter: (value: string) => void;
-  openings: string[];
   filteredRepertoires: IRepertoireDashboard[];
   getTrainVariantInfo: (trainInfo: TrainVariantInfo[]) => Record<string, TrainVariantInfo>;
   goToRepertoire: (repertoire: IRepertoireDashboard) => void;
@@ -20,7 +24,6 @@ interface OpeningsSectionProps {
 export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
   openingNameFilter,
   setOpeningNameFilter,
-  openings,
   filteredRepertoires,
   getTrainVariantInfo,
   goToRepertoire,
@@ -47,27 +50,25 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
   const INITIAL_BATCH = 10;
   const BATCH_SIZE = 16;
   const BATCH_DELAY_MS = 80;
+  const openingIndex = useMemo(
+    () => buildDashboardOpeningIndex(filteredRepertoires),
+    [filteredRepertoires]
+  );
 
-  const getVariantsByOrientation = useCallback((repertoires: IRepertoireDashboard[], opening: string) => {
-    return repertoires
-      .filter((r) => orientationFilter === 'all' || r.orientation === orientationFilter)
-      .flatMap((r) => {
-        if (!r.moveNodes) return [];
-        const variants = MoveVariantNode.initMoveVariantNode(r.moveNodes).getVariants();
-        return variants.filter((v) => v.name === opening).map((v) => ({ variant: v, state: 'inProgress' as const, repertoire: r }));
-      });
-  }, [orientationFilter]);
+  const getVariantsByOrientation = useCallback((opening: string) => {
+    return getOpeningTrainVariants(openingIndex, opening, orientationFilter);
+  }, [openingIndex, orientationFilter]);
 
-  const getVariantInfoByOrientation = useCallback((repertoires: IRepertoireDashboard[], opening: string) => {
-    const variants = getVariantsByOrientation(repertoires, opening);
-    const infos = repertoires.flatMap((r) => r.variantsInfo || []);
+  const getVariantInfoByOrientation = useCallback((opening: string) => {
+    const variants = getVariantsByOrientation(opening);
+    const infos = variants.flatMap(({ repertoire }) => repertoire.variantsInfo || []);
     const infoMap = getTrainVariantInfo(infos);
     return { variants, infoMap };
   }, [getTrainVariantInfo, getVariantsByOrientation]);
 
   const filterByStatus = useCallback((opening: string) => {
     if (statusFilter === 'all') return true;
-    const { variants, infoMap } = getVariantInfoByOrientation(filteredRepertoires, opening);
+    const { variants, infoMap } = getVariantInfoByOrientation(opening);
     const { hasErrors, hasNewVariants } = getVariantsProgressInfo(variants, infoMap);
     if (statusFilter === 'errors') {
       return hasErrors;
@@ -83,36 +84,26 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
 
   const filterByOrientation = useCallback((opening: string) => {
     if (orientationFilter === 'all') return true;
-    return filteredRepertoires.some(repertoire => 
-      repertoire.orientation === orientationFilter && 
-      repertoire.moveNodes && 
-      MoveVariantNode.initMoveVariantNode(repertoire.moveNodes)
-        .getVariants()
-        .some(v => v.name === opening)
-    );
-  }, [orientationFilter, filteredRepertoires]);
+    return getOpeningRepertoires(openingIndex, opening, orientationFilter).length > 0;
+  }, [openingIndex, orientationFilter]);
   
   const filterByRepertoire = useCallback((opening: string) => {
     if (selectedRepertoires.length === 0) return false;
     if (selectedRepertoires.length === filteredRepertoires.length) return true;
     
-    return filteredRepertoires.some(repertoire => 
-      selectedRepertoires.includes(repertoire._id) &&
-      repertoire.moveNodes &&
-      MoveVariantNode.initMoveVariantNode(repertoire.moveNodes)
-        .getVariants()
-        .some(v => v.name === opening)
+    return getOpeningRepertoires(openingIndex, opening, orientationFilter).some((repertoire) =>
+      selectedRepertoires.includes(repertoire._id)
     );
-  }, [selectedRepertoires, filteredRepertoires]);
+  }, [selectedRepertoires, filteredRepertoires.length, openingIndex, orientationFilter]);
 
   const filteredOpenings = useMemo(
     () =>
-      openings
+      openingIndex.openings
         .filter(o => o.toLowerCase().includes(openingNameFilter.toLowerCase()))
         .filter(filterByStatus)
         .filter(filterByOrientation)
         .filter(filterByRepertoire),
-    [openings, openingNameFilter, filterByStatus, filterByOrientation, filterByRepertoire]
+    [openingIndex, openingNameFilter, filterByStatus, filterByOrientation, filterByRepertoire]
   );
 
   const filteredOpeningsSignature = useMemo(
@@ -146,47 +137,58 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
 
   return (
     <section className="flex-1 flex flex-col min-h-0">
-      <div className="sticky top-12 sm:top-16 z-10 bg-page pb-2 pt-2 sm:pt-4 px-2 sm:px-4 border-b border-border-subtle">
+      <div className="sticky top-12 sm:top-16 z-40 bg-page pb-2 pt-2 sm:pt-4 px-2 sm:px-4 border-b border-border-subtle">
         <header className="mb-2">
           <h2 className="font-bold text-text-base text-lg sm:text-2xl leading-tight mb-1 truncate">Openings</h2>
           <p className="text-text-muted text-xs sm:text-base leading-snug mb-2 sm:mb-4 truncate">Browse your prepared openings and see which repertoires use them. Filter by color, status, or name.</p>
         </header>
         <div className="flex flex-col md:flex-row gap-2 md:gap-4">
-          <select
-            value={orientationFilter}
-            onChange={(e) => setOrientationFilter(e.target.value as 'all' | 'white' | 'black')}
-            className="bg-surface-raised text-text-base px-3 py-2 border border-border-default rounded-lg shadow-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition ease-in-out duration-150 text-xs sm:text-sm"
-          >
-            <option value="all">All</option>
-            <option value="white">White</option>
-            <option value="black">Black</option>
-          </select>
-          
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as 'all' | 'errors' | 'successful' | 'new')}
-            className="bg-surface-raised text-text-base px-3 py-2 border border-border-default rounded-lg shadow-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition ease-in-out duration-150 text-xs sm:text-sm"
-          >
-            <option value="all">All</option>
-            <option value="errors">With Errors</option>
-            <option value="successful">Successful</option>
-            <option value="new">New Variants</option>
-          </select>
-          
-          <RepertoireFilterDropdown
-            filteredRepertoires={filteredRepertoires}
-            orientationFilter={orientationFilter}
-            selectedRepertoires={selectedRepertoires}
-            setSelectedRepertoires={setSelectedRepertoires}
-          />
-          
-          <input
-            type="text"
-            placeholder="Filter openings"
-            value={openingNameFilter}
-            onChange={(e) => setOpeningNameFilter(e.target.value)}
-            className="bg-surface-raised text-text-base px-3 py-2 border border-border-default rounded-lg shadow-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-400 transition ease-in-out duration-150 flex-grow text-xs sm:text-sm"
-          />
+          <div className="md:w-40">
+            <Select
+              label="Color"
+              size="sm"
+              value={orientationFilter}
+              onChange={(e) => setOrientationFilter(e.target.value as 'all' | 'white' | 'black')}
+            >
+              <option value="all">All</option>
+              <option value="white">White</option>
+              <option value="black">Black</option>
+            </Select>
+          </div>
+
+          <div className="md:w-44">
+            <Select
+              label="Status"
+              size="sm"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as 'all' | 'errors' | 'successful' | 'new')}
+            >
+              <option value="all">All</option>
+              <option value="errors">With Errors</option>
+              <option value="successful">Successful</option>
+              <option value="new">New Variants</option>
+            </Select>
+          </div>
+
+          <div className="md:min-w-[16rem]">
+            <div className="mb-1 text-sm font-medium text-text-muted">Repertoires</div>
+            <RepertoireFilterDropdown
+              filteredRepertoires={filteredRepertoires}
+              orientationFilter={orientationFilter}
+              selectedRepertoires={selectedRepertoires}
+              setSelectedRepertoires={setSelectedRepertoires}
+            />
+          </div>
+
+          <div className="flex-1">
+            <Input
+              label="Opening name"
+              size="sm"
+              placeholder="Filter openings"
+              value={openingNameFilter}
+              onChange={(e) => setOpeningNameFilter(e.target.value)}
+            />
+          </div>
         </div>
       </div>
       <div className="flex-1 overflow-y-auto pt-2 sm:pt-4 px-1 sm:px-4">
@@ -198,15 +200,12 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
             : (
               <>
                 {filteredOpenings.slice(0, renderedCount).map((opening) => {
-                  const repertoiresWithOpening = filteredRepertoires.filter((repertoire) =>
-                    (orientationFilter === 'all' || repertoire.orientation === orientationFilter) &&
-                    repertoire.moveNodes
-                      ? MoveVariantNode.initMoveVariantNode(repertoire.moveNodes)
-                          .getVariants()
-                          .some((v) => v.name === opening)
-                      : false
+                  const repertoiresWithOpening = getOpeningRepertoires(
+                    openingIndex,
+                    opening,
+                    orientationFilter
                   );
-                  const summaryVariants = getVariantsByOrientation(filteredRepertoires, opening);
+                  const summaryVariants = getVariantsByOrientation(opening);
                   const isOpen = expanded[opening] || false;
                   const repCount = repertoiresWithOpening.length;
                   return (

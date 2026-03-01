@@ -1,4 +1,6 @@
 import {
+  getOpeningNameFromVariant,
+  getVariantStartPly,
   MoveVariantNode,
   TrainOpeningResponse,
   TrainOpeningVariantItem,
@@ -79,30 +81,12 @@ const toDateOrNull = (value: unknown): Date | null => {
   return null;
 };
 
-const deriveOpeningName = (variantName: string): string => {
-  const opening = variantName.split(":")[0]?.trim();
-  return opening || variantName;
-};
-
 const getVariantOpeningName = (variant: TreeVariant): string => {
   const normalized = variant.name?.trim();
   if (normalized) {
     return normalized;
   }
-  return deriveOpeningName(variant.fullName);
-};
-
-const getVariantStartPly = (variant: TreeVariant): number => {
-  let startPly = 0;
-  variant.moves.forEach((moveNode) => {
-    if (
-      moveNode.variantName &&
-      (moveNode.variantName === variant.name || moveNode.variantName === variant.fullName)
-    ) {
-      startPly = moveNode.position;
-    }
-  });
-  return Math.max(0, startPly);
+  return getOpeningNameFromVariant(variant.fullName);
 };
 
 const getVariantFenAtPly = (variant: TreeVariant, targetPly: number): string => {
@@ -158,19 +142,6 @@ const buildVariantIndex = (repertoire: RepertoireDocument): RepertoireVariantInd
   return index;
 };
 
-const matchesOpening = (
-  openingName: string,
-  variantName: string,
-  variantOpeningName?: string
-): boolean => {
-  const normalizedTarget = openingName.trim().toLowerCase();
-  const normalizedFromRecord = (variantOpeningName || "").trim().toLowerCase();
-  if (normalizedFromRecord) {
-    return normalizedFromRecord === normalizedTarget;
-  }
-  return deriveOpeningName(variantName).toLowerCase() === normalizedTarget;
-};
-
 const isDueVariant = (
   variant: VariantInfo,
   now: Date,
@@ -217,17 +188,11 @@ const calculateOpeningMastery = (
   return Math.round(weightedScore / totalWeight);
 };
 
-const resolveOpeningNameForVariant = (
+const getDescriptorForStoredVariant = (
   variantName: string,
-  variantOpeningName: string | undefined,
   variantIndex: RepertoireVariantIndex
-): string => {
-  return (
-    variantIndex.byVariantName.get(variantName)?.openingName ||
-    variantOpeningName?.trim() ||
-    deriveOpeningName(variantName)
-  );
-};
+): RepertoireVariantIndex["variants"][number] | undefined =>
+  variantIndex.byVariantName.get(variantName);
 
 const getOrCreateOpeningAggregate = (
   openingMap: Map<string, OpeningAggregate>,
@@ -312,40 +277,44 @@ export const getTrainOverview = async (userId: string): Promise<TrainOverviewRes
     });
 
     variantsForRepertoire.forEach((variant) => {
-      const openingName = resolveOpeningNameForVariant(
+      const descriptor = getDescriptorForStoredVariant(
         variant.variantName,
-        variant.openingName,
         variantIndex
       );
+      if (!descriptor) {
+        return;
+      }
       const grouped = getOrCreateOpeningAggregate(
         openingMap,
-        openingName,
-        variantIndex.openingFens.get(openingName)
+        descriptor.openingName,
+        descriptor.openingFen || variantIndex.openingFens.get(descriptor.openingName)
       );
-      grouped.variantNames.add(variant.variantName);
-      grouped.variantInfoByName.set(variant.variantName, variant);
-      if (!grouped.variantLengths.has(variant.variantName)) {
+      grouped.variantNames.add(descriptor.variantName);
+      grouped.variantInfoByName.set(descriptor.variantName, variant);
+      if (!grouped.variantLengths.has(descriptor.variantName)) {
         grouped.variantLengths.set(
-          variant.variantName,
-          variantIndex.variantLengths.get(variant.variantName) || 1
+          descriptor.variantName,
+          descriptor.length
         );
       }
     });
 
     mistakesForRepertoire.forEach((mistake) => {
-      const openingName = resolveOpeningNameForVariant(
+      const descriptor = getDescriptorForStoredVariant(
         mistake.variantName,
-        mistake.openingName,
         variantIndex
       );
+      if (!descriptor) {
+        return;
+      }
       const grouped = getOrCreateOpeningAggregate(
         openingMap,
-        openingName,
-        variantIndex.openingFens.get(openingName)
+        descriptor.openingName,
+        descriptor.openingFen || variantIndex.openingFens.get(descriptor.openingName)
       );
       grouped.mistakes.push(mistake);
-      if (!grouped.openingFen && variantIndex.openingFens.get(openingName)) {
-        grouped.openingFen = variantIndex.openingFens.get(openingName);
+      if (!grouped.openingFen && descriptor.openingFen) {
+        grouped.openingFen = descriptor.openingFen;
       }
     });
 
@@ -446,20 +415,22 @@ export const getTrainOpening = async (
     });
 
   variants.forEach((variant) => {
-    const resolvedOpeningName = resolveOpeningNameForVariant(
+    const descriptor = getDescriptorForStoredVariant(
       variant.variantName,
-      variant.openingName,
       variantIndex
     );
-    if (resolvedOpeningName.trim().toLowerCase() !== normalizedOpeningName) {
+    if (!descriptor) {
       return;
     }
-    variantNameSet.add(variant.variantName);
-    variantInfoByName.set(variant.variantName, variant);
-    if (!variantLengths.has(variant.variantName)) {
+    if (descriptor.openingName.trim().toLowerCase() !== normalizedOpeningName) {
+      return;
+    }
+    variantNameSet.add(descriptor.variantName);
+    variantInfoByName.set(descriptor.variantName, variant);
+    if (!variantLengths.has(descriptor.variantName)) {
       variantLengths.set(
-        variant.variantName,
-        variantIndex.variantLengths.get(variant.variantName) || 1
+        descriptor.variantName,
+        descriptor.length
       );
     }
   });
@@ -476,8 +447,9 @@ export const getTrainOpening = async (
       .toArray()
   ).filter(
     (mistake) =>
-      variantNameSet.has(mistake.variantName) ||
-      matchesOpening(canonicalOpeningName, mistake.variantName, mistake.openingName)
+      getDescriptorForStoredVariant(mistake.variantName, variantIndex)
+        ?.openingName.trim()
+        .toLowerCase() === normalizedOpeningName
   );
 
   const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
@@ -503,8 +475,9 @@ export const getTrainOpening = async (
   ]);
 
   const filterHistoryByOpening = (review: ReviewHistoryDocument): boolean =>
-    variantNameSet.has(review.variantName) ||
-    matchesOpening(canonicalOpeningName, review.variantName, review.openingName);
+    getDescriptorForStoredVariant(review.variantName, variantIndex)
+      ?.openingName.trim()
+      .toLowerCase() === normalizedOpeningName;
 
   const recentErrors = recentReviews
     .filter(filterHistoryByOpening)
@@ -518,16 +491,11 @@ export const getTrainOpening = async (
     .sort((left, right) => left.localeCompare(right))
     .map((variantName) => {
       const variantInfo = variantInfoByName.get(variantName);
-      const itemOpeningName = resolveOpeningNameForVariant(
-        variantName,
-        variantInfo?.openingName,
-        variantIndex
-      );
       const errors = Math.max(0, Math.floor(variantInfo?.errors || 0));
       return {
         repertoireId,
         variantName,
-        openingName: itemOpeningName,
+        openingName: canonicalOpeningName,
         orientation: variantInfo?.orientation || repertoire.orientation,
         errors,
         dueAt: toDateOrNull(variantInfo?.dueAt || null) || undefined,

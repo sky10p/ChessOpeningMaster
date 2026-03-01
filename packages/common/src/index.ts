@@ -40,6 +40,12 @@ export {
 } from "./types/Path";
 export { getOrientationAwareFen } from "./utils/fenUtils";
 export {
+  computeNextMastery,
+  getOpeningNameFromVariant,
+  getVariantStartPly,
+  mergeMistakeSnapshotItems,
+} from "./utils/trainDomain";
+export {
   PASSWORD_MIN_LENGTH,
   PASSWORD_POLICY_MESSAGE,
   validatePasswordStrength,

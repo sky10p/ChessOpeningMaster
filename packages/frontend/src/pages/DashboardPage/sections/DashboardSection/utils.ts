@@ -1,5 +1,4 @@
 import { IRepertoireDashboard } from "@chess-opening-master/common";
-import { MoveVariantNode } from "../../../../models/VariantNode";
 import {
   FilterType,
   VariantInfo,
@@ -11,6 +10,7 @@ import {
   OpeningWithUnreviewedVariants,
   UnreviewedVariant,
 } from "./types";
+import { getRepertoireVariants } from "../../utils/openingIndex";
 
 export const getRatioColor = (ratio: number): string => {
   if (ratio >= 80) return "bg-green-500";
@@ -32,11 +32,7 @@ export const getRelevantVariants = (
   rep: IRepertoireDashboard,
   filter: FilterType
 ) => {
-  if (!rep.moveNodes) return [];
-
-  const variants = MoveVariantNode.initMoveVariantNode(
-    rep.moveNodes
-  ).getVariants();
+  const variants = getRepertoireVariants(rep);
 
   if (filter === "unreviewed") {
     return variants.filter((variant) => {

@@ -1,9 +1,9 @@
 ﻿import React, { useState, useMemo } from "react";
 import { IRepertoireDashboard } from "@chess-opening-master/common";
-import { MoveVariantNode } from "../../../models/VariantNode";
 import { useNavigationUtils } from "../../../utils/navigationUtils";
 import { OrientationFilter } from "./DashboardSection/types";
 import { getRatioColor, getRatioTextColor, generateAllOpeningsProgress } from "./DashboardSection/utils";
+import { buildDashboardOpeningIndex } from "../utils/openingIndex";
 
 type SortField = "opening" | "totalVariants" | "mastered" | "withProblems" | "ratio";
 type SortDirection = "asc" | "desc";
@@ -28,19 +28,10 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
     return repertoires;
   }, [repertoires, filter]);
 
-  const openingToRepertoireMap = useMemo(() => {
-    const map = new Map<string, string>();
-    filteredRepertoires.forEach((rep) => {
-      if (!rep.moveNodes) return;
-      const variants = MoveVariantNode.initMoveVariantNode(rep.moveNodes).getVariants();
-      variants.forEach((variant) => {
-        if (!map.has(variant.name)) {
-          map.set(variant.name, rep._id);
-        }
-      });
-    });
-    return map;
-  }, [filteredRepertoires]);
+  const openingIndex = useMemo(
+    () => buildDashboardOpeningIndex(filteredRepertoires),
+    [filteredRepertoires]
+  );
 
   const allData = useMemo(
     () => generateAllOpeningsProgress(filteredRepertoires, "all"),
@@ -77,7 +68,7 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
   };
 
   const handleOpeningClick = (openingName: string) => {
-    const repertoireId = openingToRepertoireMap.get(openingName);
+    const repertoireId = openingIndex.openingToRepertoireId.get(openingName);
     if (repertoireId) {
       goToTrainRepertoire(repertoireId, openingName);
     }

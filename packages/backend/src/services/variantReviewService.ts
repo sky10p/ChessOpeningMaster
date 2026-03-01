@@ -1,5 +1,8 @@
 import { getDB } from "../db/mongo";
 import {
+  computeNextMastery,
+  getOpeningNameFromVariant,
+  mergeMistakeSnapshotItems,
   MistakeSnapshotItem,
   ReviewRating,
 } from "@chess-opening-master/common";
@@ -39,15 +42,6 @@ function normalizeNonNegativeInt(value: number | undefined): number {
     return 0;
   }
   return Math.max(0, Math.floor(value as number));
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
-}
-
-function deriveOpeningName(variantName: string): string {
-  const openingName = variantName.split(":")[0]?.trim();
-  return openingName || variantName;
 }
 
 function normalizeMistakeSnapshot(
@@ -90,20 +84,6 @@ function normalizeMistakeSnapshot(
     });
   }
   return result.filter((mistake) => mistake.mistakeKey.startsWith(`${variantName}::`));
-}
-
-function mergeMistakeSnapshots(
-  existingSnapshot: MistakeSnapshotItem[],
-  incomingSnapshot: MistakeSnapshotItem[]
-): MistakeSnapshotItem[] {
-  const map = new Map<string, MistakeSnapshotItem>();
-  for (const mistake of existingSnapshot) {
-    map.set(mistake.mistakeKey, mistake);
-  }
-  for (const mistake of incomingSnapshot) {
-    map.set(mistake.mistakeKey, mistake);
-  }
-  return Array.from(map.values());
 }
 
 interface ErrorWithStatus extends Error {
@@ -173,41 +153,27 @@ export async function saveVariantReview(input: SaveVariantReviewInput): Promise<
     : [];
   const sameDaySnapshot = existing?.dailyErrorsDayKey === todayDayKey;
   const nextSnapshot = sameDaySnapshot
-    ? mergeMistakeSnapshots(existingSnapshot, incomingMistakes)
+    ? mergeMistakeSnapshotItems(existingSnapshot, incomingMistakes)
     : incomingMistakes;
   const incomingErrorBase = incomingMistakes.length > 0 ? incomingMistakes.length : wrongMoves;
   const previousDailyErrorCount = normalizeNonNegativeInt(existing?.dailyErrorCount);
   const nextDailyErrorCount = sameDaySnapshot
     ? Math.max(previousDailyErrorCount, incomingErrorBase, nextSnapshot.length)
     : Math.max(incomingErrorBase, nextSnapshot.length);
-  const ratingBonusMap: Record<ReviewRating, number> = {
-    again: -12,
-    hard: -4,
-    good: 4,
-    easy: 10,
-  };
-  const sessionScore = Math.max(
-    0,
-    100 - 22 * wrongMoves - 8 * ignoredWrongMoves - 6 * hintsUsed
-  );
-  const perfectRun = wrongMoves === 0 && ignoredWrongMoves === 0 && hintsUsed === 0;
-  const perfectBonus = perfectRun ? 8 : 0;
   const previousMastery = typeof existing?.masteryScore === "number" ? existing.masteryScore : 0;
-  const nextMastery = clamp(
-    Math.round(
-      0.75 * previousMastery +
-        0.25 * sessionScore +
-        ratingBonusMap[input.rating] +
-        perfectBonus
-    ),
-    0,
-    100
-  );
+  const nextMastery = computeNextMastery({
+    previousMastery,
+    rating: input.rating,
+    wrongMoves,
+    ignoredWrongMoves,
+    hintsUsed,
+  });
+  const perfectRun = wrongMoves === 0 && ignoredWrongMoves === 0 && hintsUsed === 0;
   const nextPerfectRunStreak = perfectRun
     ? normalizeNonNegativeInt(existing?.perfectRunStreak) + 1
     : 0;
   const openingName =
-    input.openingName || existing?.openingName || deriveOpeningName(input.variantName);
+    input.openingName || existing?.openingName || getOpeningNameFromVariant(input.variantName);
   const startingFen = input.startingFen || existing?.startingFen;
   const orientation = input.orientation || existing?.orientation;
 
