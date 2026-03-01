@@ -14,7 +14,10 @@ import {
 import { VariantReviewHistory } from "../models/VariantReviewHistory";
 import { VariantInfo } from "../models/VariantInfo";
 import { ObjectId } from "mongodb";
-import { upsertMistakesFromSnapshot } from "./variantMistakeService";
+import {
+  archiveMissingMistakesFromSnapshot,
+  upsertMistakesFromSnapshot,
+} from "./variantMistakeService";
 
 type VariantInfoDocument = VariantInfo & {
   userId: string;
@@ -132,6 +135,7 @@ export async function saveVariantReview(input: SaveVariantReviewInput): Promise<
   const hintsUsed = normalizeNonNegativeInt(input.hintsUsed);
   const timeSpentSec = normalizeNonNegativeInt(input.timeSpentSec);
   const incomingMistakes = normalizeMistakeSnapshot(input.mistakes, input.variantName);
+  const hasExplicitMistakeSnapshot = Array.isArray(input.mistakes);
   const todayDayKey = now.toISOString().slice(0, 10);
   const suggestedRating = input.suggestedRating || inferSuggestedRatingFromMetrics(wrongMoves, hintsUsed, timeSpentSec);
   const acceptedSuggested =
@@ -225,6 +229,16 @@ export async function saveVariantReview(input: SaveVariantReviewInput): Promise<
       orientation,
       variantStartFen: startingFen,
       mistakes: incomingMistakes,
+      now,
+    });
+  }
+
+  if (hasExplicitMistakeSnapshot && !sameDaySnapshot) {
+    await archiveMissingMistakesFromSnapshot({
+      userId: input.userId,
+      repertoireId: input.repertoireId,
+      variantName: input.variantName,
+      activeMistakeKeys: incomingMistakes.map((mistake) => mistake.mistakeKey),
       now,
     });
   }

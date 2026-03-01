@@ -1,18 +1,29 @@
 import React from "react";
 import { TrainVariant } from "../../../models/chess.models";
-import { getVariantsProgressInfo, VARIANT_COLORS, VARIANT_TEXT_COLORS } from "./utils";
+import {
+  getVariantsProgressInfo,
+  VARIANT_COLORS,
+  VARIANT_TEXT_COLORS,
+  VariantInfoKeyResolver,
+} from "./utils";
 import { TrainVariantInfo } from "@chess-opening-master/common";
 
 interface VariantsProgressBarProps {
   variants: TrainVariant[];
   variantInfo: Record<string, TrainVariantInfo>;
+  variantInfoKeyResolver?: VariantInfoKeyResolver;
 }
 
 export const VariantsProgressBar: React.FC<VariantsProgressBarProps> = ({
   variants,
   variantInfo,
+  variantInfoKeyResolver,
 }) => {
-  const { totalVariants, counts } = getVariantsProgressInfo(variants, variantInfo);
+  const { totalVariants, counts } = getVariantsProgressInfo(
+    variants,
+    variantInfo,
+    variantInfoKeyResolver
+  );
 
   const getPercentage = (count: number) => (count / totalVariants) * 100;
 

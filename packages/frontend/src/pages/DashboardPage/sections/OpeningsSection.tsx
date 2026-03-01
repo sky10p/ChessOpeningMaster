@@ -7,32 +7,36 @@ import { RepertoireFilterDropdown } from "../components/RepertoireFilterDropdown
 import { Input, Select } from "../../../components/ui";
 import {
   buildDashboardOpeningIndex,
+  getScopedTrainVariantInfoKey,
   getOpeningRepertoires,
   getOpeningTrainVariants,
+  toScopedTrainVariantInfoMap,
 } from "../utils/openingIndex";
 
 interface OpeningsSectionProps {
   openingNameFilter: string;
   setOpeningNameFilter: (value: string) => void;
+  initialStatusFilter?: "all" | "errors" | "successful" | "new";
   filteredRepertoires: IRepertoireDashboard[];
   getTrainVariantInfo: (trainInfo: TrainVariantInfo[]) => Record<string, TrainVariantInfo>;
   goToRepertoire: (repertoire: IRepertoireDashboard) => void;
-  goToTrainRepertoire: (repertoire: IRepertoireDashboard) => void;
+  goToTrainOpening: (repertoire: IRepertoireDashboard, openingName: string) => void;
   loading?: boolean;
 }
 
 export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
   openingNameFilter,
   setOpeningNameFilter,
+  initialStatusFilter = "all",
   filteredRepertoires,
   getTrainVariantInfo,
   goToRepertoire,
-  goToTrainRepertoire,
+  goToTrainOpening,
   loading = false,
 }) => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [orientationFilter, setOrientationFilter] = useState<'all' | 'white' | 'black'>('all');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'errors' | 'successful' | 'new'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'errors' | 'successful' | 'new'>(initialStatusFilter);
   const [selectedRepertoires, setSelectedRepertoires] = useState<string[]>([]);
 
   const hasReceivedData = useRef(false);
@@ -44,6 +48,10 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
       setReady(true);
     }
   }, [filteredRepertoires, loading]);
+
+  useEffect(() => {
+    setStatusFilter(initialStatusFilter);
+  }, [initialStatusFilter]);
 
   const isLoading = loading || !ready;
 
@@ -62,9 +70,9 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
   const getVariantInfoByOrientation = useCallback((opening: string) => {
     const variants = getVariantsByOrientation(opening);
     const infos = variants.flatMap(({ repertoire }) => repertoire.variantsInfo || []);
-    const infoMap = getTrainVariantInfo(infos);
+    const infoMap = toScopedTrainVariantInfoMap(infos);
     return { variants, infoMap };
-  }, [getTrainVariantInfo, getVariantsByOrientation]);
+  }, [getVariantsByOrientation]);
 
   const filteredRepertoireCountByOrientation = useMemo(() => {
     if (orientationFilter === "all") {
@@ -78,7 +86,15 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
   const filterByStatus = useCallback((opening: string) => {
     if (statusFilter === 'all') return true;
     const { variants, infoMap } = getVariantInfoByOrientation(opening);
-    const { hasErrors, hasNewVariants } = getVariantsProgressInfo(variants, infoMap);
+    const { hasErrors, hasNewVariants } = getVariantsProgressInfo(
+      variants,
+      infoMap,
+      (variant) =>
+        getScopedTrainVariantInfoKey(
+          (variant as typeof variants[number]).repertoire._id,
+          variant.variant.fullName
+        )
+    );
     if (statusFilter === 'errors') {
       return hasErrors;
     }
@@ -126,8 +142,8 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
   );
 
   const summaryVariantInfo = useMemo(
-    () => getTrainVariantInfo(allVariantsInfo),
-    [allVariantsInfo, getTrainVariantInfo]
+    () => toScopedTrainVariantInfoMap(allVariantsInfo),
+    [allVariantsInfo]
   );
 
   const [renderedCount, setRenderedCount] = useState(INITIAL_BATCH);
@@ -228,7 +244,7 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
                       repCount={repCount}
                       onToggle={() => setExpanded((prev) => ({ ...prev, [opening]: !isOpen }))}
                       goToRepertoire={goToRepertoire}
-                      goToTrainRepertoire={goToTrainRepertoire}
+                      goToTrainOpening={goToTrainOpening}
                       getTrainVariantInfo={getTrainVariantInfo}
                     />
                   );

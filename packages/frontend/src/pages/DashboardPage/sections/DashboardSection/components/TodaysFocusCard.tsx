@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "../../../../../components/ui";
 import { ProgressStats } from "../types";
 import {
@@ -19,7 +19,6 @@ type FocusPriority = {
   headline: string;
   detail: string;
   cta: string;
-  route: string;
   tone: "danger" | "warning" | "success" | "brand";
 };
 
@@ -29,8 +28,7 @@ function determineFocus(stats: ProgressStats, totalVariants: number): FocusPrior
       icon: <ExclamationTriangleIcon className="h-6 w-6 text-danger" />,
       headline: `${stats.reviewedWithErrors} variant${stats.reviewedWithErrors === 1 ? "" : "s"} with errors`,
       detail: "Fix errors to strengthen your weakest lines first.",
-      cta: "Train Errors",
-      route: "/train",
+      cta: "See Errors",
       tone: "danger",
     };
   }
@@ -41,7 +39,6 @@ function determineFocus(stats: ProgressStats, totalVariants: number): FocusPrior
       headline: `${stats.neverReviewed} unreviewed variant${stats.neverReviewed === 1 ? "" : "s"}`,
       detail: "Review new lines to build your repertoire confidence.",
       cta: "Start Reviewing",
-      route: "/path",
       tone: "warning",
     };
   }
@@ -52,7 +49,6 @@ function determineFocus(stats: ProgressStats, totalVariants: number): FocusPrior
       headline: "All variants reviewed",
       detail: "Great job! Keep your edge sharp with regular practice.",
       cta: "Practice Now",
-      route: "/train",
       tone: "success",
     };
   }
@@ -62,7 +58,6 @@ function determineFocus(stats: ProgressStats, totalVariants: number): FocusPrior
     headline: "Get started",
     detail: "Create a repertoire and start learning chess openings.",
     cta: "Create Repertoire",
-    route: "/",
     tone: "brand",
   };
 }
@@ -79,7 +74,27 @@ export const TodaysFocusCard: React.FC<TodaysFocusCardProps> = ({
   totalVariants,
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const focus = determineFocus(stats, totalVariants);
+
+  const handleClick = () => {
+    if (focus.tone === "danger") {
+      navigate({
+        pathname: location.pathname,
+        search: "section=openings&status=errors",
+      });
+      return;
+    }
+    if (focus.tone === "warning") {
+      navigate("/path");
+      return;
+    }
+    if (focus.tone === "success") {
+      navigate("/train");
+      return;
+    }
+    navigate("/");
+  };
 
   return (
     <div
@@ -103,7 +118,7 @@ export const TodaysFocusCard: React.FC<TodaysFocusCardProps> = ({
         intent="primary"
         size="sm"
         className="shrink-0 self-start sm:self-center"
-        onClick={() => navigate(focus.route)}
+        onClick={handleClick}
       >
         {focus.cta}
       </Button>

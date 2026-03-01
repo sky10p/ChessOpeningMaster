@@ -1,6 +1,7 @@
 ﻿import React, { useState, useMemo } from "react";
 import { IRepertoireDashboard } from "@chess-opening-master/common";
 import { useNavigationUtils } from "../../../utils/navigationUtils";
+import { useIsMobile } from "../../../hooks/useIsMobile";
 import { OrientationFilter, OpeningWithVariants, OpeningWithUnreviewedVariants } from "./DashboardSection/types";
 import {
   getRatioColor,
@@ -14,7 +15,7 @@ import { buildDashboardOpeningIndex } from "../utils/openingIndex";
 import { ExpandableVariantsChart } from "../components/ExpandableVariantsChart";
 import { UnreviewedVariantsChart } from "../components/UnreviewedVariantsChart";
 import { RepertoireFilterDropdown } from "../components/RepertoireFilterDropdown";
-import { Button, Input, Select, Tabs, TabButton } from "../../../components/ui";
+import { Badge, Button, Input, Select, Tabs, TabButton } from "../../../components/ui";
 
 type OverviewView = "progress" | "errors" | "unreviewed";
 
@@ -33,6 +34,7 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
   initialView = "progress",
 }) => {
   const { goToTrainRepertoire, goToTrainRepertoireWithVariants } = useNavigationUtils();
+  const isMobile = useIsMobile();
 
   const [view, setView] = useState<OverviewView>(initialView);
   const [filter, setFilter] = useState<OrientationFilter>("all");
@@ -48,6 +50,10 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
 
   const [minUnreviewed, setMinUnreviewed] = useState<number>(1);
   const [unreviewedSortBy, setUnreviewedSortBy] = useState<UnreviewedSortOption>("unreviewed");
+
+  React.useEffect(() => {
+    setView(initialView);
+  }, [initialView]);
 
   const filteredRepertoires = useMemo(() => {
     if (filter === "white") return repertoires.filter((r) => r.orientation === "white");
@@ -192,8 +198,6 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
     return sortDirection === "asc" ? "↑" : "↓";
   };
 
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-
   return (
     <section className="flex-1 flex flex-col min-h-0 p-4 overflow-y-auto">
       <header className="mb-4">
@@ -211,17 +215,17 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({
           <TabButton variant="underline" active={view === "errors"} onClick={() => setView("errors")}>
             Errors
             {rawTotalErrors > 0 && (
-              <span className="ml-1.5 inline-flex items-center justify-center rounded-full bg-danger/15 px-1.5 py-0.5 text-xs font-medium text-danger">
+              <Badge variant="danger" size="sm" className="ml-1.5">
                 {rawTotalErrors}
-              </span>
+              </Badge>
             )}
           </TabButton>
           <TabButton variant="underline" active={view === "unreviewed"} onClick={() => setView("unreviewed")}>
             Unreviewed
             {rawTotalUnreviewed > 0 && (
-              <span className="ml-1.5 inline-flex items-center justify-center rounded-full bg-warning/15 px-1.5 py-0.5 text-xs font-medium text-warning">
+              <Badge variant="warning" size="sm" className="ml-1.5">
                 {rawTotalUnreviewed}
-              </span>
+              </Badge>
             )}
           </TabButton>
         </Tabs>

@@ -129,6 +129,37 @@ export const upsertMistakesFromSnapshot = async (params: {
   }
 };
 
+export const archiveMissingMistakesFromSnapshot = async (params: {
+  userId: string;
+  repertoireId: string;
+  variantName: string;
+  activeMistakeKeys: string[];
+  now?: Date;
+}): Promise<void> => {
+  const db = getDB();
+  const now = params.now || new Date();
+  const filter: Record<string, unknown> = {
+    userId: params.userId,
+    repertoireId: params.repertoireId,
+    variantName: params.variantName,
+    archivedAt: { $exists: false },
+  };
+
+  if (params.activeMistakeKeys.length > 0) {
+    filter.mistakeKey = { $nin: params.activeMistakeKeys };
+  }
+
+  await db.collection<VariantMistake>("variantMistakes").updateMany(
+    filter,
+    {
+      $set: {
+        archivedAt: now,
+        updatedAt: now,
+      },
+    }
+  );
+};
+
 const loadVariantMapForRepertoire = async (params: {
   userId: string;
   repertoireId: string;

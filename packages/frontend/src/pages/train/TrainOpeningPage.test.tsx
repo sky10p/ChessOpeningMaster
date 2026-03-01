@@ -7,11 +7,13 @@ import * as trainRepository from "../../repository/train/train";
 
 const mockNavigate = jest.fn();
 const mockUseParams = jest.fn();
+const mockUseLocation = jest.fn();
 
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
   useNavigate: () => mockNavigate,
   useParams: () => mockUseParams(),
+  useLocation: () => mockUseLocation(),
 }));
 
 const openingPayload = {
@@ -107,6 +109,7 @@ describe("TrainOpeningPage", () => {
       repertoireId: "rep-1",
       openingName: "Italian Game",
     });
+    mockUseLocation.mockReturnValue({ search: "" });
   });
 
   it("navigates with standard mode query when train all variants is clicked", async () => {
@@ -220,6 +223,40 @@ describe("TrainOpeningPage", () => {
     });
   });
 
+  it("opens the current opening in Edit Repertoire", async () => {
+    jest.spyOn(trainRepository, "getTrainOpening").mockResolvedValue(openingPayload);
+
+    render(
+      <MemoryRouter>
+        <TrainOpeningPage />
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText("Italian Game")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "View Opening" }));
+
+    expect(mockNavigate).toHaveBeenCalledWith(
+      "/repertoire/rep-1?variantName=Italian%20Game"
+    );
+  });
+
+  it("opens a variant in Edit Repertoire", async () => {
+    jest.spyOn(trainRepository, "getTrainOpening").mockResolvedValue(openingPayload);
+
+    render(
+      <MemoryRouter>
+        <TrainOpeningPage />
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText("Italian Game")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "View Variant" }));
+
+    expect(mockNavigate).toHaveBeenCalledWith(
+      "/repertoire/rep-1?variantName=Italian%20Game%3A%20Main%20Line"
+    );
+  });
+
   it("disables due-only mistake training when only scheduled mistakes exist", async () => {
     jest.spyOn(trainRepository, "getTrainOpening").mockResolvedValue({
       ...openingPayload,
@@ -242,5 +279,25 @@ describe("TrainOpeningPage", () => {
 
     expect(await screen.findByText("Italian Game")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Train Due Mistakes" })).toBeDisabled();
+  });
+
+  it("returns to dashboard openings when a return target is provided", async () => {
+    jest.spyOn(trainRepository, "getTrainOpening").mockResolvedValue(openingPayload);
+    mockUseLocation.mockReturnValue({
+      search: "?returnTo=%2Fdashboard%3Fsection%3Dopenings%26status%3Derrors",
+    });
+
+    render(
+      <MemoryRouter>
+        <TrainOpeningPage />
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText("Italian Game")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+
+    expect(mockNavigate).toHaveBeenCalledWith(
+      "/dashboard?section=openings&status=errors"
+    );
   });
 });

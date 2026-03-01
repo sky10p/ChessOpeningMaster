@@ -48,6 +48,9 @@ export const DashboardPage = () => {
   >("all");
   const [repertoireNameFilter, setRepertoireNameFilter] = useState<string>("");
   const [openingNameFilter, setOpeningNameFilter] = useState<string>("");
+  const [openingsInitialStatusFilter, setOpeningsInitialStatusFilter] = useState<
+    "all" | "errors" | "successful" | "new"
+  >("all");
   const [selectedSection, setSelectedSection] = useState<
     | "dashboard"
     | "pathInsights"
@@ -63,6 +66,7 @@ export const DashboardPage = () => {
   React.useEffect(() => {
     const params = new URLSearchParams(location.search);
     const section = params.get("section");
+    const status = params.get("status");
     if (
       section === "dashboard" ||
       section === "pathInsights" ||
@@ -72,12 +76,25 @@ export const DashboardPage = () => {
       section === "studies"
     ) {
       setSelectedSection(section);
+      if (
+        section === "openings" &&
+        (status === "all" ||
+          status === "errors" ||
+          status === "successful" ||
+          status === "new")
+      ) {
+        setOpeningsInitialStatusFilter(status);
+      } else {
+        setOpeningsInitialStatusFilter("all");
+      }
     } else if (section === "errors") {
       setSelectedSection("overview");
       setOverviewInitialView("errors");
+      setOpeningsInitialStatusFilter("all");
     } else if (section === "unreviewed") {
       setSelectedSection("overview");
       setOverviewInitialView("unreviewed");
+      setOpeningsInitialStatusFilter("all");
     }
   }, [location.search]);
 
@@ -94,8 +111,12 @@ export const DashboardPage = () => {
     if (section === "overview") {
       setOverviewInitialView("progress");
     }
+    if (section !== "openings") {
+      setOpeningsInitialStatusFilter("all");
+    }
     const params = new URLSearchParams(location.search);
     params.set("section", section);
+    params.delete("status");
     navigate({ pathname: location.pathname, search: params.toString() }, { replace: true });
   };
 
@@ -117,6 +138,15 @@ export const DashboardPage = () => {
   const goToTrainRepertoire = (repertoire: IRepertoire, variantName?: string) => {
     navigate(
       `/repertoire/train/${repertoire._id}${variantName ? `?variantName=${variantName}` : ""}`
+    );
+  };
+
+  const goToTrainOpening = (repertoire: IRepertoire, openingName: string) => {
+    const returnTo = `${location.pathname}?section=openings${openingsInitialStatusFilter !== "all" ? `&status=${openingsInitialStatusFilter}` : ""}`;
+    const params = new URLSearchParams();
+    params.set("returnTo", returnTo);
+    navigate(
+      `/train/repertoire/${repertoire._id}/opening/${encodeURIComponent(openingName)}?${params.toString()}`
     );
   };
 
@@ -185,10 +215,11 @@ export const DashboardPage = () => {
               <OpeningsSection
                 openingNameFilter={openingNameFilter}
                 setOpeningNameFilter={setOpeningNameFilter}
+                initialStatusFilter={openingsInitialStatusFilter}
                 filteredRepertoires={filteredRepertoires}
                 getTrainVariantInfo={getTrainVariantInfo}
                 goToRepertoire={goToRepertoire}
-                goToTrainRepertoire={goToTrainRepertoire}
+                goToTrainOpening={goToTrainOpening}
                 loading={loading}
               />
             )}

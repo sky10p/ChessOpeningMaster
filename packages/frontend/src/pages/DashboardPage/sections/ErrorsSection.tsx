@@ -5,6 +5,7 @@ import { OpeningWithVariants } from "./DashboardSection/types";
 import { ExpandableVariantsChart } from "../components/ExpandableVariantsChart";
 import { RepertoireFilterDropdown } from "../components/RepertoireFilterDropdown";
 import { useNavigationUtils } from "../../../utils/navigationUtils";
+import { useIsMobile } from "../../../hooks/useIsMobile";
 import { Button, Input, Select } from "../../../components/ui";
 
 interface ErrorsSectionProps {
@@ -17,6 +18,7 @@ type OrientationFilter = "all" | "white" | "black";
 
 export const ErrorsSection: React.FC<ErrorsSectionProps> = ({ repertoires }) => {
   const { goToTrainRepertoire, goToTrainRepertoireWithVariants } = useNavigationUtils();
+  const isMobile = useIsMobile();
   const [orientationFilter, setOrientationFilter] = useState<OrientationFilter>("all");
   const [selectedRepertoires, setSelectedRepertoires] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -197,7 +199,7 @@ export const ErrorsSection: React.FC<ErrorsSectionProps> = ({ repertoires }) => 
           data={filteredOpenings}
           title="Errors by Opening"
           emptyMessage="No openings found with the selected filters"
-          isMobile={typeof window !== "undefined" && window.innerWidth < 768}
+          isMobile={isMobile}
           onVariantClick={handleVariantClick}
           onVariantsClick={handleVariantsClick}
         />

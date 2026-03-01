@@ -51,6 +51,21 @@ export const toTrainVariantInfoMap = (
   return infoMap;
 };
 
+export const getScopedTrainVariantInfoKey = (
+  repertoireId: string,
+  variantName: string
+): string => `${repertoireId}::${variantName}`;
+
+export const toScopedTrainVariantInfoMap = (
+  trainInfo: TrainVariantInfo[] = []
+): Record<string, TrainVariantInfo> => {
+  const infoMap: Record<string, TrainVariantInfo> = {};
+  trainInfo.forEach((info) => {
+    infoMap[getScopedTrainVariantInfoKey(info.repertoireId, info.variantName)] = info;
+  });
+  return infoMap;
+};
+
 export const buildDashboardOpeningIndex = (
   repertoires: IRepertoireDashboard[]
 ): DashboardOpeningIndex => {

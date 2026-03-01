@@ -4,20 +4,14 @@ import {
   TrainOverviewResponse,
   TrainOpeningSummary,
 } from "@chess-opening-master/common";
-import { getTrainOverview } from "../../../../../repository/train/train";
-import { Button, Badge } from "../../../../../components/ui";
-import { MasteryBadge } from "../../../../../components/ui/MasteryBadge";
+import { getCachedTrainOverview } from "../../../../../repository/train/train";
+import { Badge, Button, MasteryBadge } from "../../../../../components/ui";
 
-interface DueOpening extends TrainOpeningSummary {
-  repertoireSlug: string;
-}
-
-function extractDueOpenings(overview: TrainOverviewResponse): DueOpening[] {
+function extractDueOpenings(overview: TrainOverviewResponse): TrainOpeningSummary[] {
   return overview.repertoires
     .flatMap((group) =>
       group.openings
         .filter((o) => o.dueVariantsCount > 0 || o.dueMistakesCount > 0)
-        .map((o) => ({ ...o, repertoireSlug: group.repertoireId }))
     )
     .sort((a, b) => b.dueVariantsCount + b.dueMistakesCount - (a.dueVariantsCount + a.dueMistakesCount))
     .slice(0, 5);
@@ -25,7 +19,7 @@ function extractDueOpenings(overview: TrainOverviewResponse): DueOpening[] {
 
 export const TrainingQueuePreview: React.FC = () => {
   const navigate = useNavigate();
-  const [openings, setOpenings] = useState<DueOpening[]>([]);
+  const [openings, setOpenings] = useState<TrainOpeningSummary[]>([]);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
   useEffect(() => {
@@ -33,7 +27,7 @@ export const TrainingQueuePreview: React.FC = () => {
     const load = async () => {
       setStatus("loading");
       try {
-        const overview = await getTrainOverview();
+        const overview = await getCachedTrainOverview();
         if (!ignore) {
           setOpenings(extractDueOpenings(overview));
           setStatus("success");
@@ -86,10 +80,12 @@ export const TrainingQueuePreview: React.FC = () => {
       </div>
       <div className="space-y-2">
         {openings.map((opening) => (
-          <button
+          <Button
             key={`${opening.repertoireId}-${opening.openingName}`}
             type="button"
-            className="w-full flex items-center justify-between gap-2 rounded-lg border border-border-subtle bg-surface-raised px-3 py-2 text-left hover:border-brand/40 transition-colors"
+            intent="secondary"
+            size="sm"
+            className="h-auto w-full justify-between gap-2 rounded-lg px-3 py-2 text-left font-normal hover:border-brand/40"
             onClick={() =>
               navigate(
                 `/train/repertoire/${opening.repertoireId}/opening/${encodeURIComponent(opening.openingName)}`
@@ -106,10 +102,10 @@ export const TrainingQueuePreview: React.FC = () => {
                 <Badge variant="warning" size="sm">{opening.dueVariantsCount} Due</Badge>
               )}
               {opening.dueMistakesCount > 0 && (
-                <Badge variant="danger" size="sm">{opening.dueMistakesCount} mistakes</Badge>
+                <Badge variant="danger" size="sm">{opening.dueMistakesCount} Mistakes</Badge>
               )}
             </div>
-          </button>
+          </Button>
         ))}
       </div>
     </div>

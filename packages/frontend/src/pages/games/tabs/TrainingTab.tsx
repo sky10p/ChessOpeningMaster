@@ -1,7 +1,7 @@
 ﻿import React from "react";
 import { LineStudyCandidate, TrainingPlanItem } from "@chess-opening-master/common";
 import { buildLineTitle, formatDateTime, formatPercent } from "../utils";
-import { Button, Input } from "../../../components/ui";
+import { Button, Checkbox } from "../../../components/ui";
 
 type TrainingTabProps = {
   trainingPlanId?: string;
@@ -142,11 +142,10 @@ const TrainingTab: React.FC<TrainingTabProps> = ({
                       : null
                     }
                     <label className="flex items-center gap-2 text-xs text-text-subtle cursor-pointer w-fit">
-                      <Input
-                        type="checkbox"
+                      <Checkbox
                         checked={item.done}
                         onChange={(e) => { if (trainingPlanId) { void markDone(trainingPlanId, item.lineKey, e.target.checked); } }}
-                        className="rounded border-border-default"
+                        className="shrink-0"
                       />
                       Mark done
                     </label>

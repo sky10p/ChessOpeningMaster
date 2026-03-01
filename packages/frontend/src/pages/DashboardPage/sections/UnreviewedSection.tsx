@@ -5,6 +5,7 @@ import { OpeningWithUnreviewedVariants } from "./DashboardSection/types";
 import { UnreviewedVariantsChart } from "../components/UnreviewedVariantsChart";
 import { RepertoireFilterDropdown } from "../components/RepertoireFilterDropdown";
 import { useNavigationUtils } from "../../../utils/navigationUtils";
+import { useIsMobile } from "../../../hooks/useIsMobile";
 import { Button, Input, Select } from "../../../components/ui";
 
 interface UnreviewedSectionProps {
@@ -17,6 +18,7 @@ type OrientationFilter = "all" | "white" | "black";
 
 export const UnreviewedSection: React.FC<UnreviewedSectionProps> = ({ repertoires }) => {
   const { goToTrainRepertoire, goToTrainRepertoireWithVariants } = useNavigationUtils();
+  const isMobile = useIsMobile();
   const [orientationFilter, setOrientationFilter] = useState<OrientationFilter>("all");
   const [selectedRepertoires, setSelectedRepertoires] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -177,7 +179,7 @@ export const UnreviewedSection: React.FC<UnreviewedSectionProps> = ({ repertoire
           data={filteredOpenings}
           title="Unreviewed Variants by Opening"
           emptyMessage="No unreviewed variants found with the selected filters"
-          isMobile={typeof window !== "undefined" && window.innerWidth < 768}
+          isMobile={isMobile}
           onVariantClick={handleVariantClick}
           onVariantsClick={handleVariantsClick}
         />

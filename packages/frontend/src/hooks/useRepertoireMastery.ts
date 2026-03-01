@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getTrainOverview } from "../repository/train/train";
+import { getCachedTrainOverview } from "../repository/train/train";
 
 export const useRepertoireMastery = (repertoireId: string): number | null => {
   const [mastery, setMastery] = useState<number | null>(null);
@@ -8,7 +8,7 @@ export const useRepertoireMastery = (repertoireId: string): number | null => {
     let ignore = false;
     const load = async () => {
       try {
-        const overview = await getTrainOverview();
+        const overview = await getCachedTrainOverview();
         if (ignore) return;
         const group = overview.repertoires.find((r) => r.repertoireId === repertoireId);
         if (!group || group.openings.length === 0) {

@@ -118,7 +118,7 @@ Use this for standalone cards that need the correct shadow + border + background
 All primitives live in `packages/frontend/src/components/ui/`. Import from the barrel:
 
 ```ts
-import { Button, IconButton, Badge, Card, Tabs, TabButton, Input, Textarea, Select } from "../../components/ui";
+import { Button, IconButton, Badge, Checkbox, Card, Tabs, TabButton, Input, Textarea, Select } from "../../components/ui";
 ```
 
 ### 3.1 `Button`
@@ -194,7 +194,18 @@ Always provide a `label` prop for accessibility. Uses `ghost` intent by default.
 
 **`variant` options:** `underline` · `pill` · `segment`
 
-### 3.6 `Input` + `Textarea`
+### 3.6 `Checkbox`
+
+```tsx
+<label className="inline-flex items-center gap-2">
+  <Checkbox checked={checked} onChange={handler} />
+  Keep me signed in
+</label>
+```
+
+Use `Checkbox` for inline boolean controls. Wrap it in a `<label>` when the text should be part of the click target.
+
+### 3.7 `Input` + `Textarea`
 
 ```tsx
 <Input
@@ -220,7 +231,7 @@ Always provide a `label` prop for accessibility. Uses `ghost` intent by default.
 
 **`state` options:** `default` · `error` · `success`
 
-### 3.7 `Select`
+### 3.8 `Select`
 
 ```tsx
 <Select label="Color" value={orientation} onChange={handler}>
@@ -232,7 +243,7 @@ Always provide a `label` prop for accessibility. Uses `ghost` intent by default.
 
 Same `size` and `state` props as `Input`.
 
-### 3.8 `EmptyState`
+### 3.9 `EmptyState`
 
 ```tsx
 <EmptyState

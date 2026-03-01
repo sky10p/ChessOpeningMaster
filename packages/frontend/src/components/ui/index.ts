@@ -1,6 +1,7 @@
 export { Button, type ButtonProps } from "./Button";
 export { IconButton, type IconButtonProps } from "./IconButton";
 export { Badge, type BadgeProps } from "./Badge";
+export { Checkbox, type CheckboxProps } from "./Checkbox";
 export { Card, type CardProps } from "./Card";
 export { Tabs, TabButton, type TabsProps, type TabButtonProps } from "./Tabs";
 export { Input, Textarea, type InputProps, type TextareaProps } from "./Input";

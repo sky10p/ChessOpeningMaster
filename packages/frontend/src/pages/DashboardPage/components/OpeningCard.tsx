@@ -2,25 +2,29 @@
 import { EyeIcon, PlayIcon, ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/solid";
 import { VariantsProgressBar } from "../../../components/design/SelectTrainVariants/VariantsProgressBar";
 import { IRepertoireDashboard, TrainVariantInfo } from "@chess-opening-master/common";
-import { TrainVariant } from "../../../models/chess.models";
 import { OpeningRepertoiresList } from "./OpeningRepertoiresList";
 import { StaticChessboard } from "../../../components/design/chess/StaticChessboard";
 import { getOpeningFen } from "../../../utils/getOpeningFen";
 import { Button, Badge } from "../../../components/ui";
 import { cn } from "../../../utils/cn";
+import { getVariantsProgressInfo } from "../../../components/design/SelectTrainVariants/utils";
+import {
+  getScopedTrainVariantInfoKey,
+  OpeningScopedTrainVariant,
+} from "../utils/openingIndex";
 
 const FALLBACK_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 interface OpeningCardProps {
   opening: string;
   repertoiresWithOpening: IRepertoireDashboard[];
-  summaryVariants: TrainVariant[];
+  summaryVariants: OpeningScopedTrainVariant[];
   summaryVariantInfo: Record<string, TrainVariantInfo>;
   isOpen: boolean;
   repCount: number;
   onToggle: () => void;
   goToRepertoire: (repertoire: IRepertoireDashboard, variantName?: string) => void;
-  goToTrainRepertoire: (repertoire: IRepertoireDashboard, variantName?: string) => void;
+  goToTrainOpening: (repertoire: IRepertoireDashboard, openingName: string) => void;
   getTrainVariantInfo: (trainInfo: TrainVariantInfo[]) => Record<string, TrainVariantInfo>;
 }
 
@@ -33,7 +37,7 @@ export const OpeningCard: React.FC<OpeningCardProps> = ({
   repCount,
   onToggle,
   goToRepertoire,
-  goToTrainRepertoire,
+  goToTrainOpening,
   getTrainVariantInfo,
 }) => {
   const primaryRepertoire = repertoiresWithOpening[0];
@@ -49,13 +53,24 @@ export const OpeningCard: React.FC<OpeningCardProps> = ({
     [primaryRepertoire, opening]
   );
 
-  const isMastered = useMemo(() => {
-    if (summaryVariants.length === 0) return false;
-    return summaryVariants.every((v) => {
-      const info = summaryVariantInfo[v.variant.fullName];
-      return info !== undefined && info.errors === 0;
-    });
-  }, [summaryVariants, summaryVariantInfo]);
+  const progressInfo = useMemo(
+    () =>
+      getVariantsProgressInfo(
+        summaryVariants,
+        summaryVariantInfo,
+        (variant) =>
+          getScopedTrainVariantInfoKey(
+            (variant as OpeningScopedTrainVariant).repertoire._id,
+            variant.variant.fullName
+          )
+      ),
+    [summaryVariants, summaryVariantInfo]
+  );
+
+  const isMastered =
+    progressInfo.totalVariants > 0 &&
+    !progressInfo.hasErrors &&
+    !progressInfo.hasNewVariants;
 
   return (
     <div
@@ -145,16 +160,22 @@ export const OpeningCard: React.FC<OpeningCardProps> = ({
             {summaryVariants.length} {summaryVariants.length === 1 ? "line" : "lines"}
           </p>
 
-          <VariantsProgressBar
-            variants={summaryVariants}
-            variantInfo={summaryVariantInfo}
-          />
+              <VariantsProgressBar
+                variants={summaryVariants}
+                variantInfo={summaryVariantInfo}
+                variantInfoKeyResolver={(variant) =>
+                  getScopedTrainVariantInfoKey(
+                    (variant as OpeningScopedTrainVariant).repertoire._id,
+                    variant.variant.fullName
+                  )
+                }
+              />
 
           <div className="flex gap-1.5 mt-0.5 pointer-events-auto">
             <Button
               intent="primary"
               size="sm"
-              onClick={() => primaryRepertoire && goToTrainRepertoire(primaryRepertoire, opening)}
+              onClick={() => primaryRepertoire && goToTrainOpening(primaryRepertoire, opening)}
               disabled={!primaryRepertoire}
               className="flex-1 justify-center"
             >
@@ -198,8 +219,8 @@ export const OpeningCard: React.FC<OpeningCardProps> = ({
             repertoiresWithOpening={repertoiresWithOpening}
             getTrainVariantInfo={getTrainVariantInfo}
             goToRepertoire={(repertoire) => goToRepertoire(repertoire, opening)}
-            goToTrainRepertoire={(repertoire) =>
-              goToTrainRepertoire(repertoire, opening)
+            goToTrainOpening={(repertoire) =>
+              goToTrainOpening(repertoire, opening)
             }
           />
         </div>
