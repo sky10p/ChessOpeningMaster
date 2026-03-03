@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@types/adm-zip": "^0.5.7",
-    "mongodb-memory-server": "^10.1.4",
+    "mongodb-memory-server": "^10.4.3",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.0.4"
   }

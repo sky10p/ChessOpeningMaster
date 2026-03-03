@@ -4,13 +4,15 @@ import * as gameImportService from "../../services/games/gameImportService";
 
 jest.mock("../../services/games/gameImportService");
 
+type MockRequest = Partial<Request & { userId: string }>;
+
 const mockMarkTrainingPlanItemDone = gameImportService.markTrainingPlanItemDone as jest.MockedFunction<typeof gameImportService.markTrainingPlanItemDone>;
 const mockListImportedGames = gameImportService.listImportedGames as jest.MockedFunction<typeof gameImportService.listImportedGames>;
 const mockForceSynchronizeForUser = gameImportService.forceSynchronizeForUser as jest.MockedFunction<typeof gameImportService.forceSynchronizeForUser>;
 
 describe("gamesController", () => {
   describe("getImportedGames", () => {
-    let mockRequest: Partial<Request>;
+    let mockRequest: MockRequest;
     let mockResponse: Partial<Response>;
     let mockNext: NextFunction;
     let mockJson: jest.Mock;
@@ -47,7 +49,7 @@ describe("gamesController", () => {
   });
 
   describe("patchTrainingPlanItem", () => {
-    let mockRequest: Partial<Request>;
+    let mockRequest: MockRequest;
     let mockResponse: Partial<Response>;
     let mockNext: NextFunction;
     let mockStatus: jest.Mock;
@@ -96,7 +98,7 @@ describe("gamesController", () => {
   });
 
   describe("postForceSynchronize", () => {
-    let mockRequest: Partial<Request>;
+    let mockRequest: MockRequest;
     let mockResponse: Partial<Response>;
     let mockNext: NextFunction;
     let mockStatus: jest.Mock;

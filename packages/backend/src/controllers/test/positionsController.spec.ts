@@ -8,12 +8,14 @@ import * as positionCommentService from "../../services/positionCommentService";
 
 jest.mock("../../services/positionCommentService");
 
+type MockRequest = Partial<Request & { userId: string }>;
+
 const mockGetPositionComment = positionCommentService.getPositionComment as jest.MockedFunction<typeof positionCommentService.getPositionComment>;
 const mockUpdatePositionComment = positionCommentService.updatePositionComment as jest.MockedFunction<typeof positionCommentService.updatePositionComment>;
 const mockGetPositionCommentsByFens = positionCommentService.getPositionCommentsByFens as jest.MockedFunction<typeof positionCommentService.getPositionCommentsByFens>;
 
 describe("positionsController", () => {
-  let mockRequest: Partial<Request>;
+  let mockRequest: MockRequest;
   let mockResponse: Partial<Response>;
   let mockJson: jest.Mock;
   let mockStatus: jest.Mock;

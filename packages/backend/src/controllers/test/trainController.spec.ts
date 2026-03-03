@@ -4,13 +4,15 @@ import * as trainService from "../../services/trainService";
 
 jest.mock("../../services/trainService");
 
+type MockRequest = Partial<Request & { userId: string }>;
+
 const mockGetTrainOpening = trainService.getTrainOpening as jest.MockedFunction<
   typeof trainService.getTrainOpening
 >;
 
 describe("trainController", () => {
   describe("getTrainOpeningSummary", () => {
-    let mockRequest: Partial<Request>;
+    let mockRequest: MockRequest;
     let mockResponse: Partial<Response>;
     let mockNext: NextFunction;
     let mockStatus: jest.Mock;
