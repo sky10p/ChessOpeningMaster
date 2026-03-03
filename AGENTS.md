@@ -147,6 +147,7 @@ packages/
 3. **Use yarn** - Never use npm commands
 4. **Quote directory names** in cd commands: `cd "directory name"`
 5. **TypeScript strict mode** is enabled
+6. **Never change MongoDB structure outside migrations** - Indexes, collection metadata, and persisted document shape changes must go through `packages/backend/src/db/migrations`
 
 ## Design System
 
@@ -330,7 +331,7 @@ Before implementing any feature that reads or writes domain data, follow these r
 - Controllers must read user via `getRequestUserId(req)` and scope all DB operations by `userId`.
 - New persisted documents must include `userId`.
 - If a new query is frequently filtered or uniquely constrained per user, include `userId` in indexes.
-- Keep compatibility with startup migration behavior (`ensureDefaultUserAndMigrateData`) for legacy data.
+- Keep compatibility with default-user bootstrap helpers in `authService` for legacy data.
 
 ### Frontend rules
 - Auth bootstrap state is owned by `App.tsx` (`getAuthConfig` + `getAuthSession`).
@@ -428,5 +429,8 @@ Use Node.js v20.11.1 (specified in volta config).
 Backend uses dotenv. Required variables:
 - `MONGO_URI` - MongoDB connection string
 - `NODE_ENV` - development/production
+- `MONGODB_BACKUP_DIR` - Optional repo-relative or absolute directory for local `mongodump` backups
 - `GAME_PROVIDER_TOKEN_SECRET` - Required in production to encrypt linked provider tokens
 - `GAMES_AUTO_SYNC_DUE_HOURS` - Optional startup/scheduler due threshold for automatic sync checks (defaults to 24)
+- `MIGRATIONS_AUTO_RUN` - Optional backend startup auto-run for pending migrations (default off)
+- `MIGRATIONS_LEASE_MS` - Optional migration lock lease duration in milliseconds

@@ -1,7 +1,8 @@
 import { MongoClient } from "mongodb";
 
-const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/chess_opening_master";
+const uri = process.env.MONGODB_URI || process.env.MONGO_URI || "mongodb://localhost:27017/chess_opening_master";
 const client = new MongoClient(uri);
+const defaultDbName = process.env.MONGODB_DB_NAME || process.env.MONGO_DB_NAME || "chess-opening-master";
 
 let isConnected = false;
 
@@ -20,6 +21,6 @@ export async function disconnectDB() {
   }
 }
 
-export function getDB(dbName = "chess-opening-master") {
+export function getDB(dbName = defaultDbName) {
   return client.db(dbName);
 }

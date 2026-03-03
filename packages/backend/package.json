@@ -7,11 +7,15 @@
     "build": "tsc",
     "start:dev": "cross-env NODE_ENV=development ts-node-dev -r dotenv/config --respawn --ignore-watch node_modules src/app.ts",
     "start:prod": "cross-env NODE_ENV=production node dist/app.js",
-    "lint": "eslint './src/**/*.{ts}'",
+    "lint": "eslint \"src/**/*.ts\"",
     "test": "jest",
     "test:position-comment": "jest src/services/test/positionCommentService.spec.ts",
-    "migrate:comments:interactive": "ts-node -r dotenv/config src/scripts/migrateRepertoireComments.ts interactive",
-    "create:indexes": "ts-node -r dotenv/config src/scripts/createIndexes.ts"
+    "migrate": "ts-node -r dotenv/config src/scripts/migrations.ts migrate",
+    "migrate:status": "ts-node -r dotenv/config src/scripts/migrations.ts migrate:status",
+    "migrate:create": "ts-node -r dotenv/config src/scripts/migrations.ts migrate:create",
+    "db:backup": "ts-node -r dotenv/config src/scripts/backupDatabase.ts",
+    "db:restore": "ts-node -r dotenv/config src/scripts/restoreDatabase.ts",
+    "migrate:comments:interactive": "ts-node -r dotenv/config src/scripts/migrateRepertoireComments.ts interactive"
   },
   "dependencies": {
     "@chess-opening-master/common": "^0.0.0",

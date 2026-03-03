@@ -11,8 +11,8 @@ import gamesRouter from "./routes/games";
 import trainRouter from "./routes/train";
 import errorHandler from "./middleware/errorHandler";
 import { authMiddleware } from "./middleware/auth";
-import { ensureDefaultUserAndMigrateData } from "./services/authService";
-import { ensureDatabaseIndexes } from "./db/indexes";
+import { ensureDefaultUser } from "./services/authService";
+import { runMigrationsForStartup } from "./db/migrations/runner";
 import { startGamesAutoSyncScheduler } from "./services/games/autoSyncScheduler";
 import { logError, logInfo, logWarn } from "./utils/logger";
 
@@ -83,8 +83,13 @@ const closeHttpServer = async (server: Server): Promise<void> => {
 if (require.main === module) {
   const run = async () => {
     await connectDB();
-    await ensureDatabaseIndexes(getDB());
-    await ensureDefaultUserAndMigrateData();
+    if (process.env.MIGRATIONS_AUTO_RUN === "true") {
+      await runMigrationsForStartup({
+        db: getDB(),
+        appVersion: process.env.npm_package_version,
+      });
+    }
+    await ensureDefaultUser();
     const scheduler = startGamesAutoSyncScheduler();
     const server = app.listen(port, () => {
       logInfo(`Server listening at http://localhost:${port}`);
