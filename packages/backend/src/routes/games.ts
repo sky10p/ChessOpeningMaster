@@ -14,7 +14,7 @@ import {
   postLinkedAccount,
 } from "../controllers/gamesController";
 
-const router = Router();
+const router: Router = Router();
 
 router.get("/accounts", getLinkedAccounts);
 router.post("/accounts", postLinkedAccount);

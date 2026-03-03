@@ -24,8 +24,9 @@
     "test:frontend": "lerna run test --scope @chess-opening-master/frontend --stream",
     "test:common": "lerna run test --scope @chess-opening-master/common --stream",
     "test:common:coverage": "lerna run test:coverage --scope @chess-opening-master/common --stream",
-    "migrate:comments:interactive": "lerna run migrate:comments:interactive --scope @chess-opening-master/backend --stream",
-    "create:indexes": "lerna run create:indexes --scope @chess-opening-master/backend --stream",
+    "migrate": "yarn workspace @chess-opening-master/backend migrate",
+    "migrate:status": "yarn workspace @chess-opening-master/backend migrate:status",
+    "migrate:create": "yarn workspace @chess-opening-master/backend migrate:create",
     "lint": "lerna exec -- eslint . --ext .ts,.tsx --ignore-path .eslintignore"
   },
   "devDependencies": {

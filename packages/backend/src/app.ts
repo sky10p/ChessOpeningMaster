@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Express } from "express";
 import cors from "cors";
 import { connectDB, disconnectDB, getDB } from "./db/mongo";
 import { Server } from "http";
@@ -11,12 +11,13 @@ import gamesRouter from "./routes/games";
 import trainRouter from "./routes/train";
 import errorHandler from "./middleware/errorHandler";
 import { authMiddleware } from "./middleware/auth";
-import { ensureDefaultUserAndMigrateData } from "./services/authService";
-import { ensureDatabaseIndexes } from "./db/indexes";
+import { ensureDefaultUser } from "./services/authService";
+import { getConfiguredMigrationLeaseMs } from "./db/migrations/config";
+import { runMigrationsForStartup } from "./db/migrations/runner";
 import { startGamesAutoSyncScheduler } from "./services/games/autoSyncScheduler";
 import { logError, logInfo, logWarn } from "./utils/logger";
 
-const app = express();
+const app: Express = express();
 const port = process.env.BACKEND_PORT || 3001;
 const bodyParserLimit = process.env.BODY_PARSER_LIMIT || "100mb";
 const defaultCorsOrigins = ["http://localhost:3002", "http://127.0.0.1:3002"];
@@ -83,8 +84,20 @@ const closeHttpServer = async (server: Server): Promise<void> => {
 if (require.main === module) {
   const run = async () => {
     await connectDB();
-    await ensureDatabaseIndexes(getDB());
-    await ensureDefaultUserAndMigrateData();
+    if (process.env.MIGRATIONS_AUTO_RUN === "true") {
+      const migrationResult = await runMigrationsForStartup({
+        db: getDB(),
+        appVersion: process.env.npm_package_version,
+        leaseMs: getConfiguredMigrationLeaseMs(),
+      });
+      if (migrationResult.appliedMigrationIds.length > 0) {
+        logInfo("Startup migrations auto-run finished", {
+          appliedCount: migrationResult.appliedMigrationIds.length,
+          appliedMigrationIds: migrationResult.appliedMigrationIds,
+        });
+      }
+    }
+    await ensureDefaultUser();
     const scheduler = startGamesAutoSyncScheduler();
     const server = app.listen(port, () => {
       logInfo(`Server listening at http://localhost:${port}`);

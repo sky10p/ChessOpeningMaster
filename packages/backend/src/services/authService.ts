@@ -121,23 +121,7 @@ export async function revokeToken(token: string): Promise<void> {
   await db.collection("authTokens").deleteOne({ token });
 }
 
-async function hasLegacyDocumentsWithoutUserId(): Promise<boolean> {
-  const db = getDB();
-  const filter = { userId: { $exists: false } };
-
-  const [repertoireDoc, studyDoc, positionDoc, variantInfoDoc, variantReviewDoc] = await Promise.all([
-    db.collection("repertoires").findOne(filter, { projection: { _id: 1 } }),
-    db.collection("studies").findOne(filter, { projection: { _id: 1 } }),
-    db.collection("positions").findOne(filter, { projection: { _id: 1 } }),
-    db.collection("variantsInfo").findOne(filter, { projection: { _id: 1 } }),
-    db.collection("variantReviewHistory").findOne(filter, { projection: { _id: 1 } }),
-  ]);
-
-  return Boolean(repertoireDoc || studyDoc || positionDoc || variantInfoDoc || variantReviewDoc);
-}
-
-export async function ensureDefaultUserAndMigrateData(): Promise<string> {
-  const db = getDB();
+export async function ensureDefaultUserInDb(db: ReturnType<typeof getDB>): Promise<string> {
   let defaultUser = await db.collection("users").findOne({ username: DEFAULT_USERNAME });
 
   if (!defaultUser) {
@@ -152,29 +136,18 @@ export async function ensureDefaultUserAndMigrateData(): Promise<string> {
     defaultUser = { _id: result.insertedId };
   }
 
-  const defaultUserId = defaultUser._id.toString();
+  return defaultUser._id.toString();
+}
 
-  const hasLegacyDocuments = await hasLegacyDocumentsWithoutUserId();
-  if (!hasLegacyDocuments) {
-    return defaultUserId;
-  }
-
-  await Promise.all([
-    db.collection("repertoires").updateMany({ userId: { $exists: false } }, { $set: { userId: defaultUserId } }),
-    db.collection("studies").updateMany({ userId: { $exists: false } }, { $set: { userId: defaultUserId } }),
-    db.collection("positions").updateMany({ userId: { $exists: false } }, { $set: { userId: defaultUserId } }),
-    db.collection("variantsInfo").updateMany({ userId: { $exists: false } }, { $set: { userId: defaultUserId } }),
-    db.collection("variantReviewHistory").updateMany({ userId: { $exists: false } }, { $set: { userId: defaultUserId } }),
-  ]);
-
-  return defaultUserId;
+export async function ensureDefaultUser(): Promise<string> {
+  return ensureDefaultUserInDb(getDB());
 }
 
 export async function getDefaultUserId(): Promise<string> {
   const db = getDB();
   const defaultUser = await db.collection("users").findOne({ username: DEFAULT_USERNAME });
   if (!defaultUser) {
-    return ensureDefaultUserAndMigrateData();
+    return ensureDefaultUser();
   }
   return defaultUser._id.toString();
 }

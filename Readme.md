@@ -109,6 +109,16 @@ To install and run ChessKeep on your local environment, follow these steps:
 4. Set up your web server and MongoDB following specific instructions for your environment.
 5. Use the following yarn commands to run the project in development or production mode.
 
+## Database Migrations
+
+MongoDB structure changes are tracked in the migration system documented in [MIGRATIONS.md](MIGRATIONS.md).
+
+- Apply pending migrations: `yarn migrate`
+- Show applied and pending migrations: `yarn migrate:status`
+- Scaffold a new migration: `yarn migrate:create add_some_change`
+
+Do not change indexes or persisted document structure outside migrations.
+
 ### Configure Nginx
 
 To configure Nginx as a web server for ChessKeep, create a new Nginx configuration file with the following content:

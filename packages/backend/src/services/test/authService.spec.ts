@@ -2,7 +2,7 @@ import * as mongo from "../../db/mongo";
 import { pbkdf2Sync } from "crypto";
 import {
   createUser,
-  ensureDefaultUserAndMigrateData,
+  ensureDefaultUser,
   getAuthTokenTtlMs,
   getUserByToken,
   loginDefaultUserWithoutPassword,
@@ -19,7 +19,6 @@ type MockCollection = {
   insertOne: jest.Mock;
   deleteOne: jest.Mock;
   deleteMany: jest.Mock;
-  updateMany: jest.Mock;
 };
 
 type MockDb = {
@@ -35,27 +34,16 @@ const createMockCollection = (): MockCollection => ({
   insertOne: jest.fn(),
   deleteOne: jest.fn(),
   deleteMany: jest.fn(),
-  updateMany: jest.fn(),
 });
 
 describe("authService", () => {
   let usersCollection: MockCollection;
   let authTokensCollection: MockCollection;
-  let repertoiresCollection: MockCollection;
-  let studiesCollection: MockCollection;
-  let positionsCollection: MockCollection;
-  let variantsInfoCollection: MockCollection;
-  let variantReviewHistoryCollection: MockCollection;
   let mockDb: MockDb;
 
   beforeEach(() => {
     usersCollection = createMockCollection();
     authTokensCollection = createMockCollection();
-    repertoiresCollection = createMockCollection();
-    studiesCollection = createMockCollection();
-    positionsCollection = createMockCollection();
-    variantsInfoCollection = createMockCollection();
-    variantReviewHistoryCollection = createMockCollection();
 
     mockDb = {
       collection: jest.fn((name: string) => {
@@ -64,21 +52,6 @@ describe("authService", () => {
         }
         if (name === "authTokens") {
           return authTokensCollection;
-        }
-        if (name === "repertoires") {
-          return repertoiresCollection;
-        }
-        if (name === "studies") {
-          return studiesCollection;
-        }
-        if (name === "positions") {
-          return positionsCollection;
-        }
-        if (name === "variantsInfo") {
-          return variantsInfoCollection;
-        }
-        if (name === "variantReviewHistory") {
-          return variantReviewHistoryCollection;
         }
         throw new Error(`Unexpected collection ${name}`);
       }),
@@ -200,62 +173,23 @@ describe("authService", () => {
     expect(result).toEqual({ token: expect.stringMatching(/^[a-f0-9]{96}$/), userId: "default-user" });
   });
 
-  it("creates default user and migrates legacy data", async () => {
+  it("creates default user when missing", async () => {
     usersCollection.findOne.mockResolvedValueOnce(null);
     usersCollection.insertOne.mockResolvedValue({ insertedId: objectId("default-user") });
-    repertoiresCollection.findOne.mockResolvedValue({ _id: objectId("legacy-repertoire") });
-    studiesCollection.findOne.mockResolvedValue(null);
-    positionsCollection.findOne.mockResolvedValue(null);
-    variantsInfoCollection.findOne.mockResolvedValue(null);
-    variantReviewHistoryCollection.findOne.mockResolvedValue(null);
-    repertoiresCollection.updateMany.mockResolvedValue({ modifiedCount: 1 });
-    studiesCollection.updateMany.mockResolvedValue({ modifiedCount: 1 });
-    positionsCollection.updateMany.mockResolvedValue({ modifiedCount: 1 });
-    variantsInfoCollection.updateMany.mockResolvedValue({ modifiedCount: 1 });
-    variantReviewHistoryCollection.updateMany.mockResolvedValue({ modifiedCount: 1 });
 
-    const defaultUserId = await ensureDefaultUserAndMigrateData();
+    const defaultUserId = await ensureDefaultUser();
 
     expect(defaultUserId).toBe("default-user");
     expect(usersCollection.insertOne).toHaveBeenCalledTimes(1);
-    expect(repertoiresCollection.updateMany).toHaveBeenCalledWith(
-      { userId: { $exists: false } },
-      { $set: { userId: "default-user" } }
-    );
-    expect(studiesCollection.updateMany).toHaveBeenCalledWith(
-      { userId: { $exists: false } },
-      { $set: { userId: "default-user" } }
-    );
-    expect(positionsCollection.updateMany).toHaveBeenCalledWith(
-      { userId: { $exists: false } },
-      { $set: { userId: "default-user" } }
-    );
-    expect(variantsInfoCollection.updateMany).toHaveBeenCalledWith(
-      { userId: { $exists: false } },
-      { $set: { userId: "default-user" } }
-    );
-    expect(variantReviewHistoryCollection.updateMany).toHaveBeenCalledWith(
-      { userId: { $exists: false } },
-      { $set: { userId: "default-user" } }
-    );
   });
 
-  it("skips legacy migration updates when all documents already contain userId", async () => {
+  it("reuses existing default user", async () => {
     usersCollection.findOne.mockResolvedValue({ _id: objectId("default-user") });
-    repertoiresCollection.findOne.mockResolvedValue(null);
-    studiesCollection.findOne.mockResolvedValue(null);
-    positionsCollection.findOne.mockResolvedValue(null);
-    variantsInfoCollection.findOne.mockResolvedValue(null);
-    variantReviewHistoryCollection.findOne.mockResolvedValue(null);
 
-    const defaultUserId = await ensureDefaultUserAndMigrateData();
+    const defaultUserId = await ensureDefaultUser();
 
     expect(defaultUserId).toBe("default-user");
-    expect(repertoiresCollection.updateMany).not.toHaveBeenCalled();
-    expect(studiesCollection.updateMany).not.toHaveBeenCalled();
-    expect(positionsCollection.updateMany).not.toHaveBeenCalled();
-    expect(variantsInfoCollection.updateMany).not.toHaveBeenCalled();
-    expect(variantReviewHistoryCollection.updateMany).not.toHaveBeenCalled();
+    expect(usersCollection.insertOne).not.toHaveBeenCalled();
   });
 
   it("returns positive auth token ttl in milliseconds", () => {

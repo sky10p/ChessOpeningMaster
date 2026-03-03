@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { getPathAnalyticsSummary, getPathPlanSummary, getPaths } from "../controllers/pathsController";
 
-const router = Router();
+const router: Router = Router();
 
 router.get("/", getPaths);
 router.get("/plan", getPathPlanSummary);
