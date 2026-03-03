@@ -10,6 +10,7 @@ import {
   reviewVariantMistake,
 } from "../services/variantMistakeService";
 import { getUserBackupFiles } from "../services/userBackupService";
+import { stringifyBackupJsonValue } from "../services/userBackupSerialization";
 import { restoreUserBackup } from "../services/userRestoreService";
 import { MistakeSnapshotItem } from "@chess-opening-master/common";
 
@@ -119,7 +120,7 @@ export async function downloadRepertoires(req: Request, res: Response, next: Nex
     const userBackupFiles = await getUserBackupFiles(getRequestUserId(req));
 
     userBackupFiles.forEach(({ fileName, jsonValue }) => {
-      zip.addFile(fileName, Buffer.from(JSON.stringify(jsonValue, null, 2)));
+      zip.addFile(fileName, Buffer.from(stringifyBackupJsonValue(jsonValue)));
     });
 
     const today = new Date().toISOString().split("T")[0];

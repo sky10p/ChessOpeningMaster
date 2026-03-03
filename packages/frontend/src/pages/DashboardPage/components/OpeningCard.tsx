@@ -7,7 +7,10 @@ import { StaticChessboard } from "../../../components/design/chess/StaticChessbo
 import { getOpeningFen } from "../../../utils/getOpeningFen";
 import { Button, Badge, MasteryBadge } from "../../../components/ui";
 import { cn } from "../../../utils/cn";
-import { getVariantsProgressInfo } from "../../../components/design/SelectTrainVariants/utils";
+import {
+  getVariantsProgressInfo,
+  isVariantsProgressMastered,
+} from "../../../components/design/SelectTrainVariants/utils";
 import {
   getScopedTrainVariantInfoKey,
   OpeningScopedTrainVariant,
@@ -67,13 +70,7 @@ export const OpeningCard: React.FC<OpeningCardProps> = ({
     [summaryVariants, summaryVariantInfo]
   );
 
-  const isMastered =
-    progressInfo.totalVariants > 0 &&
-    !progressInfo.hasErrors &&
-    !progressInfo.hasNewVariants;
-  const masteryScore = progressInfo.totalVariants > 0
-    ? Math.round((progressInfo.counts.noErrors / progressInfo.totalVariants) * 100)
-    : 0;
+  const isMastered = isVariantsProgressMastered(progressInfo);
 
   return (
     <div
@@ -126,7 +123,7 @@ export const OpeningCard: React.FC<OpeningCardProps> = ({
             </Badge>
             {isMastered && (
               <MasteryBadge
-                score={masteryScore}
+                score={100}
                 size="sm"
                 showTooltip={false}
                 className="font-bold"

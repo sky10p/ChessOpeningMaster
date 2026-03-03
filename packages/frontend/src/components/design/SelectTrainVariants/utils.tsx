@@ -99,3 +99,10 @@ export const getVariantsProgressInfo = (
     counts,
   };
 };
+
+export const isVariantsProgressMastered = (
+  progressInfo: Pick<VariantsProgressInfo, "totalVariants" | "hasErrors" | "hasNewVariants">
+): boolean =>
+  progressInfo.totalVariants > 0 &&
+  !progressInfo.hasErrors &&
+  !progressInfo.hasNewVariants;

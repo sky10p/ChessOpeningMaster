@@ -14,6 +14,10 @@ export async function connectDB() {
   return client;
 }
 
+export function getMongoClient() {
+  return client;
+}
+
 export async function disconnectDB() {
   if (isConnected) {
     await client.close();

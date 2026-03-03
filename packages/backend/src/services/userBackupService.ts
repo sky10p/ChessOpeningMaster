@@ -65,11 +65,7 @@ export const USER_COLLECTION_BACKUPS: readonly UserCollectionBackupDefinition[] 
 export async function getUserBackupFiles(userId: string): Promise<UserBackupFile[]> {
   const db = getDB();
 
-  const users = await db
-    .collection("users")
-    .find({ _id: new ObjectId(userId) })
-    .sort({ username: 1, _id: 1 })
-    .toArray();
+  const users = await db.collection("users").find({ _id: new ObjectId(userId) }).toArray();
 
   const userFiles = await Promise.all(
     USER_COLLECTION_BACKUPS.map(async ({ fileName, collectionName, sort }) => {

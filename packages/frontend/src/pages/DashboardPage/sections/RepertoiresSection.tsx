@@ -1,6 +1,9 @@
 ﻿import React from "react";
 import { RepertoireCard } from "../components/RepertoireCard";
-import { getVariantsProgressInfo } from '../../../components/design/SelectTrainVariants/utils';
+import {
+  getVariantsProgressInfo,
+  isVariantsProgressMastered,
+} from '../../../components/design/SelectTrainVariants/utils';
 import { IRepertoireDashboard, TrainVariantInfo } from "@chess-opening-master/common";
 import { TrainVariant } from "../../../models/chess.models";
 import { Input, Select } from "../../../components/ui";
@@ -51,7 +54,7 @@ export const RepertoiresSection: React.FC<RepertoiresSectionProps> = ({
       return hasErrors;
     }
     if (statusFilter === 'successful') {
-      return !hasErrors && !hasNewVariants;
+      return isVariantsProgressMastered(progress);
     }
     if (statusFilter === 'new') {
       return hasNewVariants;

@@ -90,6 +90,7 @@ Routes:
 - `GET /repertoires/download`
   - Exports a zip for the current `req.userId`
   - Includes the current user record from `users` plus all backed-up user-domain collections
+  - Zip entries are serialized as Mongo Extended JSON so `ObjectId` and `Date` values round-trip safely
 - `POST /repertoires/restore`
   - Accepts the backup zip as a raw `application/zip` request body
   - Restores only into the current `req.userId`
@@ -105,7 +106,14 @@ Restore persistence rules:
 
 - `users` is restored for the current user
 - backed-up user-scoped collections are replaced for the current user
+- restore reparses Mongo Extended JSON and also rehydrates legacy ISO date strings from older backups
+- restore runs the user replacement plus all user-scoped collection replacements inside one Mongo transaction
 - `authTokens` are not restored, so login is required again after restore
+
+Restore infrastructure requirement:
+
+- MongoDB must support transactions (replica set or `mongos`)
+- if transaction support is unavailable, restore fails before replacing user data
 
 Default-user mode:
 

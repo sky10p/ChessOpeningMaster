@@ -1,10 +1,11 @@
 import AdmZip from "adm-zip";
 import { ObjectId } from "mongodb";
-import { getDB } from "../db/mongo";
+import { connectDB, getDB } from "../db/mongo";
 import {
   USER_ACCOUNT_BACKUP_FILE_NAME,
   USER_COLLECTION_BACKUPS,
 } from "./userBackupService";
+import { parseBackupJsonArray } from "./userBackupSerialization";
 
 type ErrorWithStatus = Error & { status?: number };
 
@@ -34,11 +35,7 @@ const parseJsonArray = (zip: AdmZip, fileName: string): unknown[] => {
   }
   const raw = zip.readAsText(entry);
   try {
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      throw new Error("not array");
-    }
-    return parsed;
+    return parseBackupJsonArray(raw);
   } catch {
     throw createStatusError(`Backup file "${fileName}" must contain a JSON array`, 400);
   }
@@ -49,24 +46,58 @@ const normalizeDocumentId = (value: unknown): unknown => {
     return value;
   }
   const documentId = value._id;
-  if (typeof documentId !== "string") {
+  const documentIdString = getDocumentIdString(documentId);
+  if (!documentIdString) {
     return value;
   }
-  if (!ObjectId.isValid(documentId)) {
+  if (!ObjectId.isValid(documentIdString)) {
     return value;
   }
   return {
     ...value,
-    _id: new ObjectId(documentId),
+    _id: new ObjectId(documentIdString),
   };
 };
+
+const getDocumentIdString = (value: unknown): string | null => {
+  if (typeof value === "string") {
+    return value;
+  }
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    "toHexString" in value &&
+    typeof value.toHexString === "function"
+  ) {
+    return value.toHexString();
+  }
+  if (value instanceof ObjectId) {
+    return value.toHexString();
+  }
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    "toString" in value &&
+    typeof value.toString === "function"
+  ) {
+    const stringValue = value.toString();
+    if (ObjectId.isValid(stringValue)) {
+      return stringValue;
+    }
+  }
+  return null;
+};
+
+const isTransactionSupportError = (error: unknown): boolean =>
+  error instanceof Error &&
+  error.message.includes("Transaction numbers are only allowed on a replica set member or mongos");
 
 const validateUserDocument = (userId: string, users: unknown[]): Record<string, unknown> => {
   if (users.length !== 1 || !isPlainObject(users[0])) {
     throw createStatusError(`Backup file "${USER_ACCOUNT_BACKUP_FILE_NAME}" must contain exactly one user document`, 400);
   }
   const user = users[0];
-  if (typeof user._id !== "string" || user._id !== userId) {
+  if (getDocumentIdString(user._id) !== userId) {
     throw createStatusError("Backup user does not match the current authenticated user", 400);
   }
   return normalizeDocumentId(user) as Record<string, unknown>;
@@ -128,17 +159,34 @@ export async function restoreUserBackup(userId: string, zipBuffer: Buffer): Prom
   });
   restoredCounts.users = 1;
 
+  const client = await connectDB();
   const db = getDB();
-  await db
-    .collection("users")
-    .replaceOne({ _id: new ObjectId(userId) }, userDocument, { upsert: true });
+  const session = client.startSession();
 
-  for (const { collectionName, documents } of scopedDocumentsByCollection) {
-    const collection = db.collection(collectionName);
-    await collection.deleteMany({ userId });
-    if (documents.length > 0) {
-      await collection.insertMany(documents);
+  try {
+    await session.withTransaction(async () => {
+      await db
+        .collection("users")
+        .replaceOne({ _id: new ObjectId(userId) }, userDocument, { upsert: true, session });
+
+      for (const { collectionName, documents } of scopedDocumentsByCollection) {
+        const collection = db.collection(collectionName);
+        await collection.deleteMany({ userId }, { session });
+        if (documents.length > 0) {
+          await collection.insertMany(documents, { session });
+        }
+      }
+    });
+  } catch (error) {
+    if (isTransactionSupportError(error)) {
+      throw createStatusError(
+        "Restore requires MongoDB transaction support (replica set or mongos)",
+        503
+      );
     }
+    throw error;
+  } finally {
+    await session.endSession();
   }
 
   return {

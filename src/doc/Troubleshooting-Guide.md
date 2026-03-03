@@ -207,6 +207,17 @@ yarn build
 1. Re-download a fresh backup from the application
 2. Upload the zip unchanged to `POST /repertoires/restore`
 
+**Error**: `Restore requires MongoDB transaction support (replica set or mongos)`
+
+**Cause**:
+1. Restore now replaces user data inside a Mongo transaction to avoid partial deletes/inserts
+2. The backend is connected to a standalone MongoDB server that does not support transactions
+
+**Solution**:
+1. Run restore against a replica set or `mongos` deployment
+2. If testing locally, reconfigure MongoDB from the default standalone setup before using restore
+3. Retry the restore after the database supports transactions
+
 **Error**: User can log in after restore but sessions were lost
 
 **Expected behavior**:

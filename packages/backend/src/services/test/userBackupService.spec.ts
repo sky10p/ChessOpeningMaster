@@ -104,6 +104,7 @@ describe("userBackupService", () => {
     await getUserBackupFiles(userId);
 
     expect(collections.users.find).toHaveBeenCalledWith({ _id: new ObjectId(userId) });
+    expect(cursors.users.sort).not.toHaveBeenCalled();
     expect(collections.repertoires.find).toHaveBeenCalledWith({ userId });
     expect(collections.studies.find).toHaveBeenCalledWith({ userId });
     expect(collections.variantsInfo.find).toHaveBeenCalledWith({ userId });

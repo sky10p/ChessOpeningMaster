@@ -1,4 +1,5 @@
 import AdmZip from "adm-zip";
+import { EJSON, ObjectId } from "bson";
 import { NextFunction, Request, Response } from "express";
 import { downloadRepertoires, restoreRepertoires } from "../repertoiresController";
 import * as userBackupService from "../../services/userBackupService";
@@ -40,10 +41,11 @@ describe("repertoiresController", () => {
           fileName: "users.json",
           jsonValue: [
             {
-              _id: "507f1f77bcf86cd799439011",
+              _id: new ObjectId("507f1f77bcf86cd799439011"),
               username: "alice",
               passwordHash: "hash",
               passwordSalt: "salt",
+              createdAt: new Date("2026-03-03T00:00:00.000Z"),
             },
           ],
         },
@@ -98,7 +100,7 @@ describe("repertoiresController", () => {
       await downloadRepertoires(mockRequest as Request, mockResponse as Response, mockNext);
 
       const zip = new AdmZip(mockSend.mock.calls[0][0] as Buffer);
-      const linkedAccounts = JSON.parse(zip.readAsText("linkedGameAccounts.json"));
+      const linkedAccounts = EJSON.parse(zip.readAsText("linkedGameAccounts.json"));
 
       expect(linkedAccounts).toEqual([
         {
@@ -106,6 +108,19 @@ describe("repertoiresController", () => {
           tokenEncrypted: "encrypted-token",
         },
       ]);
+    });
+
+    it("serializes BSON values with Extended JSON in the zip", async () => {
+      await downloadRepertoires(mockRequest as Request, mockResponse as Response, mockNext);
+
+      const zip = new AdmZip(mockSend.mock.calls[0][0] as Buffer);
+      const rawUsers = zip.readAsText("users.json");
+      const users = EJSON.parse(rawUsers) as Array<Record<string, unknown>>;
+
+      expect(rawUsers).toContain("$oid");
+      expect(rawUsers).toContain("$date");
+      expect(users[0]._id).toEqual(new ObjectId("507f1f77bcf86cd799439011"));
+      expect(users[0].createdAt).toEqual(new Date("2026-03-03T00:00:00.000Z"));
     });
 
     it("does not include auth tokens in the zip", async () => {
