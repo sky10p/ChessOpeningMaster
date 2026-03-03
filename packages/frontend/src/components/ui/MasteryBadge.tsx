@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { cn } from "../../utils/cn";
 import { Badge, type BadgeProps } from "./Badge";
 
 type MasteryTier = {
@@ -34,11 +35,16 @@ export const MasteryBadge: React.FC<MasteryBadgeProps> = ({
   score,
   showTooltip = true,
   children,
+  className,
   ...rest
 }) => {
   const tier = getMasteryTier(score);
   const [open, setOpen] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const badgeClassName =
+    tier.variant === "success"
+      ? "bg-success text-text-on-brand border-success shadow-sm"
+      : "bg-surface/95 shadow-sm backdrop-blur-sm";
 
   const handleEnter = () => {
     if (!showTooltip) return;
@@ -58,7 +64,11 @@ export const MasteryBadge: React.FC<MasteryBadgeProps> = ({
       onFocus={handleEnter}
       onBlur={handleLeave}
     >
-      <Badge variant={tier.variant} {...rest}>
+      <Badge
+        variant={tier.variant}
+        className={cn(badgeClassName, className)}
+        {...rest}
+      >
         {children ?? tier.label}
       </Badge>
       {showTooltip && open && (

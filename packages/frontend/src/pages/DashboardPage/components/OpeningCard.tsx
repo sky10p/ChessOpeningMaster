@@ -5,7 +5,7 @@ import { IRepertoireDashboard, TrainVariantInfo } from "@chess-opening-master/co
 import { OpeningRepertoiresList } from "./OpeningRepertoiresList";
 import { StaticChessboard } from "../../../components/design/chess/StaticChessboard";
 import { getOpeningFen } from "../../../utils/getOpeningFen";
-import { Button, Badge } from "../../../components/ui";
+import { Button, Badge, MasteryBadge } from "../../../components/ui";
 import { cn } from "../../../utils/cn";
 import { getVariantsProgressInfo } from "../../../components/design/SelectTrainVariants/utils";
 import {
@@ -71,6 +71,9 @@ export const OpeningCard: React.FC<OpeningCardProps> = ({
     progressInfo.totalVariants > 0 &&
     !progressInfo.hasErrors &&
     !progressInfo.hasNewVariants;
+  const masteryScore = progressInfo.totalVariants > 0
+    ? Math.round((progressInfo.counts.noErrors / progressInfo.totalVariants) * 100)
+    : 0;
 
   return (
     <div
@@ -122,13 +125,12 @@ export const OpeningCard: React.FC<OpeningCardProps> = ({
               {orientation === "white" ? "WHITE" : "BLACK"}
             </Badge>
             {isMastered && (
-              <Badge
+              <MasteryBadge
+                score={masteryScore}
                 size="sm"
-                variant="success"
-                className="font-bold shadow"
-              >
-                Mastered
-              </Badge>
+                showTooltip={false}
+                className="font-bold"
+              />
             )}
           </div>
           {!isSingle && (
