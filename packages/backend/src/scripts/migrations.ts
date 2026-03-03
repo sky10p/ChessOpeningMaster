@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { getConfiguredMigrationLeaseMs } from "../db/migrations/config";
 import { connectDB, disconnectDB, getDB } from "../db/mongo";
 import { applyMigrations, getMigrationStatus } from "../db/migrations/runner";
 import { getWritableMigrationsDirectory } from "../db/migrations/loader";
@@ -46,7 +47,7 @@ const runApply = async (): Promise<void> => {
   const result = await applyMigrations({
     db,
     appVersion: getAppVersion(),
-    leaseMs: Number(process.env.MIGRATIONS_LEASE_MS || "600000"),
+    leaseMs: getConfiguredMigrationLeaseMs(),
   });
 
   console.log(`Applied migrations: ${result.appliedMigrationIds.length}`);

@@ -1,6 +1,7 @@
 import { MongoClient } from "mongodb";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { randomUUID } from "crypto";
+import { GLOBAL_MIGRATION_LOCK_ID, MIGRATION_LOCKS_COLLECTION } from "../migrations/constants";
 import { acquireMigrationLock } from "../migrations/lock";
 
 jest.setTimeout(60000);
@@ -44,5 +45,20 @@ describe("migration lock", () => {
     ).rejects.toThrow("Could not acquire the migration lock");
 
     await firstLock.release();
+  });
+
+  it("fails refresh when the lock is no longer owned by the current process", async () => {
+    const db = createTestDb();
+    const heldLock = await acquireMigrationLock(db, {
+      logger,
+      ownerId: "owner-1",
+      leaseMs: 60000,
+    });
+
+    await db.collection<{ _id: string }>(MIGRATION_LOCKS_COLLECTION).deleteOne({ _id: GLOBAL_MIGRATION_LOCK_ID });
+
+    await expect(heldLock.refresh()).rejects.toThrow(
+      "Migration lock refresh failed because the active lease is no longer owned by this process."
+    );
   });
 });

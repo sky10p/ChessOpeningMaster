@@ -12,6 +12,7 @@ import trainRouter from "./routes/train";
 import errorHandler from "./middleware/errorHandler";
 import { authMiddleware } from "./middleware/auth";
 import { ensureDefaultUser } from "./services/authService";
+import { getConfiguredMigrationLeaseMs } from "./db/migrations/config";
 import { runMigrationsForStartup } from "./db/migrations/runner";
 import { startGamesAutoSyncScheduler } from "./services/games/autoSyncScheduler";
 import { logError, logInfo, logWarn } from "./utils/logger";
@@ -87,6 +88,7 @@ if (require.main === module) {
       const migrationResult = await runMigrationsForStartup({
         db: getDB(),
         appVersion: process.env.npm_package_version,
+        leaseMs: getConfiguredMigrationLeaseMs(),
       });
       if (migrationResult.appliedMigrationIds.length > 0) {
         logInfo("Startup migrations auto-run finished", {

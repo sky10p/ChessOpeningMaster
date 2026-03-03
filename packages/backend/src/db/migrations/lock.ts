@@ -69,7 +69,7 @@ export const acquireMigrationLock = async (
   let released = false;
 
   const refresh = async (): Promise<void> => {
-    await collection.updateOne(
+    const updateResult = await collection.updateOne(
       { _id: GLOBAL_MIGRATION_LOCK_ID, ownerId },
       {
         $set: {
@@ -77,6 +77,10 @@ export const acquireMigrationLock = async (
         },
       }
     );
+
+    if (updateResult.matchedCount !== 1) {
+      throw new Error("Migration lock refresh failed because the active lease is no longer owned by this process.");
+    }
   };
 
   const release = async (): Promise<void> => {

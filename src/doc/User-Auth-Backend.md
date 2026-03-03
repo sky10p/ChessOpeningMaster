@@ -50,17 +50,17 @@ Implementation: `packages/backend/src/services/authService.ts`.
 
 On startup, backend runs:
 
-- `ensureDatabaseIndexes(getDB())`
-- `ensureDefaultUserAndMigrateData()`
+- `runMigrationsForStartup()` when `MIGRATIONS_AUTO_RUN=true`
+- `ensureDefaultUser()`
 
-`ensureDefaultUserAndMigrateData()` creates the default user if missing and migrates legacy documents by setting `userId` where absent in:
+Legacy data backfill for missing `userId` is handled by migration `20260303123000_backfill_legacy_user_scope`, which assigns legacy documents into the default user scope for:
 
 - `repertoires`
 - `studies`
 - `positions`
 - `variantsInfo`
 
-This keeps old data accessible under the default user while enabling multi-user isolation.
+If startup auto-run is disabled, run the migration CLI before enabling auth so legacy documents remain visible to user-scoped queries.
 
 ## Data Isolation Rules
 

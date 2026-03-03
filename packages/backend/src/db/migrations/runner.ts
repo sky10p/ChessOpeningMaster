@@ -1,5 +1,5 @@
 import { Db } from "mongodb";
-import { MIGRATION_LOCKS_COLLECTION, MIGRATIONS_COLLECTION } from "./constants";
+import { DEFAULT_MIGRATION_LEASE_MS, MIGRATION_LOCKS_COLLECTION, MIGRATIONS_COLLECTION } from "./constants";
 import { loadMigrations } from "./loader";
 import { acquireMigrationLock } from "./lock";
 import {
@@ -56,6 +56,48 @@ const assertNoChecksumDrift = (
 
 const getLogger = (logger?: MigrationLogger): MigrationLogger => logger || createMigrationLogger();
 
+const runWithLeaseRefresh = async ({
+  execute,
+  heldLock,
+  leaseMs,
+}: {
+  execute: () => Promise<void>;
+  heldLock: { refresh: () => Promise<void> };
+  leaseMs: number;
+}): Promise<void> => {
+  const refreshIntervalMs = Math.max(1, Math.floor(leaseMs / 2));
+  let refreshError: unknown;
+  let refreshInFlight: Promise<void> | null = null;
+
+  const timer = setInterval(() => {
+    if (refreshInFlight || refreshError) {
+      return;
+    }
+
+    refreshInFlight = heldLock
+      .refresh()
+      .catch((error) => {
+        refreshError = error;
+      })
+      .finally(() => {
+        refreshInFlight = null;
+      });
+  }, refreshIntervalMs);
+
+  try {
+    await execute();
+  } finally {
+    clearInterval(timer);
+    if (refreshInFlight) {
+      await refreshInFlight;
+    }
+  }
+
+  if (refreshError) {
+    throw refreshError;
+  }
+};
+
 export const getMigrationStatus = async ({ db }: { db: Db }): Promise<MigrationStatus> => {
   await ensureMetadataCollections(db);
   const migrations = loadMigrations();
@@ -77,11 +119,12 @@ export const applyMigrations = async ({
   leaseMs,
 }: ApplyMigrationsOptions): Promise<ApplyMigrationsResult> => {
   const logger = getLogger(providedLogger);
+  const effectiveLeaseMs = leaseMs ?? DEFAULT_MIGRATION_LEASE_MS;
   logger.info("Checking migration status");
   await ensureMetadataCollections(db);
   const heldLock = await acquireMigrationLock(db, {
     logger,
-    leaseMs,
+    leaseMs: effectiveLeaseMs,
   });
 
   try {
@@ -106,7 +149,11 @@ export const applyMigrations = async ({
       await heldLock.refresh();
       const startedAt = Date.now();
       logger.info("Applying migration", { migrationId: migration.id, name: migration.name });
-      await migration.migration.up(db);
+      await runWithLeaseRefresh({
+        execute: () => migration.migration.up(db),
+        heldLock,
+        leaseMs: effectiveLeaseMs,
+      });
       const executionTimeMs = Date.now() - startedAt;
       await db.collection<AppliedMigrationRecord>(MIGRATIONS_COLLECTION).insertOne({
         _id: migration.id,
@@ -140,10 +187,12 @@ export const runMigrationsForStartup = async ({
   db,
   appVersion,
   logger,
+  leaseMs,
 }: {
   db: Db;
   appVersion?: string;
   logger?: MigrationLogger;
+  leaseMs?: number;
 }): Promise<ApplyMigrationsResult> => {
   const status = await getMigrationStatus({ db });
   if (status.pending.length === 0) {
@@ -156,5 +205,6 @@ export const runMigrationsForStartup = async ({
     db,
     appVersion,
     logger,
+    leaseMs,
   });
 };
