@@ -6,8 +6,11 @@ ChessKeep uses a small MongoDB migration runner on the native driver. All databa
 
 - applied migration records live in `__migrations`
 - one lease lock document in `__migration_locks` prevents concurrent runs
-- migrations are loaded from `packages/backend/src/db/migrations/definitions/`
+- migration ids and checksums are derived from the canonical files in `packages/backend/src/db/migrations/definitions/` when that directory is present
+- executable migration modules are loaded from the active runtime directory (`packages/backend/build/backend/db/migrations/definitions/` in compiled backend runs)
 - files run in filename order
+
+This split avoids checksum drift between running migrations from TypeScript source and validating them later from compiled JavaScript output.
 
 ## First migration
 
@@ -73,6 +76,12 @@ Upgrade an older database:
 ```bash
 yarn migrate
 ```
+
+Deployment note:
+
+- if you deploy the compiled backend and keep `packages/backend/src/db/migrations/definitions/` alongside it, checksum validation stays stable across `ts-node` and compiled runs
+- if runtime reports a missing migration file in `build/.../db/migrations/definitions`, rebuild the backend and clear stale build artifacts before restarting
+- do not leave deleted migration artifacts in `packages/backend/build/backend/db/migrations/definitions/`
 
 The integration tests run against `mongodb-memory-server` and a temporary in-memory database. They still use the real migration files and real collection names, but never touch a developer or production database.
 

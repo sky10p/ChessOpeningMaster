@@ -6,7 +6,7 @@ import { LoadedMigration, MigrationDefinition } from "./types";
 
 const migrationFilePattern = /^\d{14}_[a-z0-9_-]+\.(ts|js)$/i;
 const requireModule = createRequire(__filename);
-const supportedMigrationExtensions = [".ts", ".js"];
+const supportedMigrationExtensions = [".js", ".ts"];
 
 const toChecksum = (content: string): string => createHash("sha256").update(content).digest("hex");
 
@@ -32,13 +32,21 @@ const loadMigrationModule = (filePath: string): MigrationDefinition => {
 
 export const getRuntimeMigrationsDirectory = (): string => path.join(__dirname, "definitions");
 
+const isExistingDirectory = (directoryPath: string): boolean => {
+  if (!fs.existsSync(directoryPath)) {
+    return false;
+  }
+
+  return fs.statSync(directoryPath).isDirectory();
+};
+
 const getSourceMigrationsDirectoryCandidates = (): string[] => [
   path.resolve(process.cwd(), "packages/backend/src/db/migrations/definitions"),
   path.resolve(process.cwd(), "src/db/migrations/definitions"),
 ];
 
 const getExistingSourceMigrationsDirectory = (): string | null => {
-  const candidate = getSourceMigrationsDirectoryCandidates().find((directoryPath) => fs.existsSync(directoryPath));
+  const candidate = getSourceMigrationsDirectoryCandidates().find((directoryPath) => isExistingDirectory(directoryPath));
   return candidate || null;
 };
 
@@ -63,12 +71,15 @@ export const getWritableMigrationsDirectory = (): string => {
 
 const resolveRuntimeMigrationFilePath = (runtimeDirectoryPath: string, fileName: string): string => {
   const fileBaseName = path.basename(fileName, path.extname(fileName));
-  const runtimeFilePath = supportedMigrationExtensions
-    .map((extension) => path.join(runtimeDirectoryPath, `${fileBaseName}${extension}`))
-    .find((candidatePath) => fs.existsSync(candidatePath));
+  const candidatePaths = supportedMigrationExtensions.map((extension) =>
+    path.join(runtimeDirectoryPath, `${fileBaseName}${extension}`)
+  );
+  const runtimeFilePath = candidatePaths.find((candidatePath) => fs.existsSync(candidatePath));
 
   if (!runtimeFilePath) {
-    throw new Error(`Migration runtime file for "${fileBaseName}" was not found in "${runtimeDirectoryPath}".`);
+    throw new Error(
+      `Migration runtime file for "${fileBaseName}" was not found. Checked: ${candidatePaths.join(", ")}. The build output may be stale or incomplete.`
+    );
   }
 
   return runtimeFilePath;
@@ -89,7 +100,7 @@ export const resolveMigrationFilePaths = ({
 
 export const loadMigrations = (): LoadedMigration[] => {
   const runtimeMigrationsDirectory = getRuntimeMigrationsDirectory();
-  if (!fs.existsSync(runtimeMigrationsDirectory)) {
+  if (!isExistingDirectory(runtimeMigrationsDirectory)) {
     return [];
   }
   const canonicalMigrationsDirectory = getExistingSourceMigrationsDirectory() || runtimeMigrationsDirectory;
