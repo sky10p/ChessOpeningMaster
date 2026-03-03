@@ -4,17 +4,19 @@ import { IRepertoire } from "@chess-opening-master/common";
 import { Button } from "../../ui/Button";
 import { Select } from "../../ui/Select";
 
+type RepertoireDialogItem = Pick<IRepertoire, "_id" | "name">;
+
 interface RepertoireDialogProps {
   open: boolean;
   title: string;
   contentText: string;
-  repertoires: IRepertoire[];
-  onConfirm: (repertoire: IRepertoire) => void;
+  repertoires: RepertoireDialogItem[];
+  onConfirm: (repertoire: RepertoireDialogItem) => void;
   onClose: (isCancelled: boolean) => void;
 }
 
 const RepertoireDialog: React.FC<RepertoireDialogProps> = ({ open, title, contentText, repertoires, onConfirm, onClose }) => {
-  const [selectedRepertoire, setSelectedRepertoire] = useState<IRepertoire | null>(repertoires.length > 0 ? repertoires[0] : null);
+  const [selectedRepertoire, setSelectedRepertoire] = useState<RepertoireDialogItem | null>(repertoires.length > 0 ? repertoires[0] : null);
 
   const handleRepertoireConfirm = () => {
     if (selectedRepertoire) {

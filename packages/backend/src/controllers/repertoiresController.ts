@@ -13,6 +13,7 @@ import { getUserBackupFiles } from "../services/userBackupService";
 import { stringifyBackupJsonValue } from "../services/userBackupSerialization";
 import { restoreUserBackup } from "../services/userRestoreService";
 import { MistakeSnapshotItem } from "@chess-opening-master/common";
+import { getRepertoireOverview } from "../services/repertoireOverviewService";
 
 const getUserFilter = (req: Request) => ({ userId: getRequestUserId(req) });
 
@@ -72,9 +73,18 @@ export async function getRepertoires(req: Request, res: Response, next: NextFunc
       .collection("repertoires")
       .find(getUserFilter(req))
       .sort({ order: 1 })
-      .project({ name: 1, _id: 1 })
+      .project({ name: 1, _id: 1, orientation: 1, order: 1, disabled: 1, favorite: 1 })
       .toArray();
     res.json(repertoires);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getRepertoiresOverview(req: Request, res: Response, next: NextFunction) {
+  try {
+    const overview = await getRepertoireOverview(getRequestUserId(req));
+    res.status(200).json(overview);
   } catch (err) {
     next(err);
   }
@@ -181,7 +191,15 @@ export async function createRepertoire(req: Request, res: Response, next: NextFu
     const db = getDB();
     const highestOrderRepertoire = await db.collection("repertoires").findOne(getUserFilter(req), { sort: { order: -1 } });
     const order = highestOrderRepertoire ? highestOrderRepertoire.order + 1 : 1;
-    const repertoire = await db.collection("repertoires").insertOne({ name, moveNodes, orientation, order, ...getUserFilter(req) });
+    const repertoire = await db.collection("repertoires").insertOne({
+      name,
+      moveNodes,
+      orientation,
+      order,
+      disabled: false,
+      favorite: false,
+      ...getUserFilter(req),
+    });
     res.json(repertoire);
   } catch (err) {
     next(err);
@@ -197,7 +215,14 @@ export async function duplicateRepertoire(req: Request, res: Response, next: Nex
     const order = highestOrderRepertoire ? highestOrderRepertoire.order + 1 : 1;
     const repertoire = await db.collection("repertoires").findOne({ _id: new ObjectId(id), ...getUserFilter(req) });
     const repertoireWithoutId = { ...repertoire, _id: undefined };
-    const newRepertoire = await db.collection("repertoires").insertOne({ ...repertoireWithoutId, name, order, ...getUserFilter(req) });
+    const newRepertoire = await db.collection("repertoires").insertOne({
+      ...repertoireWithoutId,
+      name,
+      order,
+      disabled: false,
+      favorite: false,
+      ...getUserFilter(req),
+    });
     res.json(newRepertoire);
   } catch (err) {
     next(err);
@@ -456,5 +481,38 @@ export async function enableRepertoire(req: Request, res: Response, next: NextFu
     res.json(repertoire);
   } catch (err) {
     next(err);
+  }
+}
+
+export async function updateRepertoirePreferences(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { id } = req.params;
+    const nextFields: Record<string, boolean> = {};
+
+    if (typeof req.body?.disabled === "boolean") {
+      nextFields.disabled = req.body.disabled;
+    }
+    if (typeof req.body?.favorite === "boolean") {
+      nextFields.favorite = req.body.favorite;
+    }
+
+    if (Object.keys(nextFields).length === 0) {
+      return res.status(400).json({ message: "At least one preference must be provided" });
+    }
+
+    const db = getDB();
+    const result = await db.collection("repertoires").findOneAndUpdate(
+      { _id: new ObjectId(id), ...getUserFilter(req) },
+      { $set: nextFields },
+      { returnDocument: "after" }
+    );
+
+    if (!result) {
+      return res.status(404).json({ message: "Repertoire not found" });
+    }
+
+    return res.status(200).json(result);
+  } catch (err) {
+    return next(err);
   }
 }

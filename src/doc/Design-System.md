@@ -263,6 +263,30 @@ Use `EmptyState` for loading, empty, and lightweight error surfaces instead of a
 Use `variant="card"` for standalone panels and `variant="inline"` for embedded list or tab states.
 It accepts an optional `icon` and `action`.
 
+### 3.10 `Tooltip`
+
+Use `Tooltip` for short explanatory help attached to badges or compact metrics when the visible label is ambiguous.
+
+```tsx
+<Tooltip
+  content={
+    <span className="block space-y-1">
+      <span className="block font-semibold text-text-base">Due mistakes</span>
+      <span className="block text-text-muted leading-snug">
+        Scheduled mistake review prompts; not the same as the red error-variant count.
+      </span>
+    </span>
+  }
+>
+  <Badge variant="danger" size="sm">11 mistakes</Badge>
+</Tooltip>
+```
+
+Rules:
+- Keep tooltip copy short and explanatory.
+- Use tooltips for clarification, not primary content.
+- Prefer `Tooltip` over page-local absolute overlays so help content can escape clipped scroll containers safely.
+
 ---
 
 ## 4. Class Composition Utility

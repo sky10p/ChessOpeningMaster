@@ -10,3 +10,4 @@ export { EmptyState, type EmptyStateProps } from "./EmptyState";
 export { MasteryBadge, getMasteryTier, type MasteryBadgeProps } from "./MasteryBadge";
 export { CollapsibleSection, type CollapsibleSectionProps } from "./CollapsibleSection";
 export { MetricTitle, type MetricTitleProps } from "./MetricTitle";
+export { Tooltip } from "./Tooltip";

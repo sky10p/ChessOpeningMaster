@@ -25,6 +25,7 @@ import { FullRunConfirmPanel } from "./components/FullRunConfirmPanel";
 import { FocusModeMoveProgress } from "./components/FocusModeMoveProgress";
 import { TrainRepertoireStandardWorkspace } from "./components/TrainRepertoireStandardWorkspace";
 import { TrainRepertoireFocusWorkspace } from "./components/TrainRepertoireFocusWorkspace";
+import { getRepertoireEditorRoute, getRepertoireOpeningRoute } from "../../../utils/appRoutes";
 
 const TrainRepertoireViewContainer: React.FC = () => {
   const [panelSelected, setPanelSelected] = React.useState<
@@ -144,9 +145,10 @@ const TrainRepertoireViewContainer: React.FC = () => {
         onClick: () => {
           const queryParams = new URLSearchParams(location.search);
           const variantName = queryParams.get("variantName");
-          const editUrl = variantName
-            ? `/repertoire/${repertoireId}?variantName=${encodeURIComponent(variantName)}`
-            : `/repertoire/${repertoireId}`;
+          const editUrl = getRepertoireEditorRoute(
+            repertoireId,
+            variantName ? { variantName } : undefined
+          );
           navigate(editUrl);
         },
       },
@@ -350,11 +352,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
 
   const handleFocusBack = React.useCallback(() => {
     if (focusOpeningName) {
-      navigate(
-        `/train/repertoire/${repertoireId}/opening/${encodeURIComponent(
-          focusOpeningName
-        )}`
-      );
+      navigate(getRepertoireOpeningRoute(repertoireId, focusOpeningName));
       return;
     }
     navigate(-1);

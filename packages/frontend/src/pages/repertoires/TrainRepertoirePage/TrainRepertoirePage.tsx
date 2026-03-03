@@ -8,8 +8,9 @@ import { useRepertoirePageData } from "../shared/useRepertoirePageData";
 import { RepertoirePageState } from "../shared/RepertoirePageState";
 
 const TrainRepertoirePage = () => {
-  const { id } = useParams();
-  const { repertoire, loading, error, refetch } = useRepertoirePageData(id);
+  const { id, repertoireId } = useParams();
+  const resolvedRepertoireId = repertoireId || id;
+  const { repertoire, loading, error, refetch } = useRepertoirePageData(resolvedRepertoireId);
 
   const { setOpen } = useNavbarDispatch();
   useEffect(() => {

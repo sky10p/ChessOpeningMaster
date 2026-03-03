@@ -1,13 +1,6 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import {
-  IRepertoire,
-  TrainVariantInfo,
-} from "@chess-opening-master/common";
 import { useDashboard } from "../../hooks/useDashboard";
-import { TrainVariant } from "../../models/chess.models";
-import { RepertoiresSection } from "./sections/RepertoiresSection";
-import { OpeningsSection } from "./sections/OpeningsSection";
 import { DashboardSection } from "./sections/DashboardSection/index";
 import { OverviewSection } from "./sections/OverviewSection";
 import { StudiesSection } from "./sections/StudiesSection";
@@ -17,46 +10,28 @@ import {
   Squares2X2Icon,
   ChartPieIcon,
   MapIcon,
-  BookOpenIcon,
-  FolderOpenIcon,
   AcademicCapIcon,
 } from "@heroicons/react/24/outline";
 import { Tabs, TabButton } from "../../components/ui";
 import { PageFrame } from "../../components/design/layouts/PageFrame";
 import { PageRoot } from "../../components/design/layouts/PageRoot";
 import { PageSurface } from "../../components/design/layouts/PageSurface";
-import {
-  getDashboardTrainVariants,
-  toTrainVariantInfoMap,
-} from "./utils/openingIndex";
 
 const SECTION_ICONS: Record<string, React.ReactNode> = {
   dashboard: <Squares2X2Icon className="w-4 h-4" />,
   overview: <ChartPieIcon className="w-4 h-4" />,
   pathInsights: <MapIcon className="w-4 h-4" />,
-  repertoires: <BookOpenIcon className="w-4 h-4" />,
-  openings: <FolderOpenIcon className="w-4 h-4" />,
   studies: <AcademicCapIcon className="w-4 h-4" />,
 };
 
 export const DashboardPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { repertoires, loading, updateRepertoires } = useDashboard();
-  const [orientationFilter, setOrientationFilter] = useState<
-    "all" | "white" | "black"
-  >("all");
-  const [repertoireNameFilter, setRepertoireNameFilter] = useState<string>("");
-  const [openingNameFilter, setOpeningNameFilter] = useState<string>("");
-  const [openingsInitialStatusFilter, setOpeningsInitialStatusFilter] = useState<
-    "all" | "errors" | "successful" | "new"
-  >("all");
+  const { repertoires, loading } = useDashboard();
   const [selectedSection, setSelectedSection] = useState<
     | "dashboard"
     | "pathInsights"
     | "overview"
-    | "repertoires"
-    | "openings"
     | "studies"
   >("dashboard");
   const [overviewInitialView, setOverviewInitialView] = useState<
@@ -67,96 +42,51 @@ export const DashboardPage = () => {
     const params = new URLSearchParams(location.search);
     const section = params.get("section");
     const status = params.get("status");
+    if (section === "repertoires" || section === "openings") {
+      const nextParams = new URLSearchParams();
+      if (
+        section === "openings" &&
+        (status === "errors" || status === "successful" || status === "new")
+      ) {
+        nextParams.set("status", status);
+      }
+      navigate(`/repertoires${nextParams.toString() ? `?${nextParams.toString()}` : ""}`, {
+        replace: true,
+      });
+      return;
+    }
     if (
       section === "dashboard" ||
       section === "pathInsights" ||
       section === "overview" ||
-      section === "repertoires" ||
-      section === "openings" ||
       section === "studies"
     ) {
       setSelectedSection(section);
-      if (
-        section === "openings" &&
-        (status === "all" ||
-          status === "errors" ||
-          status === "successful" ||
-          status === "new")
-      ) {
-        setOpeningsInitialStatusFilter(status);
-      } else {
-        setOpeningsInitialStatusFilter("all");
-      }
     } else if (section === "errors") {
       setSelectedSection("overview");
       setOverviewInitialView("errors");
-      setOpeningsInitialStatusFilter("all");
     } else if (section === "unreviewed") {
       setSelectedSection("overview");
       setOverviewInitialView("unreviewed");
-      setOpeningsInitialStatusFilter("all");
     }
-  }, [location.search]);
+  }, [location.search, navigate]);
 
   const handleSectionChange = (
     section:
       | "dashboard"
       | "pathInsights"
       | "overview"
-      | "repertoires"
-      | "openings"
       | "studies"
   ) => {
     setSelectedSection(section);
     if (section === "overview") {
       setOverviewInitialView("progress");
     }
-    if (section !== "openings") {
-      setOpeningsInitialStatusFilter("all");
-    }
     const params = new URLSearchParams(location.search);
     params.set("section", section);
     params.delete("status");
     navigate({ pathname: location.pathname, search: params.toString() }, { replace: true });
   };
-
-  const filteredRepertoires =
-    orientationFilter === "all"
-      ? repertoires
-      : repertoires.filter((r) => r.orientation === orientationFilter);
-
-  const nameFilteredRepertoires = repertoireNameFilter
-    ? filteredRepertoires.filter((r) =>
-        r.name.toLowerCase().includes(repertoireNameFilter.toLowerCase())
-      )
-    : filteredRepertoires;
-
-  const goToRepertoire = (repertoire: IRepertoire, variantName?: string) => {
-    navigate(`/repertoire/${repertoire._id}${variantName ? `?variantName=${variantName}` : ""}`);
-  };
-
-  const goToTrainRepertoire = (repertoire: IRepertoire, variantName?: string) => {
-    navigate(
-      `/repertoire/train/${repertoire._id}${variantName ? `?variantName=${variantName}` : ""}`
-    );
-  };
-
-  const goToTrainOpening = (repertoire: IRepertoire, openingName: string) => {
-    const returnTo = `${location.pathname}?section=openings${openingsInitialStatusFilter !== "all" ? `&status=${openingsInitialStatusFilter}` : ""}`;
-    const params = new URLSearchParams();
-    params.set("returnTo", returnTo);
-    navigate(
-      `/train/repertoire/${repertoire._id}/opening/${encodeURIComponent(openingName)}?${params.toString()}`
-    );
-  };
-
-  const getTrainVariants = (repertoire: IRepertoire): TrainVariant[] => {
-    return getDashboardTrainVariants(repertoire);
-  };
-
-  const getTrainVariantInfo = (
-    trainInfo: TrainVariantInfo[]
-  ): Record<string, TrainVariantInfo> => toTrainVariantInfoMap(trainInfo);
 
   return (
     <PageRoot>
@@ -171,8 +101,6 @@ export const DashboardPage = () => {
                 ["dashboard", "Dashboard"],
                 ["overview", "Overview"],
                 ["pathInsights", "Path Insights"],
-                ["repertoires", "Repertoires"],
-                ["openings", "Openings"],
                 ["studies", "Studies"],
               ] as const
             ).map(([id, label]) => (
@@ -197,32 +125,6 @@ export const DashboardPage = () => {
             )}
             {selectedSection === "overview" && <OverviewSection repertoires={repertoires} initialView={overviewInitialView} />}
             {selectedSection === "pathInsights" && <PathInsightsSection />}
-            {selectedSection === "repertoires" && (
-              <RepertoiresSection
-                orientationFilter={orientationFilter}
-                setOrientationFilter={setOrientationFilter}
-                repertoireNameFilter={repertoireNameFilter}
-                setRepertoireNameFilter={setRepertoireNameFilter}
-                nameFilteredRepertoires={nameFilteredRepertoires}
-                goToRepertoire={goToRepertoire}
-                goToTrainRepertoire={goToTrainRepertoire}
-                getTrainVariants={getTrainVariants}
-                getTrainVariantInfo={getTrainVariantInfo}
-                updateRepertoires={updateRepertoires}
-              />
-            )}
-            {selectedSection === "openings" && (
-              <OpeningsSection
-                openingNameFilter={openingNameFilter}
-                setOpeningNameFilter={setOpeningNameFilter}
-                initialStatusFilter={openingsInitialStatusFilter}
-                filteredRepertoires={filteredRepertoires}
-                getTrainVariantInfo={getTrainVariantInfo}
-                goToRepertoire={goToRepertoire}
-                goToTrainOpening={goToTrainOpening}
-                loading={loading}
-              />
-            )}
             {selectedSection === "studies" && <StudiesSection />}
           </div>
         </PageSurface>

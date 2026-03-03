@@ -1,6 +1,7 @@
 import { raw, Router } from "express";
 import {
   getRepertoires,
+  getRepertoiresOverview,
   getFullRepertoires,
   downloadRepertoires,
   restoreRepertoires,
@@ -19,12 +20,14 @@ import {
   deleteRepertoire,
   disableRepertoire,
   enableRepertoire,
+  updateRepertoirePreferences,
   deleteVariantInfo
 } from "../controllers/repertoiresController";
 
 const router: Router = Router();
 
 router.get("/", getRepertoires);
+router.get("/overview", getRepertoiresOverview);
 router.get("/full", getFullRepertoires);
 router.get("/download", downloadRepertoires);
 router.post(
@@ -49,6 +52,7 @@ router.put("/:id", updateRepertoire);
 router.put("/:id/name", updateRepertoireName);
 router.put("/:id/enable", enableRepertoire);
 router.put("/:id/disable", disableRepertoire);
+router.patch("/:id/preferences", updateRepertoirePreferences);
 router.patch("/:id/order/up", moveRepertoireOrderUp);
 router.delete("/:id", deleteRepertoire);
 

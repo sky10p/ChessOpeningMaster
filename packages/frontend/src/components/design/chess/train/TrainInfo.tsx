@@ -113,8 +113,8 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
         </p>
       ) : (
         <div className="mb-4 flex flex-wrap gap-2">
-          <Button intent="primary" size="sm" onClick={() => navigate("/train")}>
-            Back to Train
+          <Button intent="primary" size="sm" onClick={() => navigate("/repertoires")}>
+            Back to Repertoires
           </Button>
           <Button intent="secondary" size="sm" onClick={() => navigate("/path")}>
             Review Path
@@ -134,7 +134,7 @@ const TrainInfo: React.FC<TrainInfoProps> = ({
             style={{
               width: `${totalVariants > 0 ? (currentVariant / totalVariants) * 100 : 0}%`,
             }}
-          ></div>
+          />
         </div>
       </div>
       {supplementalPanel ? <div className="mb-4">{supplementalPanel}</div> : null}

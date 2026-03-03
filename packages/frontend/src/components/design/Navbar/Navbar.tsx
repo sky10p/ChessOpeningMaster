@@ -6,6 +6,7 @@ import { NavbarLink } from "./model";
 import { ChartPieIcon, StarIcon, ChevronDownIcon } from "@heroicons/react/24/solid";
 import { AcademicCapIcon, BoltIcon, FlagIcon } from "@heroicons/react/24/outline";
 import { useTheme } from "../../../hooks/useTheme";
+import { Button, IconButton } from "../../ui";
 
 interface NavbarProps {
   open: boolean;
@@ -32,13 +33,13 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
       <div className="relative flex-1 flex flex-col max-w-xs w-full bg-surface-raised shadow-xl border-r border-border-default transition-transform duration-300">
         {/* Close button */}
         <div className="absolute top-3 right-3 z-10">
-          <button
-            className="flex items-center justify-center h-8 w-8 rounded-full bg-interactive/70 text-text-muted hover:bg-interactive hover:text-text-base transition-colors duration-200"
+          <IconButton
+            label="Close sidebar"
+            className="rounded-full bg-interactive/70 text-text-muted hover:bg-interactive hover:text-text-base"
             onClick={() => setOpen(false)}
           >
-            <span className="sr-only">Close sidebar</span>
             <XMarkIcon className="h-5 w-5" aria-hidden="true" />
-          </button>
+          </IconButton>
         </div>
         
         <div className="flex-1 pb-4 overflow-y-auto">
@@ -57,9 +58,11 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
             {/* Main navigation links */}
             {mainActions.map((link) => (
               link.onClick ? (
-                <button
+                <Button
                   key={link.id}
-                  className="nav-link group w-full text-left"
+                  intent="ghost"
+                  size="md"
+                  className="nav-link group w-full justify-start"
                   onClick={() => {
                     link.onClick?.();
                     setOpen(false);
@@ -67,7 +70,7 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
                 >
                   <span className="text-amber-400 mr-3">{link.icon}</span>
                   <span>{link.name}</span>
-                </button>
+                </Button>
               ) : (
                 <Link
                   key={link.id}
@@ -103,36 +106,40 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
             </Link>
 
             <Link
-              to="/train"
+              to="/repertoires"
               className="nav-link group mt-2"
               onClick={() => setOpen(false)}
             >
               <BoltIcon className="h-5 w-5 text-amber-400 mr-3" />
-              <span>Train</span>
+              <span>Repertoires</span>
             </Link>
             
-            {/* Repertoires dropdown */}
             <div className="mt-2">
-              <button
+              <Button
+                intent="ghost"
+                size="md"
                 className="w-full nav-link justify-between group"
                 onClick={() => setFavouritesOpen(!favouritesOpen)}
               >
                 <div className="flex items-center">
                   <StarIcon className="h-5 w-5 text-amber-400 mr-3" />
-                  <span>Repertoires</span>
+                  <span>Favourites</span>
                 </div>
                 <ChevronDownIcon
                   className={`h-4 w-4 text-text-subtle transition-transform duration-200 ${favouritesOpen ? 'transform rotate-180' : ''}`}
                 />
-              </button>
+              </Button>
               
-              {/* Repertoire items */}
               {favouritesOpen && (
                 <div className="mt-1 ml-8 space-y-1 overflow-auto max-h-40 pr-2">
                   {secondaryActions.map((link) => (
                     <div 
                       key={link.id} 
-                      className="flex items-center justify-between py-2 px-3 text-sm font-medium text-text-muted rounded-md hover:bg-interactive hover:text-text-base transition-colors duration-200"
+                      className={`flex items-center justify-between py-2 px-3 text-sm font-medium rounded-md transition-colors duration-200 ${
+                        link.disabled
+                          ? "text-text-subtle bg-danger/5 border border-danger/20"
+                          : "text-text-muted hover:bg-interactive hover:text-text-base"
+                      }`}
                     >
                       <Link
                         to={link.url}
@@ -141,12 +148,13 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
                       >
                         {link.name}
                       </Link>
-                      <button
-                        className="ml-2 p-1 rounded-md text-text-subtle hover:text-accent hover:bg-interactive"
+                      <IconButton
+                        label={`Actions for ${link.name}`}
+                        className="ml-2 text-text-subtle hover:text-accent hover:bg-interactive"
                         onClick={link.onActionClick}
                       >
                         <EllipsisVerticalIcon className="h-4 w-4" aria-hidden="true" />
-                      </button>
+                      </IconButton>
                     </div>
                   ))}
                 </div>
@@ -161,8 +169,10 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
               <span>Studies</span>
             </Link>
             {showLogout ? (
-              <button
-                className="nav-link group mt-2 w-full text-left"
+              <Button
+                intent="ghost"
+                size="md"
+                className="nav-link group mt-2 w-full justify-start"
                 onClick={() => {
                   onLogout?.();
                   setOpen(false);
@@ -170,15 +180,17 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
               >
                 <ArrowRightOnRectangleIcon className="h-5 w-5 text-red-400 mr-3" />
                 <span>Logout</span>
-              </button>
+              </Button>
             ) : null}
           </nav>
           
           {/* Footer section */}
           <div className="mt-auto px-3 py-4 space-y-3">
-            <button
+            <Button
+              intent="ghost"
+              size="md"
               onClick={toggleTheme}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg bg-surface border border-border-subtle text-text-muted hover:text-text-base hover:bg-interactive transition-colors duration-200"
+              className="w-full justify-between rounded-lg bg-surface border border-border-subtle px-3 py-2.5 text-text-muted hover:text-text-base hover:bg-interactive"
             >
               <div className="flex items-center gap-2.5">
                 {theme === "dark" ? (
@@ -195,7 +207,7 @@ export const Navbar: React.FC<NavbarProps> = ({ open, setOpen, mainActions, seco
                   theme === "light" ? "translate-x-4" : "translate-x-1"
                 }`} />
               </div>
-            </button>
+            </Button>
             <div className="px-3 py-3 bg-surface rounded-lg border border-border-subtle text-xs text-text-subtle">
               <p>ChessKeep v1.0</p>
               <p className="mt-1">Manage your chess repertoire with ease</p>

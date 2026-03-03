@@ -1,4 +1,10 @@
-import { BoardOrientation, IMoveNode, IRepertoireDashboard } from "@chess-opening-master/common";
+import {
+  BoardOrientation,
+  IMoveNode,
+  IRepertoire,
+  IRepertoireDashboard,
+  RepertoireOverviewResponse,
+} from "@chess-opening-master/common";
 import { API_URL } from "../constants";
 import { apiFetch } from "../apiClient";
 
@@ -53,7 +59,17 @@ export interface RestoreRepertoiresBackupResult {
   restoredCounts: Record<string, number>;
 }
 
-export const getRepertoires = async () => {
+export type RepertoireListItem = Pick<
+  IRepertoire,
+  "_id" | "name" | "orientation" | "order" | "disabled" | "favorite"
+>;
+
+export interface UpdateRepertoirePreferencesInput {
+  disabled?: boolean;
+  favorite?: boolean;
+}
+
+export const getRepertoires = async (): Promise<RepertoireListItem[]> => {
   const response = await apiFetch(`${API_URL}/repertoires`);
   const data = await parseResponsePayload(response);
 
@@ -66,6 +82,25 @@ export const getRepertoires = async () => {
   }
 
   return data;
+};
+
+export const getRepertoireOverview = async (): Promise<RepertoireOverviewResponse> => {
+  const response = await apiFetch(`${API_URL}/repertoires/overview`);
+  const data = await parseResponsePayload(response);
+
+  if (!response.ok) {
+    throw new Error(parseErrorMessage(data, "Unable to load repertoire overview"));
+  }
+
+  if (
+    !data ||
+    typeof data !== "object" ||
+    !Array.isArray((data as RepertoireOverviewResponse).repertoires)
+  ) {
+    throw new Error("Invalid repertoire overview response");
+  }
+
+  return data as RepertoireOverviewResponse;
 };
 
 export const getFullInfoRepertoires = async (): Promise<IRepertoireDashboard[]> => {
@@ -173,6 +208,26 @@ export const disableRepertoire = async (id: string) => {
     method: "PUT",
   });
   const data = await response.json();
+  return data;
+};
+
+export const updateRepertoirePreferences = async (
+  id: string,
+  preferences: UpdateRepertoirePreferencesInput
+) => {
+  const response = await apiFetch(`${API_URL}/repertoires/${id}/preferences`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(preferences),
+  });
+  const data = await parseResponsePayload(response);
+
+  if (!response.ok) {
+    throw new Error(parseErrorMessage(data, "Unable to update repertoire preferences"));
+  }
+
   return data;
 };
 

@@ -46,8 +46,8 @@ This directory contains architecture and implementation guides for ChessKeep.
 - Mistake-SRS lifecycle and replay behavior
 
 ### [Train Section Architecture](Train-Section-Architecture.md)
-- `/train` and opening detail routes
-- Train API contracts and data flow
+- `/repertoires` browse/manage route and canonical opening detail route
+- `/train/repertoires/:id` execution route and train API contracts
 - Mastery formulas and due definitions
 
 ### [Spaced Repetition Upgrade Plan](Spaced-Repetition-Upgrade-Plan.md)
@@ -77,8 +77,8 @@ This directory contains architecture and implementation guides for ChessKeep.
 4. Read [UI Consistency Governance](UI-Consistency-Governance.md) before any UI change.
 5. Read [User Auth Backend](User-Auth-Backend.md) and [User Auth Frontend](User-Auth-Frontend.md).
 6. Read [PathPage and Next Lesson Logic](PathPage-Next-Lesson-Logic.md) before changing `/path`.
-7. Read [Train Error Reinforcement Mode](Train-Error-Reinforcement-Mode.md) before changing train reinforcement behavior.
-8. Read [Train Section Architecture](Train-Section-Architecture.md) before changing `/train` routes or APIs.
+7. Read [Train Error Reinforcement Mode](Train-Error-Reinforcement-Mode.md) before changing reinforcement behavior or opening-detail actions.
+8. Read [Train Section Architecture](Train-Section-Architecture.md) before changing `/repertoires`, `/train/repertoires/:id`, or train APIs.
 9. Read [Spaced Repetition Upgrade Plan](Spaced-Repetition-Upgrade-Plan.md) for scheduler model changes.
 10. Read [Game Imports and Training Plan Guide](Game-Imports-Guide.md) for `/games` UX changes.
 11. Read [Game Import Service Architecture](Game-Import-Service-Architecture.md) for `/games` backend changes.
@@ -94,7 +94,7 @@ This directory contains architecture and implementation guides for ChessKeep.
 3. Follow [React Effect & Data Fetching Guide](React-Effect-Data-Fetching-Guide.md) for effect usage.
 4. Validate `/path` logic against [PathPage and Next Lesson Logic](PathPage-Next-Lesson-Logic.md).
 5. Validate train reinforcement behavior with [Train Error Reinforcement Mode](Train-Error-Reinforcement-Mode.md).
-6. Validate `/train` contracts with [Train Section Architecture](Train-Section-Architecture.md).
+6. Validate repertoire browse/manage and train execution contracts with [Train Section Architecture](Train-Section-Architecture.md).
 7. Validate scheduler/rating changes with [Spaced Repetition Upgrade Plan](Spaced-Repetition-Upgrade-Plan.md).
 8. Validate games UX and backend assumptions with [Game Imports and Training Plan Guide](Game-Imports-Guide.md) and [Game Import Service Architecture](Game-Import-Service-Architecture.md).
 9. Run the touched-scope consistency sweep from [UI Consistency Governance](UI-Consistency-Governance.md) for any UI task.
@@ -114,10 +114,11 @@ This directory contains architecture and implementation guides for ChessKeep.
 
 ### Variant Compatibility
 - Variants match by exact LAN path
-- Incompatible edits trigger variant switching/creation behavior
+- Incompatible edits trigger variant switching or creation behavior
 
 ### Navigation Flow
 - Navigation helpers update variants and board context together
+- Route helpers centralize canonical repertoire browse and train execution URLs
 - Move-path reconstruction is central for deterministic selection
 
 ---

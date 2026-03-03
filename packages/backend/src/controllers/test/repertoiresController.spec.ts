@@ -1,10 +1,20 @@
 import AdmZip from "adm-zip";
 import { EJSON, ObjectId } from "bson";
 import { NextFunction, Request, Response } from "express";
-import { downloadRepertoires, restoreRepertoires } from "../repertoiresController";
+import {
+  downloadRepertoires,
+  getRepertoires,
+  getRepertoiresOverview,
+  restoreRepertoires,
+  updateRepertoirePreferences,
+} from "../repertoiresController";
+import * as mongo from "../../db/mongo";
+import * as repertoireOverviewService from "../../services/repertoireOverviewService";
 import * as userBackupService from "../../services/userBackupService";
 import * as userRestoreService from "../../services/userRestoreService";
 
+jest.mock("../../db/mongo");
+jest.mock("../../services/repertoireOverviewService");
 jest.mock("../../services/userBackupService");
 jest.mock("../../services/userRestoreService");
 
@@ -16,8 +26,173 @@ const mockGetUserBackupFiles = userBackupService.getUserBackupFiles as jest.Mock
 const mockRestoreUserBackup = userRestoreService.restoreUserBackup as jest.MockedFunction<
   typeof userRestoreService.restoreUserBackup
 >;
+const mockGetDB = mongo.getDB as jest.MockedFunction<typeof mongo.getDB>;
+const mockGetRepertoireOverview = repertoireOverviewService.getRepertoireOverview as jest.MockedFunction<
+  typeof repertoireOverviewService.getRepertoireOverview
+>;
 
 describe("repertoiresController", () => {
+  describe("getRepertoires", () => {
+    it("returns the projected lightweight repertoire fields for the current user", async () => {
+      const toArray = jest.fn().mockResolvedValue([{ _id: "rep-1", name: "Main White" }]);
+      const project = jest.fn().mockReturnValue({ toArray });
+      const sort = jest.fn().mockReturnValue({ project });
+      const find = jest.fn().mockReturnValue({ sort });
+      mockGetDB.mockReturnValue({
+        collection: jest.fn().mockReturnValue({ find }),
+      } as never);
+      const json = jest.fn();
+
+      await getRepertoires(
+        { userId: "user-1" } as unknown as Request,
+        { json } as unknown as Response,
+        jest.fn()
+      );
+
+      expect(find).toHaveBeenCalledWith({ userId: "user-1" });
+      expect(sort).toHaveBeenCalledWith({ order: 1 });
+      expect(project).toHaveBeenCalledWith({
+        name: 1,
+        _id: 1,
+        orientation: 1,
+        order: 1,
+        disabled: 1,
+        favorite: 1,
+      });
+      expect(json).toHaveBeenCalledWith([{ _id: "rep-1", name: "Main White" }]);
+    });
+  });
+
+  describe("getRepertoiresOverview", () => {
+    it("returns the overview for the authenticated user", async () => {
+      const status = jest.fn().mockReturnThis();
+      const json = jest.fn().mockReturnThis();
+      mockGetRepertoireOverview.mockResolvedValue({ repertoires: [] });
+
+      await getRepertoiresOverview(
+        { userId: "user-1" } as unknown as Request,
+        { status, json } as unknown as Response,
+        jest.fn()
+      );
+
+      expect(mockGetRepertoireOverview).toHaveBeenCalledWith("user-1");
+      expect(status).toHaveBeenCalledWith(200);
+      expect(json).toHaveBeenCalledWith({ repertoires: [] });
+    });
+  });
+
+  describe("updateRepertoirePreferences", () => {
+    let mockFindOneAndUpdate: jest.Mock;
+    let mockStatus: jest.Mock;
+    let mockJson: jest.Mock;
+    let mockNext: jest.Mock;
+
+    beforeEach(() => {
+      mockFindOneAndUpdate = jest.fn().mockResolvedValue({
+        _id: new ObjectId("507f1f77bcf86cd799439011"),
+        favorite: true,
+      });
+      mockGetDB.mockReturnValue({
+        collection: jest.fn().mockReturnValue({
+          findOneAndUpdate: mockFindOneAndUpdate,
+        }),
+      } as never);
+      mockStatus = jest.fn().mockReturnThis();
+      mockJson = jest.fn().mockReturnThis();
+      mockNext = jest.fn();
+    });
+
+    it("updates favourite only", async () => {
+      await updateRepertoirePreferences(
+        {
+          userId: "user-1",
+          params: { id: "507f1f77bcf86cd799439011" },
+          body: { favorite: true },
+        } as unknown as Request,
+        { status: mockStatus, json: mockJson } as unknown as Response,
+        mockNext
+      );
+
+      const [filter, update, options] = mockFindOneAndUpdate.mock.calls[0];
+      expect((filter._id as ObjectId).toHexString()).toBe("507f1f77bcf86cd799439011");
+      expect(filter.userId).toBe("user-1");
+      expect(update).toEqual({ $set: { favorite: true } });
+      expect(options).toEqual({ returnDocument: "after" });
+      expect(mockStatus).toHaveBeenCalledWith(200);
+    });
+
+    it("updates disabled only", async () => {
+      await updateRepertoirePreferences(
+        {
+          userId: "user-1",
+          params: { id: "507f1f77bcf86cd799439011" },
+          body: { disabled: true },
+        } as unknown as Request,
+        { status: mockStatus, json: mockJson } as unknown as Response,
+        mockNext
+      );
+
+      const [filter, update, options] = mockFindOneAndUpdate.mock.calls[0];
+      expect((filter._id as ObjectId).toHexString()).toBe("507f1f77bcf86cd799439011");
+      expect(filter.userId).toBe("user-1");
+      expect(update).toEqual({ $set: { disabled: true } });
+      expect(options).toEqual({ returnDocument: "after" });
+    });
+
+    it("updates both supported preferences together", async () => {
+      await updateRepertoirePreferences(
+        {
+          userId: "user-1",
+          params: { id: "507f1f77bcf86cd799439011" },
+          body: { disabled: true, favorite: false },
+        } as unknown as Request,
+        { status: mockStatus, json: mockJson } as unknown as Response,
+        mockNext
+      );
+
+      const [filter, update, options] = mockFindOneAndUpdate.mock.calls[0];
+      expect((filter._id as ObjectId).toHexString()).toBe("507f1f77bcf86cd799439011");
+      expect(filter.userId).toBe("user-1");
+      expect(update).toEqual({ $set: { disabled: true, favorite: false } });
+      expect(options).toEqual({ returnDocument: "after" });
+    });
+
+    it("returns 400 when no valid preference fields are provided", async () => {
+      await updateRepertoirePreferences(
+        {
+          userId: "user-1",
+          params: { id: "507f1f77bcf86cd799439011" },
+          body: {},
+        } as unknown as Request,
+        { status: mockStatus, json: mockJson } as unknown as Response,
+        mockNext
+      );
+
+      expect(mockFindOneAndUpdate).not.toHaveBeenCalled();
+      expect(mockStatus).toHaveBeenCalledWith(400);
+      expect(mockJson).toHaveBeenCalledWith({
+        message: "At least one preference must be provided",
+      });
+    });
+
+    it("returns 404 when the repertoire is not found for the current user", async () => {
+      mockFindOneAndUpdate.mockResolvedValue(null);
+
+      await updateRepertoirePreferences(
+        {
+          userId: "user-1",
+          params: { id: "507f1f77bcf86cd799439011" },
+          body: { favorite: true },
+        } as unknown as Request,
+        { status: mockStatus, json: mockJson } as unknown as Response,
+        mockNext
+      );
+
+      expect(mockStatus).toHaveBeenCalledWith(404);
+      expect(mockJson).toHaveBeenCalledWith({ message: "Repertoire not found" });
+    });
+  });
+
   describe("downloadRepertoires", () => {
     let mockRequest: MockRequest;
     let mockResponse: Partial<Response>;

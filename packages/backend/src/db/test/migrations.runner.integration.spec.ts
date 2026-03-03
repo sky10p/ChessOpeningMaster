@@ -13,6 +13,8 @@ const INITIAL_SCHEMA_MIGRATION_ID = "20260303120000_initial_schema";
 const INITIAL_SCHEMA_MIGRATION_NAME = "initial schema";
 const LEGACY_USER_SCOPE_BACKFILL_MIGRATION_ID = "20260303123000_backfill_legacy_user_scope";
 const LEGACY_USER_SCOPE_BACKFILL_MIGRATION_NAME = "backfill legacy user scope";
+const REPERTOIRE_FAVORITES_BACKFILL_MIGRATION_ID = "20260303130000_backfill_repertoire_favorites";
+const REPERTOIRE_FAVORITES_BACKFILL_MIGRATION_NAME = "backfill repertoire favorites";
 const getMigrationChecksum = (fileName: string): string =>
   createHash("sha256")
     .update(fs.readFileSync(path.resolve(__dirname, `../migrations/definitions/${fileName}`), "utf8"))
@@ -21,7 +23,14 @@ const INITIAL_SCHEMA_MIGRATION_CHECKSUM = getMigrationChecksum("20260303120000_i
 const LEGACY_USER_SCOPE_BACKFILL_MIGRATION_CHECKSUM = getMigrationChecksum(
   "20260303123000_backfill_legacy_user_scope.ts"
 );
-const BASELINE_MIGRATION_IDS = [INITIAL_SCHEMA_MIGRATION_ID, LEGACY_USER_SCOPE_BACKFILL_MIGRATION_ID];
+const REPERTOIRE_FAVORITES_BACKFILL_MIGRATION_CHECKSUM = getMigrationChecksum(
+  "20260303130000_backfill_repertoire_favorites.ts"
+);
+const BASELINE_MIGRATION_IDS = [
+  INITIAL_SCHEMA_MIGRATION_ID,
+  LEGACY_USER_SCOPE_BACKFILL_MIGRATION_ID,
+  REPERTOIRE_FAVORITES_BACKFILL_MIGRATION_ID,
+];
 
 describe("migration runner", () => {
   let server: MongoMemoryServer;
@@ -83,6 +92,13 @@ describe("migration runner", () => {
         appliedAt: new Date("2026-03-03T12:22:10.000Z"),
         executionTimeMs: 25,
       },
+      {
+        _id: REPERTOIRE_FAVORITES_BACKFILL_MIGRATION_ID,
+        name: REPERTOIRE_FAVORITES_BACKFILL_MIGRATION_NAME,
+        checksum: REPERTOIRE_FAVORITES_BACKFILL_MIGRATION_CHECKSUM,
+        appliedAt: new Date("2026-03-03T12:22:20.000Z"),
+        executionTimeMs: 10,
+      },
     ]);
 
     const result = await applyMigrations({
@@ -93,7 +109,7 @@ describe("migration runner", () => {
     expect(result.appliedMigrationIds).toEqual([]);
 
     const appliedMigrations = await db.collection(MIGRATIONS_COLLECTION).find().toArray();
-    expect(appliedMigrations).toHaveLength(2);
+    expect(appliedMigrations).toHaveLength(BASELINE_MIGRATION_IDS.length);
     expect(appliedMigrations.map((migration) => migration._id)).toEqual(BASELINE_MIGRATION_IDS);
   });
 
@@ -113,7 +129,7 @@ describe("migration runner", () => {
     expect(secondRun.appliedMigrationIds).toEqual([]);
 
     const status = await getMigrationStatus({ db });
-    expect(status.applied).toHaveLength(2);
+    expect(status.applied).toHaveLength(BASELINE_MIGRATION_IDS.length);
     expect(status.applied.map((migration) => migration._id)).toEqual(BASELINE_MIGRATION_IDS);
     expect(status.pending).toEqual([]);
   });
