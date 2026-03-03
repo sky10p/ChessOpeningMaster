@@ -12,8 +12,7 @@
     "test:position-comment": "jest src/services/test/positionCommentService.spec.ts",
     "migrate": "ts-node -r dotenv/config src/scripts/migrations.ts migrate",
     "migrate:status": "ts-node -r dotenv/config src/scripts/migrations.ts migrate:status",
-    "migrate:create": "ts-node -r dotenv/config src/scripts/migrations.ts migrate:create",
-    "migrate:comments:interactive": "ts-node -r dotenv/config src/scripts/migrateRepertoireComments.ts interactive"
+    "migrate:create": "ts-node -r dotenv/config src/scripts/migrations.ts migrate:create"
   },
   "dependencies": {
     "@chess-opening-master/common": "^0.0.0",
