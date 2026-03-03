@@ -165,6 +165,25 @@ await waitFor(() => {
 2. Check connection string in environment variables
 3. Verify MongoDB is running on correct port (27017)
 
+#### Migration Startup Failures
+**Error**: `Checksum drift detected for applied migration ...` or runtime migration file missing during backend startup
+
+**Common Causes**:
+1. Migration was applied from TypeScript source and startup is now validating against compiled JavaScript output
+2. Stale files were left behind in `packages/backend/build/backend/db/migrations/definitions`
+3. Deployment copied build output without the canonical migration source files
+
+**Solution**:
+1. Rebuild the backend from a clean state
+2. Remove stale compiled migration artifacts before restart
+3. Ensure deployments keep `packages/backend/src/db/migrations/definitions` available when using checksum validation
+
+**Typical recovery**:
+```bash
+rm -rf packages/backend/build
+yarn build
+```
+
 #### CORS Issues
 **Error**: Frontend cannot reach backend API
 
