@@ -84,10 +84,16 @@ if (require.main === module) {
   const run = async () => {
     await connectDB();
     if (process.env.MIGRATIONS_AUTO_RUN === "true") {
-      await runMigrationsForStartup({
+      const migrationResult = await runMigrationsForStartup({
         db: getDB(),
         appVersion: process.env.npm_package_version,
       });
+      if (migrationResult.appliedMigrationIds.length > 0) {
+        logInfo("Startup migrations auto-run finished", {
+          appliedCount: migrationResult.appliedMigrationIds.length,
+          appliedMigrationIds: migrationResult.appliedMigrationIds,
+        });
+      }
     }
     await ensureDefaultUser();
     const scheduler = startGamesAutoSyncScheduler();

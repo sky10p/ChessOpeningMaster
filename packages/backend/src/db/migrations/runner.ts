@@ -77,6 +77,7 @@ export const applyMigrations = async ({
   leaseMs,
 }: ApplyMigrationsOptions): Promise<ApplyMigrationsResult> => {
   const logger = getLogger(providedLogger);
+  logger.info("Checking migration status");
   await ensureMetadataCollections(db);
   const heldLock = await acquireMigrationLock(db, {
     logger,
@@ -90,8 +91,16 @@ export const applyMigrations = async ({
 
     const appliedMap = buildAppliedMap(appliedMigrations);
     const pendingMigrations = migrations.filter((migration) => !appliedMap.has(migration.id));
+    logger.info("Migration status ready", {
+      appliedCount: appliedMigrations.length,
+      pendingCount: pendingMigrations.length,
+    });
 
     const appliedMigrationIds: string[] = [];
+
+    if (pendingMigrations.length === 0) {
+      logger.info("No pending migrations");
+    }
 
     for (const migration of pendingMigrations) {
       await heldLock.refresh();
@@ -114,6 +123,11 @@ export const applyMigrations = async ({
       });
     }
 
+    logger.info("Migration run completed", {
+      appliedCount: appliedMigrationIds.length,
+      appliedMigrationIds,
+    });
+
     return {
       appliedMigrationIds,
     };
@@ -130,8 +144,15 @@ export const runMigrationsForStartup = async ({
   db: Db;
   appVersion?: string;
   logger?: MigrationLogger;
-}): Promise<void> => {
-  await applyMigrations({
+}): Promise<ApplyMigrationsResult> => {
+  const status = await getMigrationStatus({ db });
+  if (status.pending.length === 0) {
+    return {
+      appliedMigrationIds: [],
+    };
+  }
+
+  return applyMigrations({
     db,
     appVersion,
     logger,
