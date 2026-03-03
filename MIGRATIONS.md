@@ -77,6 +77,36 @@ Upgrade an older database:
 yarn migrate
 ```
 
+## Backup and Restore
+
+Before risky migration or deployment work, create a per-user backup from the application:
+
+- `GET /repertoires/download` exports a zip for the current authenticated user
+- in auth-disabled mode, the same route exports the default user because `authMiddleware` assigns that user to `req.userId`
+
+Restore is available through:
+
+- `POST /repertoires/restore`
+- request body must be the zip returned by `GET /repertoires/download`
+- content type should be `application/zip`
+
+Restore rules:
+
+- restore is scoped to the current authenticated/default user only
+- `users.json` in the backup must match `req.userId`
+- user-scoped JSON files must contain only documents for `req.userId`
+- `authTokens` are intentionally excluded, so restored users must sign in again
+- restore replaces the current user's stored data in the backed-up collections
+
+Example:
+
+```bash
+curl -X POST "http://localhost:3001/repertoires/restore" \
+  -H "Content-Type: application/zip" \
+  --cookie "chess_opening_master_auth=<token>" \
+  --data-binary "@chess-openings-backup-2026-03-03.zip"
+```
+
 Deployment note:
 
 - if you deploy the compiled backend and keep `packages/backend/src/db/migrations/definitions/` alongside it, checksum validation stays stable across `ts-node` and compiled runs

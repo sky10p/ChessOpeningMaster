@@ -9,6 +9,8 @@ import {
   getVariantMistakesForRepertoire,
   reviewVariantMistake,
 } from "../services/variantMistakeService";
+import { getUserBackupFiles } from "../services/userBackupService";
+import { restoreUserBackup } from "../services/userRestoreService";
 import { MistakeSnapshotItem } from "@chess-opening-master/common";
 
 const getUserFilter = (req: Request) => ({ userId: getRequestUserId(req) });
@@ -113,16 +115,12 @@ export async function getFullRepertoires(req: Request, res: Response, next: Next
 
 export async function downloadRepertoires(req: Request, res: Response, next: NextFunction) {
   try {
-    const db = getDB();
-    const userFilter = getUserFilter(req);
-    const repertoires = await db.collection("repertoires").find(userFilter).sort({ order: 1 }).toArray();
-    const studies = await db.collection("studies").find(userFilter).toArray();
-    const variantsInfo = await db.collection("variantsInfo").find(userFilter).toArray();
-
     const zip = new AdmZip();
-    zip.addFile("repertoires.json", Buffer.from(JSON.stringify(repertoires, null, 2)));
-    zip.addFile("studies.json", Buffer.from(JSON.stringify(studies, null, 2)));
-    zip.addFile("variantsInfo.json", Buffer.from(JSON.stringify(variantsInfo, null, 2)));
+    const userBackupFiles = await getUserBackupFiles(getRequestUserId(req));
+
+    userBackupFiles.forEach(({ fileName, jsonValue }) => {
+      zip.addFile(fileName, Buffer.from(JSON.stringify(jsonValue, null, 2)));
+    });
 
     const today = new Date().toISOString().split("T")[0];
     const zipFileName = `chess-openings-backup-${today}.zip`;
@@ -132,6 +130,19 @@ export async function downloadRepertoires(req: Request, res: Response, next: Nex
     res.send(zip.toBuffer());
   } catch (err) {
     next(err);
+  }
+}
+
+export async function restoreRepertoires(req: Request, res: Response, next: NextFunction) {
+  try {
+    if (!Buffer.isBuffer(req.body) || req.body.length === 0) {
+      return res.status(400).json({ message: "Backup zip file is required" });
+    }
+
+    const result = await restoreUserBackup(getRequestUserId(req), req.body);
+    return res.status(200).json(result);
+  } catch (err) {
+    return next(err);
   }
 }
 

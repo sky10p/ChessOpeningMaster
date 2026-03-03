@@ -72,6 +72,12 @@ Network behavior:
 - Requests use `apiFetch` with `credentials: include` so auth cookie is sent automatically.
 - `AuthRequestError` normalizes auth/network/server/unknown failures for UI handling.
 
+Backup/restore note:
+
+- repertoire backup download uses credentialed requests in `packages/frontend/src/repository/repertoires/repertoires.tsx`
+- restore requests for backup zips must also remain credentialed so the backend can bind the restore to the current authenticated user
+- session tokens are not restored, so a restored user may need to sign in again
+
 ## Rules for Future Frontend Features
 
 1. Do not bypass `App.tsx` auth bootstrap state for route decisions.
