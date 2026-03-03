@@ -14,7 +14,7 @@ import {
   deleteStudySession
 } from "../controllers/studiesController";
 
-const router = Router();
+const router: Router = Router();
 
 router.get("/", getStudies);
 router.post("/", createStudyGroup);

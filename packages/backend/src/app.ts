@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Express } from "express";
 import cors from "cors";
 import { connectDB, disconnectDB, getDB } from "./db/mongo";
 import { Server } from "http";
@@ -17,7 +17,7 @@ import { runMigrationsForStartup } from "./db/migrations/runner";
 import { startGamesAutoSyncScheduler } from "./services/games/autoSyncScheduler";
 import { logError, logInfo, logWarn } from "./utils/logger";
 
-const app = express();
+const app: Express = express();
 const port = process.env.BACKEND_PORT || 3001;
 const bodyParserLimit = process.env.BODY_PARSER_LIMIT || "100mb";
 const defaultCorsOrigins = ["http://localhost:3002", "http://127.0.0.1:3002"];

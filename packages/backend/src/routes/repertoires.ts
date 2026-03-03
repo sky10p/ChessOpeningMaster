@@ -21,7 +21,7 @@ import {
   deleteVariantInfo
 } from "../controllers/repertoiresController";
 
-const router = Router();
+const router: Router = Router();
 
 router.get("/", getRepertoires);
 router.get("/full", getFullRepertoires);

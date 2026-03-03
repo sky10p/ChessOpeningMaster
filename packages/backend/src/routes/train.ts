@@ -4,7 +4,7 @@ import {
   getTrainOverviewSummary,
 } from "../controllers/trainController";
 
-const router = Router();
+const router: Router = Router();
 
 router.get("/overview", getTrainOverviewSummary);
 router.get("/repertoires/:id/openings/:openingName", getTrainOpeningSummary);

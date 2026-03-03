@@ -2,7 +2,7 @@ import { Router } from "express";
 import { getAuthConfig, getSession, login, loginWithDefaultUser, logout, register } from "../controllers/authController";
 import { authLoginRateLimit } from "../middleware/authRateLimit";
 
-const router = Router();
+const router: Router = Router();
 
 router.get("/config", getAuthConfig);
 router.get("/session", getSession);
