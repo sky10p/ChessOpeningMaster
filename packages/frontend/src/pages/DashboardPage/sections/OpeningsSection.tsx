@@ -2,7 +2,10 @@
 import { IRepertoireDashboard, TrainVariantInfo } from "@chess-opening-master/common";
 import { OpeningCard } from "../components/OpeningCard";
 import { OpeningCardSkeleton } from "../components/OpeningCardSkeleton";
-import { getVariantsProgressInfo } from "../../../components/design/SelectTrainVariants/utils";
+import {
+  getVariantsProgressInfo,
+  isVariantsProgressMastered,
+} from "../../../components/design/SelectTrainVariants/utils";
 import { RepertoireFilterDropdown } from "../components/RepertoireFilterDropdown";
 import { Input, Select } from "../../../components/ui";
 import {
@@ -99,7 +102,7 @@ export const OpeningsSection: React.FC<OpeningsSectionProps> = ({
       return hasErrors;
     }
     if (statusFilter === 'successful') {
-      return !hasErrors && !hasNewVariants;
+      return isVariantsProgressMastered({ totalVariants: variants.length, hasErrors, hasNewVariants });
     }
     if (statusFilter === 'new') {
       return hasNewVariants;

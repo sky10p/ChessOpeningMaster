@@ -184,6 +184,49 @@ rm -rf packages/backend/build
 yarn build
 ```
 
+#### Restore Backup Failures
+**Error**: `Backup user does not match the current authenticated user` or `Backup file "...json" contains data for a different user`
+
+**Cause**:
+1. The uploaded zip was created for a different user
+2. The backup was manually edited and no longer matches the current `req.userId`
+3. The request was made while signed in as a different user than the backup owner
+
+**Solution**:
+1. Sign in as the same user that created the backup
+2. In auth-disabled mode, restore while the backend is still using the same default user configuration
+3. Use the original zip from `GET /repertoires/download` without modifying files inside it
+
+**Error**: `Backup contains unsupported files ...` or `Backup is missing required files ...`
+
+**Cause**:
+1. The zip is not an application-generated backup
+2. Files were added, removed, or renamed inside the archive
+
+**Solution**:
+1. Re-download a fresh backup from the application
+2. Upload the zip unchanged to `POST /repertoires/restore`
+
+**Error**: `Restore requires MongoDB transaction support (replica set or mongos)`
+
+**Cause**:
+1. Restore now replaces user data inside a Mongo transaction to avoid partial deletes/inserts
+2. The backend is connected to a standalone MongoDB server that does not support transactions
+
+**Solution**:
+1. Run restore against a replica set or `mongos` deployment
+2. If testing locally, reconfigure MongoDB from the default standalone setup before using restore
+3. Retry the restore after the database supports transactions
+
+**Error**: User can log in after restore but sessions were lost
+
+**Expected behavior**:
+- backup/restore excludes `authTokens`
+- after restore, users must log in again
+
+**Why**:
+- session tokens are transient state and are intentionally not part of the restore surface
+
 #### CORS Issues
 **Error**: Frontend cannot reach backend API
 
@@ -217,6 +260,7 @@ yarn build
 2. Check inter-package dependencies
 3. Verify build order (common -> others)
 4. Test in isolation
+5. Verify backup zip integrity before running restore
 
 ## Prevention Strategies
 

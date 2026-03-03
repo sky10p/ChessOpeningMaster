@@ -1,8 +1,9 @@
-import { Router } from "express";
+import { raw, Router } from "express";
 import {
   getRepertoires,
   getFullRepertoires,
   downloadRepertoires,
+  restoreRepertoires,
   getRepertoireById,
   downloadRepertoireById,
   createRepertoire,
@@ -26,6 +27,14 @@ const router: Router = Router();
 router.get("/", getRepertoires);
 router.get("/full", getFullRepertoires);
 router.get("/download", downloadRepertoires);
+router.post(
+  "/restore",
+  raw({
+    type: ["application/zip", "application/octet-stream", "application/x-zip-compressed"],
+    limit: process.env.BODY_PARSER_LIMIT || "100mb",
+  }),
+  restoreRepertoires
+);
 router.get("/:id", getRepertoireById);
 router.get("/:id/download", downloadRepertoireById);
 router.post("/", createRepertoire);

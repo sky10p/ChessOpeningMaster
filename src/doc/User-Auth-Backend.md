@@ -81,6 +81,45 @@ Patterns to follow for new backend features:
 4. Include `userId` in new persisted documents.
 5. Add indexes that include `userId` when uniqueness or frequent filtering is needed.
 
+## Backup and Restore Semantics
+
+The repertoire backup endpoints are also user-scoped through `authMiddleware`.
+
+Routes:
+
+- `GET /repertoires/download`
+  - Exports a zip for the current `req.userId`
+  - Includes the current user record from `users` plus all backed-up user-domain collections
+  - Zip entries are serialized as Mongo Extended JSON so `ObjectId` and `Date` values round-trip safely
+- `POST /repertoires/restore`
+  - Accepts the backup zip as a raw `application/zip` request body
+  - Restores only into the current `req.userId`
+
+Restore validation rules:
+
+- `users.json` must contain exactly one user record
+- that user record `_id` must equal the current `req.userId`
+- every user-scoped document inside the backup must have `userId === req.userId`
+- unsupported files such as `authTokens.json` are rejected
+
+Restore persistence rules:
+
+- `users` is restored for the current user
+- backed-up user-scoped collections are replaced for the current user
+- restore reparses Mongo Extended JSON and also rehydrates legacy ISO date strings from older backups
+- restore runs the user replacement plus all user-scoped collection replacements inside one Mongo transaction
+- `authTokens` are not restored, so login is required again after restore
+
+Restore infrastructure requirement:
+
+- MongoDB must support transactions (replica set or `mongos`)
+- if transaction support is unavailable, restore fails before replacing user data
+
+Default-user mode:
+
+- when auth is disabled, `authMiddleware` assigns the default user id to `req.userId`
+- backup and restore therefore operate on the default user record and default-user data automatically
+
 ## Security Notes
 
 - Passwords are never stored in plain text.

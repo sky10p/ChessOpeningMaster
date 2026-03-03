@@ -48,6 +48,11 @@ const triggerFileDownload = (blob: Blob, fileName: string): void => {
   URL.revokeObjectURL(url);
 };
 
+export interface RestoreRepertoiresBackupResult {
+  userId: string;
+  restoredCounts: Record<string, number>;
+}
+
 export const getRepertoires = async () => {
   const response = await apiFetch(`${API_URL}/repertoires`);
   const data = await parseResponsePayload(response);
@@ -179,6 +184,27 @@ export const downloadRepertoiresBackup = async (): Promise<void> => {
   const blob = await response.blob();
   const fileName = parseDownloadFileName(response, "chess-openings-backup.zip");
   triggerFileDownload(blob, fileName);
+};
+
+export const restoreRepertoiresBackup = async (file: Blob): Promise<RestoreRepertoiresBackupResult> => {
+  const response = await apiFetch(`${API_URL}/repertoires/restore`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/zip",
+    },
+    body: file,
+  });
+  const data = await parseResponsePayload(response);
+
+  if (!response.ok) {
+    throw new Error(parseErrorMessage(data, "Unable to restore repertoires backup"));
+  }
+
+  if (!data || typeof data !== "object" || typeof (data as { userId?: unknown }).userId !== "string") {
+    throw new Error("Invalid restore backup response");
+  }
+
+  return data as RestoreRepertoiresBackupResult;
 };
 
 export const downloadRepertoireJson = async (id: string, repertoireName: string): Promise<void> => {

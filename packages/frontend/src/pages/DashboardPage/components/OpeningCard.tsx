@@ -5,9 +5,12 @@ import { IRepertoireDashboard, TrainVariantInfo } from "@chess-opening-master/co
 import { OpeningRepertoiresList } from "./OpeningRepertoiresList";
 import { StaticChessboard } from "../../../components/design/chess/StaticChessboard";
 import { getOpeningFen } from "../../../utils/getOpeningFen";
-import { Button, Badge } from "../../../components/ui";
+import { Button, Badge, MasteryBadge } from "../../../components/ui";
 import { cn } from "../../../utils/cn";
-import { getVariantsProgressInfo } from "../../../components/design/SelectTrainVariants/utils";
+import {
+  getVariantsProgressInfo,
+  isVariantsProgressMastered,
+} from "../../../components/design/SelectTrainVariants/utils";
 import {
   getScopedTrainVariantInfoKey,
   OpeningScopedTrainVariant,
@@ -67,10 +70,7 @@ export const OpeningCard: React.FC<OpeningCardProps> = ({
     [summaryVariants, summaryVariantInfo]
   );
 
-  const isMastered =
-    progressInfo.totalVariants > 0 &&
-    !progressInfo.hasErrors &&
-    !progressInfo.hasNewVariants;
+  const isMastered = isVariantsProgressMastered(progressInfo);
 
   return (
     <div
@@ -122,13 +122,12 @@ export const OpeningCard: React.FC<OpeningCardProps> = ({
               {orientation === "white" ? "WHITE" : "BLACK"}
             </Badge>
             {isMastered && (
-              <Badge
+              <MasteryBadge
+                score={100}
                 size="sm"
-                variant="success"
-                className="font-bold shadow"
-              >
-                Mastered
-              </Badge>
+                showTooltip={false}
+                className="font-bold"
+              />
             )}
           </div>
           {!isSingle && (
