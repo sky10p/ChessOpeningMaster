@@ -8,8 +8,6 @@ Tracked MongoDB migrations live in `src/db/migrations/definitions`.
 yarn migrate
 yarn migrate:status
 yarn migrate:create add_some_change
-yarn db:backup
-yarn db:restore -- .mongo-backups/<backup-folder> --drop
 ```
 
 Migration workflow, locking, and idempotency guidelines are documented in the repo-level `MIGRATIONS.md`.

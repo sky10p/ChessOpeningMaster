@@ -13,8 +13,6 @@
     "migrate": "ts-node -r dotenv/config src/scripts/migrations.ts migrate",
     "migrate:status": "ts-node -r dotenv/config src/scripts/migrations.ts migrate:status",
     "migrate:create": "ts-node -r dotenv/config src/scripts/migrations.ts migrate:create",
-    "db:backup": "ts-node -r dotenv/config src/scripts/backupDatabase.ts",
-    "db:restore": "ts-node -r dotenv/config src/scripts/restoreDatabase.ts",
     "migrate:comments:interactive": "ts-node -r dotenv/config src/scripts/migrateRepertoireComments.ts interactive"
   },
   "dependencies": {

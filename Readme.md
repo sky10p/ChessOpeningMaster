@@ -116,8 +116,6 @@ MongoDB structure changes are tracked in the migration system documented in [MIG
 - Apply pending migrations: `yarn migrate`
 - Show applied and pending migrations: `yarn migrate:status`
 - Scaffold a new migration: `yarn migrate:create add_some_change`
-- Create a local backup before upgrades: `yarn db:backup`
-- Restore a local backup when needed: `yarn db:restore -- .mongo-backups/<backup-folder> --drop`
 
 Do not change indexes or persisted document structure outside migrations.
 

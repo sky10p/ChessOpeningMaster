@@ -27,8 +27,6 @@
     "migrate": "yarn workspace @chess-opening-master/backend migrate",
     "migrate:status": "yarn workspace @chess-opening-master/backend migrate:status",
     "migrate:create": "yarn workspace @chess-opening-master/backend migrate:create",
-    "db:backup": "yarn workspace @chess-opening-master/backend db:backup",
-    "db:restore": "yarn workspace @chess-opening-master/backend db:restore",
     "migrate:comments:interactive": "lerna run migrate:comments:interactive --scope @chess-opening-master/backend --stream",
     "lint": "lerna exec -- eslint . --ext .ts,.tsx --ignore-path .eslintignore"
   },

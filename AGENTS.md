@@ -429,7 +429,6 @@ Use Node.js v20.11.1 (specified in volta config).
 Backend uses dotenv. Required variables:
 - `MONGO_URI` - MongoDB connection string
 - `NODE_ENV` - development/production
-- `MONGODB_BACKUP_DIR` - Optional repo-relative or absolute directory for local `mongodump` backups
 - `GAME_PROVIDER_TOKEN_SECRET` - Required in production to encrypt linked provider tokens
 - `GAMES_AUTO_SYNC_DUE_HOURS` - Optional startup/scheduler due threshold for automatic sync checks (defaults to 24)
 - `MIGRATIONS_AUTO_RUN` - Optional backend startup auto-run for pending migrations (default off)

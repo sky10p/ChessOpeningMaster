@@ -26,8 +26,6 @@ This keeps the runner simple and keeps the migration workflow uniform.
 yarn migrate
 yarn migrate:status
 yarn migrate:create add_some_change
-yarn db:backup
-yarn db:restore -- .mongo-backups/<backup-folder> --drop
 ```
 
 ## Creating a migration
@@ -61,11 +59,8 @@ Keep migrations simple:
 Production:
 
 ```bash
-yarn db:backup
 yarn migrate
 ```
-
-`db:backup` and `db:restore` use `mongodump` and `mongorestore`, so MongoDB Database Tools must be installed and available in `PATH`.
 
 Fresh install:
 
@@ -76,7 +71,6 @@ yarn migrate
 Upgrade an older database:
 
 ```bash
-yarn db:backup
 yarn migrate
 ```
 
