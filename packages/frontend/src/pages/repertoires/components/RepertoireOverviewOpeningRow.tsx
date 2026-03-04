@@ -40,7 +40,7 @@ export const RepertoireOverviewOpeningRow: React.FC<RepertoireOverviewOpeningRow
     >
       <div className="flex h-full flex-col gap-2">
         <div className="flex min-h-[8rem] items-stretch gap-3">
-          <div className="w-28 shrink-0 overflow-hidden rounded-lg border border-border-subtle bg-surface-raised">
+          <div className="w-20 shrink-0 overflow-hidden rounded-lg border border-border-subtle bg-surface-raised">
             <StaticChessboard
               fen={opening.openingFen || START_FEN}
               orientation={opening.orientation || "white"}
@@ -49,7 +49,7 @@ export const RepertoireOverviewOpeningRow: React.FC<RepertoireOverviewOpeningRow
 
           <div className="min-w-0 flex flex-1 flex-col">
             <div className="flex min-h-[3.5rem] items-center justify-between gap-3">
-              <h3 className="min-w-0 flex-1 line-clamp-2 text-lg font-semibold leading-tight text-text-base">
+              <h3 className="min-w-0 flex-1 line-clamp-2 text-sm font-semibold leading-tight text-text-base">
                 {opening.openingName}
               </h3>
               <div className="hidden shrink-0 items-center gap-2 sm:flex">

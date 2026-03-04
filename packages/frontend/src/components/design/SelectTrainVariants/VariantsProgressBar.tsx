@@ -15,7 +15,7 @@ interface VariantsProgressBarProps {
   variantInfoKeyResolver?: VariantInfoKeyResolver;
   counts?: VariantsProgressCounts;
   className?: string;
-  spacing?: "default" | "tight";
+  spacing?: "default" | "tight" | "slim";
 }
 
 export const VariantsProgressBar: React.FC<VariantsProgressBarProps> = ({
@@ -47,6 +47,20 @@ export const VariantsProgressBar: React.FC<VariantsProgressBarProps> = ({
   const progressCounts = progressInfo.counts;
 
   const getPercentage = (count: number) => (count / totalVariants) * 100;
+
+  if (spacing === "slim") {
+    return (
+      <div className={className} style={{ width: "100%" }}>
+        <svg width="100%" height="6" style={{ borderRadius: "4px", overflow: "hidden" }}>
+          <rect x="0" y="0" width={`${getPercentage(progressCounts.noErrors)}%`} height="6" fill={VARIANT_COLORS.noErrors} />
+          <rect x={`${getPercentage(progressCounts.noErrors)}%`} y="0" width={`${getPercentage(progressCounts.oneError)}%`} height="6" fill={VARIANT_COLORS.oneError} />
+          <rect x={`${getPercentage(progressCounts.noErrors + progressCounts.oneError)}%`} y="0" width={`${getPercentage(progressCounts.twoErrors)}%`} height="6" fill={VARIANT_COLORS.twoErrors} />
+          <rect x={`${getPercentage(progressCounts.noErrors + progressCounts.oneError + progressCounts.twoErrors)}%`} y="0" width={`${getPercentage(progressCounts.moreThanTwoErrors)}%`} height="6" fill={VARIANT_COLORS.moreThanTwoErrors} />
+          <rect x={`${getPercentage(progressCounts.noErrors + progressCounts.oneError + progressCounts.twoErrors + progressCounts.moreThanTwoErrors)}%`} y="0" width={`${getPercentage(progressCounts.unresolved)}%`} height="6" fill={VARIANT_COLORS.unresolved} />
+        </svg>
+      </div>
+    );
+  }
 
   return (
     <div

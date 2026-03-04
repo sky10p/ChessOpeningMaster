@@ -58,7 +58,6 @@ export const RepertoireOverviewFilters: React.FC<RepertoireOverviewFiltersProps>
   );
 
   const activeFilterCount = activeFilters.length;
-  const advancedLabel = showAdvanced ? "Hide filters" : "More filters";
 
   React.useEffect(() => {
     if (!isMobile && activeFilterCount > 0) {
@@ -69,37 +68,32 @@ export const RepertoireOverviewFilters: React.FC<RepertoireOverviewFiltersProps>
   return (
     <div className="shrink-0 border-b border-border-subtle bg-surface px-4 py-3 sm:px-5">
       <div className="space-y-3">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
+        <div className="flex items-center gap-2">
           <div className="min-w-0 flex-1">
             <Input
-              label="Search"
               size="sm"
-              placeholder="Repertoire or opening"
+              placeholder="Search repertoire or opening"
               value={query}
               onChange={(event) => onQueryChange(event.target.value)}
             />
           </div>
-          <div className="flex flex-wrap items-center gap-2 lg:pb-0.5">
-            <Button
-              intent={showAdvanced ? "secondary" : "outline"}
-              size="sm"
-              onClick={() => setShowAdvanced((current) => !current)}
-            >
-              <AdjustmentsHorizontalIcon className="h-4 w-4" />
-              {advancedLabel}
-              {activeFilterCount > 0 ? (
-                <Badge variant="brand" size="sm" className="ml-1">
-                  {activeFilterCount}
-                </Badge>
-              ) : null}
-            </Button>
-            {(activeFilterCount > 0 || query.trim().length > 0) ? (
-              <Button intent="ghost" size="sm" onClick={onClearFilters}>
-                <XMarkIcon className="h-4 w-4" />
-                Clear
-              </Button>
+          <Button
+            intent={showAdvanced ? "secondary" : "outline"}
+            size="sm"
+            onClick={() => setShowAdvanced((current) => !current)}
+          >
+            <AdjustmentsHorizontalIcon className="h-4 w-4" />
+            {activeFilterCount > 0 ? (
+              <Badge variant="brand" size="sm">
+                {activeFilterCount}
+              </Badge>
             ) : null}
-          </div>
+          </Button>
+          {activeFilterCount > 0 || query.trim().length > 0 ? (
+            <Button intent="ghost" size="sm" onClick={onClearFilters}>
+              <XMarkIcon className="h-4 w-4" />
+            </Button>
+          ) : null}
         </div>
 
         {(activeFilterCount > 0 || query.trim().length > 0) && (
