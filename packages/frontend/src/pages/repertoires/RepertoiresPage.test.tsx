@@ -278,7 +278,7 @@ describe("RepertoiresPage", () => {
     renderPage();
 
     const openingTitle = await screen.findByText("Italian Game");
-    const openingCard = openingTitle.closest("div[class*='min-h-[13.75rem]']");
+    const openingCard = openingTitle.closest("div[class*='min-h-[12rem]']");
     expect(openingCard).not.toBeNull();
     fireEvent.click(within(openingCard as HTMLElement).getAllByRole("button", { name: "View" })[0]);
 
@@ -293,7 +293,7 @@ describe("RepertoiresPage", () => {
     renderPage();
 
     const openingTitle = await screen.findByText("Italian Game");
-    const openingCard = openingTitle.closest("div[class*='min-h-[13.75rem]']");
+    const openingCard = openingTitle.closest("div[class*='min-h-[12rem]']");
     expect(openingCard).not.toBeNull();
     fireEvent.click(within(openingCard as HTMLElement).getAllByRole("button", { name: "Edit" })[0]);
 

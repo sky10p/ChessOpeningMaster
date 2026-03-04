@@ -90,7 +90,7 @@ export const RepertoireOverviewFilters: React.FC<RepertoireOverviewFiltersProps>
             ) : null}
           </Button>
           {activeFilterCount > 0 || query.trim().length > 0 ? (
-            <Button intent="ghost" size="sm" onClick={onClearFilters}>
+            <Button intent="ghost" size="sm" onClick={onClearFilters} aria-label="Clear">
               <XMarkIcon className="h-4 w-4" />
             </Button>
           ) : null}
