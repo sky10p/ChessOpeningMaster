@@ -456,34 +456,6 @@ export async function deleteRepertoire(req: Request, res: Response, next: NextFu
   }
 }
 
-export async function disableRepertoire(req: Request, res: Response, next: NextFunction) {
-  try {
-    const { id } = req.params;
-    const db = getDB();
-    const repertoire = await db.collection("repertoires").findOneAndUpdate(
-      { _id: new ObjectId(id), ...getUserFilter(req) },
-      { $set: { disabled: true } }
-    );
-    res.json(repertoire);
-  } catch (err) {
-    next(err);
-  }
-}
-
-export async function enableRepertoire(req: Request, res: Response, next: NextFunction) {
-  try {
-    const { id } = req.params;
-    const db = getDB();
-    const repertoire = await db.collection("repertoires").findOneAndUpdate(
-      { _id: new ObjectId(id), ...getUserFilter(req) },
-      { $set: { disabled: false } }
-    );
-    res.json(repertoire);
-  } catch (err) {
-    next(err);
-  }
-}
-
 export async function updateRepertoirePreferences(req: Request, res: Response, next: NextFunction) {
   try {
     const { id } = req.params;

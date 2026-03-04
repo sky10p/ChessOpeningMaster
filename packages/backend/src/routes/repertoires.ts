@@ -18,8 +18,6 @@ import {
   updateRepertoireName,
   moveRepertoireOrderUp,
   deleteRepertoire,
-  disableRepertoire,
-  enableRepertoire,
   updateRepertoirePreferences,
   deleteVariantInfo
 } from "../controllers/repertoiresController";
@@ -50,8 +48,6 @@ router.post("/:id/mistake-reviews", postVariantMistakeReview);
 router.delete("/:id/variantsInfo", deleteVariantInfo);
 router.put("/:id", updateRepertoire);
 router.put("/:id/name", updateRepertoireName);
-router.put("/:id/enable", enableRepertoire);
-router.put("/:id/disable", disableRepertoire);
 router.patch("/:id/preferences", updateRepertoirePreferences);
 router.patch("/:id/order/up", moveRepertoireOrderUp);
 router.delete("/:id", deleteRepertoire);

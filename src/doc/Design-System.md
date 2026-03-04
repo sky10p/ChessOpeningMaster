@@ -286,6 +286,7 @@ Rules:
 - Keep tooltip copy short and explanatory.
 - Use tooltips for clarification, not primary content.
 - Prefer `Tooltip` over page-local absolute overlays so help content can escape clipped scroll containers safely.
+- When the direct child is already focusable (a `<button>`, `<a>`, `<input>`, `<select>`, `<textarea>`, or any element with an explicit `tabIndex`), the wrapper span will **not** add an extra `tabIndex={0}`. This prevents double focus stops. When wrapping non-interactive content (plain `<span>`, `<Badge>`, icons), the wrapper provides keyboard access automatically.
 
 ---
 

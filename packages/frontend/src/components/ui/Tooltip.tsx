@@ -19,8 +19,15 @@ type TooltipPosition = {
 
 const OFFSET = 10;
 const VIEWPORT_PADDING = 8;
+const NATIVELY_FOCUSABLE_TAGS = new Set(["a", "button", "input", "select", "textarea", "details", "summary"]);
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+
+function isAlreadyFocusable(child: React.ReactNode): boolean {
+  if (!React.isValidElement(child)) return false;
+  if (typeof child.type === "string" && NATIVELY_FOCUSABLE_TAGS.has(child.type)) return true;
+  return typeof (child.props as { tabIndex?: number }).tabIndex === "number";
+}
 
 export const Tooltip: React.FC<TooltipProps> = ({
   children,
@@ -102,7 +109,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
       <span
         ref={triggerRef}
         className={cn("inline-flex", className)}
-        tabIndex={0}
+        tabIndex={isAlreadyFocusable(children) ? undefined : 0}
         aria-describedby={open ? tooltipId : undefined}
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}

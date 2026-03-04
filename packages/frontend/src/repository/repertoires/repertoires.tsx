@@ -195,22 +195,6 @@ export const deleteRepertoire = async (id: string) => {
   return data;
 };
 
-export const enableRepertoire = async (id: string) => {
-  const response = await apiFetch(`${API_URL}/repertoires/${id}/enable`, {
-    method: "PUT",
-  });
-  const data = await response.json();
-  return data;
-};
-
-export const disableRepertoire = async (id: string) => {
-  const response = await apiFetch(`${API_URL}/repertoires/${id}/disable`, {
-    method: "PUT",
-  });
-  const data = await response.json();
-  return data;
-};
-
 export const updateRepertoirePreferences = async (
   id: string,
   preferences: UpdateRepertoirePreferencesInput

@@ -4,7 +4,7 @@ import { VariantsProgressBar } from "../../../components/design/SelectTrainVaria
 import { IRepertoireDashboard, TrainVariantInfo } from "@chess-opening-master/common";
 import { TrainVariant } from "../../../models/chess.models";
 import { useDialogContext } from "../../../contexts/DialogContext";
-import { disableRepertoire, enableRepertoire } from "../../../repository/repertoires/repertoires";
+import { updateRepertoirePreferences } from "../../../repository/repertoires/repertoires";
 import { Button, IconButton } from "../../../components/ui";
 import { cn } from "../../../utils/cn";
 
@@ -34,7 +34,7 @@ export const RepertoireCard: React.FC<RepertoireCardProps> = ({
         contentText: `Are you sure you want to enable "${repertoire.name}"?`,
         confirmLabel: "Enable",
         onConfirm: async () => {
-          await enableRepertoire(repertoire._id);
+          await updateRepertoirePreferences(repertoire._id, { disabled: false });
           updateRepertoires();
         },
       });
@@ -44,7 +44,7 @@ export const RepertoireCard: React.FC<RepertoireCardProps> = ({
         contentText: `Are you sure you want to disable "${repertoire.name}"? It will be visually marked as disabled in the dashboard.`,
         confirmLabel: "Disable",
         onConfirm: async () => {
-          await disableRepertoire(repertoire._id);
+          await updateRepertoirePreferences(repertoire._id, { disabled: true });
           updateRepertoires();
         },
       });
