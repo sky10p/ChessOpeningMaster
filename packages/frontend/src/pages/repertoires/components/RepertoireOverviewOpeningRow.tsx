@@ -34,7 +34,7 @@ export const RepertoireOverviewOpeningRow: React.FC<RepertoireOverviewOpeningRow
       padding="compact"
       elevation="raised"
       className={cn(
-        "h-full min-h-[13.75rem] w-[min(24rem,calc(100vw-5.5rem))] min-w-[min(24rem,calc(100vw-5.5rem))] border-border-subtle bg-surface sm:w-[26rem] sm:min-w-[26rem] lg:w-[28rem] lg:min-w-[28rem]",
+        "h-full min-h-[12rem] w-[min(24rem,calc(100vw-5.5rem))] min-w-[min(24rem,calc(100vw-5.5rem))] border-border-subtle bg-surface sm:w-[26rem] sm:min-w-[26rem] lg:w-[28rem] lg:min-w-[28rem]",
         disabled && "border-danger/20 opacity-80"
       )}
     >

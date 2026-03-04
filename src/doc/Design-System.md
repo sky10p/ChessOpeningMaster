@@ -135,7 +135,17 @@ import { Button, IconButton, Badge, Checkbox, Card, Tabs, TabButton, Input, Text
 
 **`intent` options:** `primary` · `secondary` · `danger` · `ghost` · `accent` · `outline`
 
-**`size` options:** `xs` · `sm` · `md` · `lg` · `xl`
+**`size` options and approximate tap heights:**
+
+| Size | Height | Use case |
+|---|---|---|
+| `xs` | ~26px | Non-interactive chips, counters (avoid as tap target) |
+| `sm` | ≥34px | Secondary/tertiary actions in dense cards |
+| `md` | ≥40px | Default for most page-level actions |
+| `lg` | ≥48px | Primary CTAs, hero buttons |
+| `xl` | ≥52px | Full-width CTA rows |
+
+Rule: primary CTAs (e.g. **Train**, **Save**, **Confirm**) must use `size="md"` or larger. `size="sm"` is reserved for secondary/tertiary actions inside compact cards.
 
 ### 3.2 `IconButton`
 
@@ -145,7 +155,7 @@ import { Button, IconButton, Badge, Checkbox, Card, Tabs, TabButton, Input, Text
 </IconButton>
 ```
 
-Always provide a `label` prop for accessibility. Uses `ghost` intent by default.
+Always provide a `label` prop for accessibility. Uses `ghost` intent by default. Renders at **36×36px** (`h-9 w-9`) — the minimum safe touch target for finger-precision interaction.
 
 ### 3.3 `Badge`
 
@@ -156,7 +166,13 @@ Always provide a `label` prop for accessibility. Uses `ghost` intent by default.
 
 **`variant` options:** `default` · `brand` · `success` · `warning` · `danger` · `info` · `accent`
 
-**`size` options:** `sm` · `md` · `lg`
+**`size` options:**
+
+| Size | Text | Use case |
+|---|---|---|
+| `sm` | 12px (`text-xs`) | Dense metadata chips (status, mastery, counts) |
+| `md` | 12px (`text-xs`) | Default in-line badges |
+| `lg` | 14px (`text-sm`) | Summary row chips, hero stats |
 
 ### 3.4 `Card`
 
@@ -227,11 +243,13 @@ Use `Checkbox` for inline boolean controls. Wrap it in a `<label>` when the text
 <Textarea label="Notes" rows={4} value={value} onChange={handler} />
 ```
 
-**`size` options:** `sm` · `md` · `lg`
+**`size` options:**
 
-**`state` options:** `default` · `error` · `success`
-
-### 3.8 `Select`
+| Size | Height | Text | Use case |
+|---|---|---|---|
+| `sm` | ~36px | 14px | Compact filter bars, inline forms |
+| `md` | ~40px | 14px | Default form fields |
+| `lg` | ~48px | 16px | Full-page forms, login screens |
 
 ```tsx
 <Select label="Color" value={orientation} onChange={handler}>
@@ -241,9 +259,30 @@ Use `Checkbox` for inline boolean controls. Wrap it in a `<label>` when the text
 </Select>
 ```
 
-Same `size` and `state` props as `Input`.
+**`size` options:** `sm` · `md` · `lg` (same height scale as `Input`)
 
-### 3.9 `EmptyState`
+---
+
+## 3a. Touch Target Guidelines
+
+All interactive elements must meet these minimum sizes for reliable finger-precision interaction:
+
+| Guideline | Minimum tap target |
+|---|---|
+| Apple HIG | 44 × 44pt |
+| Material Design (comfortable) | 48 × 48dp |
+| WCAG 2.5.5 (AAA) | 44 × 44px |
+| WCAG 2.5.8 (AA, 2.2) | 24 × 24px |
+| **This codebase** | **≥ 36px on the short axis for dense UI; ≥ 40px for primary CTAs** |
+
+Practical rules:
+1. **Primary CTAs** (`Train`, `Save`, `Confirm`, `Submit`) → `size="md"` minimum (≥40px).
+2. **Secondary actions** inside compact cards → `size="sm"` acceptable (≥34px), with ≥4px gap between adjacent targets.
+3. **IconButton** renders at `h-9 w-9` (36px). Never reduce below this for touch UI.
+4. **Tab bars** — `TabButton variant="underline"` is already ≥44px; `pill` and `segment` are ≥36px.
+5. Increase sizes to `md`/`lg` in standalone page contexts (forms, modals, dialogs) where vertical space is not the constraint.
+
+---
 
 ```tsx
 <EmptyState

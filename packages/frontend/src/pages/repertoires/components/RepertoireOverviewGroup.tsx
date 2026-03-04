@@ -179,7 +179,7 @@ export const RepertoireOverviewGroup: React.FC<RepertoireOverviewGroupProps> = (
           </Button>
           <Button
             intent="primary"
-            size="sm"
+            size="md"
             onClick={onTrainRepertoire}
             disabled={repertoire.disabled}
           >

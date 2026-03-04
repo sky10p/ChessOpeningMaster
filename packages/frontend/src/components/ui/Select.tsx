@@ -13,9 +13,9 @@ const selectVariants = cva(
   {
     variants: {
       size: {
-        sm: "pl-2.5 pr-8 py-1.5 text-xs",
-        md: "pl-3 pr-9 py-2 text-sm",
-        lg: "pl-4 pr-10 py-2.5 text-base",
+        sm: "pl-2.5 pr-8 py-2 text-sm",
+        md: "pl-3 pr-9 py-2.5 text-sm",
+        lg: "pl-4 pr-10 py-3 text-base",
       },
       state: {
         default: "border-border-default",

@@ -16,7 +16,7 @@ const badgeVariants = cva(
         accent:   "bg-accent/15 text-accent border border-accent/30",
       },
       size: {
-        sm: "px-1.5 py-0.5 text-[10px] gap-0.5",
+        sm: "px-1.5 py-0.5 text-xs gap-0.5",
         md: "px-2 py-0.5 text-xs gap-1",
         lg: "px-2.5 py-1 text-sm gap-1",
       },
