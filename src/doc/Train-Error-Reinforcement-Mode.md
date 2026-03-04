@@ -13,30 +13,30 @@ It preserves existing variant training while adding targeted correction.
 
 ## Phase Flow
 
-1. `Standard training`  
-   User trains selected variants on `/repertoire/train/:id`.
+1. `Standard training`
+   User trains selected variants on `/train/repertoires/:id`.
 
-2. `Variant result`  
+2. `Variant result`
    After a variant finishes, a result modal shows:
    - mistakes (`wrongMoves`, `ignoredWrongMoves`),
    - hints used,
    - time spent,
    - projected mastery delta.
 
-3. `Mistake reinforcement`  
+3. `Mistake reinforcement`
    If mistakes exist, user can start `Fix mistakes now`:
    - the app replays moves toward each mistake target in sequence,
    - user must play the expected move,
    - user rates each solved mistake (`again/hard/good/easy`),
    - failed attempts requeue to the end.
 
-4. `Full-run confirm`  
-   After queue exhaustion, user replays the full variant.  
+4. `Full-run confirm`
+   After queue exhaustion, user replays the full variant.
    A completion panel confirms whether the run was perfect.
 
 ## Review-Only Mistake Training (Opening Page CTAs)
 
-From `/train/repertoire/:repertoireId/opening/:openingName`:
+From `/repertoires/:repertoireId/openings/:openingName`:
 
 - `Train Mistakes Only` starts a reinforcement queue built only from mistake keys that are currently due for that opening.
 - `Train This Mistake` starts the same flow but with one mistake key.
@@ -54,17 +54,17 @@ Behavior contract:
 - no mastery update is triggered,
 - no `mistake-reviews` rating write is triggered.
 
-This mode is strictly for recall review and does not mutate stored progress/scheduling state.
+This mode is strictly for recall review and does not mutate stored progress or scheduling state.
 
 ## Focus Mode Lifecycle
 
 `mode=mistakes` for focus training follows a strict 3-phase loop:
 
-1. `Variant phase`  
+1. `Variant phase`
    Play the variant and collect mistakes for the current session.
-2. `Mistakes phase`  
+2. `Mistakes phase`
    Replay only queued mistakes. Failed mistakes requeue and are retried until solved in-session.
-3. `Variant confirm phase`  
+3. `Variant confirm phase`
    Replay the full variant.
    - if new mistakes appear, return to `Mistakes phase` with those errors,
    - if clean, finish the loop and show the final review modal.
@@ -79,7 +79,7 @@ The training session is considered finished only after the full 3-phase loop com
 - Color semantics:
   - green = completed with no error on that move,
   - red = known error on a move not yet solved in the current pass,
-  - orange = move had an error and is now solved in mistakes/full-run confirm (kept as reminder),
+  - orange = move had an error and is now solved in mistakes/full-run confirm,
   - ring = current move according to board position.
 - In the initial variant phase, failed moves stay red even if the user later plays the correct move in that same run.
 - During auto-replay in mistakes phase, the current ring follows board progression step-by-step.
@@ -93,9 +93,9 @@ The training session is considered finished only after the full 3-phase loop com
 - Locked and unlocked states must be consistent on desktop and mobile panels.
 - Focus Assist is rendered inline in the right training panel as a dedicated card below `Your turn`.
 - Focus Assist card content is tabbed (`Comments`, `Candidate lines`).
-- When no errors exist, the card shows a locked/waiting state.
+- When no errors exist, the card shows a locked or waiting state.
 - When errors exist, tabs show contextual comments and candidate variants without opening a separate overlay.
-- In normal mode, the standard persistent side-panel help/comment layout remains unchanged.
+- In normal mode, the standard persistent side-panel help and comment layout remains unchanged.
 
 ## Daily Snapshot Rule (Monotonic Same-Day)
 
@@ -106,7 +106,7 @@ For `variantsInfo` daily error snapshots:
   - snapshot count can stay same or increase,
   - snapshot count cannot decrease.
 - New UTC day:
-  - prior day snapshot is replaced by the new day snapshot.
+  - prior day snapshot is replaced by the new day snapshot,
   - an explicit empty snapshot means the variant had no remaining mistakes in that new-day review.
 
 This protects daily learning records from same-day overwrites.
@@ -115,10 +115,10 @@ This protects daily learning records from same-day overwrites.
 
 Mistake SRS items (`variantMistakes`) are seeded from variant review snapshots and then scheduled independently:
 
-- first creation stores mistake identity + replay metadata (`mistakeKey`, `positionFen`, `variantStartFen`, `mistakePly`, expected move),
+- first creation stores mistake identity and replay metadata (`mistakeKey`, `positionFen`, `variantStartFen`, `mistakePly`, expected move),
 - rating updates scheduling fields (`dueAt`, `intervalDays`, `ease`, `reps`, `lapses`, state),
-- same-day re-review is blocked via `lastReviewedDayKey` checks in due queries.
-- when a later UTC-day review provides an explicit snapshot for a variant, active mistake items missing from that snapshot are archived.
+- same-day re-review is blocked via `lastReviewedDayKey` checks in due queries,
+- when a later UTC-day review provides an explicit snapshot for a variant, active mistake items missing from that snapshot are archived,
 - if that later-day explicit snapshot is empty, all active mistake items for that variant are archived.
 
 `variantMistakes` updates do not mutate the same-day locked variant daily snapshot.
@@ -150,7 +150,7 @@ After mistakes are solved:
 - board resets to the beginning (`ply 0`),
 - user replays the line end-to-end.
 
-UI marks perfect/non-perfect completion and shows mastery effect summary.
+UI marks perfect or non-perfect completion and shows mastery effect summary.
 
 ## Failure Handling
 

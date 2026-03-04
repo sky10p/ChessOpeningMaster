@@ -1,18 +1,17 @@
 import React, { useCallback, useReducer } from "react";
-import { getRepertoires } from "../repository/repertoires/repertoires";
-import { IRepertoire } from "@chess-opening-master/common";
+import { getRepertoires, RepertoireListItem } from "../repository/repertoires/repertoires";
 import { useAlertContext } from "./AlertContext";
 
 // Define initial state and reducer
 const initialState = {
     open: false,
-    repertoires: [] as IRepertoire[],
+    repertoires: [] as RepertoireListItem[],
     updatedRepertoires: false,
 };
 
 type Action =
     | { type: 'SET_OPEN'; payload: boolean }
-    | { type: 'SET_REPERTOIRES'; payload: IRepertoire[] }
+    | { type: 'SET_REPERTOIRES'; payload: RepertoireListItem[] }
     | { type: 'SET_UPDATED_REPERTOIRES'; payload: boolean };
 
 const reducer = (state: typeof initialState, action: Action) => {

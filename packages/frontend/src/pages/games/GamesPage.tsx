@@ -24,6 +24,7 @@ import { Button, Badge, Tabs, TabButton } from "../../components/ui";
 import { PageFrame } from "../../components/design/layouts/PageFrame";
 import { PageRoot } from "../../components/design/layouts/PageRoot";
 import { PageSurface } from "../../components/design/layouts/PageSurface";
+import { buildTrainExecutionSearch, getRepertoireEditorRoute, getTrainRepertoireRoute } from "../../utils/appRoutes";
 
 const TAB_ICONS: Record<GamesTab, React.ReactNode> = {
   insights: <ChartBarIcon className="w-4 h-4" />,
@@ -102,13 +103,11 @@ const GamesPage: React.FC = () => {
   } = useGamesInsights(stats, games, trainingPlan);
 
   const openRepertoire = React.useCallback((repertoireId: string, variantName?: string) => {
-    const variantQuery = variantName ? `?variantName=${encodeURIComponent(variantName)}` : "";
-    navigate(`/repertoire/${repertoireId}${variantQuery}`);
+    navigate(getRepertoireEditorRoute(repertoireId, variantName ? { variantName } : undefined));
   }, [navigate]);
 
   const openTrainRepertoire = React.useCallback((repertoireId: string, variantName?: string) => {
-    const variantQuery = variantName ? `?variantName=${encodeURIComponent(variantName)}` : "";
-    navigate(`/repertoire/train/${repertoireId}${variantQuery}`);
+    navigate(getTrainRepertoireRoute(repertoireId, buildTrainExecutionSearch({ variantName })));
   }, [navigate]);
 
   const showFilters = selectedTab !== "sync";

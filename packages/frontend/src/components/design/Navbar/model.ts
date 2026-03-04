@@ -5,4 +5,5 @@ export type NavbarLink = {
     onClick?: () => void;
     onActionClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
     icon?: React.ReactNode;
+    disabled?: boolean;
 };

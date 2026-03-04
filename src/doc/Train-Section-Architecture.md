@@ -2,33 +2,42 @@
 
 ## Routes
 
-Frontend:
+Frontend canonical routes:
 
-- `/train`
-- `/train/repertoire/:repertoireId/opening/:openingName`
-- existing `/repertoire/train/:id` remains the execution page for board training
+- `/repertoires`
+- `/repertoires/:repertoireId/openings/:openingName`
+- `/train/repertoires/:repertoireId`
+
+Frontend legacy redirects:
+
+- `/train` -> `/repertoires`
+- `/train/repertoire/:repertoireId/opening/:openingName` -> `/repertoires/:repertoireId/openings/:openingName`
+- `/repertoire/train/:id` -> `/train/repertoires/:id`
 
 Backend:
 
+- `GET /repertoires/overview`
 - `GET /train/overview`
 - `GET /train/repertoires/:id/openings/:openingName`
 - `GET /repertoires/:id/mistakes`
 - `POST /repertoires/:id/mistake-reviews`
-- `POST /repertoires/:id/variant-reviews` (extended with `mistakes`)
+- `POST /repertoires/:id/variant-reviews`
 
 ## UI Data Flow
 
-1. Train overview page (`/train`)
-   - loads `GET /train/overview`,
+1. Repertoire overview page (`/repertoires`)
+   - loads `GET /repertoires/overview`,
    - renders repertoire-grouped opening cards,
-   - displays mastery + due variants + due mistakes per opening.
+   - displays per-repertoire and per-opening status, mastery, due variants, and due mistakes,
+   - manages favourites and disabled repertoire preferences.
 
-2. Train opening page (`/train/repertoire/:repertoireId/opening/:openingName`)
+2. Opening detail page (`/repertoires/:repertoireId/openings/:openingName`)
    - loads `GET /train/repertoires/:id/openings/:openingName`,
    - renders opening stats, variants list, mistake summary, and action CTAs,
-   - `Train Mistakes Only` is enabled only when the opening has due mistake items and builds `mistakeKeys` from that due-only subset.
+   - `Train Mistakes Only` is enabled only when the opening has due mistake items and builds `mistakeKeys` from that due-only subset,
+   - navigation back targets `/repertoires` unless a safe `returnTo` query is provided.
 
-3. Training execution (`/repertoire/train/:id`)
+3. Training execution (`/train/repertoires/:repertoireId`)
    - receives query mode:
      - `mode=standard`
      - `mode=mistakes`
@@ -44,11 +53,11 @@ Execution UI composition:
 - `TrainRepertoireViewContainer` orchestrates train state and modals.
 - `TrainRepertoireStandardWorkspace` renders normal-mode persistent side panels.
 - `TrainRepertoireFocusWorkspace` renders focus-mode contextual assistance as inline panel content.
-- `TrainRepertoireFocusWorkspace` also exposes a dedicated back action to return to the opening training page.
+- `TrainRepertoireFocusWorkspace` also exposes a dedicated back action to return to the canonical opening detail page.
 
 ## Focus Mode State Machine (`mode=mistakes`)
 
-Execution on `/repertoire/train/:id?mode=mistakes` uses:
+Execution on `/train/repertoires/:repertoireId?mode=mistakes` uses:
 
 1. `variant phase` (`trainingPhase=standard`)
 2. `mistakes phase` (`trainingPhase=reinforcement`)
@@ -84,10 +93,10 @@ Focus assist UX semantics:
 
 - focus mode starts with assists locked,
 - assists unlock after first mistake in current focus session,
-- unlocked assists stay available during correction and confirm phases.
-- in focus mode, comments + variant guidance are rendered in an inline `Focus Assist` card below `Your turn` inside the training info panel.
-- focus assist card content uses tabs (`Comments`, `Candidate lines`).
-- the card stays in waiting state until the first error, then switches to active guidance content.
+- unlocked assists stay available during correction and confirm phases,
+- in focus mode, comments and variant guidance are rendered in an inline `Focus Assist` card below `Your turn` inside the training info panel,
+- focus assist card content uses tabs (`Comments`, `Candidate lines`),
+- the card stays in waiting state until the first error, then switches to active guidance content,
 - persistent comment/help panels are reserved for normal mode.
 
 Direct mistake review semantics (`mode=mistakes` + `mistakeKey(s)`):
@@ -121,14 +130,21 @@ Persistence timing in focus mode:
 - no initial `variant-reviews` save when entering mistakes phase,
 - one final `variant-reviews` save after clean variant confirm completion.
 
+### `GET /repertoires/overview`
+
+Returns the repertoire browse/manage payload for `/repertoires`:
+
+- repertoire metadata (`favorite`, `disabled`, `orientation`, `order`),
+- repertoire-level status buckets,
+- opening-level mastery and due counts,
+- opening FEN previews.
+
 ### `GET /train/overview`
 
-Returns repertoires with opening summaries:
+Remains a training-specific backend contract.
 
-- mastery score,
-- due variants count,
-- due mistakes count,
-- total variants count.
+- It still excludes disabled repertoires.
+- It is no longer the data source for the main browse/manage page.
 
 ### `GET /train/repertoires/:id/openings/:openingName`
 

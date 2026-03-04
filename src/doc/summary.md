@@ -1,4 +1,4 @@
-# ChessKeep — Product Summary
+# ChessKeep - Product Summary
 
 ## What this application is
 
@@ -7,113 +7,123 @@ It combines:
 - repertoire editing and training,
 - study management,
 - path-based next-lesson selection,
-- games intelligence from imported/synced games,
+- games intelligence from imported and synced games,
 - optional user authentication with per-user data isolation.
 
 ## High-level architecture
 
 The project is a monorepo with 3 packages:
 
-- `packages/frontend` — React + TypeScript UI
-- `packages/backend` — Express + TypeScript API
-- `packages/common` — shared types/utilities/chess helpers
+- `packages/frontend` - React + TypeScript UI
+- `packages/backend` - Express + TypeScript API
+- `packages/common` - shared types, utilities, and chess helpers
 
 Data is stored in MongoDB. Backend routes are protected by auth middleware except `/auth` endpoints.
 
 ## Core feature areas
 
-### 1) Repertoires
+### 1. Repertoires
 
-- Create, duplicate, update, enable/disable, delete repertoires.
-- Edit lines/positions and train lines.
-- Track and update per-variant training/review info.
-- Download/export repertoire data.
+- Create, duplicate, update, enable or disable, favourite, and delete repertoires.
+- Browse all repertoires from `/repertoires`.
+- Edit lines and positions from `/repertoire/:id`.
+- Track and update per-variant training and review info.
+- Download and export repertoire data.
 
-### 2) Studies
+### 2. Studies
 
 - Organize study groups.
 - Create studies inside groups.
-- Add/edit/remove study entries.
-- Create/remove study sessions.
+- Add, edit, and remove study entries.
+- Create and remove study sessions.
 
-### 3) Path (Next Lesson + Forecast)
+### 3. Path (Next Lesson + Forecast)
 
 - Returns next actionable lesson from spaced-repetition-aware data.
 - Supports deterministic category-based selection (`variantsWithErrors`, `newVariants`, `oldVariants`, `studyToReview`).
 - Prevents same-day repeat selection.
-- Provides planning/forecast and review analytics.
+- Provides planning, forecast, and review analytics.
 
-### 4) My Games (Games Intelligence)
+### 4. My Games (Games Intelligence)
 
-- Link chess providers (Lichess/Chess.com) or import PGN manually.
-- Sync/import games and rematch them to repertoire mappings.
+- Link chess providers (Lichess and Chess.com) or import PGN manually.
+- Sync or import games and rematch them to repertoire mappings.
 - Generate and track a training plan from imported game signals.
 - Review insights, training priorities, sync state, and imported data management.
 
-### 5) Train (Opening-Focused Training)
+### 5. Repertoire Training
 
-- Dedicated train overview at `/train` grouped by repertoire/opening.
-- Opening detail pages at `/train/repertoire/:repertoireId/opening/:openingName`.
-- Reinforcement flow for variant mistakes, with in-session requeue until solved.
-- Full-run confirmation stage after mistake reinforcement.
+- Repertoire browse and management live at `/repertoires`.
+- Opening detail pages live at `/repertoires/:repertoireId/openings/:openingName`.
+- Active board training runs at `/train/repertoires/:repertoireId`.
+- Reinforcement flow requeues variant mistakes until solved in-session.
+- Full-run confirmation happens after mistake reinforcement.
 
-### 6) Authentication and user scope
+### 6. Authentication and user scope
 
-- Optional auth mode (login/register/session/logout).
+- Optional auth mode (login, register, session, logout).
 - Optional default-user local mode (when enabled by backend config).
 - Domain data is user-scoped across repertoires, studies, path, positions, and games.
 
 ## Frontend pages and routes
 
-- `/login` — user login (plus optional default-user login)
-- `/register` — user registration
-- `/dashboard` — overview and path insights dashboard
-- `/create-repertoire` — create repertoire
-- `/repertoire/:id` — edit repertoire
-- `/repertoire/train/:id` — train repertoire
-- `/train` — train overview (repertoire-grouped openings)
-- `/train/repertoire/:repertoireId/opening/:openingName` — opening-level train detail
-- `/studies` — study groups/studies workflow
-- `/path` — next lesson + path forecast/analytics
-- `/games` — 4-tab games intelligence workspace (`Insights`, `Training`, `Sync`, `Data`)
+- `/login` - user login (plus optional default-user login)
+- `/register` - user registration
+- `/dashboard` - overview and path insights dashboard
+- `/create-repertoire` - create repertoire
+- `/repertoire/:id` - edit repertoire
+- `/repertoires` - repertoire browse and management
+- `/repertoires/:repertoireId/openings/:openingName` - opening detail and decision page
+- `/train/repertoires/:repertoireId` - repertoire training execution
+- `/studies` - study groups and studies workflow
+- `/path` - next lesson and path forecast or analytics
+- `/games` - 4-tab games intelligence workspace (`Insights`, `Training`, `Sync`, `Data`)
+
+Legacy compatibility:
+
+- `/train` redirects to `/repertoires`
+- `/train/repertoire/:repertoireId/opening/:openingName` redirects to `/repertoires/:repertoireId/openings/:openingName`
+- `/repertoire/train/:id` redirects to `/train/repertoires/:id`
 
 Notes:
 - `/` redirects to `/dashboard`.
-- When auth is enabled and user is not authenticated, app is gated to auth routes only.
+- When auth is enabled and user is not authenticated, the app is gated to auth routes only.
 
 ## Main user flows
 
-### A) Repertoire learning loop
+### A. Repertoire learning loop
 
 1. Create or update repertoire lines.
-2. Train lines from repertoire training pages.
-3. Variant reviews update spaced-repetition-related variant info.
-4. `/path` and dashboard insights use this information to suggest next lessons.
+2. Browse repertoire and opening status from `/repertoires`.
+3. Review an opening from `/repertoires/:repertoireId/openings/:openingName`.
+4. Start training in `/train/repertoires/:id`.
+5. Variant reviews update spaced-repetition-related variant info.
+6. `/path` and dashboard insights use this information to suggest next lessons.
 
-### B) Next lesson / path flow
+### B. Next lesson and path flow
 
 1. User opens `/path`.
 2. Frontend requests:
    - `GET /paths` (next lesson)
-   - `GET /paths/plan` (forecast/load)
+   - `GET /paths/plan` (forecast or load)
    - `GET /paths/analytics` (quality metrics)
 3. Backend selects deterministic best candidate by rules and filters.
 4. User executes CTA (`Start Review`, `Start Training`, or `Go to Study`).
 
-### C) Games intelligence flow
+### C. Games intelligence flow
 
-1. User links provider account(s) and/or imports PGN manually.
-2. Backend ingests games, detects openings/line keys, and maps to repertoire context.
-3. Stats and training plan are generated/regenerated.
+1. User links provider account(s) or imports PGN manually.
+2. Backend ingests games, detects openings and line keys, and maps to repertoire context.
+3. Stats and training plan are generated or regenerated.
 4. User works queue items in `Training`, tracks quality in `Insights`, and manages data in `Data`.
 
-### D) Train reinforcement flow
+### D. Train reinforcement flow
 
-1. User opens `/train` and selects an opening card.
-2. User reviews opening-level due variants/mistakes on opening detail page.
-3. User starts training in `/repertoire/train/:id` with query filters (`mode`, `openingName`, `variantName`, `variantNames`).
+1. User opens `/repertoires` and selects an opening card.
+2. User reviews opening-level due variants and mistakes on `/repertoires/:repertoireId/openings/:openingName`.
+3. User starts training in `/train/repertoires/:id` with query filters (`mode`, `openingName`, `variantName`, `variantNames`).
 4. On variant completion:
-   - results modal shows metrics + mastery delta,
+   - results modal shows metrics and mastery delta,
    - user can enter mistake reinforcement loop,
    - user finishes with full-run confirmation.
 
@@ -131,7 +141,7 @@ Notes:
 
 - `/auth` routes are public.
 - Other domains are behind auth middleware.
-- Controllers resolve user identity and enforce user-scoped reads/writes.
+- Controllers resolve user identity and enforce user-scoped reads and writes.
 - Games provider secrets are encrypted at rest.
 - Startup tasks ensure DB indexes and default-user migration compatibility.
 
@@ -140,7 +150,7 @@ Notes:
 - Frontend default dev port: `3002`
 - Backend default port: `3001`
 - Database: MongoDB
-- Package manager/workspace toolchain: Yarn + Lerna
+- Package manager and workspace toolchain: Yarn + Lerna
 
 ## If you need deeper technical detail
 

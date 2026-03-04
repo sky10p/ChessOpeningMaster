@@ -74,6 +74,22 @@ The panel renders:
 - Mobile layout stacks cards/lists/charts vertically.
 - Desktop layout uses multi-column grouping for quick scan.
 
+## Main Dashboard Tab Components
+
+The main `Dashboard` tab (section `"dashboard"`) is rendered by `DashboardSection` and includes these key components:
+
+- `TodaysFocusCard` — derives a single priority action from `ProgressStats`:
+  - If there are variants with errors → directs user to the Errors view.
+  - If there are unreviewed variants → directs user to start reviewing.
+  - If everything is reviewed → shows a practice prompt.
+  - If there are no variants yet → encourages creating a repertoire.
+  - Source: `packages/frontend/src/pages/DashboardPage/sections/DashboardSection/components/TodaysFocusCard.tsx`
+
+- `TrainingQueuePreview` — fetches the cached training overview (`getCachedTrainOverview`) and surfaces the top 5 due openings ranked by `dueVariantsCount + dueMistakesCount`. Links to the `/repertoires` page.
+  - Source: `packages/frontend/src/pages/DashboardPage/sections/DashboardSection/components/TrainingQueuePreview.tsx`
+
+Both components are rendered before the collapsible `Performance` and `Mastery & Activity` sections in `DashboardSection`.
+
 ## Testing
 
 - Dashboard tests mock `usePathInsights`:

@@ -1,5 +1,5 @@
 import React from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../../../../../components/ui";
 import { ProgressStats } from "../types";
 import {
@@ -74,15 +74,11 @@ export const TodaysFocusCard: React.FC<TodaysFocusCardProps> = ({
   totalVariants,
 }) => {
   const navigate = useNavigate();
-  const location = useLocation();
   const focus = determineFocus(stats, totalVariants);
 
   const handleClick = () => {
     if (focus.tone === "danger") {
-      navigate({
-        pathname: location.pathname,
-        search: "?section=openings&status=errors",
-      });
+      navigate("/repertoires?status=errors");
       return;
     }
     if (focus.tone === "warning") {
@@ -90,7 +86,7 @@ export const TodaysFocusCard: React.FC<TodaysFocusCardProps> = ({
       return;
     }
     if (focus.tone === "success") {
-      navigate("/train");
+      navigate("/repertoires");
       return;
     }
     navigate("/");

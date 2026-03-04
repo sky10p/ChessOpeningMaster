@@ -1,6 +1,7 @@
-import React, { useState, useRef } from "react";
+import React from "react";
 import { cn } from "../../utils/cn";
 import { Badge, type BadgeProps } from "./Badge";
+import { Tooltip } from "./Tooltip";
 
 type MasteryTier = {
   label: string;
@@ -21,8 +22,8 @@ export function getMasteryTier(score: number): MasteryTier {
 }
 
 const TIER_DESCRIPTIONS: Record<string, string> = {
-  Mastered: "Score \u2265 85%. Solid recall — keep refreshing occasionally.",
-  "In Progress": "Score 55\u201384%. Building confidence — review regularly.",
+  Mastered: "Score >= 85%. Solid recall; keep refreshing occasionally.",
+  "In Progress": "Score 55-84%. Building confidence; review regularly.",
   "Needs Work": "Score < 55%. Focus your practice here.",
 };
 
@@ -39,54 +40,42 @@ export const MasteryBadge: React.FC<MasteryBadgeProps> = ({
   ...rest
 }) => {
   const tier = getMasteryTier(score);
-  const [open, setOpen] = useState(false);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const badgeClassName =
     tier.variant === "success"
       ? "bg-success text-text-on-brand border-success shadow-sm"
       : "bg-surface/95 shadow-sm backdrop-blur-sm";
 
-  const handleEnter = () => {
-    if (!showTooltip) return;
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    setOpen(true);
-  };
+  const badge = (
+    <Badge
+      variant={tier.variant}
+      className={cn(badgeClassName, className)}
+      {...rest}
+    >
+      {children ?? tier.label}
+    </Badge>
+  );
 
-  const handleLeave = () => {
-    timeoutRef.current = setTimeout(() => setOpen(false), 120);
-  };
+  if (!showTooltip) {
+    return badge;
+  }
 
   return (
-    <span
-      className="relative inline-flex"
-      onMouseEnter={handleEnter}
-      onMouseLeave={handleLeave}
-      onFocus={handleEnter}
-      onBlur={handleLeave}
-    >
-      <Badge
-        variant={tier.variant}
-        className={cn(badgeClassName, className)}
-        {...rest}
-      >
-        {children ?? tier.label}
-      </Badge>
-      {showTooltip && open && (
-        <span
-          role="tooltip"
-          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50
-                     w-48 rounded-lg border border-border-default bg-surface
-                     shadow-elevated p-2.5 text-xs pointer-events-none"
-        >
-          <span className="block font-semibold text-text-base mb-1">
-            {tier.label} — {Math.round(score)}%
+    <Tooltip
+      preferredPlacement="top"
+      className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+      content={
+        <span className="block space-y-1">
+          <span className="block font-semibold text-text-base">
+            {tier.label} - {Math.round(score)}%
           </span>
           <span className="block text-text-muted leading-snug">
             {TIER_DESCRIPTIONS[tier.label]}
           </span>
         </span>
-      )}
-    </span>
+      }
+    >
+      {badge}
+    </Tooltip>
   );
 };
 

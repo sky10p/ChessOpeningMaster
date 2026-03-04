@@ -1,4 +1,3 @@
-import { IRepertoire } from "@chess-opening-master/common";
 import { Variant } from "../models/chess.models";
 import {
   getRepertoire,
@@ -76,7 +75,7 @@ export const useRepertoireInfo = () => {
   };
 
   const copyVariantToRepertoire = async (variant: Variant) => {
-    const repertoires: IRepertoire[] = await getRepertoires();
+    const repertoires = await getRepertoires();
     showRepertoireDialog({
       title: "Copy variant",
       contentText: `Select the repertoire to copy the variant ${variant.fullName}:`,
@@ -106,7 +105,7 @@ export const useRepertoireInfo = () => {
   };
 
   const copyVariantsToRepertoire = async () => {
-      const repertoires: IRepertoire[] = await getRepertoires();
+      const repertoires = await getRepertoires();
       let selectedVariantsToCopy: Variant[] = [];
       showSelectVariantsDialog({
         title: "Copy variants",

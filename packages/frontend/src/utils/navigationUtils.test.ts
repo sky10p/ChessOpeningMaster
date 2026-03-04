@@ -1,220 +1,253 @@
-import { renderHook } from '@testing-library/react';
-import { useNavigate } from 'react-router-dom';
-import { useNavigationUtils } from './navigationUtils';
-import { IRepertoire } from '@chess-opening-master/common';
+import { renderHook } from "@testing-library/react";
+import { useNavigate } from "react-router-dom";
+import { IRepertoire } from "@chess-opening-master/common";
+import { useNavigationUtils } from "./navigationUtils";
+import {
+  buildTrainExecutionSearch,
+  getRepertoireEditorRoute,
+  getRepertoireOpeningRoute,
+  getTrainRepertoireRoute,
+} from "./appRoutes";
 
-jest.mock('react-router-dom', () => ({
+jest.mock("react-router-dom", () => ({
   useNavigate: jest.fn(),
 }));
 
 const mockNavigate = jest.fn();
 
-describe('useNavigationUtils', () => {
+describe("useNavigationUtils", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
   });
 
   const mockRepertoire: IRepertoire = {
-    _id: 'repertoire-123',
-    name: 'Test Repertoire',
+    _id: "repertoire-123",
+    name: "Test Repertoire",
     moveNodes: {
-      id: 'root',
+      id: "root",
       move: null,
       children: [],
     },
-    orientation: 'white',
+    orientation: "white",
     order: 1,
   };
 
-  describe('goToRepertoire', () => {
-    it('should navigate to repertoire with string ID', () => {
+  describe("goToRepertoire", () => {
+    it("navigates to repertoire with string ID", () => {
       const { result } = renderHook(() => useNavigationUtils());
 
-      result.current.goToRepertoire('test-repertoire-id');
+      result.current.goToRepertoire("test-repertoire-id");
 
-      expect(mockNavigate).toHaveBeenCalledWith('/repertoire/test-repertoire-id');
+      expect(mockNavigate).toHaveBeenCalledWith("/repertoire/test-repertoire-id");
     });
 
-    it('should navigate to repertoire with IRepertoire object', () => {
+    it("navigates to repertoire with IRepertoire object", () => {
       const { result } = renderHook(() => useNavigationUtils());
 
       result.current.goToRepertoire(mockRepertoire);
 
-      expect(mockNavigate).toHaveBeenCalledWith('/repertoire/repertoire-123');
+      expect(mockNavigate).toHaveBeenCalledWith("/repertoire/repertoire-123");
     });
 
-    it('should navigate to repertoire with string ID and variant name', () => {
+    it("navigates to repertoire with string ID and variant name", () => {
       const { result } = renderHook(() => useNavigationUtils());
 
-      result.current.goToRepertoire('test-repertoire-id', 'Italian Game');
+      result.current.goToRepertoire("test-repertoire-id", "Italian Game");
 
-      expect(mockNavigate).toHaveBeenCalledWith('/repertoire/test-repertoire-id?variantName=Italian%20Game');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        getRepertoireEditorRoute("test-repertoire-id", { variantName: "Italian Game" })
+      );
     });
 
-    it('should navigate to repertoire with IRepertoire object and variant name', () => {
+    it("navigates to repertoire with IRepertoire object and variant name", () => {
       const { result } = renderHook(() => useNavigationUtils());
 
-      result.current.goToRepertoire(mockRepertoire, 'Sicilian Defense');
+      result.current.goToRepertoire(mockRepertoire, "Sicilian Defense");
 
-      expect(mockNavigate).toHaveBeenCalledWith('/repertoire/repertoire-123?variantName=Sicilian%20Defense');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        getRepertoireEditorRoute("repertoire-123", { variantName: "Sicilian Defense" })
+      );
     });
 
-    it('should properly encode special characters in variant name', () => {
+    it("properly encodes special characters in variant name", () => {
       const { result } = renderHook(() => useNavigationUtils());
 
-      result.current.goToRepertoire('test-id', 'Queen\'s Gambit: Declined');
+      result.current.goToRepertoire("test-id", "Queen's Gambit: Declined");
 
-      expect(mockNavigate).toHaveBeenCalledWith('/repertoire/test-id?variantName=Queen\'s%20Gambit%3A%20Declined');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        getRepertoireEditorRoute("test-id", { variantName: "Queen's Gambit: Declined" })
+      );
     });
 
-    it('should handle empty variant name by not adding query parameter', () => {
+    it("handles empty variant name by not adding query parameter", () => {
       const { result } = renderHook(() => useNavigationUtils());
 
-      result.current.goToRepertoire('test-id', '');
+      result.current.goToRepertoire("test-id", "");
 
-      expect(mockNavigate).toHaveBeenCalledWith('/repertoire/test-id');
+      expect(mockNavigate).toHaveBeenCalledWith("/repertoire/test-id");
     });
   });
 
-  describe('goToTrainRepertoire', () => {
-    it('should navigate to train repertoire with string ID', () => {
+  describe("goToTrainRepertoire", () => {
+    it("navigates to train repertoire with string ID", () => {
       const { result } = renderHook(() => useNavigationUtils());
 
-      result.current.goToTrainRepertoire('test-repertoire-id');
+      result.current.goToTrainRepertoire("test-repertoire-id");
 
-      expect(mockNavigate).toHaveBeenCalledWith('/repertoire/train/test-repertoire-id');
+      expect(mockNavigate).toHaveBeenCalledWith("/train/repertoires/test-repertoire-id");
     });
 
-    it('should navigate to train repertoire with IRepertoire object', () => {
+    it("navigates to train repertoire with IRepertoire object", () => {
       const { result } = renderHook(() => useNavigationUtils());
 
       result.current.goToTrainRepertoire(mockRepertoire);
 
-      expect(mockNavigate).toHaveBeenCalledWith('/repertoire/train/repertoire-123');
+      expect(mockNavigate).toHaveBeenCalledWith("/train/repertoires/repertoire-123");
     });
 
-    it('should navigate to train repertoire with string ID and variant name', () => {
+    it("navigates to train repertoire with string ID and variant name", () => {
       const { result } = renderHook(() => useNavigationUtils());
 
-      result.current.goToTrainRepertoire('test-repertoire-id', 'Italian Game');
+      result.current.goToTrainRepertoire("test-repertoire-id", "Italian Game");
 
-      expect(mockNavigate).toHaveBeenCalledWith('/repertoire/train/test-repertoire-id?variantName=Italian%20Game');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        getTrainRepertoireRoute(
+          "test-repertoire-id",
+          buildTrainExecutionSearch({ variantName: "Italian Game" })
+        )
+      );
     });
 
-    it('should navigate to train repertoire with IRepertoire object and variant name', () => {
+    it("navigates to train repertoire with IRepertoire object and variant name", () => {
       const { result } = renderHook(() => useNavigationUtils());
 
-      result.current.goToTrainRepertoire(mockRepertoire, 'Sicilian Defense');
+      result.current.goToTrainRepertoire(mockRepertoire, "Sicilian Defense");
 
-      expect(mockNavigate).toHaveBeenCalledWith('/repertoire/train/repertoire-123?variantName=Sicilian%20Defense');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        getTrainRepertoireRoute(
+          "repertoire-123",
+          buildTrainExecutionSearch({ variantName: "Sicilian Defense" })
+        )
+      );
     });
 
-    it('should properly encode special characters in variant name for training', () => {
+    it("properly encodes special characters in variant name for training", () => {
       const { result } = renderHook(() => useNavigationUtils());
 
-      result.current.goToTrainRepertoire('test-id', 'Queen\'s Gambit: Declined');
+      result.current.goToTrainRepertoire("test-id", "Queen's Gambit: Declined");
 
-      expect(mockNavigate).toHaveBeenCalledWith('/repertoire/train/test-id?variantName=Queen\'s%20Gambit%3A%20Declined');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        getTrainRepertoireRoute(
+          "test-id",
+          buildTrainExecutionSearch({ variantName: "Queen's Gambit: Declined" })
+        )
+      );
     });
   });
 
-  describe('goToTrainOpening', () => {
-    it('should navigate to train opening detail route', () => {
+  describe("goToTrainOpening", () => {
+    it("navigates to train opening detail route", () => {
       const { result } = renderHook(() => useNavigationUtils());
 
-      result.current.goToTrainOpening('test-repertoire-id', 'Italian Game');
+      result.current.goToTrainOpening("test-repertoire-id", "Italian Game");
 
-      expect(mockNavigate).toHaveBeenCalledWith('/train/repertoire/test-repertoire-id/opening/Italian%20Game');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        getRepertoireOpeningRoute("test-repertoire-id", "Italian Game")
+      );
     });
   });
 
-  describe('resolveId functionality', () => {
-    it('should correctly resolve ID from different repertoire objects', () => {
+  describe("resolveId functionality", () => {
+    it("correctly resolves ID from different repertoire objects", () => {
       const { result } = renderHook(() => useNavigationUtils());
 
       const repertoire1: IRepertoire = {
-        _id: 'id-1',
-        name: 'Repertoire 1',
+        _id: "id-1",
+        name: "Repertoire 1",
         moveNodes: {
-          id: 'root',
+          id: "root",
           move: null,
           children: [],
         },
-        orientation: 'white',
+        orientation: "white",
         order: 1,
       };
 
       const repertoire2: IRepertoire = {
-        _id: 'id-2',
-        name: 'Repertoire 2',
+        _id: "id-2",
+        name: "Repertoire 2",
         moveNodes: {
-          id: 'root',
+          id: "root",
           move: null,
           children: [],
         },
-        orientation: 'black',
+        orientation: "black",
         order: 2,
       };
 
       result.current.goToRepertoire(repertoire1);
       result.current.goToRepertoire(repertoire2);
 
-      expect(mockNavigate).toHaveBeenNthCalledWith(1, '/repertoire/id-1');
-      expect(mockNavigate).toHaveBeenNthCalledWith(2, '/repertoire/id-2');
+      expect(mockNavigate).toHaveBeenNthCalledWith(1, "/repertoire/id-1");
+      expect(mockNavigate).toHaveBeenNthCalledWith(2, "/repertoire/id-2");
     });
 
-    it('should handle repertoire objects with disabled property', () => {
+    it("handles repertoire objects with disabled property", () => {
       const { result } = renderHook(() => useNavigationUtils());
 
       const disabledRepertoire: IRepertoire = {
-        _id: 'disabled-id',
-        name: 'Disabled Repertoire',
+        _id: "disabled-id",
+        name: "Disabled Repertoire",
         moveNodes: {
-          id: 'root',
+          id: "root",
           move: null,
           children: [],
         },
-        orientation: 'white',
+        orientation: "white",
         order: 1,
         disabled: true,
       };
 
       result.current.goToRepertoire(disabledRepertoire);
 
-      expect(mockNavigate).toHaveBeenCalledWith('/repertoire/disabled-id');
+      expect(mockNavigate).toHaveBeenCalledWith("/repertoire/disabled-id");
     });
   });
 
-  describe('URL building edge cases', () => {
-    it('should handle variant names with spaces and special characters', () => {
+  describe("URL building edge cases", () => {
+    it("handles variant names with spaces and special characters", () => {
       const { result } = renderHook(() => useNavigationUtils());
+      const specialVariantName = "King's Indian: Four Pawns Attack & Other Lines";
 
-      const specialVariantName = 'King\'s Indian: Four Pawns Attack & Other Lines';
-      
-      result.current.goToRepertoire('test-id', specialVariantName);
+      result.current.goToRepertoire("test-id", specialVariantName);
 
-      expect(mockNavigate).toHaveBeenCalledWith('/repertoire/test-id?variantName=King\'s%20Indian%3A%20Four%20Pawns%20Attack%20%26%20Other%20Lines');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        getRepertoireEditorRoute("test-id", { variantName: specialVariantName })
+      );
     });
 
-    it('should handle variant names with Unicode characters', () => {
+    it("handles variant names with Unicode characters", () => {
       const { result } = renderHook(() => useNavigationUtils());
+      const unicodeVariantName = "Réti Opening: Advance Variation";
 
-      const unicodeVariantName = 'Réti Opening: Advance Variation';
-      
-      result.current.goToRepertoire('test-id', unicodeVariantName);
+      result.current.goToRepertoire("test-id", unicodeVariantName);
 
-      expect(mockNavigate).toHaveBeenCalledWith('/repertoire/test-id?variantName=R%C3%A9ti%20Opening%3A%20Advance%20Variation');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        getRepertoireEditorRoute("test-id", { variantName: unicodeVariantName })
+      );
     });
 
-    it('should handle extremely long variant names', () => {
+    it("handles extremely long variant names", () => {
       const { result } = renderHook(() => useNavigationUtils());
+      const longVariantName =
+        "Sicilian Defense: Accelerated Dragon, Maróczy Bind, Breyer Variation with Long Descriptive Name";
 
-      const longVariantName = 'Sicilian Defense: Accelerated Dragon, Maróczy Bind, Breyer Variation with Long Descriptive Name';
-      
-      result.current.goToRepertoire('test-id', longVariantName);
+      result.current.goToRepertoire("test-id", longVariantName);
 
-      expect(mockNavigate).toHaveBeenCalledWith('/repertoire/test-id?variantName=Sicilian%20Defense%3A%20Accelerated%20Dragon%2C%20Mar%C3%B3czy%20Bind%2C%20Breyer%20Variation%20with%20Long%20Descriptive%20Name');
+      expect(mockNavigate).toHaveBeenCalledWith(
+        getRepertoireEditorRoute("test-id", { variantName: longVariantName })
+      );
     });
   });
 });

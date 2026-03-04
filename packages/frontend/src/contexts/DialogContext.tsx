@@ -11,6 +11,8 @@ import { NumberDialog } from "../components/design/dialogs/NumberDialog";
 import { IRepertoire } from "@chess-opening-master/common";
 import { TextAreaDialog } from "../components/design/dialogs/TextAreaDialog";
 
+type RepertoireDialogItem = Pick<IRepertoire, "_id" | "name">;
+
 interface TextDialogProps {
   title: string;
   contentText: string;
@@ -65,8 +67,8 @@ interface SelectNextMoveDialog {
 interface RepertoireDialogProps {
   title: string;
   contentText: string;
-  repertoires: IRepertoire[];
-  onConfirm: (repertoire: IRepertoire) => void;
+  repertoires: RepertoireDialogItem[];
+  onConfirm: (repertoire: RepertoireDialogItem) => void;
   onDialogClose?: () => void;
 }
 
@@ -128,12 +130,12 @@ interface State {
   onConfirm: () => void;
   onTrainVariantsConfirm: (trainVariants: TrainVariant[]) => void;
   onNextMoveConfirm: (nextMove: string) => void;
-  onRepertoireConfirm: (repertoire: IRepertoire) => void;
+  onRepertoireConfirm: (repertoire: RepertoireDialogItem) => void;
   onVariantsConfirm: (variants: Variant[]) => void;
   trainVariants: TrainVariant[];
   nextMovements: string[];
   selectedVariantMove?: string;
-  repertoires: IRepertoire[];
+  repertoires: RepertoireDialogItem[];
   variants: Variant[];
   repertoireId: string;
 }
@@ -373,7 +375,7 @@ export const DialogContextProvider = ({
     state.onNextMoveConfirm(nextMove);
   }, [state.onNextMoveConfirm]);
 
-  const handleRepertoireConfirm = useCallback((repertoire: IRepertoire) => {
+  const handleRepertoireConfirm = useCallback((repertoire: RepertoireDialogItem) => {
     dispatch({ type: "CLOSE_DIALOGS" });
     state.onRepertoireConfirm(repertoire);
   }, [state.onRepertoireConfirm]);

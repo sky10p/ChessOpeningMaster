@@ -26,11 +26,11 @@ const buttonVariants = cva(
           "border border-border-default text-text-muted hover:border-brand hover:text-brand",
       },
       size: {
-        xs:  "px-2 py-1 text-xs rounded-sm",
-        sm:  "px-3 py-1.5 text-xs rounded-md",
-        md:  "px-4 py-2 text-sm rounded-md",
-        lg:  "px-5 py-2.5 text-base rounded-lg",
-        xl:  "px-6 py-3 text-base rounded-lg",
+        xs:  "px-2 py-1 text-xs rounded-sm min-h-[26px]",
+        sm:  "px-3 py-2 text-xs rounded-md min-h-[34px]",
+        md:  "px-4 py-2.5 text-sm rounded-md min-h-[40px]",
+        lg:  "px-5 py-3 text-base rounded-lg min-h-[48px]",
+        xl:  "px-6 py-3.5 text-base rounded-lg min-h-[52px]",
       },
     },
     defaultVariants: {

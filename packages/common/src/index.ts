@@ -20,6 +20,12 @@ export {
   TrainOpeningStats,
   TrainOpeningResponse,
 } from "./types/Train";
+export {
+  VariantStatusCounts,
+  RepertoireOverviewOpening,
+  RepertoireOverviewItem,
+  RepertoireOverviewResponse,
+} from "./types/RepertoireOverview";
 export { MoveVariantNode } from "./types/MoveVariantNode";
 export {
   Path,

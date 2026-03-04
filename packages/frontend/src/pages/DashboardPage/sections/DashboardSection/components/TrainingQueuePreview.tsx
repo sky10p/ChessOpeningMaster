@@ -74,7 +74,7 @@ export const TrainingQueuePreview: React.FC = () => {
     <div className="rounded-xl border border-border-default bg-surface p-4">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-semibold text-text-base">Training Queue</h3>
-        <Button intent="secondary" size="xs" onClick={() => navigate("/train")}>
+        <Button intent="secondary" size="xs" onClick={() => navigate("/repertoires")}>
           View all
         </Button>
       </div>
@@ -88,7 +88,7 @@ export const TrainingQueuePreview: React.FC = () => {
             className="h-auto w-full justify-between gap-2 rounded-lg px-3 py-2 text-left font-normal hover:border-brand/40"
             onClick={() =>
               navigate(
-                `/train/repertoire/${opening.repertoireId}/opening/${encodeURIComponent(opening.openingName)}`
+                `/repertoires/${opening.repertoireId}/openings/${encodeURIComponent(opening.openingName)}`
               )
             }
           >

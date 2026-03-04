@@ -26,6 +26,7 @@ import { RepertoireWorkspaceLayout } from "../shared/RepertoireWorkspaceLayout";
 import { useAlertContext } from "../../../contexts/AlertContext";
 import { useRepertoireMastery } from "../../../hooks/useRepertoireMastery";
 import { MasteryBadge } from "../../../components/ui/MasteryBadge";
+import { getTrainRepertoireRoute } from "../../../utils/appRoutes";
 
 type FooterSection = "variants" | "comments" | "statistics" | "stockfish";
 
@@ -99,7 +100,7 @@ const EditRepertoireViewContainer: React.FC = () => {
       key: "trainRepertoire",
       icon: <BookOpenIcon />,
       onClick: () => {
-        navigate(`/repertoire/train/${repertoireId}`);
+        navigate(getTrainRepertoireRoute(repertoireId));
       },
     });
     addIconHeader({

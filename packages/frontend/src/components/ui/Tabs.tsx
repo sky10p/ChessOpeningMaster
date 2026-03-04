@@ -12,8 +12,8 @@ const tabButtonVariants = cva(
     variants: {
       variant: {
         underline: "px-4 py-3 text-sm border-b-2",
-        pill:      "px-3 py-1.5 text-sm rounded-md",
-        segment:   "flex-1 px-3 py-1.5 text-sm rounded-md justify-center",
+        pill:      "px-3 py-2 text-sm rounded-md min-h-[36px]",
+        segment:   "flex-1 px-3 py-2 text-sm rounded-md justify-center min-h-[36px]",
       },
       active: {
         true:  "",

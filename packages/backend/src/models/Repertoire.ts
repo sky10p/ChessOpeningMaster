@@ -27,4 +27,5 @@ export interface Repertoire {
   orientation: "white" | "black";
   order: number;
   disabled?: boolean;
+  favorite?: boolean;
 }

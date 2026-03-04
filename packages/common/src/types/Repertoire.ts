@@ -8,6 +8,7 @@ export interface IRepertoire {
     orientation: "white" | "black";
     order: number;
     disabled?: boolean;
+    favorite?: boolean;
 }
 
 export interface IRepertoireDashboard  extends IRepertoire {

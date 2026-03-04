@@ -3,12 +3,12 @@ import { Link } from "react-router-dom";
 import { TrainOpeningSummary } from "@chess-opening-master/common";
 import { Badge, Card, MasteryBadge } from "../../../components/ui";
 import { StaticChessboard } from "../../../components/design/chess/StaticChessboard";
+import { getRepertoireOpeningRoute } from "../../../utils/appRoutes";
+import { START_FEN } from "../../../utils/getOpeningFen";
 
 interface TrainOpeningListCardProps {
   opening: TrainOpeningSummary;
 }
-
-const FALLBACK_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 export const TrainOpeningListCard: React.FC<TrainOpeningListCardProps> = ({ opening }) => {
   const dueTotal = opening.dueVariantsCount + opening.dueMistakesCount;
@@ -21,9 +21,7 @@ export const TrainOpeningListCard: React.FC<TrainOpeningListCardProps> = ({ open
       padding="none"
     >
       <Link
-        to={`/train/repertoire/${opening.repertoireId}/opening/${encodeURIComponent(
-          opening.openingName
-        )}`}
+        to={getRepertoireOpeningRoute(opening.repertoireId, opening.openingName)}
         className="block p-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
         aria-label={`Open ${opening.openingName} training summary`}
         draggable={false}
@@ -41,7 +39,7 @@ export const TrainOpeningListCard: React.FC<TrainOpeningListCardProps> = ({ open
           <div className="overflow-hidden rounded-lg border border-border-subtle bg-surface-raised">
             <div className="w-full">
               <StaticChessboard
-                fen={opening.openingFen || FALLBACK_FEN}
+                fen={opening.openingFen || START_FEN}
                 orientation={opening.orientation || "white"}
               />
             </div>

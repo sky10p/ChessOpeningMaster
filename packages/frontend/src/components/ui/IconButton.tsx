@@ -14,7 +14,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
         intent="ghost"
         size="sm"
         aria-label={label}
-        className={cn("h-8 w-8 p-0 rounded-md", className)}
+        className={cn("h-9 w-9 p-0 rounded-md", className)}
         {...props}
       >
         {children}

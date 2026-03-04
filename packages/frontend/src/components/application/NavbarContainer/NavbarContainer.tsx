@@ -8,13 +8,13 @@ import {
   duplicateRepertoire,
   putRepertoireName,
   putRepertoireOrderUp,
+  RepertoireListItem,
 } from "../../../repository/repertoires/repertoires";
 import { useDialogContext } from "../../../contexts/DialogContext";
 
 import { useMenuContext } from "../../../contexts/MenuContext";
 import { Navbar } from "../../design/Navbar/Navbar";
 import { useNavbarDispatch, useNavbarState } from "../../../contexts/NavbarContext";
-import { IRepertoire } from "@chess-opening-master/common";
 import { logout } from "../../../repository/auth/auth";
 import { useAlertContext } from "../../../contexts/AlertContext";
 
@@ -28,7 +28,9 @@ const shouldShowDownloadRepertoires = process.env.SHOW_DOWNLOAD_REPERTOIRES !== 
 
 const NavbarContainer: React.FC<NavbarContainerProps> = ({ authEnabled, onLoggedOut }) => {
   const { open, repertoires } = useNavbarState();
-  const safeRepertoires = Array.isArray(repertoires) ? repertoires : [];
+  const safeRepertoires = Array.isArray(repertoires)
+    ? repertoires.filter((repertoire) => repertoire.favorite)
+    : [];
   const {setOpen, updateRepertoires} = useNavbarDispatch();
   const { showConfirmDialog, showTextDialog } = useDialogContext();
   const { showAlert } = useAlertContext();
@@ -47,7 +49,7 @@ const NavbarContainer: React.FC<NavbarContainerProps> = ({ authEnabled, onLogged
     navigate("/login");
   };
 
-  const handleEdit = (repertoire: IRepertoire) => {
+  const handleEdit = (repertoire: RepertoireListItem) => {
     showTextDialog({
       title: "Edit Repertoire",
       contentText: "Enter a new name for the repertoire",
@@ -59,7 +61,7 @@ const NavbarContainer: React.FC<NavbarContainerProps> = ({ authEnabled, onLogged
     });
   };
 
-  const handleDuplicate = (repertoire: IRepertoire) => {
+  const handleDuplicate = (repertoire: RepertoireListItem) => {
     showTextDialog({
       title: "Duplicate Repertoire",
       contentText: "Enter a new name for the repertoire",
@@ -71,12 +73,12 @@ const NavbarContainer: React.FC<NavbarContainerProps> = ({ authEnabled, onLogged
     });
   };
 
-  const handleOrderUp = async (repertoire: IRepertoire) => {
+  const handleOrderUp = async (repertoire: RepertoireListItem) => {
     await putRepertoireOrderUp(repertoire._id);
     updateRepertoires();
   };
 
-  const handleDelete = (repertoire: IRepertoire) => {
+  const handleDelete = (repertoire: RepertoireListItem) => {
     showConfirmDialog({
       title: "Delete Repertoire",
       contentText: `Are you sure you want to delete ${repertoire.name}?`,
@@ -127,6 +129,7 @@ const NavbarContainer: React.FC<NavbarContainerProps> = ({ authEnabled, onLogged
         { name: "Edit", action: () => handleEdit(repertoire) },
         { name: "Delete", action: () => handleDelete(repertoire) },
       ]),
+    disabled: repertoire.disabled,
   }))} />;
 };
 

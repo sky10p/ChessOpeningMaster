@@ -423,7 +423,7 @@ describe("TrainRepertoireViewContainer", () => {
     fireEvent.click(screen.getByRole("button", { name: "focus-back" }));
 
     expect(mockNavigate).toHaveBeenCalledWith(
-      "/train/repertoire/rep-1/opening/Spanish%20Opening"
+      "/repertoires/rep-1/openings/Spanish%20Opening"
     );
   });
 

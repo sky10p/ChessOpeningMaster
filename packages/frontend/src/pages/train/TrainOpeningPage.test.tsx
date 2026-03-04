@@ -4,6 +4,7 @@ import "@testing-library/jest-dom";
 import { MemoryRouter } from "react-router-dom";
 import TrainOpeningPage from "./TrainOpeningPage";
 import * as trainRepository from "../../repository/train/train";
+import { getRepertoireEditorRoute } from "../../utils/appRoutes";
 
 const mockNavigate = jest.fn();
 const mockUseParams = jest.fn();
@@ -126,7 +127,7 @@ describe("TrainOpeningPage", () => {
 
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith(
-        "/repertoire/train/rep-1?mode=standard&openingName=Italian+Game&variantNames=Italian+Game%3A+Main+Line"
+        "/train/repertoires/rep-1?mode=standard&openingName=Italian+Game&variantNames=Italian+Game%3A+Main+Line"
       );
     });
   });
@@ -145,7 +146,7 @@ describe("TrainOpeningPage", () => {
 
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith(
-        "/repertoire/train/rep-1?mode=mistakes&openingName=Italian+Game&mistakeKeys=k1%7Ck2"
+        "/train/repertoires/rep-1?mode=mistakes&openingName=Italian+Game&mistakeKeys=k1%7Ck2"
       );
     });
   });
@@ -178,7 +179,7 @@ describe("TrainOpeningPage", () => {
 
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith(
-        "/repertoire/train/rep-1?mode=mistakes&openingName=Italian+Game&mistakeKeys=k1"
+        "/train/repertoires/rep-1?mode=mistakes&openingName=Italian+Game&mistakeKeys=k1"
       );
     });
   });
@@ -197,7 +198,7 @@ describe("TrainOpeningPage", () => {
 
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith(
-        "/repertoire/train/rep-1?mode=mistakes&openingName=Italian+Game&variantName=Italian+Game%3A+Main+Line&mistakeKey=k1"
+        "/train/repertoires/rep-1?mode=mistakes&openingName=Italian+Game&variantName=Italian+Game%3A+Main+Line&mistakeKey=k1"
       );
     });
   });
@@ -236,7 +237,7 @@ describe("TrainOpeningPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "View Opening" }));
 
     expect(mockNavigate).toHaveBeenCalledWith(
-      "/repertoire/rep-1?variantName=Italian%20Game"
+      getRepertoireEditorRoute("rep-1", { variantName: "Italian Game" })
     );
   });
 
@@ -253,7 +254,7 @@ describe("TrainOpeningPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "View Variant" }));
 
     expect(mockNavigate).toHaveBeenCalledWith(
-      "/repertoire/rep-1?variantName=Italian%20Game%3A%20Main%20Line"
+      getRepertoireEditorRoute("rep-1", { variantName: "Italian Game: Main Line" })
     );
   });
 
@@ -284,7 +285,7 @@ describe("TrainOpeningPage", () => {
   it("returns to dashboard openings when a return target is provided", async () => {
     jest.spyOn(trainRepository, "getTrainOpening").mockResolvedValue(openingPayload);
     mockUseLocation.mockReturnValue({
-      search: "?returnTo=%2Fdashboard%3Fsection%3Dopenings%26status%3Derrors",
+      search: "?returnTo=%2Frepertoires%3Fstatus%3Derrors",
     });
 
     render(
@@ -297,7 +298,7 @@ describe("TrainOpeningPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Back" }));
 
     expect(mockNavigate).toHaveBeenCalledWith(
-      "/dashboard?section=openings&status=errors"
+      "/repertoires?status=errors"
     );
   });
 });
