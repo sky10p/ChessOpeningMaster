@@ -2,7 +2,6 @@ import React from "react";
 import { AdjustmentsHorizontalIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Badge, Button, Input, Select } from "../../../components/ui";
 import { useIsMobile } from "../../../hooks/useIsMobile";
-import { cn } from "../../../utils/cn";
 import {
   AvailabilityFilter,
   FavoritesFilter,
@@ -118,13 +117,7 @@ export const RepertoireOverviewFilters: React.FC<RepertoireOverviewFiltersProps>
           </div>
         )}
 
-        <div
-          className={cn(
-            "overflow-hidden transition-all duration-200",
-            showAdvanced ? "max-h-[40rem] opacity-100" : "max-h-0 opacity-0"
-          )}
-          aria-hidden={!showAdvanced}
-        >
+        {showAdvanced && (
           <div className="rounded-xl border border-border-subtle bg-surface-raised p-3">
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
               <Select
@@ -181,7 +174,7 @@ export const RepertoireOverviewFilters: React.FC<RepertoireOverviewFiltersProps>
               </Select>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

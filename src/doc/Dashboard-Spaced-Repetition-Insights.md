@@ -85,7 +85,7 @@ The main `Dashboard` tab (section `"dashboard"`) is rendered by `DashboardSectio
   - If there are no variants yet → encourages creating a repertoire.
   - Source: `packages/frontend/src/pages/DashboardPage/sections/DashboardSection/components/TodaysFocusCard.tsx`
 
-- `TrainingQueuePreview` — fetches the cached training overview (`getCachedTrainOverview`) and surfaces the top 5 due openings ranked by `dueVariantsCount + dueMistakesCount`. Links to the `/train` page.
+- `TrainingQueuePreview` — fetches the cached training overview (`getCachedTrainOverview`) and surfaces the top 5 due openings ranked by `dueVariantsCount + dueMistakesCount`. Links to the `/repertoires` page.
   - Source: `packages/frontend/src/pages/DashboardPage/sections/DashboardSection/components/TrainingQueuePreview.tsx`
 
 Both components are rendered before the collapsible `Performance` and `Mastery & Activity` sections in `DashboardSection`.
