@@ -25,16 +25,28 @@ Implemented in `packages/frontend/src/components/application/Content/Content.tsx
   - fallback redirects to `/login`
 - When authenticated, main app routes are available (`/dashboard`, repertoire/study routes, etc.).
 
+## Auth Page Shell
+
+Implemented in `packages/frontend/src/pages/auth/AuthPageShell.tsx`.
+
+A shared layout wrapper used by both `LoginPage` and `RegisterPage`. Renders a two-column full-screen layout:
+
+- **Left column** (desktop only, `lg:flex`): brand aside with `asideTitle` + `asideDescription` + two feature highlight cards.
+- **Right column**: centered card with a header section (`title` + `description`) and a `children` slot for the form.
+
+Props: `title`, `description`, `asideTitle`, `asideDescription`, `children`.
+
 ## Login Page
 
 Implemented in `packages/frontend/src/pages/auth/LoginPage.tsx`.
 
 Capabilities:
 
-- Standard login via username/password.
+- Standard login via username/password (with `label` + `size="lg"` inputs).
 - Optional default-user login toggle when `allowDefaultUser=true`.
 - Clear user-facing error mapping for network/server/auth cases.
 - On success: calls `onAuthenticated()` and navigates to `/dashboard`.
+- Wrapped in `<AuthPageShell>`.
 
 ## Register Page
 
@@ -42,17 +54,19 @@ Implemented in `packages/frontend/src/pages/auth/RegisterPage.tsx`.
 
 Capabilities:
 
-- Username/password/confirm validation.
-- Password policy enforcement using shared `validatePasswordStrength` from common package.
+- Username/password/confirm validation with `size="lg"` labeled inputs.
+- Password policy enforcement using shared `validatePasswordStrength` from common package; policy text rendered in a `surface-raised` info block.
 - On successful registration: user is considered authenticated and routed to `/dashboard`.
+- Wrapped in `<AuthPageShell>`.
 
 ## Logout
 
-Implemented in `packages/frontend/src/components/application/NavbarContainer/NavbarContainer.tsx`.
+Implemented in `packages/frontend/src/components/application/AppShell/AppShell.tsx`.
 
 - Calls backend `/auth/logout` when auth is enabled.
 - Clears local authenticated state through `onLoggedOut()`.
 - Navigates to `/login`.
+- The logout action is located in the user menu within the `AppShell` sidebar.
 
 ## Frontend Auth API Layer
 
