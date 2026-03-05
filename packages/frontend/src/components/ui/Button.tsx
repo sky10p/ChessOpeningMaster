@@ -5,7 +5,7 @@ import { cn } from "../../utils/cn";
 const buttonVariants = cva(
   [
     "inline-flex items-center justify-center gap-2 font-medium transition-colors",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-page",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-page",
     "disabled:pointer-events-none disabled:opacity-50",
     "select-none",
   ],
@@ -23,11 +23,11 @@ const buttonVariants = cva(
         accent:
           "bg-accent hover:bg-accent-hover text-text-on-brand",
         outline:
-          "border border-border-default text-text-muted hover:border-brand hover:text-brand",
+          "border border-border-default text-text-muted hover:border-border-strong hover:text-brand",
       },
       size: {
         xs:  "px-2 py-1 text-xs rounded-sm min-h-[26px]",
-        sm:  "px-3 py-2 text-xs rounded-md min-h-[34px]",
+        sm:  "px-3 py-2 text-xs rounded-md min-h-[36px]",
         md:  "px-4 py-2.5 text-sm rounded-md min-h-[40px]",
         lg:  "px-5 py-3 text-base rounded-lg min-h-[48px]",
         xl:  "px-6 py-3.5 text-base rounded-lg min-h-[52px]",

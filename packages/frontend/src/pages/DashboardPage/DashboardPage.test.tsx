@@ -1,10 +1,9 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import "@testing-library/jest-dom";
 import * as useDashboardModule from "../../hooks/useDashboard";
-import * as pathInsightsHookModule from "./sections/DashboardSection/hooks/usePathInsights";
-import * as trainRepository from "../../repository/train/train";
+import * as usePathsModule from "../../hooks/usePaths";
 import { DashboardPage } from "./DashboardPage";
 import { IRepertoireDashboard } from "@chess-opening-master/common";
 
@@ -30,36 +29,37 @@ const mockRepertoires: IRepertoireDashboard[] = [
 
 describe("DashboardPage", () => {
   beforeEach(() => {
-    jest.spyOn(trainRepository, "getCachedTrainOverview").mockImplementation(
-      () => new Promise(() => undefined)
-    );
-
-    jest.spyOn(pathInsightsHookModule, "usePathInsights").mockReturnValue({
-      pathPlan: {
-        todayKey: "2026-02-15",
+    jest.spyOn(usePathsModule, "usePaths").mockReturnValue({
+      loadPath: jest.fn(),
+      loadInsights: jest.fn(),
+      path: {
+        id: "path-1",
+        type: "newVariant",
+        repertoireId: "1",
+        repertoireName: "Test Repertoire",
+        name: "Italian Game",
+      } as never,
+      plan: {
         overdueCount: 0,
         dueTodayCount: 0,
         reviewDueCount: 0,
+        completedDueToday: 0,
+        completedNewToday: 0,
         completedTodayCount: 0,
-        newVariantsAvailable: 0,
         suggestedNewToday: 0,
         estimatedTodayTotal: 0,
-        upcoming: [],
         forecastDays: [],
-        nextVariants: [],
-        upcomingOpenings: [],
-      },
-      pathAnalytics: {
-        rangeStart: "2026-01-17",
-        rangeEnd: "2026-02-15",
-        totalReviews: 0,
-        ratingBreakdown: { again: 0, hard: 0, good: 0, easy: 0 },
-        dailyReviews: [],
-        topOpenings: [],
-        topFens: [],
-      },
-      loadingPathInsights: false,
-      pathInsightsError: null,
+      } as never,
+      loading: false,
+      error: null,
+      removeVariantFromPath: jest.fn(),
+      category: undefined,
+      setCategory: jest.fn(),
+      filters: {},
+      setFilters: jest.fn(),
+      analytics: null,
+      insightsLoading: false,
+      insightsError: null,
     });
 
     jest.spyOn(useDashboardModule, "useDashboard").mockReturnValue({
@@ -74,33 +74,27 @@ describe("DashboardPage", () => {
     jest.clearAllMocks();
   });
 
-  it("renders the reduced dashboard tab set", () => {
+  it("renders the Today landing page", () => {
     render(
       <BrowserRouter>
         <DashboardPage />
       </BrowserRouter>
     );
 
-    expect(screen.getByRole("tab", { name: /dashboard/i })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: /overview/i })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: /path insights/i })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: /studies/i })).toBeInTheDocument();
-    expect(screen.queryByRole("tab", { name: /repertoires/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("tab", { name: /openings/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Today" })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: /start new variant/i })).toHaveLength(2);
+    expect(screen.getByRole("button", { name: /open library/i })).toBeInTheDocument();
+    expect(screen.queryByRole("tab")).not.toBeInTheDocument();
   });
 
-  it("redirects legacy openings dashboard links to /repertoires filters", async () => {
-    window.history.pushState({}, "", "/dashboard?section=openings&status=errors");
-
+  it("shows the queue summary instead of legacy dashboard tabs", () => {
     render(
       <BrowserRouter>
         <DashboardPage />
       </BrowserRouter>
     );
 
-    await waitFor(() => {
-      expect(window.location.pathname).toBe("/repertoires");
-      expect(window.location.search).toBe("?status=errors");
-    });
+    expect(screen.getByText(/Italian Game/i)).toBeInTheDocument();
+    expect(screen.getByText(/Recommended next action/i)).toBeInTheDocument();
   });
 });

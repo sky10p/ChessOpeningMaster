@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { MoveVariantNode } from "../../../../models/VariantNode";
 import { TextDialog } from "../../dialogs/TextDialog";
 import { ConfirmDialog } from "../../dialogs/ConfirmDialog";
+import { Tooltip } from "../../../ui";
 
 interface VariantMovementsPanelProps {
   moves: MoveVariantNode[];
@@ -34,18 +35,29 @@ const MoveItem: React.FC<{
   onClick: () => void;
 }> = ({ move, currentMoveNode, onContextMenu, onClick }) => (
   <span
-    className={`inline-block p-1 cursor-pointer rounded ${
-      move === currentMoveNode ? "bg-secondary text-textLight" : "hover:bg-gray-700"
+    className={`inline-block cursor-pointer rounded-md px-2 py-1.5 transition-colors ${
+      move === currentMoveNode ? "bg-brand text-text-on-brand shadow-surface" : "hover:bg-interactive"
     }`}
     onContextMenu={(event) => onContextMenu(event, move)}
     onClick={onClick}
   >
-    <span className={`mr-1 ${move.getMove().color === 'w' ? 'text-white' : 'text-black'}`}>
+    <span className={`mr-1 ${move.getMove().color === "w" ? "text-text-base" : "text-text-muted"}`}>
       {pieceIcons[move.getMove().piece] || ""}
     </span>
     <span>{move.getMove().san}</span>
     {move.variantName && <span className="ml-1">📖</span>}
   </span>
+);
+
+const VariantReference: React.FC<{ name: string }> = ({ name }) => (
+  <>
+    <div className="mt-1 max-w-full sm:hidden">
+      <span className="block text-[11px] leading-snug text-text-subtle">{name}</span>
+    </div>
+    <Tooltip content={name} className="hidden sm:block">
+      <span className="mt-1 block text-xs leading-snug text-text-subtle">{name}</span>
+    </Tooltip>
+  </>
 );
 
 export const VariantMovementsPanel: React.FC<VariantMovementsPanelProps> = ({
@@ -129,19 +141,19 @@ export const VariantMovementsPanel: React.FC<VariantMovementsPanelProps> = ({
   );
 
   return (
-    <div className={`max-h-${maxHeight} overflow-y-auto p-4 bg-gray-80 text-textLight`}>
+    <div className="overflow-y-auto rounded-xl border border-border-default bg-surface-raised p-3 text-text-base" style={maxHeight ? { maxHeight } : undefined}>
       {turns.map((turn, index) => (
-        <div key={index} className="grid grid-cols-12 py-2">
-          <div className="col-span-1 text-sm">{`${turn.turnNumber}.`}</div>
+        <div key={index} className="grid grid-cols-12 border-b border-border-subtle py-2 last:border-b-0">
+          <div className="col-span-1 text-sm font-semibold text-text-subtle">{`${turn.turnNumber}.`}</div>
           <div className="col-span-5 cursor-pointer" onClick={() => goToMove(turn.whiteMove)}>
             <MoveItem move={turn.whiteMove} currentMoveNode={currentMoveNode} onContextMenu={handleContextMenu} onClick={() => goToMove(turn.whiteMove)} />
-            {turn.whiteMove.variantName && <span className="ml-2 hidden sm:text-sm">{turn.whiteMove.variantName}</span>}
+            {turn.whiteMove.variantName && <VariantReference name={turn.whiteMove.variantName} />}
           </div>
           <div className="col-span-5 cursor-pointer" onClick={() => turn.blackMove && goToMove(turn.blackMove)}>
             {turn.blackMove && (
               <>
                 <MoveItem move={turn.blackMove} currentMoveNode={currentMoveNode} onContextMenu={handleContextMenu} onClick={() => turn.blackMove && goToMove(turn.blackMove)} />
-                {turn.blackMove.variantName && <span className="ml-2 hidden sm:text-sm">{turn.blackMove.variantName}</span>}
+                {turn.blackMove.variantName && <VariantReference name={turn.blackMove.variantName} />}
               </>
             )}
           </div>
@@ -149,12 +161,12 @@ export const VariantMovementsPanel: React.FC<VariantMovementsPanelProps> = ({
       ))}
       {contextMenu.node && (
         <div
-          className="fixed z-10 rounded shadow-lg context-menu"
+          className="context-menu fixed z-10 overflow-hidden rounded-md border border-border-default bg-surface shadow-elevated"
           style={{ top: contextMenu.y, left: contextMenu.x }}
           onMouseLeave={handleCloseContextMenu}
         >
-          <div className="p-2 cursor-pointer context-menu-item" onClick={handleDeleteDialog}>Delete</div>
-          <div className="p-2 cursor-pointer context-menu-item" onClick={handleRenameDialog}>Rename</div>
+          <div className="cursor-pointer p-2 text-sm transition-colors hover:bg-danger hover:text-text-on-brand" onClick={handleDeleteDialog}>Delete</div>
+          <div className="cursor-pointer p-2 text-sm transition-colors hover:bg-interactive" onClick={handleRenameDialog}>Rename</div>
         </div>
       )}
       <TextDialog

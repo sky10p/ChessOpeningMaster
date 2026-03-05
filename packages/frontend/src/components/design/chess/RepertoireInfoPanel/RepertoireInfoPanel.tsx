@@ -1,9 +1,11 @@
 import React, { useState } from "react";
-import UiSwitch from "../../../basic/UiSwitch";
 import {
   ArrowDownTrayIcon,
+  Bars3BottomLeftIcon,
   ChatBubbleBottomCenterTextIcon,
+  ChevronDownIcon,
   ClipboardIcon,
+  ComputerDesktopIcon,
   EllipsisVerticalIcon,
   PresentationChartLineIcon,
   TrashIcon,
@@ -11,7 +13,6 @@ import {
 } from "@heroicons/react/24/outline";
 import useStockfish from "../../../../libs/useStockfish";
 import { StockfishSubpanel } from "./StockfishSubpanel";
-import { StockfishLabel } from "./StockfishLabel";
 import StatisticsSubpanel from "./StatisticsSubpanel";
 import { VariantMovementsSubpanel } from "./VariantMovementsSubpanel";
 import { MoveVariantNode } from "../../../../models/VariantNode";
@@ -21,8 +22,10 @@ import { BoardComment } from "../BoardComment";
 import { RepertoireInfoActions } from "./RepertoireInfoActions/RepertoireInfoActions";
 import { RepertoireInfoAction } from "./RepertoireInfoActions/model";
 import { useNavigationUtils } from "../../../../utils/navigationUtils";
+import { Button, TabButton, Tabs } from "../../../ui";
 
 const NUM_LINES = 3;
+type RepertoireInfoPanelMode = "moves" | "engine" | "stats" | "notes";
 
 interface RepertoireInfoPanelProps {
   repertoireId: string;
@@ -69,17 +72,9 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
   toggleMenu,
 }) => {
   const { goToTrainRepertoire } = useNavigationUtils();
-
   const [showSelectVariantDialog, setShowSelectVariantDialog] = useState(false);
-
-  const [stockfishEnabled, setStockfishEnabled] = React.useState(false);
-  const [statisticsEnabled, setStatisticsEnabled] = React.useState(false);
-  const [commentEnabled, setCommentEnabled] = React.useState(false);
-  const { lines, depth, maxDepth } = useStockfish(
-    fen,
-    NUM_LINES,
-    stockfishEnabled
-  );
+  const [activePanel, setActivePanel] = React.useState<RepertoireInfoPanelMode>("moves");
+  const { lines, depth, maxDepth } = useStockfish(fen, NUM_LINES, activePanel === "engine");
 
   const actions = [
     {
@@ -127,122 +122,129 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
     },
   };
 
+  const panelTabs: {
+    id: RepertoireInfoPanelMode;
+    label: string;
+    mobileLabel: string;
+    icon: React.ReactElement;
+  }[] = [
+    {
+      id: "moves",
+      label: "Moves",
+      mobileLabel: "Moves",
+      icon: <Bars3BottomLeftIcon className="h-4 w-4" />,
+    },
+    {
+      id: "engine",
+      label: "Engine",
+      mobileLabel: "Engine",
+      icon: <ComputerDesktopIcon className="h-4 w-4" />,
+    },
+    {
+      id: "stats",
+      label: "Stats",
+      mobileLabel: "Stats",
+      icon: <PresentationChartLineIcon className="h-4 w-4" />,
+    },
+    {
+      id: "notes",
+      label: "Notes",
+      mobileLabel: "Notes",
+      icon: <ChatBubbleBottomCenterTextIcon className="h-4 w-4" />,
+    },
+  ];
+
+  const renderPanel = () => {
+    if (activePanel === "engine") {
+      return (
+        <div className="flex h-full min-h-0 flex-col gap-3">
+          <div className="flex items-center justify-between rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm text-text-muted">
+            <span className="font-medium text-text-base">Engine analysis</span>
+            <span className="rounded-md border border-border-default bg-surface px-2 py-1 font-mono text-xs text-brand">
+              {depth}/{maxDepth}
+            </span>
+          </div>
+          <div className="min-h-0 overflow-auto">
+            <StockfishSubpanel lines={lines} fen={fen} />
+          </div>
+        </div>
+      );
+    }
+
+    if (activePanel === "stats") {
+      return (
+        <div className="flex h-full min-h-0 flex-col gap-3">
+          <div className="rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm font-medium text-text-base">
+            Position statistics
+          </div>
+          <div className="min-h-0 overflow-auto">
+            <StatisticsSubpanel fen={fen} />
+          </div>
+        </div>
+      );
+    }
+
+    if (activePanel === "notes") {
+      return (
+        <div className="flex h-full min-h-0 flex-col gap-3">
+          <div className="rounded-xl border border-border-default bg-surface-raised px-3 py-2 text-sm font-medium text-text-base">
+            Position notes
+          </div>
+          <div className="min-h-0 overflow-auto rounded-xl border border-border-default bg-surface-raised p-3">
+            <BoardComment comment={comment} updateComment={updateComment} />
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <VariantMovementsSubpanel
+        moves={selectedVariant?.moves || []}
+        currentMoveNode={currentMoveNode}
+        goToMove={goToMove}
+        deleteMove={deleteMove}
+        changeNameMove={changeNameMove}
+      />
+    );
+  };
+
   return (
     <>
-      <div className="w-full h-full max-h-full overflow-hidden bg-surface text-text-base flex flex-col rounded-lg shadow-surface border border-border-default">
-        {/* Header con controles y acciones */}
-        <div className="px-4 py-3 flex items-center justify-between w-full bg-surface-raised z-10 border-b border-border-default rounded-t-lg">
-          <div className="flex items-center gap-3">
-            <UiSwitch
-              label={(enabled) => (
-                <div className="flex items-center">
-                  <StockfishLabel
-                    depth={depth}
-                    maxDepth={maxDepth}
-                    enabled={enabled}
-                  />
-                </div>
-              )}
-              enabled={stockfishEnabled}
-              setEnabled={setStockfishEnabled}
-            />
-            <UiSwitch
-              label={
-                <div className="flex items-center">
-                  <PresentationChartLineIcon className="h-5 w-5 text-brand" />
-                  <span className="ml-1 text-sm font-medium hidden sm:inline">
-                    Stats
-                  </span>
-                </div>
-              }
-              enabled={statisticsEnabled}
-              setEnabled={setStatisticsEnabled}
-            />
-            <UiSwitch
-              label={
-                <div className="flex items-center">
-                  <ChatBubbleBottomCenterTextIcon className="h-5 w-5 text-success" />
-                  <span className="ml-1 text-sm font-medium hidden sm:inline">
-                    Notes
-                  </span>
-                </div>
-              }
-              enabled={commentEnabled}
-              setEnabled={setCommentEnabled}
-            />
-          </div>
-
-          <RepertoireInfoActions
-            actions={actions}
-            moreOptionsAction={moreOptionsAction}
-          />
-        </div>
-
-        {/* Contenido principal con paneles condicionales */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Panel de variante siempre visible */}
-          <div className="flex flex-col flex-1 overflow-hidden">
-            <button
-              className="m-3 py-2 px-4 bg-brand hover:opacity-90 text-text-on-brand font-medium rounded-md transition-all duration-200 shadow-surface hover:shadow-elevated flex items-center justify-center gap-2"
+      <div className="flex h-full max-h-full w-full flex-col overflow-hidden rounded-2xl border border-border-default bg-surface text-text-base shadow-surface">
+        <div className="border-b border-border-default bg-surface-raised p-3">
+          <Tabs variant="segment" className="w-full">
+            {panelTabs.map((tab) => (
+              <TabButton
+                key={tab.id}
+                variant="segment"
+                active={activePanel === tab.id}
+                onClick={() => setActivePanel(tab.id)}
+                className="min-w-0 gap-1 px-1.5 text-xs sm:gap-1 sm:px-2 sm:text-sm xl:px-2.5"
+              >
+                <span className="hidden lg:inline-flex">{tab.icon}</span>
+                <span className="truncate sm:hidden">{tab.mobileLabel}</span>
+                <span className="hidden sm:inline">{tab.label}</span>
+              </TabButton>
+            ))}
+          </Tabs>
+          <div className="mt-3 space-y-2">
+            <Button
+              intent="secondary"
+              size="sm"
+              className="w-full justify-between rounded-lg border-border-default"
               onClick={() => setShowSelectVariantDialog(true)}
             >
-              <span>
-                {selectedVariant ? selectedVariant.name : "Select Variant"}
-              </span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
-
-            <div className="flex-1 overflow-auto px-2">
-              <VariantMovementsSubpanel
-                moves={selectedVariant?.moves || []}
-                currentMoveNode={currentMoveNode}
-                goToMove={goToMove}
-                deleteMove={deleteMove}
-                changeNameMove={changeNameMove}
-              />
-            </div>
+              <span className="truncate">{selectedVariant ? selectedVariant.name : "Select variant"}</span>
+              <ChevronDownIcon className="h-4 w-4 shrink-0" />
+            </Button>
+            <RepertoireInfoActions
+              actions={actions}
+              moreOptionsAction={moreOptionsAction}
+            />
           </div>
-
-          {/* Paneles condicionales */}
-          {stockfishEnabled && (
-            <div className="p-3 border-t border-border-default bg-surface">
-              <h3 className="text-sm font-medium text-text-muted mb-2">
-                Engine Analysis
-              </h3>
-              <StockfishSubpanel lines={lines} fen={fen} />
-            </div>
-          )}
-
-          {statisticsEnabled && (
-            <div className="p-3 border-t border-border-default bg-surface">
-              <h3 className="text-sm font-medium text-text-muted mb-2">
-                Statistical Analysis
-              </h3>
-              <StatisticsSubpanel fen={fen} />
-            </div>
-          )}
-
-          {commentEnabled && (
-            <div className="p-3 border-t border-border-default bg-surface">
-              <h3 className="text-sm font-medium text-text-muted mb-2">
-                Position Notes
-              </h3>
-              <BoardComment comment={comment} updateComment={updateComment} />
-            </div>
-          )}
+        </div>
+        <div className="min-h-0 flex-1 overflow-hidden p-3">
+          {renderPanel()}
         </div>
       </div>
       <SelectVariantsDialog

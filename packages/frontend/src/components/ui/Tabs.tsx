@@ -5,7 +5,7 @@ import { cn } from "../../utils/cn";
 const tabButtonVariants = cva(
   [
     "flex items-center gap-1.5 whitespace-nowrap font-medium transition-colors",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-inset",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-inset",
     "disabled:pointer-events-none disabled:opacity-40",
   ],
   {

@@ -3,11 +3,8 @@ import { usePaths } from "../../hooks/usePaths";
 import { useDialogContext } from "../../contexts/DialogContext";
 import { useNavigationUtils } from "../../utils/navigationUtils";
 import { useNavigate } from "react-router-dom";
-import {
-  ArrowPathIcon,
-  FunnelIcon,
-} from "@heroicons/react/24/outline";
-import { Button, Badge, Input, Select } from "../../components/ui";
+import { FunnelIcon } from "@heroicons/react/24/outline";
+import { Button, Badge, Input, Select, PageHeader, StatStrip } from "../../components/ui";
 import {
   BoardOrientation,
   PathCategory,
@@ -17,8 +14,9 @@ import { getTodayPlanProgress } from "../../utils/path/todayPlanProgress";
 import { PageFrame } from "../../components/design/layouts/PageFrame";
 import { PageRoot } from "../../components/design/layouts/PageRoot";
 import { PageSurface } from "../../components/design/layouts/PageSurface";
-import { PathLessonView } from "./components/PathLessonView";
-import { PathForecastView } from "./components/PathForecastView";
+import { PathLessonView } from "./components/PathLessonViewResponsive";
+import { PathForecastView } from "./components/PathForecastViewResponsive";
+import { useIsMobile } from "../../hooks/useIsMobile";
 
 type FilterOrientation = BoardOrientation | "all";
 type PathView = "lesson" | "forecast";
@@ -68,6 +66,7 @@ const categoryLabels: Record<PathCategory | "all", string> = {
 };
 
 const PathPage: React.FC = () => {
+  const isMobile = useIsMobile();
   const {
     path,
     loading,
@@ -122,6 +121,20 @@ const PathPage: React.FC = () => {
     }
     return tags;
   }, [selectedCategory, apiFilters]);
+
+  const hasActiveFilters = useMemo(() => {
+    const defaults = defaultFilters();
+
+    return (
+      selectedCategory !== "all" ||
+      filters.orientation !== defaults.orientation ||
+      filters.openingName.trim() !== defaults.openingName ||
+      filters.fen.trim() !== defaults.fen ||
+      filters.dateFrom !== defaults.dateFrom ||
+      filters.dateTo !== defaults.dateTo ||
+      filters.dailyNewLimit !== defaults.dailyNewLimit
+    );
+  }, [filters, selectedCategory]);
 
   useEffect(() => {
     const categoryForApi = selectedCategory === "all" ? undefined : (selectedCategory as PathCategory);
@@ -190,23 +203,74 @@ const PathPage: React.FC = () => {
 
   return (
     <PageRoot>
-      <PageFrame className="h-full py-0 sm:py-2">
-        <PageSurface>
-          <div className="flex-1 min-h-0 flex flex-col relative p-2 sm:p-6 overflow-y-auto">
-        <div className="w-full max-w-6xl mx-auto mt-1 sm:mt-2 flex flex-col gap-4 pb-4">
-          <div className="rounded-2xl border border-border-default bg-surface px-4 py-4 sm:px-6">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-brand/20 p-2">
-                  <ArrowPathIcon className="h-6 w-6 sm:h-7 sm:w-7 text-brand" />
-                </div>
-                <div>
-                  <h1 className="text-xl sm:text-2xl font-bold text-text-base">Path</h1>
-                  <p className="text-xs sm:text-sm text-text-muted">Next lesson first. Forecast when you want the bigger plan.</p>
-                </div>
-              </div>
-            </div>
-          </div>
+      <PageFrame className="h-full max-w-analytics py-4 sm:py-6">
+        <PageSurface className="gap-4 border-none bg-transparent shadow-none">
+          <div className="flex-1 min-h-0 flex flex-col relative overflow-y-auto">
+        <div className="w-full mx-auto flex flex-col gap-4 pb-4">
+          <PageHeader
+            eyebrow={isMobile ? undefined : "Queue"}
+            title="Path"
+            description={
+              isMobile
+                ? undefined
+                : "Keep the next lesson obvious, then switch to forecast when you need to shape the upcoming workload."
+            }
+            primaryAction={!isMobile ? (
+              <Button intent="primary" size="md" onClick={() => setSelectedView("lesson")}>
+                Next lesson
+              </Button>
+            ) : undefined}
+            secondaryActions={!isMobile ? (
+              <Button intent="secondary" size="md" onClick={() => setSelectedView("forecast")}>
+                Forecast
+              </Button>
+            ) : undefined}
+            meta={!isMobile ? (
+              <>
+                <Badge variant="warning" size="sm">
+                  {plan?.dueTodayCount ?? 0} due today
+                </Badge>
+                <Badge variant="danger" size="sm">
+                  {plan?.overdueCount ?? 0} overdue
+                </Badge>
+                <Badge variant="brand" size="sm">
+                  {plan?.forecastDays?.length ?? 0} forecast days
+                </Badge>
+              </>
+            ) : undefined}
+            className={isMobile ? "gap-3 px-4 py-4" : undefined}
+          />
+
+          {!isMobile ? (
+            <StatStrip
+              items={[
+                {
+                  label: "Target today",
+                  value: plannedTodayTarget,
+                  tone: "accent",
+                  detail: `${completedToday} completed • ${remainingToTarget} remaining`,
+                },
+                {
+                  label: "Reviews",
+                  value: reviewTargetToday,
+                  tone: "brand",
+                  detail: `${completedReviewsToday} done today`,
+                },
+                {
+                  label: "New/day cap",
+                  value: apiFilters.dailyNewLimit ?? DEFAULT_DAILY_NEW_LIMIT,
+                  tone: "default",
+                  detail: `${completedNewToday} new learned today`,
+                },
+                {
+                  label: "Next 7 days",
+                  value: nextSevenDueCount,
+                  tone: "warning",
+                  detail: exceededTarget ? "Ahead of target" : todayPlanMessage,
+                },
+              ]}
+            />
+          ) : null}
 
           <div className="sticky top-0 z-10 rounded-xl border border-border-default bg-surface/95 backdrop-blur p-2 sm:p-3 space-y-3">
             <div className="grid grid-cols-2 gap-2">
@@ -216,7 +280,7 @@ const PathPage: React.FC = () => {
                 className="w-full justify-center"
                 onClick={() => setSelectedView("lesson")}
               >
-                Next lesson
+                {isMobile ? "Lesson" : "Next lesson"}
               </Button>
               <Button
                 intent={selectedView === "forecast" ? "accent" : "secondary"}
@@ -224,11 +288,11 @@ const PathPage: React.FC = () => {
                 className="w-full justify-center"
                 onClick={() => setSelectedView("forecast")}
               >
-                Path forecast
+                {isMobile ? "Forecast" : "Path forecast"}
               </Button>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 sm:flex sm:items-center">
                 <Select
                   id="category-select"
                   size="sm"
@@ -248,28 +312,45 @@ const PathPage: React.FC = () => {
                   onClick={() => setShowAdvancedFilters((previousValue) => !previousValue)}
                 >
                   <FunnelIcon className="h-4 w-4" />
-                  {showAdvancedFilters ? "Hide filters" : "Show filters"}
+                  {isMobile ? "Filters" : showAdvancedFilters ? "Hide filters" : "Show filters"}
                 </Button>
               </div>
-              <Button
-                type="button"
-                intent="secondary"
-                size="sm"
-                onClick={clearFilters}
-              >
-                Reset scope
-              </Button>
+              {!isMobile ? (
+                <Button
+                  type="button"
+                  intent="secondary"
+                  size="sm"
+                  onClick={clearFilters}
+                >
+                  Reset scope
+                </Button>
+              ) : null}
             </div>
 
-            {activeFilterTags.length > 0 && (
-              <div className="flex gap-2 overflow-x-auto pb-1">
-                {activeFilterTags.map((tag) => (
-                  <Badge key={tag} variant="default" size="sm" className="whitespace-nowrap">
-                    {tag}
-                  </Badge>
-                ))}
+            {(activeFilterTags.length > 0 || (isMobile && hasActiveFilters)) ? (
+              <div className="space-y-2">
+                {activeFilterTags.length > 0 ? (
+                  <div className="flex gap-2 overflow-x-auto pb-1">
+                    {activeFilterTags.map((tag) => (
+                      <Badge key={tag} variant="default" size="sm" className="whitespace-nowrap">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                ) : null}
+                {isMobile && hasActiveFilters ? (
+                  <Button
+                    type="button"
+                    intent="secondary"
+                    size="sm"
+                    className="w-full justify-center"
+                    onClick={clearFilters}
+                  >
+                    Reset scope
+                  </Button>
+                ) : null}
               </div>
-            )}
+            ) : null}
 
             {showAdvancedFilters && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2 border-t border-border-default">

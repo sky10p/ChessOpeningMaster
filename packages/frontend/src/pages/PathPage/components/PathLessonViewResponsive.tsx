@@ -7,8 +7,9 @@ import {
 } from "@heroicons/react/24/outline";
 import { Path, PathPlanSummary } from "@chess-opening-master/common";
 import { Button, EmptyState, MetricTitle } from "../../../components/ui";
-import { isEmptyPath, isNewVariantPath, isStudiedVariantPath, isStudyPath } from "../helpers";
+import { useIsMobile } from "../../../hooks/useIsMobile";
 import { toUtcDateKey } from "../../../utils/dateUtils";
+import { isEmptyPath, isNewVariantPath, isStudiedVariantPath, isStudyPath } from "../helpers";
 
 const formatDate = (date: string | Date): string => {
   const dateObject = typeof date === "string" ? new Date(date) : date;
@@ -62,6 +63,8 @@ export const PathLessonView: React.FC<PathLessonViewProps> = ({
   onRemoveVariant,
   onSwitchToForecast,
 }) => {
+  const isMobile = useIsMobile();
+
   const renderLessonCard = () => {
     if (loading) {
       return (
@@ -73,6 +76,7 @@ export const PathLessonView: React.FC<PathLessonViewProps> = ({
         />
       );
     }
+
     if (error) {
       return (
         <EmptyState
@@ -83,6 +87,7 @@ export const PathLessonView: React.FC<PathLessonViewProps> = ({
         />
       );
     }
+
     if (!path) {
       return (
         <EmptyState
@@ -96,25 +101,25 @@ export const PathLessonView: React.FC<PathLessonViewProps> = ({
     if (isStudiedVariantPath(path)) {
       return (
         <>
-          <BookOpenIcon className="h-8 w-8 text-brand mb-2" />
-          <div className="font-semibold text-lg text-accent mb-1 text-center">
+          <BookOpenIcon className="mb-2 h-8 w-8 text-brand" />
+          <div className="mb-1 text-center text-lg font-semibold text-accent">
             Repertoire to review: {path.repertoireName}
           </div>
-          <div className="text-text-base mb-1">
+          <div className="mb-1 text-text-base">
             <span className="font-medium">Name:</span> {path.name}
           </div>
-          <div className="text-text-muted mb-1">
+          <div className="mb-1 text-text-muted">
             <span className="font-medium">Errors:</span> {path.errors}
           </div>
-          <div className="text-text-muted mb-1">
+          <div className="mb-1 text-text-muted">
             <span className="font-medium">Last Reviewed:</span> {formatDate(path.lastDate)}
           </div>
-          {path.dueAt && (
-            <div className="text-text-muted mb-1">
+          {path.dueAt ? (
+            <div className="mb-1 text-text-muted">
               <span className="font-medium">Due At:</span> {formatDate(path.dueAt)}
             </div>
-          )}
-          <div className="flex flex-col sm:flex-row gap-3 mt-4 w-full">
+          ) : null}
+          <div className="mt-4 flex w-full flex-col gap-3 sm:flex-row">
             <Button
               intent="primary"
               size="md"
@@ -148,17 +153,17 @@ export const PathLessonView: React.FC<PathLessonViewProps> = ({
     if (isNewVariantPath(path)) {
       return (
         <>
-          <BookOpenIcon className="h-8 w-8 text-brand mb-2" />
-          <div className="font-semibold text-lg text-accent mb-1 text-center">
+          <BookOpenIcon className="mb-2 h-8 w-8 text-brand" />
+          <div className="mb-1 text-center text-lg font-semibold text-accent">
             New Repertoire to learn: {path.repertoireName}
           </div>
-          <div className="text-text-base mb-1">
+          <div className="mb-1 text-text-base">
             <span className="font-medium">Name:</span> {path.name}
           </div>
-          <div className="text-text-muted mb-1">
+          <div className="mb-1 text-text-muted">
             <span className="font-medium">Status:</span> Not yet started
           </div>
-          <div className="flex flex-col sm:flex-row gap-3 mt-4 w-full">
+          <div className="mt-4 flex w-full flex-col gap-3 sm:flex-row">
             <Button
               intent="primary"
               size="md"
@@ -183,18 +188,18 @@ export const PathLessonView: React.FC<PathLessonViewProps> = ({
     if (isStudyPath(path)) {
       return (
         <>
-          <AcademicCapIcon className="h-8 w-8 text-success mb-2" />
-          <div className="font-semibold text-lg text-success mb-1">Study to Review</div>
-          <div className="text-text-base mb-1">
+          <AcademicCapIcon className="mb-2 h-8 w-8 text-success" />
+          <div className="mb-1 text-lg font-semibold text-success">Study to Review</div>
+          <div className="mb-1 text-text-base">
             <span className="font-medium">Name:</span> {path.name}
           </div>
-          <div className="text-text-muted mb-1">
+          <div className="mb-1 text-text-muted">
             <span className="font-medium">Last Session:</span> {path.lastSession}
           </div>
           <Button
             intent="accent"
             size="md"
-            className="mt-4 w-full sm:w-auto justify-center"
+            className="mt-4 w-full justify-center sm:w-auto"
             onClick={onGoToStudy}
           >
             Go to Study
@@ -219,25 +224,25 @@ export const PathLessonView: React.FC<PathLessonViewProps> = ({
 
   const workloadGrid = (
     <div className="grid grid-cols-2 gap-3">
-      <div className="bg-surface border border-border-default rounded-xl p-3">
+      <div className="rounded-xl border border-border-default bg-surface p-3">
         <MetricTitle
           label="Overdue now"
           helpText="Variants whose due date is already in the past and are still pending review."
         />
         <div className="text-xl font-semibold text-danger">{plan?.overdueCount ?? 0}</div>
       </div>
-      <div className="bg-surface border border-border-default rounded-xl p-3">
+      <div className="rounded-xl border border-border-default bg-surface p-3">
         <div className="text-xs text-text-muted">Due today</div>
         <div className="text-xl font-semibold text-warning">{plan?.dueTodayCount ?? 0}</div>
       </div>
-      <div className="bg-surface border border-border-default rounded-xl p-3">
+      <div className="rounded-xl border border-border-default bg-surface p-3">
         <MetricTitle
           label="Next 7 days"
           helpText="Total due reviews scheduled in the first 7 days of the forecast window, including today."
         />
         <div className="text-xl font-semibold text-brand">{nextSevenDueCount}</div>
       </div>
-      <div className="bg-surface border border-border-default rounded-xl p-3">
+      <div className="rounded-xl border border-border-default bg-surface p-3">
         <MetricTitle
           label="Suggested new"
           helpText="Recommended new variants to add today after considering current due workload and New/Day cap."
@@ -248,9 +253,9 @@ export const PathLessonView: React.FC<PathLessonViewProps> = ({
   );
 
   const forecastCard = (
-    <div className="bg-surface border border-border-default rounded-xl p-4 flex flex-col gap-3">
+    <div className="flex flex-col gap-3 rounded-xl border border-border-default bg-surface p-4">
       <div>
-        <div className="text-sm text-text-base font-semibold">Need a bigger-picture plan?</div>
+        <div className="text-sm font-semibold text-text-base">Need a bigger-picture plan?</div>
         <div className="text-sm text-text-muted">Open Path forecast to see likely openings and variants by day.</div>
       </div>
       <Button
@@ -266,8 +271,8 @@ export const PathLessonView: React.FC<PathLessonViewProps> = ({
   );
 
   const todayVsPlanCard = (
-    <div className="bg-surface border border-border-default rounded-xl p-4 flex flex-col gap-2">
-      <div className="text-sm text-text-base font-semibold">Today vs plan</div>
+    <div className="flex flex-col gap-2 rounded-xl border border-border-default bg-surface p-4">
+      <div className="text-sm font-semibold text-text-base">Today vs plan</div>
       <div className="grid grid-cols-2 gap-2 text-center">
         <div className="rounded bg-interactive px-2 py-2">
           <div className="text-[11px] text-text-muted">Reviews (due)</div>
@@ -293,7 +298,7 @@ export const PathLessonView: React.FC<PathLessonViewProps> = ({
         </div>
       </div>
       <div className="text-xs text-text-muted">
-        Reviews remaining: {remainingReviewsTarget} Â· New remaining: {remainingNewTarget}
+        Reviews remaining: {remainingReviewsTarget} · New remaining: {remainingNewTarget}
       </div>
       <div className="text-xs text-text-subtle">
         New learned increases only when a variant is reviewed for the first time in this filter scope.
@@ -305,91 +310,14 @@ export const PathLessonView: React.FC<PathLessonViewProps> = ({
   );
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
-      <div className="xl:col-span-8 bg-surface border border-border-default rounded-2xl shadow p-4 sm:p-6 w-full flex flex-col items-center justify-center min-h-[280px]">
+    <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
+      <div className="flex min-h-[220px] w-full flex-col items-center justify-center rounded-2xl border border-border-default bg-surface p-4 shadow sm:min-h-[280px] sm:p-6 xl:col-span-8">
         {renderLessonCard()}
       </div>
-      <div className="xl:col-span-4 space-y-3">
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-surface border border-border-default rounded-xl p-3">
-            <MetricTitle
-              label="Overdue now"
-              helpText="Variants whose due date is already in the past and are still pending review."
-            />
-            <div className="text-xl font-semibold text-danger">{plan?.overdueCount ?? 0}</div>
-          </div>
-          <div className="bg-surface border border-border-default rounded-xl p-3">
-            <div className="text-xs text-text-muted">Due today</div>
-            <div className="text-xl font-semibold text-warning">{plan?.dueTodayCount ?? 0}</div>
-          </div>
-          <div className="bg-surface border border-border-default rounded-xl p-3">
-            <MetricTitle
-              label="Next 7 days"
-              helpText="Total due reviews scheduled in the first 7 days of the forecast window, including today."
-            />
-            <div className="text-xl font-semibold text-brand">{nextSevenDueCount}</div>
-          </div>
-          <div className="bg-surface border border-border-default rounded-xl p-3">
-            <MetricTitle
-              label="Suggested new"
-              helpText="Recommended new variants to add today after considering current due workload and New/Day cap."
-            />
-            <div className="text-xl font-semibold text-accent">{plan?.suggestedNewToday ?? 0}</div>
-          </div>
-        </div>
-
-        <div className="bg-surface border border-border-default rounded-xl p-4 flex flex-col gap-3">
-          <div>
-            <div className="text-sm text-text-base font-semibold">Need a bigger-picture plan?</div>
-            <div className="text-sm text-text-muted">Open Path forecast to see likely openings and variants by day.</div>
-          </div>
-          <Button
-            type="button"
-            intent="accent"
-            size="sm"
-            className="w-full justify-center"
-            onClick={onSwitchToForecast}
-          >
-            Open forecast
-          </Button>
-        </div>
-
-        <div className="bg-surface border border-border-default rounded-xl p-4 flex flex-col gap-2">
-          <div className="text-sm text-text-base font-semibold">Today vs plan</div>
-          <div className="grid grid-cols-2 gap-2 text-center">
-            <div className="rounded bg-interactive px-2 py-2">
-              <div className="text-[11px] text-text-muted">Reviews (due)</div>
-              <div className="text-lg font-semibold text-brand">{completedReviewsToday} / {reviewTargetToday}</div>
-            </div>
-            <div className="rounded bg-interactive px-2 py-2">
-              <div className="text-[11px] text-text-muted">New learned (first-time)</div>
-              <div className="text-lg font-semibold text-accent">{completedNewToday} / {newTargetToday}</div>
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="rounded bg-interactive px-2 py-2">
-              <div className="text-[11px] text-text-muted">Target</div>
-              <div className="text-lg font-semibold text-brand">{plannedTodayTarget}</div>
-            </div>
-            <div className="rounded bg-interactive px-2 py-2">
-              <div className="text-[11px] text-text-muted">Completed</div>
-              <div className="text-lg font-semibold text-success">{completedToday}</div>
-            </div>
-            <div className="rounded bg-interactive px-2 py-2">
-              <div className="text-[11px] text-text-muted">Remaining</div>
-              <div className="text-lg font-semibold text-accent">{remainingToTarget}</div>
-            </div>
-          </div>
-          <div className="text-xs text-text-muted">
-            Reviews remaining: {remainingReviewsTarget} · New remaining: {remainingNewTarget}
-          </div>
-          <div className="text-xs text-text-subtle">
-            New learned increases only when a variant is reviewed for the first time in this filter scope.
-          </div>
-          <div className={`text-sm ${exceededTarget ? "text-success" : "text-text-muted"}`}>
-            {todayPlanMessage}
-          </div>
-        </div>
+      <div className="space-y-3 xl:col-span-4">
+        {isMobile ? forecastCard : workloadGrid}
+        {isMobile ? todayVsPlanCard : forecastCard}
+        {isMobile ? workloadGrid : todayVsPlanCard}
       </div>
     </div>
   );

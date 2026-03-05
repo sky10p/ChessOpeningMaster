@@ -3,17 +3,17 @@ import {
   RepertoireOverviewResponse,
 } from "@chess-opening-master/common";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { EmptyState } from "../../components/ui";
+import { Badge, Button, EmptyState, PageHeader, StatStrip } from "../../components/ui";
 import { PageFrame } from "../../components/design/layouts/PageFrame";
 import { PageRoot } from "../../components/design/layouts/PageRoot";
 import { PageSurface } from "../../components/design/layouts/PageSurface";
+import { useIsMobile } from "../../hooks/useIsMobile";
 import {
   getRepertoireOverview,
   updateRepertoirePreferences,
 } from "../../repository/repertoires/repertoires";
 import { useNavbarDispatch } from "../../contexts/NavbarContext";
 import { useAlertContext } from "../../contexts/AlertContext";
-import { RepertoireOverviewHeader } from "./components/RepertoireOverviewHeader";
 import { RepertoireOverviewFilters } from "./components/RepertoireOverviewFilters";
 import { RepertoireOverviewGroup } from "./components/RepertoireOverviewGroup";
 import {
@@ -29,6 +29,7 @@ import {
   getRepertoireOpeningRoute,
   getTrainRepertoireRoute,
 } from "../../utils/appRoutes";
+import { CreateRepertoireDrawer } from "./components/CreateRepertoireDrawer";
 
 const DEFAULT_OVERVIEW: RepertoireOverviewResponse = { repertoires: [] };
 
@@ -37,6 +38,7 @@ const RepertoiresPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { updateRepertoires } = useNavbarDispatch();
   const { showAlert } = useAlertContext();
+  const isMobile = useIsMobile();
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [overview, setOverview] = useState<RepertoireOverviewResponse>(DEFAULT_OVERVIEW);
   const [updatingIds, setUpdatingIds] = useState<Record<string, boolean>>({});
@@ -47,6 +49,7 @@ const RepertoiresPage: React.FC = () => {
   const availability = parseAvailabilityFilter(searchParams.get("availability"));
   const favorites = parseFavoritesFilter(searchParams.get("favorites"));
   const mastery = parseMasteryFilter(searchParams.get("mastery"));
+  const createDrawerOpen = searchParams.get("create") === "1";
 
   const loadOverview = React.useCallback(async () => {
     try {
@@ -135,9 +138,57 @@ const RepertoiresPage: React.FC = () => {
 
   return (
     <PageRoot>
-      <PageFrame className="h-full py-0 sm:py-2">
-        <PageSurface>
-          <RepertoireOverviewHeader {...activeSummary} />
+      <PageFrame className="h-full max-w-analytics py-4 sm:py-6">
+        <PageSurface className="gap-4 border-none bg-transparent shadow-none">
+          <PageHeader
+            eyebrow={isMobile ? undefined : "Library"}
+            title="Repertoires"
+            description={
+              isMobile
+                ? undefined
+                : "Manage your opening library, see due work at a glance, and jump into the next training action without leaving the page."
+            }
+            primaryAction={
+              <Button
+                intent="primary"
+                size={isMobile ? "sm" : "md"}
+                onClick={() => {
+                  const next = new URLSearchParams(searchParams);
+                  next.set("create", "1");
+                  setSearchParams(next, { replace: true });
+                }}
+              >
+                Create repertoire
+              </Button>
+            }
+            secondaryActions={!isMobile ? (
+              <Button
+                intent="secondary"
+                size="md"
+                onClick={() => {
+                  clearFilters();
+                }}
+              >
+                Reset filters
+              </Button>
+            ) : undefined}
+            meta={!isMobile ? (
+              <>
+                <Badge variant="default" size="sm">
+                  {activeSummary.repertoireCount} active repertoires
+                </Badge>
+                <Badge variant="info" size="sm">
+                  {activeSummary.openingCount} openings
+                </Badge>
+                <Badge variant="warning" size="sm">
+                  {activeSummary.dueVariantsCount} due variants
+                </Badge>
+                <Badge variant="danger" size="sm">
+                  {activeSummary.dueMistakesCount} due mistakes
+                </Badge>
+              </>
+            ) : undefined}
+          />
           <RepertoireOverviewFilters
             query={query}
             orientation={orientation}
@@ -153,7 +204,37 @@ const RepertoiresPage: React.FC = () => {
             onMasteryChange={(value) => setFilter("mastery", value)}
             onClearFilters={clearFilters}
           />
-          <div className="flex-1 overflow-y-auto px-3 pb-6 pt-4 sm:px-5 sm:pb-8 sm:pt-5">
+          {!isMobile ? (
+            <StatStrip
+              items={[
+                {
+                  label: "Active repertoires",
+                  value: activeSummary.repertoireCount,
+                  tone: "default",
+                  detail: `${filteredRepertoires.length} shown in current scope`,
+                },
+                {
+                  label: "Openings",
+                  value: activeSummary.openingCount,
+                  tone: "brand",
+                  detail: "Across active filtered repertoires",
+                },
+                {
+                  label: "Due variants",
+                  value: activeSummary.dueVariantsCount,
+                  tone: "warning",
+                  detail: "Ready for review now",
+                },
+                {
+                  label: "Due mistakes",
+                  value: activeSummary.dueMistakesCount,
+                  tone: "danger",
+                  detail: "Need focused correction",
+                },
+              ]}
+            />
+          ) : null}
+          <div className="flex-1 overflow-y-auto pb-6 pt-1">
             {status === "loading" ? (
               <div className="space-y-4">
                 {Array.from({ length: 3 }).map((_, index) => (
@@ -213,6 +294,14 @@ const RepertoiresPage: React.FC = () => {
               </div>
             ) : null}
           </div>
+          <CreateRepertoireDrawer
+            open={createDrawerOpen}
+            onClose={() => {
+              const next = new URLSearchParams(searchParams);
+              next.delete("create");
+              setSearchParams(next, { replace: true });
+            }}
+          />
         </PageSurface>
       </PageFrame>
     </PageRoot>

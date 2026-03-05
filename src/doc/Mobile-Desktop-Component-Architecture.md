@@ -1,5 +1,53 @@
 # Mobile vs Desktop Component Architecture
 
+## AppShell — Global Navigation Shell
+
+**File:** `packages/frontend/src/components/application/AppShell/AppShell.tsx`
+
+`AppShell` is the unified navigation wrapper that replaced the previous `HeaderContainer` + `NavbarContainer` + `FooterContainer` trio. It is rendered in `App.tsx` and wraps `<Content>`.
+
+### Responsibilities
+
+- **Desktop sidebar** (`lg:flex`): fixed left rail with primary nav links, favorite-repertoire quick links (filterable search), theme toggle, and a user menu (backup download + logout).
+- **Mobile topbar** (`lg:hidden`): compact header with route title, header action icons (from `HeaderContext`), and a hamburger that opens the mobile drawer.
+- **Mobile bottom bar** (`md:flex lg:hidden`): bottom icon nav for primary routes + footer action slots (from `FooterContext`).
+- **Mobile drawer**: slide-in panel with full nav, favorite repertoires, theme toggle, and user menu.
+- **Immersive workspace mode**: when on `/repertoire/` or `/train/repertoires/`, the sidebar collapses to an icon-only rail and the mobile bottom bar is suppressed; the surrounding `padding` is removed so the board workspace fills the viewport.
+
+### Props
+
+| Prop | Type | Purpose |
+|---|---|---|
+| `authEnabled` | `boolean` | Shows logout option only when auth is enabled |
+| `authenticated` | `boolean` | Controls whether shell chrome is rendered |
+| `onLoggedOut` | `() => void` | Callback to clear auth state after logout |
+| `children` | `ReactNode` | Page content slot |
+
+### Primary navigation
+
+Defined as the `primaryNav` constant inside `AppShell.tsx`:
+
+| Label | Route | Active when |
+|---|---|---|
+| Today | `/dashboard` | `pathname === "/"` or starts with `/dashboard` or `/path` |
+| Repertoires | `/repertoires` | starts with `/repertoires` |
+| Games | `/games` | starts with `/games` |
+| Studies | `/studies` | starts with `/studies` |
+
+### Route title/description
+
+`getRouteMeta(pathname)` maps the current route to a `{ title, description }` pair shown in the mobile topbar and desktop page subheading area (when used by `PageHeader`).
+
+### Favorite repertoires
+
+Read from `NavbarContext`. Up to 8 enabled favorites are shown. A search input (`Input` from ui) filters by name. Clicking navigates to `/repertoire/:id`.
+
+### Theme toggle
+
+Uses `useTheme()` hook. Default theme is now `light`. Toggle switches between `light` and `dark`, persisted in `localStorage` under key `chess-theme`.
+
+---
+
 ## Overview
 
 The repertoire editing page (`EditRepertoirePage`) has two distinct rendering paths: a **mobile path** and a **desktop path**. They share the same data (via context) but use different components tuned for each viewport.

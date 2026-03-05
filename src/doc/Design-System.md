@@ -20,11 +20,11 @@ The active theme is controlled by the class on `<html>`. It's persisted to `loca
 <html lang="en" class="light">
 ```
 
-CSS custom properties are defined in `packages/frontend/src/index.css`:
+CSS custom properties are defined in `packages/frontend/src/theme.css`:
 
 ```css
-:root, .dark { /* dark theme tokens - slate-900 base */ }
-.light       { /* light theme overrides - #eef2f7 base */ }
+:root, .light { /* light theme tokens - cool slate base */ }
+.dark         { /* dark theme overrides - slate-950 base */ }
 ```
 
 Tailwind resolves every `bg-page`, `text-text-base`, `shadow-surface`, etc. through `var(--*)` helpers in `tailwind.config.js`.
@@ -33,10 +33,10 @@ Tailwind resolves every `bg-page`, `text-text-base`, `shadow-surface`, etc. thro
 
 | Aspect | Value | Rationale |
 |---|---|---|
-| **Primary / Brand** | Indigo (`#6366f1` dark · `#4f46e5` light) | Distinctive, modern, matches existing UI hints |
-| **Accent** | Amber (`#f59e0b` dark · `#d97706` light) | Matches the ChessKeep logo gold/orange |
-| **Page base** | `#0f172a` dark · `#eef2f7` light | Warm dark / cool blue-gray - never pure black or white |
-| **Surfaces** | `#1e293b` dark · `#ffffff` light | White cards pop clearly against the cool-gray page in light mode |
+| **Primary / Brand** | Blue (`#60a5fa` dark · `#2563eb` light) | Clear, actionable; distinct from neutral gray throughout both themes |
+| **Accent** | Amber/Gold (`#f2b84b` dark · `#c58a1d` light) | Matches the ChessKeep logo gold tone |
+| **Page base** | `#0b1220` dark · `#f7f8fa` light | Deep navy dark / cool off-white — never pure black or pure white |
+| **Surfaces** | `#10192b` dark · `#ffffff` light | White cards contrast clearly against the cool-gray page in light mode |
 
 ---
 
@@ -48,53 +48,58 @@ Every colour class in the application **must** use one of the semantic tokens be
 
 | Token class | Dark value | Light value | Purpose |
 |---|---|---|---|
-| `bg-page` | `#0f172a` (slate-900) | `#eef2f7` (cool blue-gray) | Global canvas |
-| `bg-surface` | `#1e293b` (slate-800) | `#ffffff` (white) | Cards, panels, modals |
-| `bg-surface-raised` | `#293548` (slate-750) | `#f8fafc` (slate-50) | Nested / inner raised surface |
-| `bg-interactive` | `#334155` (slate-700) | `#e2e8f0` (slate-200) | Hover states, input bg, filter chips |
+| `bg-page` | `#0b1220` | `#f7f8fa` | Global canvas |
+| `bg-page-subtle` | `#0f172a` | `#eef2f6` | Aside / split-screen backgrounds |
+| `bg-surface` | `#10192b` | `#ffffff` | Cards, panels, modals |
+| `bg-surface-raised` | `#162236` | `#f1f4f8` | Nested / inner raised surface |
+| `bg-interactive` | `#1d2a40` | `#e7edf5` | Hover states, input bg, filter chips |
+| `overlay` | `rgba(2,6,23,0.7)` | `rgba(15,23,42,0.45)` | Modal scrims |
 
 ### Borders
 
 | Token class | Dark | Light |
 |---|---|---|
-| `border-border-default` | `#334155` (slate-700) | `#cbd5e1` (slate-300) |
-| `border-border-subtle` | `#1e293b` (slate-800) | `#e2e8f0` (slate-200) |
+| `border-border-default` | `#243247` | `#d7dee8` |
+| `border-border-subtle` | `#182335` | `#e6ebf2` |
+| `border-border-strong` | `#31445d` | `#b7c3d4` |
 
 ### Text - WCAG AA verified (light mode)
 
 | Token class | Dark | Light | Contrast on white |
 |---|---|---|---|
-| `text-text-base` | `#f1f5f9` (slate-100) | `#0f172a` (slate-900) | **18.1 : 1** |
-| `text-text-muted` | `#94a3b8` (slate-400) | `#475569` (slate-600) | **7.1 : 1** |
-| `text-text-subtle` | `#64748b` (slate-500) | `#64748b` (slate-500) | **4.7 : 1** |
-| `text-text-on-brand` | `#ffffff` | `#ffffff` | - (on brand bg) |
+| `text-text-base` | `#e5eefb` | `#0f172a` | **18.1 : 1** |
+| `text-text-muted` | `#bfd0e6` | `#334155` | **7.1 : 1** |
+| `text-text-subtle` | `#7f95b2` | `#64748b` | **4.7 : 1** |
+| `text-text-on-brand` | `#081120` | `#ffffff` | - (on brand bg) |
 
 ### Brand / Action
 
 | Token class | Dark | Light |
 |---|---|---|
-| `bg-brand` | `#6366f1` (indigo-500) | `#4f46e5` (indigo-600) |
-| `bg-brand-hover` | `#818cf8` (indigo-400) | `#4338ca` (indigo-700) |
-| `bg-brand-subtle` | `rgba(99,102,241,0.12)` | `#eef2ff` (indigo-50) |
-| `bg-accent` | `#f59e0b` (amber-500) | `#d97706` (amber-600) |
-| `bg-accent-hover` | `#fbbf24` (amber-400) | `#b45309` (amber-700) |
+| `bg-brand` | `#60a5fa` (blue-400) | `#2563eb` (blue-600) |
+| `bg-brand-hover` | `#93c5fd` (blue-300) | `#1d4ed8` (blue-700) |
+| `bg-brand-subtle` | `rgba(96,165,250,0.16)` | `rgba(37,99,235,0.1)` |
+| `bg-brand-soft` | `rgba(96,165,250,0.22)` | `#dbeafe` (blue-100) |
+| `bg-accent` | `#f2b84b` | `#c58a1d` |
+| `bg-accent-hover` | `#f7c86b` | `#a96f05` |
 
 ### Semantic Feedback
 
-| Token | Dark (pastel) | Light (deep) |
+| Token | Dark | Light |
 |---|---|---|
-| `bg-danger` | `#f87171` (red-400) | `#dc2626` (red-600) |
-| `bg-danger-subtle` | `rgba(248,113,113,0.12)` | `#fef2f2` (red-50) |
-| `bg-success` | `#34d399` (emerald-400) | `#059669` (emerald-600) |
-| `bg-warning` | `#fbbf24` (amber-400) | `#d97706` (amber-600) |
+| `bg-danger` | `#fb923c` (orange-400) | `#c2410c` (orange-700) |
+| `bg-danger-subtle` | `rgba(251,146,60,0.16)` | `#ffedd5` (orange-100) |
+| `bg-success` | `#4ade80` (green-400) | `#15803d` (green-700) |
+| `bg-warning` | `#f59e0b` (amber-500) | `#b45309` (amber-700) |
+| `bg-info` | `#38bdf8` (sky-400) | `#0369a1` (sky-700) |
 
 ### Shadows - CSS variable backed, theme-aware
 
 | Token class | Dark | Light |
 |---|---|---|
-| `shadow-sm` | `0 1px 2px rgba(0,0,0,0.45)` | `0 1px 3px rgba(15,23,42,0.07)` |
-| `shadow-surface` | `0 2px 8px rgba(0,0,0,0.45)` | `0 2px 10px rgba(15,23,42,0.08)` |
-| `shadow-elevated` | `0 12px 32px rgba(0,0,0,0.6)` | `0 10px 30px rgba(15,23,42,0.11)` |
+| `shadow-sm` | `0 1px 2px rgba(2,6,23,0.5)` | `0 1px 2px rgba(15,23,42,0.06)` |
+| `shadow-surface` | `0 14px 28px rgba(2,6,23,0.38)` | `0 12px 30px rgba(15,23,42,0.07)` |
+| `shadow-elevated` | `0 24px 56px rgba(2,6,23,0.55)` | `0 20px 48px rgba(15,23,42,0.12)` |
 
 > Shadows are defined as CSS variables (`--shadow-sm`, `--shadow-surface`, `--shadow-elevated`) and resolve automatically per theme. Never hardcode `rgba` shadow values in components.
 
@@ -118,7 +123,12 @@ Use this for standalone cards that need the correct shadow + border + background
 All primitives live in `packages/frontend/src/components/ui/`. Import from the barrel:
 
 ```ts
-import { Button, IconButton, Badge, Checkbox, Card, Tabs, TabButton, Input, Textarea, Select } from "../../components/ui";
+import {
+  Button, IconButton, Badge, Checkbox, Card,
+  PageHeader, SectionHeader, StatStrip, ListRow,
+  Tabs, TabButton, Input, Textarea, Select,
+  EmptyState, Tooltip, MetricTitle,
+} from "../../components/ui";
 ```
 
 ### 3.1 `Button`
@@ -191,7 +201,59 @@ Always provide a `label` prop for accessibility. Uses `ghost` intent by default.
 
 **`elevation` options:** `flat` · `raised` · `high`
 
-### 3.5 `Tabs` + `TabButton`
+### 3.5 `PageHeader`
+
+```tsx
+<PageHeader
+  eyebrow="Repertoire"
+  title="Italian Game"
+  description="Primary page summary."
+  secondaryActions={<Button intent="secondary">Open editor</Button>}
+  primaryAction={<Button intent="primary">Start review</Button>}
+/>
+```
+
+Use at the top of all top-level product pages. It is the canonical pattern for title, summary, CTA hierarchy, and compact metadata badges.
+
+### 3.6 `SectionHeader`
+
+```tsx
+<SectionHeader
+  title="Variants"
+  description="Line-level actions."
+  action={<Badge variant="brand">12 total</Badge>}
+/>
+```
+
+Use inside cards and sections to introduce a content block with one supporting action or summary.
+
+### 3.7 `StatStrip`
+
+```tsx
+<StatStrip
+  items={[
+    { label: "Due variants", value: 4, tone: "warning", detail: "Ready now" },
+    { label: "Mistakes", value: 2, tone: "danger" },
+  ]}
+/>
+```
+
+Use for compact top-of-page KPI rows. Keep it to four items by default.
+
+### 3.8 `ListRow`
+
+```tsx
+<ListRow
+  title="Italian Game: Main Line"
+  description="Due now. 2 active errors."
+  meta={<Badge variant="warning">Needs work</Badge>}
+  actions={<Button intent="secondary" size="sm">Train variant</Button>}
+/>
+```
+
+Use for mobile-first collections, queue items, and action-oriented rows. Prefer it over ad-hoc bordered row markup.
+
+### 3.9 `Tabs` + `TabButton`
 
 ```tsx
 <Tabs variant="underline">
@@ -210,7 +272,7 @@ Always provide a `label` prop for accessibility. Uses `ghost` intent by default.
 
 **`variant` options:** `underline` · `pill` · `segment`
 
-### 3.6 `Checkbox`
+### 3.10 `Checkbox`
 
 ```tsx
 <label className="inline-flex items-center gap-2">
@@ -221,7 +283,7 @@ Always provide a `label` prop for accessibility. Uses `ghost` intent by default.
 
 Use `Checkbox` for inline boolean controls. Wrap it in a `<label>` when the text should be part of the click target.
 
-### 3.7 `Input` + `Textarea`
+### 3.11 `Input` + `Textarea`
 
 ```tsx
 <Input
@@ -355,18 +417,35 @@ Use layout primitives from `packages/frontend/src/components/design/layouts`:
 
 ```tsx
 <PageRoot>
-  <PageFrame className="h-full py-0 sm:py-2">
-    <PageSurface>{/* page content */}</PageSurface>
+  <PageFrame className="h-full max-w-analytics py-4 sm:py-6">
+    <PageSurface className="gap-4 border-none bg-transparent shadow-none">
+      <PageHeader
+        eyebrow="Section label"
+        title="Page title"
+        description="One-sentence description without trailing period"
+        primaryAction={<Button intent="primary" size="md">Primary action</Button>}
+        secondaryActions={<Button intent="secondary" size="md">Secondary</Button>}
+        meta={<Badge variant="brand" size="sm">Count</Badge>}
+      />
+      <StatStrip
+        items={[
+          { label: "KPI one", value: 0, tone: "brand", detail: "Supporting context" },
+        ]}
+      />
+      {/* page content */}
+    </PageSurface>
   </PageFrame>
 </PageRoot>
 ```
 
 Rules:
-- Default to `PageRoot + PageFrame` on top-level route pages.
-- Use `PageSurface` for workspace-style pages (`Dashboard`, `Games`, `Path`, `Studies`, `Train`) that need a framed full-height surface.
-- Mobile gutters are edge-to-edge by default (`PageFrame` uses `px-0` on mobile); desktop/tablet adds horizontal gutter from `sm`.
-- Do not introduce custom edge-to-edge wrappers unless there is a documented product/layout reason.
-- If a different max width is required, set `PageFrame.maxWidthClass` and document the reason in the page architecture doc.
+- Default to `PageRoot + PageFrame + PageSurface` on every top-level route page.
+- Every top-level page **must** start with `<PageHeader>` immediately inside `<PageSurface>`.
+- Follow with `<StatStrip>` when the page has 2–4 meaningful KPI metrics visible at a glance.
+- `PageSurface` uses `className="gap-4 border-none bg-transparent shadow-none"` for page-level composition (transparent — does not add its own card chrome).
+- Available max-width tokens: `max-w-content` (72rem), `max-w-analytics` (80rem, default for most pages), `max-w-workspace` (90rem, for dense side-by-side layouts).
+- Mobile gutters are edge-to-edge by default; `PageHeader` handles own padding with `className` override when needed on mobile.
+- Never add a custom page title `<h1>` outside `<PageHeader>`.
 
 ### Horizontal scrollers inside workspace pages
 
@@ -433,7 +512,7 @@ Icon sizes should use Tailwind width/height utilities (`h-4 w-4`, `h-5 w-5`, `h-
 - Every `<Tabs>` container renders `role="tablist"`.
 - All form inputs from `Input` / `Select` / `Textarea` accept a `label` prop that renders a visible `<label>` (preferred over `placeholder`-only labels).
 - Keyboard-only users must be able to activate all interactive elements via `Tab` + `Enter`/`Space`. The Button primitive includes `focus-visible` ring using `ring-brand`.
-- Do not suppress the outline on interactive elements globally - the global `focus { outline: none }` in `index.css` is intentional only for mouse users; `focus-visible` styles remain active.
+- Do not suppress the outline on interactive elements globally - the global `focus { outline: none }` in `theme.css` is intentional only for mouse users; `focus-visible` styles remain active.
 
 ---
 

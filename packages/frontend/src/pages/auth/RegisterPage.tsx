@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { PASSWORD_POLICY_MESSAGE, validatePasswordStrength } from "@chess-opening-master/common";
 import { AuthRequestError, register } from "../../repository/auth/auth";
 import { Button, Input } from "../../components/ui";
+import AuthPageShell from "./AuthPageShell";
 
 interface RegisterPageProps {
   onAuthenticated: () => void;
@@ -46,31 +47,40 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onAuthenticated }) => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto mt-12 rounded-2xl border border-border-default bg-surface shadow-elevated">
-      <div className="rounded-t-2xl bg-interactive px-6 py-5">
-        <h1 className="text-2xl font-semibold text-text-base">Register</h1>
-        <p className="mt-1 text-sm text-text-muted">Create a user to enable secure access</p>
-      </div>
-      <form className="flex flex-col gap-4 p-6" onSubmit={submit}>
+    <AuthPageShell
+      title="Create account"
+      description="Set up secure access to your repertoire library and training progress."
+      asideTitle="Keep every training decision in one system."
+      asideDescription="Create an account to save repertoire progress, track due reviews, and keep games and studies tied to the same workspace."
+    >
+      <form className="flex flex-col gap-4" onSubmit={submit}>
         <Input
+          label="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          placeholder="Username"
+          placeholder="Choose a username"
+          size="lg"
         />
         <Input
+          label="Password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
+          placeholder="Create a password"
+          size="lg"
         />
-        <p className="text-xs text-text-subtle">{PASSWORD_POLICY_MESSAGE}</p>
+        <div className="rounded-xl border border-border-subtle bg-surface-raised px-4 py-3 text-sm leading-6 text-text-muted">
+          {PASSWORD_POLICY_MESSAGE}
+        </div>
         <Input
+          label="Confirm password"
           type="password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="Confirm password"
+          placeholder="Repeat your password"
+          size="lg"
         />
-        {error ? <div className="rounded-md bg-danger/10 border border-danger/30 p-2 text-sm text-danger">{error}</div> : null}
+        {error ? <div className="rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">{error}</div> : null}
         <Button
           intent="primary"
           size="lg"
@@ -79,16 +89,16 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onAuthenticated }) => {
           disabled={isSubmitting}
           className="w-full justify-center"
         >
-          {isSubmitting ? "Creating account..." : "Register"}
+          {isSubmitting ? "Creating account..." : "Create account"}
         </Button>
       </form>
-      <p className="px-6 pb-6 text-sm text-text-muted">
+      <p className="mt-6 text-sm text-text-muted">
         Already have an account?{" "}
-        <Link className="font-medium text-text-base underline" to="/login">
-          Login
+        <Link className="font-medium text-brand" to="/login">
+          Sign in
         </Link>
       </p>
-    </div>
+    </AuthPageShell>
   );
 };
 

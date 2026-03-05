@@ -1,6 +1,6 @@
 import React from "react";
 import { TrainOpeningVariantItem } from "@chess-opening-master/common";
-import { Badge, Button, Card } from "../../../components/ui";
+import { Badge, Button, Card, EmptyState, ListRow, SectionHeader } from "../../../components/ui";
 
 interface TrainOpeningVariantListProps {
   variants: TrainOpeningVariantItem[];
@@ -42,69 +42,83 @@ export const TrainOpeningVariantList: React.FC<TrainOpeningVariantListProps> = (
   onTrainVariantFocus,
 }) => {
   return (
-    <Card className="border-border-default bg-surface" padding="default" elevation="raised">
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-semibold text-text-base">Variants</h3>
-          <span className="text-xs text-text-subtle">{variants.length} total</span>
-        </div>
-        <div className="space-y-2">
-          {variants.map((variant) => (
-            <div
-              key={variant.variantName}
-              className="rounded-lg border border-border-subtle bg-surface-raised px-3 py-3"
-            >
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm font-medium text-text-base break-words">
-                  {variant.variantName}
-                </p>
-                <Badge variant={getStatusVariant(variant)} size="sm">
-                  Mastery {variant.masteryScore}%
-                </Badge>
-              </div>
-              <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-text-muted sm:grid-cols-4">
-                <span className="rounded border border-border-subtle bg-surface px-2 py-1">
-                  {formatDueLabel(variant.dueAt)}
-                </span>
-                <span className="rounded border border-border-subtle bg-surface px-2 py-1">
-                  Errors {variant.dailyErrorCount}
-                </span>
-                <span className="rounded border border-border-subtle bg-surface px-2 py-1">
-                  Streak {variant.perfectRunStreak}
-                </span>
-                <span className="rounded border border-border-subtle bg-surface px-2 py-1">
-                  Rating {variant.lastRating || "none"}
-                </span>
-              </div>
-              <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
-                <Button
-                  intent="ghost"
-                  size="sm"
-                  onClick={() => onViewVariant(variant.variantName)}
-                  className="justify-center"
-                >
-                  View Variant
-                </Button>
-                <Button
-                  intent="secondary"
-                  size="sm"
-                  onClick={() => onTrainVariantNormal(variant.variantName)}
-                  className="justify-center"
-                >
-                  Train Normal
-                </Button>
-                <Button
-                  intent="accent"
-                  size="sm"
-                  onClick={() => onTrainVariantFocus(variant.variantName)}
-                  className="justify-center"
-                >
-                  Train Focus
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
+    <Card className="border-border-default bg-surface" padding="relaxed" elevation="raised">
+      <div className="flex flex-col gap-4">
+        <SectionHeader
+          title="Variants"
+          description="Use targeted training when one line needs extra repetition instead of rerunning the whole opening."
+          action={<span className="text-xs text-text-subtle">{variants.length} total</span>}
+        />
+        {variants.length === 0 ? (
+          <EmptyState
+            variant="inline"
+            title="No variants available"
+            description="This opening does not have trainable variants yet."
+          />
+        ) : (
+          <div className="space-y-3">
+            {variants.map((variant) => (
+              <ListRow
+                key={variant.variantName}
+                className="bg-surface-raised"
+                title={
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="break-words">{variant.variantName}</span>
+                    <Badge variant={getStatusVariant(variant)} size="sm">
+                      Mastery {variant.masteryScore}%
+                    </Badge>
+                  </div>
+                }
+                description={
+                  <span className="leading-6">
+                    {formatDueLabel(variant.dueAt)}. {variant.dailyErrorCount > 0 ? `${variant.dailyErrorCount} active errors to revisit.` : "No active daily errors."}
+                  </span>
+                }
+                meta={
+                  <>
+                    <Badge variant="default" size="sm">
+                      Streak {variant.perfectRunStreak}
+                    </Badge>
+                    <Badge variant={variant.dailyErrorCount > 0 ? "danger" : "success"} size="sm">
+                      Errors {variant.dailyErrorCount}
+                    </Badge>
+                    <Badge variant="info" size="sm">
+                      Rating {variant.lastRating || "none"}
+                    </Badge>
+                  </>
+                }
+                actions={
+                  <>
+                    <Button
+                      intent="ghost"
+                      size="sm"
+                      onClick={() => onViewVariant(variant.variantName)}
+                      className="justify-center"
+                    >
+                      Open line
+                    </Button>
+                    <Button
+                      intent="secondary"
+                      size="sm"
+                      onClick={() => onTrainVariantNormal(variant.variantName)}
+                      className="justify-center"
+                    >
+                      Train variant
+                    </Button>
+                    <Button
+                      intent="accent"
+                      size="sm"
+                      onClick={() => onTrainVariantFocus(variant.variantName)}
+                      className="justify-center"
+                    >
+                      Focus mistakes
+                    </Button>
+                  </>
+                }
+              />
+            ))}
+          </div>
+        )}
       </div>
     </Card>
   );
