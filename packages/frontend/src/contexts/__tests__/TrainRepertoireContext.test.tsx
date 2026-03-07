@@ -1,5 +1,5 @@
 import React from "react";
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { MoveVariantNode } from "../../models/VariantNode";
 import { Variant } from "../../models/chess.models";
@@ -7,6 +7,7 @@ import {
   TrainRepertoireContextProvider,
   useTrainRepertoireContext,
 } from "../TrainRepertoireContext";
+import * as trainRepertoireContextUtils from "../TrainRepertoireContext.utils";
 
 jest.mock("../RepertoireContext", () => ({
   useRepertoireContext: jest.fn(),
@@ -63,6 +64,7 @@ describe("TrainRepertoireContext", () => {
 
   afterEach(() => {
     jest.runOnlyPendingTimers();
+    jest.restoreAllMocks();
     jest.useRealTimers();
   });
 
@@ -128,5 +130,133 @@ describe("TrainRepertoireContext", () => {
     });
 
     expect(moveCalls).toEqual(["e4", "e5"]);
+  });
+
+  it("does not rebuild train variants when no discarded variants need reset", async () => {
+    const rootNode = new MoveVariantNode();
+    rootNode.id = "root";
+    rootNode.position = 0;
+    rootNode.move = null;
+
+    const e4 = createMoveNode("e4", 1, "w", "e2", "e4", "e4");
+    const e5 = createMoveNode("e5", 2, "b", "e7", "e5", "e5");
+    const nf3 = createMoveNode("nf3", 3, "w", "g1", "f3", "Nf3");
+    const variants: Variant[] = [createVariant("Line A", [e4, e5, nf3])];
+    const stableChess = { fen: () => "start-fen" };
+    const initBoardMock = jest.fn();
+    const allowedMovesSpy = jest
+      .spyOn(trainRepertoireContextUtils, "getAllowedMovesFromTrainVariants")
+      .mockReturnValue([]);
+
+    mockedUseRepertoireContext.mockImplementation(() => {
+      const [currentMoveNode, setCurrentMoveNode] = React.useState(rootNode);
+
+      const initBoard = () => {
+        initBoardMock();
+        setCurrentMoveNode(rootNode);
+      };
+
+      return {
+        repertoireId: "rep-1",
+        orientation: "white",
+        chess: stableChess,
+        currentMoveNode,
+        goToMove: jest.fn(),
+        initBoard,
+        variants,
+      };
+    });
+
+    const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+      <MemoryRouter>
+        <TrainRepertoireContextProvider>{children}</TrainRepertoireContextProvider>
+      </MemoryRouter>
+    );
+
+    const { result } = renderHook(() => useTrainRepertoireContext(), {
+      wrapper,
+    });
+
+    const initialTrainVariants = result.current.trainVariants;
+
+    await waitFor(() => {
+      expect(initBoardMock).toHaveBeenCalledTimes(1);
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(result.current.allowedMoves).toHaveLength(0);
+    expect(result.current.trainVariants).toBe(initialTrainVariants);
+    expect(result.current.trainVariants[0]?.state).toBe("inProgress");
+    expect(initBoardMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("restores discarded variants after a dead-end reset", async () => {
+    const rootNode = new MoveVariantNode();
+    rootNode.id = "root";
+    rootNode.position = 0;
+    rootNode.move = null;
+
+    const e4 = createMoveNode("e4", 1, "w", "e2", "e4", "e4");
+    const e5 = createMoveNode("e5", 2, "b", "e7", "e5", "e5");
+    const nf3 = createMoveNode("nf3", 3, "w", "g1", "f3", "Nf3");
+    const wrongMove = createMoveNode("d4", 1, "w", "d2", "d4", "d4");
+    const variants: Variant[] = [createVariant("Line A", [e4, e5, nf3])];
+
+    let triggerMove: ((node: MoveVariantNode) => void) | null = null;
+    const stableChess = { fen: () => "start-fen" };
+    const initBoardMock = jest.fn();
+
+    mockedUseRepertoireContext.mockImplementation(() => {
+      const [currentMoveNode, setCurrentMoveNode] = React.useState(rootNode);
+
+      const goToMove = (node: MoveVariantNode) => {
+        setCurrentMoveNode(node);
+      };
+
+      const initBoard = () => {
+        initBoardMock();
+        setCurrentMoveNode(rootNode);
+      };
+
+      triggerMove = goToMove;
+
+      return {
+        repertoireId: "rep-1",
+        orientation: "white",
+        chess: stableChess,
+        currentMoveNode,
+        goToMove,
+        initBoard,
+        variants,
+      };
+    });
+
+    const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+      <MemoryRouter>
+        <TrainRepertoireContextProvider>{children}</TrainRepertoireContextProvider>
+      </MemoryRouter>
+    );
+
+    const { result } = renderHook(() => useTrainRepertoireContext(), { wrapper });
+
+    await waitFor(() => {
+      expect(result.current.allowedMoves.map((move) => move.id)).toEqual(["e4"]);
+    });
+
+    const initialResetCount = initBoardMock.mock.calls.length;
+
+    act(() => {
+      triggerMove?.(wrongMove);
+    });
+
+    await waitFor(() => {
+      expect(result.current.allowedMoves.map((move) => move.id)).toEqual(["e4"]);
+    });
+
+    expect(result.current.trainVariants[0]?.state).toBe("inProgress");
+    expect(initBoardMock.mock.calls.length).toBeGreaterThan(initialResetCount);
   });
 });

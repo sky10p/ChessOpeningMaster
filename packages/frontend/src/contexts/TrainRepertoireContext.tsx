@@ -1705,23 +1705,18 @@ export const TrainRepertoireContextProvider: React.FC<
       return;
     }
     initBoard();
-    if (
-      trainVariants.some(
-        (trainVariant) =>
-          trainVariant.state === "inProgress" ||
-          trainVariant.state === "discarded"
-      )
-    ) {
-      setTrainVariants(
-        trainVariants.map((trainVariant) => {
-          if (trainVariant.state === "discarded") {
-            return { ...trainVariant, state: "inProgress" } as TrainVariant;
-          }
+    setTrainVariants((previousTrainVariants) => {
+      let hasReset = false;
+      const nextTrainVariants = previousTrainVariants.map((trainVariant) => {
+        if (trainVariant.state !== "discarded") {
           return trainVariant;
-        })
-      );
-    }
-  }, [allowedMoves.length, initBoard, trainVariants, trainingPhase]);
+        }
+        hasReset = true;
+        return { ...trainVariant, state: "inProgress" } as TrainVariant;
+      });
+      return hasReset ? nextTrainVariants : previousTrainVariants;
+    });
+  }, [allowedMoves.length, initBoard, trainingPhase]);
 
   useEffect(() => {
     if (allowedMoves.length === 0) {
