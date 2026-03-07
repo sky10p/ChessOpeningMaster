@@ -8,11 +8,13 @@
 
 ### Responsibilities
 
-- **Desktop sidebar** (`lg:flex`): fixed left rail with primary nav links, favorite-repertoire quick links (filterable search), theme toggle, and a user menu (backup download + logout).
+- **Desktop sidebar** (`lg:flex`): fixed left rail with primary nav links, a quick-create card, favorite repertoire quick links, theme toggle, backup download, and logout when auth is enabled.
+- **Desktop header actions** (`md:flex`): route title and description, save status, header action buttons from `HeaderContext`, and a quick-search trigger outside immersive workspace routes.
 - **Mobile topbar** (`lg:hidden`): compact header with route title, header action icons (from `HeaderContext`), and a hamburger that opens the mobile drawer.
-- **Mobile bottom bar** (`md:flex lg:hidden`): bottom icon nav for primary routes + footer action slots (from `FooterContext`).
-- **Mobile drawer**: slide-in panel with full nav, favorite repertoires, theme toggle, and user menu.
-- **Immersive workspace mode**: when on `/repertoire/` or `/train/repertoires/`, the sidebar collapses to an icon-only rail and the mobile bottom bar is suppressed; the surrounding `padding` is removed so the board workspace fills the viewport.
+- **Mobile bottom bar** (`lg:hidden` when not immersive): bottom navigation for primary routes plus a `More` entry that opens the drawer.
+- **Mobile drawer**: slide-in panel with full nav, favorite repertoires, theme toggle, backup download, and logout when auth is enabled.
+- **Quick search drawer**: separate drawer opened from the desktop header, backed by the repertoire overview payload and filtered client-side for repertoire and opening matches.
+- **Immersive workspace mode**: when on `/repertoire/` or `/train/repertoires/`, the desktop sidebar remains full width, the desktop search trigger is hidden, and the standard mobile bottom navigation is replaced by footer action slots only when `FooterContext` exposes actions.
 
 ### Props
 
@@ -40,7 +42,7 @@ Defined as the `primaryNav` constant inside `AppShell.tsx`:
 
 ### Favorite repertoires
 
-Read from `NavbarContext`. Up to 8 enabled favorites are shown. A search input (`Input` from ui) filters by name. Clicking navigates to `/repertoire/:id`.
+Read from `NavbarContext`. Up to 8 enabled favorites are shown in the desktop sidebar and mobile drawer. Clicking navigates to `/repertoire/:id`. Filtering happens in the dedicated quick-search drawer, not inline inside the desktop favorites list.
 
 ### Theme toggle
 

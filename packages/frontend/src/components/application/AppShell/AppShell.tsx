@@ -49,6 +49,7 @@ type QuickSearchResult = {
 };
 
 const EMPTY_OVERVIEW: RepertoireOverviewResponse = { repertoires: [] };
+const SEARCH_OVERVIEW_CACHE_MS = 5 * 60 * 1000;
 
 const primaryNav: NavItem[] = [
   {
@@ -82,6 +83,12 @@ const getRouteMeta = (pathname: string) => {
     return {
       title: "Today",
       description: "Focus on the next lesson, your daily targets, and the work that matters now.",
+    };
+  }
+  if (pathname.startsWith("/path")) {
+    return {
+      title: "Path",
+      description: "Plan the queue, inspect the forecast, and switch into the next lesson when you are ready to execute.",
     };
   }
   if (pathname.startsWith("/repertoires")) {
@@ -140,6 +147,7 @@ export const AppShell: React.FC<AppShellProps> = ({
   const [searchValue, setSearchValue] = React.useState("");
   const [searchStatus, setSearchStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
   const [searchOverview, setSearchOverview] = React.useState<RepertoireOverviewResponse>(EMPTY_OVERVIEW);
+  const searchOverviewFetchedAtRef = React.useRef<number | null>(null);
   const routeMeta = getRouteMeta(location.pathname);
   const favoriteRepertoires = React.useMemo(
     () => repertoires.filter((repertoire) => repertoire.favorite && !repertoire.disabled).slice(0, 8),
@@ -200,7 +208,12 @@ export const AppShell: React.FC<AppShellProps> = ({
   }, [authenticated, updateRepertoires]);
 
   React.useEffect(() => {
-    if (!searchOpen || !normalizedSearchValue) {
+    if (!authenticated || !searchOpen) {
+      return;
+    }
+
+    const cachedAt = searchOverviewFetchedAtRef.current;
+    if (cachedAt !== null && Date.now() - cachedAt < SEARCH_OVERVIEW_CACHE_MS) {
       return;
     }
 
@@ -214,6 +227,7 @@ export const AppShell: React.FC<AppShellProps> = ({
           return;
         }
         setSearchOverview(payload);
+        searchOverviewFetchedAtRef.current = Date.now();
         setSearchStatus("success");
       } catch {
         if (ignore) {
@@ -228,7 +242,7 @@ export const AppShell: React.FC<AppShellProps> = ({
     return () => {
       ignore = true;
     };
-  }, [normalizedSearchValue, searchOpen]);
+  }, [authenticated, searchOpen]);
 
   const handleLogout = React.useCallback(async () => {
     if (authEnabled) {
@@ -241,7 +255,6 @@ export const AppShell: React.FC<AppShellProps> = ({
   const handleCloseSearch = React.useCallback(() => {
     setSearchOpen(false);
     setSearchValue("");
-    setSearchStatus("idle");
   }, []);
 
   if (!authenticated) {

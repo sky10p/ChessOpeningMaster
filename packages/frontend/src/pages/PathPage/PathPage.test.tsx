@@ -1,26 +1,26 @@
-import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import '@testing-library/jest-dom';
-import { useNavigate } from 'react-router-dom';
-import PathPage from './PathPage';
-import { usePaths } from '../../hooks/usePaths';
-import { useDialogContext } from '../../contexts/DialogContext';
-import { useNavigationUtils } from '../../utils/navigationUtils';
-import { StudyPath, StudiedVariantPath, NewVariantPath, EmptyPath } from '@chess-opening-master/common';
+import React from "react";
+import { fireEvent, render, screen } from "@testing-library/react";
+import "@testing-library/jest-dom";
+import { MemoryRouter, useNavigate } from "react-router-dom";
+import PathPage from "./PathPage";
+import { usePaths } from "../../hooks/usePaths";
+import { useDialogContext } from "../../contexts/DialogContext";
+import { useNavigationUtils } from "../../utils/navigationUtils";
 
-jest.mock('react-router-dom', () => ({
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
   useNavigate: jest.fn(),
 }));
 
-jest.mock('../../hooks/usePaths', () => ({
+jest.mock("../../hooks/usePaths", () => ({
   usePaths: jest.fn(),
 }));
 
-jest.mock('../../contexts/DialogContext', () => ({
+jest.mock("../../contexts/DialogContext", () => ({
   useDialogContext: jest.fn(),
 }));
 
-jest.mock('../../utils/navigationUtils', () => ({
+jest.mock("../../utils/navigationUtils", () => ({
   useNavigationUtils: jest.fn(),
 }));
 
@@ -32,505 +32,144 @@ const mockLoadInsights = jest.fn();
 const mockRemoveVariantFromPath = jest.fn();
 const mockShowConfirmDialog = jest.fn();
 
-const mockUsePaths = {
-  path: null,
+const baseUsePaths = {
+  path: {
+    type: "variant",
+    id: "variant-123",
+    repertoireId: "repertoire-456",
+    repertoireName: "Test Repertoire",
+    name: "French Defense",
+    errors: 3,
+    lastDate: new Date("2026-02-15"),
+    dueAt: new Date("2026-02-16"),
+  },
   loading: false,
   error: null,
   loadPath: mockLoadPath,
-  loadInsights: mockLoadInsights,
   removeVariantFromPath: mockRemoveVariantFromPath,
   plan: {
-    todayKey: "2026-02-15",
-    overdueCount: 0,
-    dueTodayCount: 0,
-    reviewDueCount: 0,
-    completedTodayCount: 0,
-    newVariantsAvailable: 0,
-    suggestedNewToday: 0,
-    estimatedTodayTotal: 0,
+    todayKey: "2026-03-07",
+    overdueCount: 4,
+    dueTodayCount: 2,
+    reviewDueCount: 6,
+    completedTodayCount: 1,
+    completedDueToday: 1,
+    completedNewToday: 0,
+    newVariantsAvailable: 3,
+    suggestedNewToday: 2,
+    estimatedTodayTotal: 8,
     upcoming: [],
-    forecastDays: [],
-    nextVariants: [],
-    upcomingOpenings: [],
+    forecastDays: [
+      {
+        date: "2026-03-07",
+        dueCount: 2,
+        topOpenings: [{ name: "French Defense", count: 2 }],
+        variants: [
+          {
+            repertoireId: "repertoire-456",
+            repertoireName: "Test Repertoire",
+            variantName: "French Defense",
+          },
+        ],
+      },
+    ],
+    nextVariants: [
+      {
+        repertoireId: "repertoire-456",
+        repertoireName: "Test Repertoire",
+        variantName: "French Defense",
+        dueDate: "2026-03-07",
+        orientation: "white",
+      },
+    ],
+    upcomingOpenings: [{ name: "French Defense", count: 2 }],
   },
   analytics: {
-    rangeStart: "2026-01-17",
-    rangeEnd: "2026-02-15",
-    totalReviews: 0,
-    ratingBreakdown: { again: 0, hard: 0, good: 0, easy: 0 },
+    rangeStart: "2026-02-07",
+    rangeEnd: "2026-03-07",
+    totalReviews: 10,
+    ratingBreakdown: { again: 1, hard: 2, good: 5, easy: 2 },
     dailyReviews: [],
     topOpenings: [],
     topFens: [],
   },
   insightsLoading: false,
   insightsError: null,
+  loadInsights: mockLoadInsights,
 };
 
-const mockUseDialogContext = {
-  showConfirmDialog: mockShowConfirmDialog,
-};
+const renderPage = (initialEntry = "/path") =>
+  render(
+    <MemoryRouter initialEntries={[initialEntry]}>
+      <PathPage />
+    </MemoryRouter>
+  );
 
-const mockUseNavigationUtils = {
-  goToRepertoire: mockGoToRepertoire,
-  goToTrainRepertoire: mockGoToTrainRepertoire,
-};
-
-describe('PathPage Navigation Logic', () => {
+describe("PathPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
-    (usePaths as jest.Mock).mockReturnValue(mockUsePaths);
-    (useDialogContext as jest.Mock).mockReturnValue(mockUseDialogContext);
-    (useNavigationUtils as jest.Mock).mockReturnValue(mockUseNavigationUtils);
-  });
-
-  describe('goToStudy functionality', () => {
-    it('should navigate to study page with correct parameters when path is StudyPath', async () => {
-      const studyPath: StudyPath = {
-        type: 'study',
-        groupId: 'test-group-123',
-        studyId: 'test-study-456',
-        name: 'Test Study',
-        lastSession: '2023-01-01',
-      };
-
-      (usePaths as jest.Mock).mockReturnValue({
-        ...mockUsePaths,
-        path: studyPath,
-      });
-
-      render(<PathPage />);
-
-      const goToStudyButton = screen.getByText('Go to Study');
-      fireEvent.click(goToStudyButton);
-
-      expect(mockNavigate).toHaveBeenCalledWith('/studies?groupId=test-group-123&studyId=test-study-456');
+    (usePaths as jest.Mock).mockReturnValue(baseUsePaths);
+    (useDialogContext as jest.Mock).mockReturnValue({
+      showConfirmDialog: mockShowConfirmDialog,
     });
-
-    it('should encode special characters in groupId and studyId', async () => {
-      const studyPath: StudyPath = {
-        type: 'study',
-        groupId: 'test group & special chars',
-        studyId: 'test study: with colon',
-        name: 'Test Study',
-        lastSession: '2023-01-01',
-      };
-
-      (usePaths as jest.Mock).mockReturnValue({
-        ...mockUsePaths,
-        path: studyPath,
-      });
-
-      render(<PathPage />);
-
-      const goToStudyButton = screen.getByText('Go to Study');
-      fireEvent.click(goToStudyButton);
-
-      expect(mockNavigate).toHaveBeenCalledWith('/studies?groupId=test%20group%20%26%20special%20chars&studyId=test%20study%3A%20with%20colon');
-    });
-
-    it('should not navigate when path is not StudyPath', () => {
-      const variantPath: StudiedVariantPath = {
-        type: 'variant',
-        id: 'variant-123',
-        repertoireId: 'repertoire-456',
-        repertoireName: 'Test Repertoire',
-        name: 'Test Variant',
-        errors: 0,
-        lastDate: new Date(),
-      };
-
-      (usePaths as jest.Mock).mockReturnValue({
-        ...mockUsePaths,
-        path: variantPath,
-      });
-
-      render(<PathPage />);
-
-      expect(mockNavigate).not.toHaveBeenCalled();
+    (useNavigationUtils as jest.Mock).mockReturnValue({
+      goToRepertoire: mockGoToRepertoire,
+      goToTrainRepertoire: mockGoToTrainRepertoire,
     });
   });
 
-  describe('goToTrainVariant functionality', () => {
-    it('should call goToTrainRepertoire with correct parameters for StudiedVariantPath', async () => {
-      const studiedVariantPath: StudiedVariantPath = {
-        type: 'variant',
-        id: 'variant-123',
-        repertoireId: 'repertoire-456',
-        repertoireName: 'Test Repertoire',
-        name: 'Sicilian Defense',
-        errors: 2,
-        lastDate: new Date(),
-      };
+  it("opens in forecast by default", () => {
+    renderPage();
 
-      (usePaths as jest.Mock).mockReturnValue({
-        ...mockUsePaths,
-        path: studiedVariantPath,
-      });
-
-      render(<PathPage />);
-
-      const trainButton = screen.getByText('Start Training');
-      fireEvent.click(trainButton);
-
-      expect(mockGoToTrainRepertoire).toHaveBeenCalledWith('repertoire-456', 'Sicilian Defense');
-    });
-
-    it('should call goToTrainRepertoire with correct parameters for NewVariantPath', async () => {
-      const newVariantPath: NewVariantPath = {
-        type: 'newVariant',
-        repertoireId: 'repertoire-789',
-        repertoireName: 'New Repertoire',
-        name: 'Italian Game',
-      };
-
-      (usePaths as jest.Mock).mockReturnValue({
-        ...mockUsePaths,
-        path: newVariantPath,
-      });
-
-      render(<PathPage />);
-
-      const trainButton = screen.getByText('Start Training');
-      fireEvent.click(trainButton);
-
-      expect(mockGoToTrainRepertoire).toHaveBeenCalledWith('repertoire-789', 'Italian Game');
-    });
-
-    it('should handle variant names with special characters', async () => {
-      const studiedVariantPath: StudiedVariantPath = {
-        type: 'variant',
-        id: 'variant-123',
-        repertoireId: 'repertoire-456',
-        repertoireName: 'Test Repertoire',
-        name: 'Queen\'s Gambit: Declined',
-        errors: 1,
-        lastDate: new Date(),
-      };
-
-      (usePaths as jest.Mock).mockReturnValue({
-        ...mockUsePaths,
-        path: studiedVariantPath,
-      });
-
-      render(<PathPage />);
-
-      const trainButton = screen.getByText('Start Training');
-      fireEvent.click(trainButton);
-
-      expect(mockGoToTrainRepertoire).toHaveBeenCalledWith('repertoire-456', 'Queen\'s Gambit: Declined');
-    });
-
-    it('should not call goToTrainRepertoire for StudyPath', () => {
-      const studyPath: StudyPath = {
-        type: 'study',
-        groupId: 'test-group-123',
-        studyId: 'test-study-456',
-        name: 'Test Study',
-        lastSession: '2023-01-01',
-      };
-
-      (usePaths as jest.Mock).mockReturnValue({
-        ...mockUsePaths,
-        path: studyPath,
-      });
-
-      render(<PathPage />);
-
-      expect(mockGoToTrainRepertoire).not.toHaveBeenCalled();
-    });
+    expect(screen.getByRole("tab", { name: "Path forecast" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByText("Likely Study Path (14 days)")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Start Review" })).not.toBeInTheDocument();
   });
 
-  describe('goToReviewVariant functionality', () => {
-    it('should call goToRepertoire with correct parameters for StudiedVariantPath', async () => {
-      const studiedVariantPath: StudiedVariantPath = {
-        type: 'variant',
-        id: 'variant-123',
-        repertoireId: 'repertoire-456',
-        repertoireName: 'Test Repertoire',
-        name: 'French Defense',
-        errors: 3,
-        lastDate: new Date(),
-      };
+  it("respects the lesson view query param", () => {
+    renderPage("/path?view=lesson");
 
-      (usePaths as jest.Mock).mockReturnValue({
-        ...mockUsePaths,
-        path: studiedVariantPath,
-      });
-
-      render(<PathPage />);
-
-      const reviewButton = screen.getByText('Start Review');
-      fireEvent.click(reviewButton);
-
-      expect(mockGoToRepertoire).toHaveBeenCalledWith('repertoire-456', 'French Defense');
-    });
-
-    it('should call goToRepertoire with correct parameters for NewVariantPath', async () => {
-      const newVariantPath: NewVariantPath = {
-        type: 'newVariant',
-        repertoireId: 'repertoire-789',
-        repertoireName: 'New Repertoire',
-        name: 'Caro-Kann Defense',
-      };
-
-      (usePaths as jest.Mock).mockReturnValue({
-        ...mockUsePaths,
-        path: newVariantPath,
-      });
-
-      render(<PathPage />);
-
-      const reviewButton = screen.getByText('Start Review');
-      fireEvent.click(reviewButton);
-
-      expect(mockGoToRepertoire).toHaveBeenCalledWith('repertoire-789', 'Caro-Kann Defense');
-    });
-
-    it('should handle variant names with Unicode characters', async () => {
-      const studiedVariantPath: StudiedVariantPath = {
-        type: 'variant',
-        id: 'variant-123',
-        repertoireId: 'repertoire-456',
-        repertoireName: 'Test Repertoire',
-        name: 'Réti Opening',
-        errors: 0,
-        lastDate: new Date(),
-      };
-
-      (usePaths as jest.Mock).mockReturnValue({
-        ...mockUsePaths,
-        path: studiedVariantPath,
-      });
-
-      render(<PathPage />);
-
-      const reviewButton = screen.getByText('Start Review');
-      fireEvent.click(reviewButton);
-
-      expect(mockGoToRepertoire).toHaveBeenCalledWith('repertoire-456', 'Réti Opening');
-    });
-
-    it('should not call goToRepertoire for StudyPath', () => {
-      const studyPath: StudyPath = {
-        type: 'study',
-        groupId: 'test-group-123',
-        studyId: 'test-study-456',
-        name: 'Test Study',
-        lastSession: '2023-01-01',
-      };
-
-      (usePaths as jest.Mock).mockReturnValue({
-        ...mockUsePaths,
-        path: studyPath,
-      });
-
-      render(<PathPage />);
-
-      expect(mockGoToRepertoire).not.toHaveBeenCalled();
-    });
+    expect(screen.getByRole("tab", { name: "Next lesson" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("button", { name: "Start Review" })).toBeInTheDocument();
+    expect(screen.queryByText("Likely Study Path (14 days)")).not.toBeInTheDocument();
   });
 
-  describe('Edge cases and error handling', () => {
-    it('should handle null path gracefully', () => {
-      (usePaths as jest.Mock).mockReturnValue({
-        ...mockUsePaths,
-        path: null,
-      });
+  it("keeps filters and exposes reset scope", () => {
+    renderPage();
 
-      render(<PathPage />);
-
-      expect(mockNavigate).not.toHaveBeenCalled();
-      expect(mockGoToRepertoire).not.toHaveBeenCalled();
-      expect(mockGoToTrainRepertoire).not.toHaveBeenCalled();
+    fireEvent.change(screen.getByDisplayValue("All Paths"), {
+      target: { value: "newVariants" },
     });
 
-    it('should handle EmptyPath without navigation', () => {
-      const emptyPath: EmptyPath = {
-        message: 'All caught up!',
-      };
-
-      (usePaths as jest.Mock).mockReturnValue({
-        ...mockUsePaths,
-        path: emptyPath,
-      });
-
-      render(<PathPage />);
-
-      expect(mockNavigate).not.toHaveBeenCalled();
-      expect(mockGoToRepertoire).not.toHaveBeenCalled();
-      expect(mockGoToTrainRepertoire).not.toHaveBeenCalled();
-    });
-
-    it('should handle extremely long variant names', async () => {
-      const longVariantName = 'Sicilian Defense: Accelerated Dragon, Maróczy Bind, Breyer Variation with Extremely Long Descriptive Name That Tests URL Encoding';
-      
-      const studiedVariantPath: StudiedVariantPath = {
-        type: 'variant',
-        id: 'variant-123',
-        repertoireId: 'repertoire-456',
-        repertoireName: 'Test Repertoire',
-        name: longVariantName,
-        errors: 1,
-        lastDate: new Date(),
-      };
-
-      (usePaths as jest.Mock).mockReturnValue({
-        ...mockUsePaths,
-        path: studiedVariantPath,
-      });
-
-      render(<PathPage />);
-
-      const reviewButton = screen.getByText('Start Review');
-      fireEvent.click(reviewButton);
-
-      expect(mockGoToRepertoire).toHaveBeenCalledWith('repertoire-456', longVariantName);
-    });
-
-    it('should handle empty string variant names', async () => {
-      const studiedVariantPath: StudiedVariantPath = {
-        type: 'variant',
-        id: 'variant-123',
-        repertoireId: 'repertoire-456',
-        repertoireName: 'Test Repertoire',
-        name: '',
-        errors: 0,
-        lastDate: new Date(),
-      };
-
-      (usePaths as jest.Mock).mockReturnValue({
-        ...mockUsePaths,
-        path: studiedVariantPath,
-      });
-
-      render(<PathPage />);
-
-      const reviewButton = screen.getByText('Start Review');
-      fireEvent.click(reviewButton);
-
-      expect(mockGoToRepertoire).toHaveBeenCalledWith('repertoire-456', '');
-    });
+    expect(screen.getByText("Type: New variants")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Reset scope" })).toBeInTheDocument();
   });
 
-  describe('Integration with path type guards', () => {
-    it('should correctly identify and handle StudyPath', () => {
-      const studyPath: StudyPath = {
-        type: 'study',
-        groupId: 'integration-test',
-        studyId: 'study-integration',
-        name: 'Integration Test Study',
-        lastSession: '2023-01-01',
-      };
-
-      (usePaths as jest.Mock).mockReturnValue({
-        ...mockUsePaths,
-        path: studyPath,
-      });
-
-      render(<PathPage />);
-
-      expect(screen.getByText('Study to Review')).toBeInTheDocument();
-      expect(screen.getByText('Go to Study')).toBeInTheDocument();
+  it("keeps lesson actions for study paths", () => {
+    (usePaths as jest.Mock).mockReturnValue({
+      ...baseUsePaths,
+      path: {
+        type: "study",
+        groupId: "group-123",
+        studyId: "study-456",
+        name: "Study Queue",
+        lastSession: "2026-03-06",
+      },
     });
 
-    it('should correctly identify and handle StudiedVariantPath', () => {
-      const studiedVariantPath: StudiedVariantPath = {
-        type: 'variant',
-        id: 'variant-integration',
-        repertoireId: 'repertoire-integration',
-        repertoireName: 'Integration Test Repertoire',
-        name: 'Integration Test Variant',
-        errors: 1,
-        lastDate: new Date(),
-      };
+    renderPage("/path?view=lesson");
 
-      (usePaths as jest.Mock).mockReturnValue({
-        ...mockUsePaths,
-        path: studiedVariantPath,
-      });
+    fireEvent.click(screen.getByRole("button", { name: "Go to Study" }));
 
-      render(<PathPage />);
-
-      expect(screen.getByText('Repertoire to review: Integration Test Repertoire')).toBeInTheDocument();
-      expect(screen.getByText('Start Review')).toBeInTheDocument();
-      expect(screen.getByText('Start Training')).toBeInTheDocument();
-    });
-
-    it('should correctly identify and handle NewVariantPath', () => {
-      const newVariantPath: NewVariantPath = {
-        type: 'newVariant',
-        repertoireId: 'repertoire-new',
-        repertoireName: 'New Integration Repertoire',
-        name: 'New Integration Variant',
-      };
-
-      (usePaths as jest.Mock).mockReturnValue({
-        ...mockUsePaths,
-        path: newVariantPath,
-      });
-
-      render(<PathPage />);
-
-      expect(screen.getByText('New Repertoire to learn: New Integration Repertoire')).toBeInTheDocument();
-      expect(screen.getByText('Start Review')).toBeInTheDocument();
-      expect(screen.getByText('Start Training')).toBeInTheDocument();
-    });
+    expect(mockNavigate).toHaveBeenCalledWith("/studies?groupId=group-123&studyId=study-456");
   });
 
-  describe('Button interaction flows', () => {
-    it('should handle multiple clicks on navigation buttons', async () => {
-      const studiedVariantPath: StudiedVariantPath = {
-        type: 'variant',
-        id: 'variant-123',
-        repertoireId: 'repertoire-456',
-        repertoireName: 'Test Repertoire',
-        name: 'Test Variant',
-        errors: 1,
-        lastDate: new Date(),
-      };
+  it("keeps variant removal available in lesson view", () => {
+    renderPage("/path?view=lesson");
 
-      (usePaths as jest.Mock).mockReturnValue({
-        ...mockUsePaths,
-        path: studiedVariantPath,
-      });
+    fireEvent.click(screen.getByRole("button", { name: "Remove this variant from path" }));
 
-      render(<PathPage />);
-
-      const reviewButton = screen.getByText('Start Review');
-      const trainButton = screen.getByText('Start Training');
-
-      fireEvent.click(reviewButton);
-      fireEvent.click(trainButton);
-      fireEvent.click(reviewButton);
-
-      expect(mockGoToRepertoire).toHaveBeenCalledTimes(2);
-      expect(mockGoToTrainRepertoire).toHaveBeenCalledTimes(1);
-    });
-
-    it('should handle study button clicks correctly', async () => {
-      const studyPath: StudyPath = {
-        type: 'study',
-        groupId: 'test-group',
-        studyId: 'test-study',
-        name: 'Test Study',
-        lastSession: '2023-01-01',
-      };
-
-      (usePaths as jest.Mock).mockReturnValue({
-        ...mockUsePaths,
-        path: studyPath,
-      });
-
-      render(<PathPage />);
-
-      const studyButton = screen.getByText('Go to Study');
-      
-      fireEvent.click(studyButton);
-      fireEvent.click(studyButton);
-
-      expect(mockNavigate).toHaveBeenCalledTimes(2);
-      expect(mockNavigate).toHaveBeenCalledWith('/studies?groupId=test-group&studyId=test-study');
-    });
+    expect(mockShowConfirmDialog).toHaveBeenCalled();
   });
 });

@@ -5,10 +5,10 @@ import {
   CheckCircleIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { Path, PathPlanSummary } from "@chess-opening-master/common";
-import { Button, EmptyState, MetricTitle } from "../../../components/ui";
-import { useIsMobile } from "../../../hooks/useIsMobile";
+import { Path } from "@chess-opening-master/common";
+import { Button, EmptyState } from "../../../components/ui";
 import { toUtcDateKey } from "../../../utils/dateUtils";
+import { NextActionModel } from "../../../utils/path/pathSurfaceModel";
 import { isEmptyPath, isNewVariantPath, isStudiedVariantPath, isStudyPath } from "../helpers";
 
 const formatDate = (date: string | Date): string => {
@@ -20,305 +20,178 @@ interface PathLessonViewProps {
   path: Path | null;
   loading: boolean;
   error: string | null;
-  plan: PathPlanSummary | null;
-  nextSevenDueCount: number;
-  completedReviewsToday: number;
-  reviewTargetToday: number;
-  completedNewToday: number;
-  newTargetToday: number;
-  plannedTodayTarget: number;
-  completedToday: number;
-  remainingToTarget: number;
-  remainingReviewsTarget: number;
-  remainingNewTarget: number;
-  exceededTarget: boolean;
-  todayPlanMessage: string;
+  nextAction: NextActionModel;
   onGoToReviewVariant: () => void;
   onGoToTrainVariant: () => void;
   onGoToStudy: () => void;
   onRemoveVariant: () => void;
-  onSwitchToForecast: () => void;
 }
 
 export const PathLessonView: React.FC<PathLessonViewProps> = ({
   path,
   loading,
   error,
-  plan,
-  nextSevenDueCount,
-  completedReviewsToday,
-  reviewTargetToday,
-  completedNewToday,
-  newTargetToday,
-  plannedTodayTarget,
-  completedToday,
-  remainingToTarget,
-  remainingReviewsTarget,
-  remainingNewTarget,
-  exceededTarget,
-  todayPlanMessage,
+  nextAction,
   onGoToReviewVariant,
   onGoToTrainVariant,
   onGoToStudy,
   onRemoveVariant,
-  onSwitchToForecast,
 }) => {
-  const isMobile = useIsMobile();
+  if (loading) {
+    return (
+      <div className="rounded-2xl border border-border-default bg-surface p-5 shadow-surface sm:p-6">
+        <EmptyState variant="inline" title={nextAction.title} description={nextAction.description} className="animate-pulse" />
+      </div>
+    );
+  }
 
-  const renderLessonCard = () => {
-    if (loading) {
-      return (
-        <EmptyState
-          variant="inline"
-          title="Loading..."
-          description="Loading your next lesson..."
-          className="animate-pulse"
-        />
-      );
-    }
+  if (error) {
+    return (
+      <div className="rounded-2xl border border-border-default bg-surface p-5 shadow-surface sm:p-6">
+        <EmptyState variant="inline" title="Unable to load next lesson" description={error} className="text-danger" />
+      </div>
+    );
+  }
 
-    if (error) {
-      return (
-        <EmptyState
-          variant="inline"
-          title="Error"
-          description={error}
-          className="text-danger"
-        />
-      );
-    }
-
-    if (!path) {
-      return (
-        <EmptyState
-          variant="inline"
-          title="No Match"
-          description="No lesson available matching your criteria."
-        />
-      );
-    }
-
-    if (isStudiedVariantPath(path)) {
-      return (
-        <>
-          <BookOpenIcon className="mb-2 h-8 w-8 text-brand" />
-          <div className="mb-1 text-center text-lg font-semibold text-accent">
-            Repertoire to review: {path.repertoireName}
-          </div>
-          <div className="mb-1 text-text-base">
-            <span className="font-medium">Name:</span> {path.name}
-          </div>
-          <div className="mb-1 text-text-muted">
-            <span className="font-medium">Errors:</span> {path.errors}
-          </div>
-          <div className="mb-1 text-text-muted">
-            <span className="font-medium">Last Reviewed:</span> {formatDate(path.lastDate)}
-          </div>
-          {path.dueAt ? (
-            <div className="mb-1 text-text-muted">
-              <span className="font-medium">Due At:</span> {formatDate(path.dueAt)}
-            </div>
-          ) : null}
-          <div className="mt-4 flex w-full flex-col gap-3 sm:flex-row">
-            <Button
-              intent="primary"
-              size="md"
-              className="w-full justify-center"
-              onClick={onGoToReviewVariant}
-            >
-              Start Review
-            </Button>
-            <Button
-              intent="secondary"
-              size="md"
-              className="w-full justify-center"
-              onClick={onGoToTrainVariant}
-            >
-              Start Training
-            </Button>
-          </div>
-          <Button
-            intent="danger"
-            size="md"
-            className="mt-4 w-full justify-center"
-            onClick={onRemoveVariant}
-          >
-            <XMarkIcon className="h-5 w-5" />
-            Remove this variant from path
-          </Button>
-        </>
-      );
-    }
-
-    if (isNewVariantPath(path)) {
-      return (
-        <>
-          <BookOpenIcon className="mb-2 h-8 w-8 text-brand" />
-          <div className="mb-1 text-center text-lg font-semibold text-accent">
-            New Repertoire to learn: {path.repertoireName}
-          </div>
-          <div className="mb-1 text-text-base">
-            <span className="font-medium">Name:</span> {path.name}
-          </div>
-          <div className="mb-1 text-text-muted">
-            <span className="font-medium">Status:</span> Not yet started
-          </div>
-          <div className="mt-4 flex w-full flex-col gap-3 sm:flex-row">
-            <Button
-              intent="primary"
-              size="md"
-              className="w-full justify-center"
-              onClick={onGoToReviewVariant}
-            >
-              Start Review
-            </Button>
-            <Button
-              intent="secondary"
-              size="md"
-              className="w-full justify-center"
-              onClick={onGoToTrainVariant}
-            >
-              Start Training
-            </Button>
-          </div>
-        </>
-      );
-    }
-
-    if (isStudyPath(path)) {
-      return (
-        <>
-          <AcademicCapIcon className="mb-2 h-8 w-8 text-success" />
-          <div className="mb-1 text-lg font-semibold text-success">Study to Review</div>
-          <div className="mb-1 text-text-base">
-            <span className="font-medium">Name:</span> {path.name}
-          </div>
-          <div className="mb-1 text-text-muted">
-            <span className="font-medium">Last Session:</span> {path.lastSession}
-          </div>
-          <Button
-            intent="accent"
-            size="md"
-            className="mt-4 w-full justify-center sm:w-auto"
-            onClick={onGoToStudy}
-          >
-            Go to Study
-          </Button>
-        </>
-      );
-    }
-
-    if (isEmptyPath(path)) {
-      return (
+  if (!path || isEmptyPath(path)) {
+    return (
+      <div className="rounded-2xl border border-border-default bg-surface p-5 shadow-surface sm:p-6">
         <EmptyState
           variant="inline"
           icon={CheckCircleIcon}
-          title="All Caught Up!"
-          description="You have no variants or studies to review right now. Adjust filters or return tomorrow for new due lessons."
+          title="Nothing due in this scope"
+          description="You are caught up right now. Stay in forecast to inspect upcoming work or adjust the current scope."
         />
-      );
-    }
+      </div>
+    );
+  }
 
-    return null;
-  };
+  if (isStudiedVariantPath(path)) {
+    return (
+      <div className="rounded-2xl border border-border-default bg-surface p-5 shadow-surface sm:p-6">
+        <div className="flex flex-col gap-5">
+          <div className="space-y-3">
+            <BookOpenIcon className="h-8 w-8 text-brand" />
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-text-subtle">Next lesson</p>
+              <h2 className="text-2xl font-semibold leading-tight text-text-base">{nextAction.title}</h2>
+              <p className="text-sm leading-6 text-text-muted">{nextAction.description}</p>
+            </div>
+          </div>
 
-  const workloadGrid = (
-    <div className="grid grid-cols-2 gap-3">
-      <div className="rounded-xl border border-border-default bg-surface p-3">
-        <MetricTitle
-          label="Overdue now"
-          helpText="Variants whose due date is already in the past and are still pending review."
-        />
-        <div className="text-xl font-semibold text-danger">{plan?.overdueCount ?? 0}</div>
-      </div>
-      <div className="rounded-xl border border-border-default bg-surface p-3">
-        <div className="text-xs text-text-muted">Due today</div>
-        <div className="text-xl font-semibold text-warning">{plan?.dueTodayCount ?? 0}</div>
-      </div>
-      <div className="rounded-xl border border-border-default bg-surface p-3">
-        <MetricTitle
-          label="Next 7 days"
-          helpText="Total due reviews scheduled in the first 7 days of the forecast window, including today."
-        />
-        <div className="text-xl font-semibold text-brand">{nextSevenDueCount}</div>
-      </div>
-      <div className="rounded-xl border border-border-default bg-surface p-3">
-        <MetricTitle
-          label="Suggested new"
-          helpText="Recommended new variants to add today after considering current due workload and New/Day cap."
-        />
-        <div className="text-xl font-semibold text-accent">{plan?.suggestedNewToday ?? 0}</div>
-      </div>
-    </div>
-  );
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-xl border border-border-subtle bg-surface-raised px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-text-subtle">Repertoire</p>
+              <p className="mt-2 text-sm font-medium text-text-base">{path.repertoireName}</p>
+            </div>
+            <div className="rounded-xl border border-border-subtle bg-surface-raised px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-text-subtle">Variant</p>
+              <p className="mt-2 text-sm font-medium text-text-base">{path.name}</p>
+            </div>
+            <div className="rounded-xl border border-border-subtle bg-surface-raised px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-text-subtle">Errors</p>
+              <p className="mt-2 text-sm font-medium text-accent">{path.errors}</p>
+            </div>
+            <div className="rounded-xl border border-border-subtle bg-surface-raised px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-text-subtle">Due at</p>
+              <p className="mt-2 text-sm font-medium text-text-base">{path.dueAt ? formatDate(path.dueAt) : "Ready now"}</p>
+            </div>
+          </div>
 
-  const forecastCard = (
-    <div className="flex flex-col gap-3 rounded-xl border border-border-default bg-surface p-4">
-      <div>
-        <div className="text-sm font-semibold text-text-base">Need a bigger-picture plan?</div>
-        <div className="text-sm text-text-muted">Open Path forecast to see likely openings and variants by day.</div>
-      </div>
-      <Button
-        type="button"
-        intent="accent"
-        size="sm"
-        className="w-full justify-center"
-        onClick={onSwitchToForecast}
-      >
-        Open forecast
-      </Button>
-    </div>
-  );
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Button intent="primary" size="md" className="w-full justify-center" onClick={onGoToReviewVariant}>
+              Start Review
+            </Button>
+            <Button intent="secondary" size="md" className="w-full justify-center" onClick={onGoToTrainVariant}>
+              Start Training
+            </Button>
+          </div>
 
-  const todayVsPlanCard = (
-    <div className="flex flex-col gap-2 rounded-xl border border-border-default bg-surface p-4">
-      <div className="text-sm font-semibold text-text-base">Today vs plan</div>
-      <div className="grid grid-cols-2 gap-2 text-center">
-        <div className="rounded bg-interactive px-2 py-2">
-          <div className="text-[11px] text-text-muted">Reviews (due)</div>
-          <div className="text-lg font-semibold text-brand">{completedReviewsToday} / {reviewTargetToday}</div>
-        </div>
-        <div className="rounded bg-interactive px-2 py-2">
-          <div className="text-[11px] text-text-muted">New learned (first-time)</div>
-          <div className="text-lg font-semibold text-accent">{completedNewToday} / {newTargetToday}</div>
+          <div className="rounded-xl border border-border-subtle bg-surface-raised px-4 py-3 text-sm text-text-muted">
+            Last reviewed: {formatDate(path.lastDate)}
+          </div>
+
+          <Button intent="danger" size="md" className="w-full justify-center" onClick={onRemoveVariant}>
+            <XMarkIcon className="h-5 w-5" />
+            Remove this variant from path
+          </Button>
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-2 text-center">
-        <div className="rounded bg-interactive px-2 py-2">
-          <div className="text-[11px] text-text-muted">Target</div>
-          <div className="text-lg font-semibold text-brand">{plannedTodayTarget}</div>
-        </div>
-        <div className="rounded bg-interactive px-2 py-2">
-          <div className="text-[11px] text-text-muted">Completed</div>
-          <div className="text-lg font-semibold text-success">{completedToday}</div>
-        </div>
-        <div className="rounded bg-interactive px-2 py-2">
-          <div className="text-[11px] text-text-muted">Remaining</div>
-          <div className="text-lg font-semibold text-accent">{remainingToTarget}</div>
-        </div>
-      </div>
-      <div className="text-xs text-text-muted">
-        Reviews remaining: {remainingReviewsTarget} | New remaining: {remainingNewTarget}
-      </div>
-      <div className="text-xs text-text-subtle">
-        New learned increases only when a variant is reviewed for the first time in this filter scope.
-      </div>
-      <div className={`text-sm ${exceededTarget ? "text-success" : "text-text-muted"}`}>
-        {todayPlanMessage}
-      </div>
-    </div>
-  );
+    );
+  }
 
-  return (
-    <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
-      <div className="flex min-h-[220px] w-full flex-col items-center justify-center rounded-2xl border border-border-default bg-surface p-4 shadow sm:min-h-[280px] sm:p-6 xl:col-span-8">
-        {renderLessonCard()}
+  if (isNewVariantPath(path)) {
+    return (
+      <div className="rounded-2xl border border-border-default bg-surface p-5 shadow-surface sm:p-6">
+        <div className="flex flex-col gap-5">
+          <div className="space-y-3">
+            <BookOpenIcon className="h-8 w-8 text-brand" />
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-text-subtle">Next lesson</p>
+              <h2 className="text-2xl font-semibold leading-tight text-text-base">{nextAction.title}</h2>
+              <p className="text-sm leading-6 text-text-muted">{nextAction.description}</p>
+            </div>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <div className="rounded-xl border border-border-subtle bg-surface-raised px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-text-subtle">Repertoire</p>
+              <p className="mt-2 text-sm font-medium text-text-base">{path.repertoireName}</p>
+            </div>
+            <div className="rounded-xl border border-border-subtle bg-surface-raised px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-text-subtle">Variant</p>
+              <p className="mt-2 text-sm font-medium text-text-base">{path.name}</p>
+            </div>
+            <div className="rounded-xl border border-border-subtle bg-surface-raised px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-text-subtle">Status</p>
+              <p className="mt-2 text-sm font-medium text-accent">Not started</p>
+            </div>
+          </div>
+
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Button intent="primary" size="md" className="w-full justify-center" onClick={onGoToReviewVariant}>
+              Start Review
+            </Button>
+            <Button intent="secondary" size="md" className="w-full justify-center" onClick={onGoToTrainVariant}>
+              Start Training
+            </Button>
+          </div>
+        </div>
       </div>
-      <div className="space-y-3 xl:col-span-4">
-        {isMobile ? forecastCard : workloadGrid}
-        {isMobile ? todayVsPlanCard : forecastCard}
-        {isMobile ? workloadGrid : todayVsPlanCard}
+    );
+  }
+
+  if (isStudyPath(path)) {
+    return (
+      <div className="rounded-2xl border border-border-default bg-surface p-5 shadow-surface sm:p-6">
+        <div className="flex flex-col gap-5">
+          <div className="space-y-3">
+            <AcademicCapIcon className="h-8 w-8 text-success" />
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-text-subtle">Next lesson</p>
+              <h2 className="text-2xl font-semibold leading-tight text-text-base">{nextAction.title}</h2>
+              <p className="text-sm leading-6 text-text-muted">{nextAction.description}</p>
+            </div>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="rounded-xl border border-border-subtle bg-surface-raised px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-text-subtle">Study</p>
+              <p className="mt-2 text-sm font-medium text-text-base">{path.name}</p>
+            </div>
+            <div className="rounded-xl border border-border-subtle bg-surface-raised px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-text-subtle">Last session</p>
+              <p className="mt-2 text-sm font-medium text-text-base">{path.lastSession}</p>
+            </div>
+          </div>
+
+          <Button intent="accent" size="md" className="w-full justify-center sm:w-auto" onClick={onGoToStudy}>
+            Go to Study
+          </Button>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  return null;
 };

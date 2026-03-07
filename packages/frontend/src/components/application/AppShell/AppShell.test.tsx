@@ -123,6 +123,10 @@ describe("AppShell", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /search/i }));
 
+    await waitFor(() => {
+      expect(repertoireRepository.getRepertoireOverview).toHaveBeenCalledTimes(1);
+    });
+
     const dialog = screen.getByRole("dialog", { name: /quick search/i });
     fireEvent.change(within(dialog).getByLabelText(/search library/i), {
       target: { value: "italian" },
@@ -136,5 +140,34 @@ describe("AppShell", () => {
     await waitFor(() => {
       expect(screen.getByTestId("location-display")).toHaveTextContent("/repertoires/rep-1/openings/Italian%20Game");
     });
+  });
+
+  it("does not refetch the overview on each quick-search keystroke", async () => {
+    renderShell();
+
+    fireEvent.click(screen.getByRole("button", { name: /search/i }));
+
+    await waitFor(() => {
+      expect(repertoireRepository.getRepertoireOverview).toHaveBeenCalledTimes(1);
+    });
+
+    const dialog = screen.getByRole("dialog", { name: /quick search/i });
+    const input = within(dialog).getByLabelText(/search library/i);
+
+    fireEvent.change(input, { target: { value: "ita" } });
+    fireEvent.change(input, { target: { value: "ital" } });
+    fireEvent.change(input, { target: { value: "italian" } });
+
+    await within(dialog).findByRole("button", { name: /italian game/i });
+    expect(repertoireRepository.getRepertoireOverview).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows dedicated route copy for path", () => {
+    renderShell("/path?view=forecast");
+
+    expect(screen.getByText("Path")).toBeInTheDocument();
+    expect(
+      screen.getByText("Plan the queue, inspect the forecast, and switch into the next lesson when you are ready to execute.")
+    ).toBeInTheDocument();
   });
 });

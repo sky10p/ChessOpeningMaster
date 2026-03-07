@@ -21,9 +21,9 @@ const AuthPageShell: React.FC<AuthPageShellProps> = ({
         <div className="space-y-4">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-text-subtle">ChessKeep</p>
           <div className="space-y-3">
-            <h1 className="max-w-lg text-[2.5rem] font-semibold leading-tight tracking-[-0.04em] text-text-base">
+            <h2 className="max-w-lg text-[2.5rem] font-semibold leading-tight tracking-[-0.04em] text-text-base">
               {asideTitle}
-            </h1>
+            </h2>
             <p className="max-w-lg text-base leading-7 text-text-muted">{asideDescription}</p>
           </div>
         </div>
