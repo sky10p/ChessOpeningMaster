@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { RepertoireOverviewResponse } from "@chess-opening-master/common";
 import {
   Bars3Icon,
   BookOpenIcon,
@@ -11,8 +12,11 @@ import {
   SunIcon,
   TrophyIcon,
 } from "@heroicons/react/24/outline";
-import { ArrowRightOnRectangleIcon, ChevronRightIcon, PlusIcon } from "@heroicons/react/24/solid";
-import { downloadRepertoiresBackup } from "../../../repository/repertoires/repertoires";
+import { ArrowRightEndOnRectangleIcon, ChevronRightIcon, PlusIcon } from "@heroicons/react/24/solid";
+import {
+  downloadRepertoiresBackup,
+  getRepertoireOverview,
+} from "../../../repository/repertoires/repertoires";
 import { logout } from "../../../repository/auth/auth";
 import { useHeaderState } from "../../../contexts/HeaderContext";
 import { useNavbarDispatch, useNavbarState } from "../../../contexts/NavbarContext";
@@ -20,6 +24,7 @@ import { useFooterState } from "../../../contexts/FooterContext";
 import { useTheme } from "../../../hooks/useTheme";
 import { Badge, Button, Drawer, IconButton, Input } from "../../ui";
 import { cn } from "../../../utils/cn";
+import { getRepertoireEditorRoute, getRepertoireOpeningRoute } from "../../../utils/appRoutes";
 
 interface AppShellProps {
   authEnabled: boolean;
@@ -34,6 +39,16 @@ type NavItem = {
   href: string;
   icon: React.ReactNode;
 };
+
+type QuickSearchResult = {
+  id: string;
+  title: string;
+  subtitle: string;
+  href: string;
+  kind: "repertoire" | "opening";
+};
+
+const EMPTY_OVERVIEW: RepertoireOverviewResponse = { repertoires: [] };
 
 const primaryNav: NavItem[] = [
   {
@@ -123,20 +138,56 @@ export const AppShell: React.FC<AppShellProps> = ({
   const { theme, toggleTheme } = useTheme();
   const [searchOpen, setSearchOpen] = React.useState(false);
   const [searchValue, setSearchValue] = React.useState("");
+  const [searchStatus, setSearchStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
+  const [searchOverview, setSearchOverview] = React.useState<RepertoireOverviewResponse>(EMPTY_OVERVIEW);
   const routeMeta = getRouteMeta(location.pathname);
   const favoriteRepertoires = React.useMemo(
     () => repertoires.filter((repertoire) => repertoire.favorite && !repertoire.disabled).slice(0, 8),
     [repertoires]
   );
-  const filteredFavorites = React.useMemo(() => {
-    const normalizedQuery = searchValue.trim().toLowerCase();
-    if (!normalizedQuery) {
-      return favoriteRepertoires;
+  const normalizedSearchValue = searchValue.trim().toLowerCase();
+  const filteredFavorites = React.useMemo(
+    () =>
+      favoriteRepertoires.filter((repertoire) =>
+        repertoire.name.toLowerCase().includes(normalizedSearchValue)
+      ),
+    [favoriteRepertoires, normalizedSearchValue]
+  );
+  const quickSearchResults = React.useMemo<QuickSearchResult[]>(() => {
+    if (!normalizedSearchValue || searchStatus !== "success") {
+      return [];
     }
-    return favoriteRepertoires.filter((repertoire) =>
-      repertoire.name.toLowerCase().includes(normalizedQuery)
-    );
-  }, [favoriteRepertoires, searchValue]);
+
+    return searchOverview.repertoires
+      .flatMap((repertoire) => {
+        const results: QuickSearchResult[] = [];
+
+        if (repertoire.repertoireName.toLowerCase().includes(normalizedSearchValue)) {
+          results.push({
+            id: `repertoire:${repertoire.repertoireId}`,
+            title: repertoire.repertoireName,
+            subtitle: `Repertoire | ${repertoire.openings.length} openings`,
+            href: getRepertoireEditorRoute(repertoire.repertoireId),
+            kind: "repertoire",
+          });
+        }
+
+        repertoire.openings
+          .filter((opening) => opening.openingName.toLowerCase().includes(normalizedSearchValue))
+          .forEach((opening) => {
+            results.push({
+              id: `opening:${repertoire.repertoireId}:${opening.openingName}`,
+              title: opening.openingName,
+              subtitle: repertoire.repertoireName,
+              href: getRepertoireOpeningRoute(repertoire.repertoireId, opening.openingName),
+              kind: "opening",
+            });
+          });
+
+        return results;
+      })
+      .slice(0, 12);
+  }, [normalizedSearchValue, searchOverview.repertoires, searchStatus]);
   const isImmersiveWorkspace =
     location.pathname.startsWith("/repertoire/") ||
     location.pathname.startsWith("/train/repertoires/");
@@ -148,6 +199,37 @@ export const AppShell: React.FC<AppShellProps> = ({
     void updateRepertoires();
   }, [authenticated, updateRepertoires]);
 
+  React.useEffect(() => {
+    if (!searchOpen || !normalizedSearchValue) {
+      return;
+    }
+
+    let ignore = false;
+
+    const loadSearchOverview = async () => {
+      try {
+        setSearchStatus("loading");
+        const payload = await getRepertoireOverview();
+        if (ignore) {
+          return;
+        }
+        setSearchOverview(payload);
+        setSearchStatus("success");
+      } catch {
+        if (ignore) {
+          return;
+        }
+        setSearchStatus("error");
+      }
+    };
+
+    void loadSearchOverview();
+
+    return () => {
+      ignore = true;
+    };
+  }, [normalizedSearchValue, searchOpen]);
+
   const handleLogout = React.useCallback(async () => {
     if (authEnabled) {
       await logout().catch(() => undefined);
@@ -155,6 +237,12 @@ export const AppShell: React.FC<AppShellProps> = ({
     onLoggedOut();
     navigate("/login");
   }, [authEnabled, navigate, onLoggedOut]);
+
+  const handleCloseSearch = React.useCallback(() => {
+    setSearchOpen(false);
+    setSearchValue("");
+    setSearchStatus("idle");
+  }, []);
 
   if (!authenticated) {
     return <>{children}</>;
@@ -260,7 +348,7 @@ export const AppShell: React.FC<AppShellProps> = ({
             </Button>
             {authEnabled ? (
               <Button intent="ghost" size="sm" className="w-full justify-center" onClick={() => void handleLogout()}>
-                <ArrowRightOnRectangleIcon className="h-4 w-4" />
+                <ArrowRightEndOnRectangleIcon className="h-4 w-4" />
                 Log out
               </Button>
             ) : null}
@@ -406,7 +494,7 @@ export const AppShell: React.FC<AppShellProps> = ({
             </Button>
             {authEnabled ? (
               <Button intent="ghost" size="sm" onClick={() => void handleLogout()}>
-                <ArrowRightOnRectangleIcon className="h-4 w-4" />
+                <ArrowRightEndOnRectangleIcon className="h-4 w-4" />
                 Log out
               </Button>
             ) : null}
@@ -475,7 +563,7 @@ export const AppShell: React.FC<AppShellProps> = ({
                     size="md"
                     className="w-full justify-between"
                     onClick={() => {
-                      navigate(`/repertoire/${repertoire._id}`);
+                      navigate(getRepertoireEditorRoute(repertoire._id));
                       setOpen(false);
                     }}
                   >
@@ -496,18 +584,18 @@ export const AppShell: React.FC<AppShellProps> = ({
       <Drawer
         open={searchOpen}
         title="Quick search"
-        description="Jump to a pinned repertoire."
-        onClose={() => setSearchOpen(false)}
+        description="Jump to a repertoire or opening."
+        onClose={handleCloseSearch}
       >
         <div className="space-y-4">
           <Input
-            label="Search favorites"
+            label="Search library"
             value={searchValue}
             onChange={(event) => setSearchValue(event.target.value)}
-            placeholder="Type a repertoire name…"
+            placeholder="Type a repertoire or opening name..."
           />
           <div className="space-y-2">
-            {filteredFavorites.length > 0 ? (
+            {!normalizedSearchValue && filteredFavorites.length > 0 ? (
               filteredFavorites.map((repertoire) => (
                 <Button
                   key={repertoire._id}
@@ -515,19 +603,60 @@ export const AppShell: React.FC<AppShellProps> = ({
                   size="md"
                   className="w-full justify-between"
                   onClick={() => {
-                    navigate(`/repertoire/${repertoire._id}`);
-                    setSearchOpen(false);
+                    navigate(getRepertoireEditorRoute(repertoire._id));
+                    handleCloseSearch();
                   }}
                 >
                   <span className="truncate">{repertoire.name}</span>
                   <ChevronRightIcon className="h-4 w-4" />
                 </Button>
               ))
-            ) : (
+            ) : null}
+            {!normalizedSearchValue && filteredFavorites.length === 0 ? (
               <div className="rounded-xl border border-dashed border-border-default px-3 py-5 text-sm text-text-muted">
-                No matching pinned repertoire.
+                No favorite repertoires yet.
               </div>
-            )}
+            ) : null}
+            {normalizedSearchValue && searchStatus === "loading" ? (
+              <div className="rounded-xl border border-border-subtle px-3 py-5 text-sm text-text-muted">
+                Searching your library...
+              </div>
+            ) : null}
+            {normalizedSearchValue && searchStatus === "error" ? (
+              <div className="rounded-xl border border-dashed border-danger/30 px-3 py-5 text-sm text-danger">
+                Unable to search your library right now.
+              </div>
+            ) : null}
+            {normalizedSearchValue && searchStatus === "success" && quickSearchResults.length > 0 ? (
+              quickSearchResults.map((result) => (
+                <Button
+                  key={result.id}
+                  intent="secondary"
+                  size="md"
+                  className="w-full justify-between"
+                  onClick={() => {
+                    navigate(result.href);
+                    handleCloseSearch();
+                  }}
+                >
+                  <span className="min-w-0 text-left">
+                    <span className="block truncate text-sm text-text-base">{result.title}</span>
+                    <span className="block truncate text-xs text-text-subtle">{result.subtitle}</span>
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <Badge variant={result.kind === "opening" ? "info" : "default"} size="sm">
+                      {result.kind === "opening" ? "Opening" : "Repertoire"}
+                    </Badge>
+                    <ChevronRightIcon className="h-4 w-4" />
+                  </span>
+                </Button>
+              ))
+            ) : null}
+            {normalizedSearchValue && searchStatus === "success" && quickSearchResults.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-border-default px-3 py-5 text-sm text-text-muted">
+                No matching repertoire or opening.
+              </div>
+            ) : null}
           </div>
         </div>
       </Drawer>

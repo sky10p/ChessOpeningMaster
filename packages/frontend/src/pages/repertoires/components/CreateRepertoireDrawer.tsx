@@ -19,14 +19,18 @@ export const CreateRepertoireDrawer: React.FC<CreateRepertoireDrawerProps> = ({
   const [error, setError] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
 
+  const closeDrawer = React.useCallback(() => {
+    setName("");
+    setError(null);
+    onClose();
+  }, [onClose]);
+
   const handleClose = React.useCallback(() => {
     if (submitting) {
       return;
     }
-    setName("");
-    setError(null);
-    onClose();
-  }, [onClose, submitting]);
+    closeDrawer();
+  }, [closeDrawer, submitting]);
 
   const handleSubmit = React.useCallback(async () => {
     if (!name.trim()) {
@@ -38,14 +42,14 @@ export const CreateRepertoireDrawer: React.FC<CreateRepertoireDrawerProps> = ({
     try {
       const createdRepertoire = await createRepertoire(name.trim());
       await updateRepertoires();
-      handleClose();
+      closeDrawer();
+      setSubmitting(false);
       navigate(`/repertoire/${createdRepertoire.insertedId}`);
     } catch {
       setError("Unable to create repertoire right now.");
-    } finally {
       setSubmitting(false);
     }
-  }, [handleClose, name, navigate, updateRepertoires]);
+  }, [closeDrawer, name, navigate, updateRepertoires]);
 
   return (
     <Drawer

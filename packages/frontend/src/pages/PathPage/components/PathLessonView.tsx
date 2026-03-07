@@ -293,7 +293,7 @@ export const PathLessonView: React.FC<PathLessonViewProps> = ({
         </div>
       </div>
       <div className="text-xs text-text-muted">
-        Reviews remaining: {remainingReviewsTarget} Â· New remaining: {remainingNewTarget}
+        Reviews remaining: {remainingReviewsTarget} | New remaining: {remainingNewTarget}
       </div>
       <div className="text-xs text-text-subtle">
         New learned increases only when a variant is reviewed for the first time in this filter scope.
@@ -381,7 +381,7 @@ export const PathLessonView: React.FC<PathLessonViewProps> = ({
             </div>
           </div>
           <div className="text-xs text-text-muted">
-            Reviews remaining: {remainingReviewsTarget} · New remaining: {remainingNewTarget}
+            Reviews remaining: {remainingReviewsTarget} | New remaining: {remainingNewTarget}
           </div>
           <div className="text-xs text-text-subtle">
             New learned increases only when a variant is reviewed for the first time in this filter scope.
