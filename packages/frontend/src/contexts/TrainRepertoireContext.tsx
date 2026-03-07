@@ -857,7 +857,10 @@ export const TrainRepertoireContextProvider: React.FC<
         }
         return trainVariant;
       });
-      setTrainVariants(newTrainVariants);
+      const hasChanges = newTrainVariants.some((tv, i) => tv !== trainVariants[i]);
+      if (hasChanges) {
+        setTrainVariants(newTrainVariants);
+      }
       return newTrainVariants;
     },
     [

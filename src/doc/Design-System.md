@@ -127,7 +127,7 @@ import {
   Button, IconButton, Badge, Checkbox, Card,
   PageHeader, SectionHeader, StatStrip, ListRow,
   Tabs, TabButton, Input, Textarea, Select,
-  EmptyState, Tooltip, MetricTitle,
+  EmptyState, Tooltip, MetricTitle, Drawer,
 } from "../../components/ui";
 ```
 
@@ -389,6 +389,44 @@ Rules:
 - Prefer `Tooltip` over page-local absolute overlays so help content can escape clipped scroll containers safely.
 - When the direct child is already focusable (a `<button>`, `<a>`, `<input>`, `<select>`, `<textarea>`, or any element with an explicit `tabIndex`), the wrapper span will **not** add an extra `tabIndex={0}`. This prevents double focus stops. When wrapping non-interactive content (plain `<span>`, `<Badge>`, icons), the wrapper provides keyboard access automatically.
 
+### 3.12 `Drawer`
+
+```tsx
+<Drawer
+  open={open}
+  title="Navigate"
+  description="Primary sections and utility actions."
+  onClose={() => setOpen(false)}
+  footer={<Button intent="secondary" size="sm">Action</Button>}
+>
+  {/* children */}
+</Drawer>
+```
+
+**Props:**
+
+| Prop | Type | Description |
+|---|---|---|
+| `open` | `boolean` | Controls visibility |
+| `title` | `string` | Required. Rendered as `<h2>` and used for `aria-labelledby` |
+| `description` | `string?` | Optional subtitle; used for `aria-describedby` |
+| `onClose` | `() => void` | Called on backdrop click, Close button, or Escape key |
+| `children` | `ReactNode` | Scrollable body content |
+| `footer` | `ReactNode?` | Optional sticky footer row |
+| `className` | `string?` | Extra classes applied to the `<aside>` panel |
+
+**Accessibility behaviour (built-in):**
+- The panel renders with `role="dialog"` + `aria-modal="true"`, `aria-labelledby`, and `aria-describedby` so screen readers announce it correctly.
+- Pressing **Escape** closes the drawer.
+- Focus moves into the drawer on open and returns to the triggering element on close.
+- **Tab** / **Shift+Tab** are trapped within the drawer while it is open, preventing keyboard users from reaching obscured page content.
+- The overlay backdrop is a `<button type="button">` (never `type="submit"`) to avoid accidental form submissions when used inside a `<form>`.
+
+**Rules:**
+- Always provide `title`; it is the accessible label for the dialog.
+- Use Drawer for slide-in panels that conceptually block the page (navigation, filter sheets, detail panes). Prefer dialog/modal for confirmations.
+- Do not use Drawer for inline content that does not overlay the page.
+
 ---
 
 ## 4. Class Composition Utility
@@ -510,9 +548,11 @@ Icon sizes should use Tailwind width/height utilities (`h-4 w-4`, `h-5 w-5`, `h-
 
 - Every `<IconButton>` must have a `label` prop (becomes `aria-label`).
 - Every `<Tabs>` container renders `role="tablist"`.
-- All form inputs from `Input` / `Select` / `Textarea` accept a `label` prop that renders a visible `<label>` (preferred over `placeholder`-only labels).
+- All form inputs from `Input` / `Select` / `Textarea` accept a `label` prop that renders a visible `<label>` (preferred over `placeholder`-only labels). Never use `placeholder` as the sole accessible label.
 - Keyboard-only users must be able to activate all interactive elements via `Tab` + `Enter`/`Space`. The Button primitive includes `focus-visible` ring using `ring-brand`.
 - Do not suppress the outline on interactive elements globally - the global `focus { outline: none }` in `theme.css` is intentional only for mouse users; `focus-visible` styles remain active.
+- All overlay/modal-style components (`Drawer`, dialogs) must carry `role="dialog"` + `aria-modal="true"` and must implement Escape-key close, focus-on-open, focus-restore-on-close, and Tab focus trapping.
+- Never use a bare `<button>` without an explicit `type` attribute inside or adjacent to a `<form>`. Buttons that do not submit must have `type="button"`; the `Button` component passes `type` through its `...props` spread.
 
 ---
 

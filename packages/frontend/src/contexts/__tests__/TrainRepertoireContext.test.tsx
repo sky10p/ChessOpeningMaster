@@ -86,6 +86,7 @@ describe("TrainRepertoireContext", () => {
 
     const moveCalls: string[] = [];
     let triggerUserMove: ((node: MoveVariantNode) => void) | null = null;
+    const stableChess = { fen: () => "start-fen" };
 
     mockedUseRepertoireContext.mockImplementation(() => {
       const [currentMoveNode, setCurrentMoveNode] = React.useState(rootNode);
@@ -100,9 +101,7 @@ describe("TrainRepertoireContext", () => {
       return {
         repertoireId: "rep-1",
         orientation: "white",
-        chess: {
-          fen: () => "start-fen",
-        },
+        chess: stableChess,
         currentMoveNode,
         goToMove,
         initBoard: () => setCurrentMoveNode(rootNode),

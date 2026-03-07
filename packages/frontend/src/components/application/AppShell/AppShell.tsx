@@ -501,9 +501,10 @@ export const AppShell: React.FC<AppShellProps> = ({
       >
         <div className="space-y-4">
           <Input
+            label="Search favorites"
             value={searchValue}
             onChange={(event) => setSearchValue(event.target.value)}
-            placeholder="Search favorites"
+            placeholder="Type a repertoire name…"
           />
           <div className="space-y-2">
             {filteredFavorites.length > 0 ? (

@@ -21,6 +21,50 @@ export const Drawer: React.FC<DrawerProps> = ({
   footer,
   className,
 }) => {
+  const titleId = React.useId();
+  const descriptionId = React.useId();
+  const drawerRef = React.useRef<HTMLElement>(null);
+  const previousFocusRef = React.useRef<HTMLElement | null>(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+    previousFocusRef.current = document.activeElement as HTMLElement;
+    drawerRef.current?.focus();
+    return () => {
+      previousFocusRef.current?.focus();
+    };
+  }, [open]);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = drawerRef.current?.querySelectorAll<HTMLElement>(
+        'a[href],button:not([disabled]),textarea,input,select,[tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable || focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey) {
+        if (document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [open, onClose]);
+
   if (!open) {
     return null;
   }
@@ -28,22 +72,29 @@ export const Drawer: React.FC<DrawerProps> = ({
   return (
     <div className="fixed inset-0 z-[70] flex justify-end bg-overlay backdrop-blur-sm">
       <button
+        type="button"
         aria-label="Close drawer"
         className="flex-1 cursor-default"
         onClick={onClose}
       />
       <aside
+        ref={drawerRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={description ? descriptionId : undefined}
+        tabIndex={-1}
         className={cn(
-          "flex h-full w-full max-w-[28rem] flex-col border-l border-border-default bg-surface shadow-elevated",
+          "flex h-full w-full max-w-[28rem] flex-col border-l border-border-default bg-surface shadow-elevated focus:outline-none",
           className
         )}
       >
         <div className="flex items-start justify-between gap-4 border-b border-border-subtle px-5 py-4">
           <div className="space-y-1">
-            <h2 className="text-xl font-semibold text-text-base">{title}</h2>
-            {description ? <p className="text-sm text-text-muted">{description}</p> : null}
+            <h2 id={titleId} className="text-xl font-semibold text-text-base">{title}</h2>
+            {description ? <p id={descriptionId} className="text-sm text-text-muted">{description}</p> : null}
           </div>
-          <Button intent="ghost" size="sm" onClick={onClose}>
+          <Button type="button" intent="ghost" size="sm" onClick={onClose}>
             Close
           </Button>
         </div>
