@@ -4,6 +4,7 @@ import { Variant } from "../../../../models/chess.models";
 import { VariantMovementsPanel } from "./VariantMovementsPanel";
 import VariantActionButtons from "./VariantActionButtons";
 import SelectVariantsDialog from "../../dialogs/SelectVariantsDialog";
+import { Button, IconButton } from "../../../ui";
 
 import {
   TrashIcon,
@@ -11,10 +12,13 @@ import {
   ArrowDownTrayIcon,
   ClipboardDocumentListIcon,
   AcademicCapIcon,
+  ChevronDownIcon,
+  EllipsisVerticalIcon,
 } from "@heroicons/react/24/outline";
 import { TrashListIcon } from "../../../icons/TrashListIcon";
 import { BoardOrientation } from "@chess-opening-master/common";
 import { useNavigationUtils } from "../../../../utils/navigationUtils";
+import { MenuContext } from "../../../../contexts/MenuContext";
 
 interface VariantTreeProps {
   variants: Variant[];
@@ -32,6 +36,7 @@ interface VariantTreeProps {
   currentMoveNode: MoveVariantNode;
   selectedVariant: Variant | null;
   setSelectedVariant: (variant: Variant | null) => void;
+  compact?: boolean;
 }
 
 const VariantTree: React.FC<VariantTreeProps> = ({
@@ -49,8 +54,10 @@ const VariantTree: React.FC<VariantTreeProps> = ({
   currentMoveNode,
   selectedVariant,
   setSelectedVariant,
+  compact = false,
 }) => {
   const { goToTrainRepertoire } = useNavigationUtils();
+  const menuContext = React.useContext(MenuContext);
   const [showSelectVariantDialog, setShowSelectVariantDialog] = useState(false);
 
   const variantActions = useMemo(
@@ -107,33 +114,87 @@ const VariantTree: React.FC<VariantTreeProps> = ({
   );
 
   return (
-    <div className="w-full text-textLight">
-      {selectedVariant && (
-        <div className="flex justify-center">
-          <VariantActionButtons actions={variantActions()} />
-        </div>
-      )}
-      <div>
-        {selectedVariant && (
-          <div className="grid grid-cols-1">
-            <button
-              onClick={() => setShowSelectVariantDialog(true)}
-              className="px-4 py-2 bg-accent text-black rounded hover:opacity-75"
-            >
-              {selectedVariant ? selectedVariant.name : "Change Variant"}
-            </button>
+    <div className="w-full text-text-base">
+      <div className="space-y-3">
+        {selectedVariant ? (
+          <div className="rounded-xl border border-border-default bg-surface-raised p-3">
+            {!compact && <VariantActionButtons actions={variantActions()} />}
+            <div className="space-y-2">
+              {compact ? (
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-text-subtle">Current line</p>
+              ) : null}
+              <Button
+                onClick={() => setShowSelectVariantDialog(true)}
+                intent="secondary"
+                size="sm"
+                className="w-full justify-between rounded-lg"
+              >
+                <span className="truncate">{selectedVariant.name}</span>
+                <ChevronDownIcon className="h-4 w-4 shrink-0" />
+              </Button>
+              {compact ? (
+                <div className="flex items-center gap-2">
+                  <Button
+                    intent="accent"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => goToTrainRepertoire(repertoireId, selectedVariant.fullName)}
+                  >
+                    <AcademicCapIcon className="h-4 w-4" />
+                    Train
+                  </Button>
+                  <IconButton
+                    label="More variant actions"
+                    onClick={(event) =>
+                      menuContext?.toggleMenu(event.currentTarget, [
+                        {
+                          name: "Download",
+                          action: () => downloadVariantPGN(selectedVariant),
+                        },
+                        {
+                          name: "Copy PGN",
+                          action: () => copyVariantPGN(selectedVariant),
+                        },
+                        {
+                          name: "Copy variant to repertoire",
+                          action: () => copyVariantToRepertoire(selectedVariant),
+                        },
+                        {
+                          name: "Copy variants to repertoire",
+                          action: copyVariantsToRepertoire,
+                        },
+                        {
+                          name: "Delete variant",
+                          action: () => deleteVariant(selectedVariant),
+                        },
+                        {
+                          name: "Delete variants",
+                          action: deleteVariants,
+                        },
+                      ])}
+                    className="border border-border-default bg-surface text-text-muted hover:bg-interactive hover:text-text-base"
+                  >
+                    <EllipsisVerticalIcon className="h-5 w-5" />
+                  </IconButton>
+                </div>
+              ) : null}
+            </div>
           </div>
-        )}
+        ) : null}
         <div>
-          {selectedVariant?.moves && (
+          {selectedVariant?.moves ? (
             <VariantMovementsPanel
-              moves={selectedVariant?.moves}
+              moves={selectedVariant.moves}
               changeNameMove={changeNameMove}
               currentMoveNode={currentMoveNode}
               deleteMove={deleteMove}
               goToMove={goToMove}
-              maxHeight="300px"
+              maxHeight={compact ? undefined : "300px"}
             />
+          ) : (
+            <div className="rounded-xl border border-border-default bg-surface-raised p-4 text-sm text-text-subtle">
+              No movements available for this variant.
+            </div>
           )}
         </div>
       </div>

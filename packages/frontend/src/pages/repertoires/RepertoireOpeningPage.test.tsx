@@ -142,7 +142,7 @@ describe("RepertoireOpeningPage", () => {
     );
 
     expect(await screen.findByText("Italian Game")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Train All Variants" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Start review" })[0]);
 
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith(
@@ -163,12 +163,12 @@ describe("RepertoireOpeningPage", () => {
 
     expect(await screen.findByText("Italian Game")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "View Opening" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Open editor" })[0]);
     expect(mockNavigate).toHaveBeenCalledWith(
       getRepertoireEditorRoute("rep-1", { variantName: "Italian Game" })
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "View Variant" }));
+    fireEvent.click(screen.getByRole("button", { name: "Open line" }));
     expect(mockNavigate).toHaveBeenCalledWith(
       getRepertoireEditorRoute("rep-1", { variantName: "Italian Game: Main Line" })
     );

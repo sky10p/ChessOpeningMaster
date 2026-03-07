@@ -1,7 +1,7 @@
 import React from "react";
 import { CheckCircleIcon } from "@heroicons/react/24/outline";
 import { VariantMistake } from "@chess-opening-master/common";
-import { Badge, Button, Card, EmptyState } from "../../../components/ui";
+import { Badge, Button, Card, EmptyState, ListRow, SectionHeader } from "../../../components/ui";
 import { toUtcDateKey } from "../../../utils/dateUtils";
 import { getDueTrainMistakes, isTrainMistakeDue } from "../mistakeUtils";
 
@@ -21,15 +21,18 @@ export const TrainOpeningMistakeSummary: React.FC<TrainOpeningMistakeSummaryProp
   const dueMistakes = getDueTrainMistakes(mistakes, now);
 
   return (
-    <Card padding="default" elevation="raised" className="flex flex-col h-full">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-text-base">Mistakes</h3>
-        {mistakes.length > 0 && (
-          <Badge variant={dueMistakes.length > 0 ? "warning" : "default"} size="sm">
-            {dueMistakes.length} Due
-          </Badge>
-        )}
-      </div>
+    <Card padding="relaxed" elevation="raised" className="flex h-full flex-col">
+      <SectionHeader
+        title="Mistakes"
+        description="Review stored errors separately when a line needs reinforcement instead of a full opening run."
+        action={
+          mistakes.length > 0 ? (
+            <Badge variant={dueMistakes.length > 0 ? "warning" : "default"} size="sm">
+              {dueMistakes.length} due
+            </Badge>
+          ) : null
+        }
+      />
 
       {mistakes.length === 0 ? (
         <EmptyState
@@ -40,13 +43,13 @@ export const TrainOpeningMistakeSummary: React.FC<TrainOpeningMistakeSummaryProp
           className="flex-1"
         />
       ) : (
-        <div className="flex flex-col flex-1 min-h-0">
+        <div className="mt-4 flex min-h-0 flex-1 flex-col">
           <Button
             intent="accent"
             size="md"
             onClick={onReviewDueMistakes}
             disabled={dueMistakes.length === 0}
-            className="w-full justify-center mb-4 shrink-0"
+            className="mb-4 w-full justify-center shrink-0"
           >
             Train Due Mistakes
           </Button>
@@ -55,32 +58,38 @@ export const TrainOpeningMistakeSummary: React.FC<TrainOpeningMistakeSummaryProp
             {mistakes.slice(0, 16).map((mistake) => {
               const isDue = isTrainMistakeDue(mistake, now, todayDayKey);
               return (
-                <div
+                <ListRow
                   key={mistake.mistakeKey}
-                  className="rounded-xl border border-border-subtle bg-surface-raised p-3 flex flex-col gap-2 transition-colors hover:border-border-default"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <p className="text-sm font-medium text-text-base line-clamp-2">
-                      {mistake.variantName}
-                    </p>
-                    <Badge variant={isDue ? "danger" : "default"} size="sm" className="shrink-0">
-                      {isDue ? "Due" : "Scheduled"}
+                  className="bg-surface-raised"
+                  title={
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="line-clamp-2">{mistake.variantName}</span>
+                      <Badge variant={isDue ? "danger" : "default"} size="sm">
+                        {isDue ? "Due now" : "Scheduled"}
+                      </Badge>
+                    </div>
+                  }
+                  description={
+                    <span className="leading-6">
+                      Expected {mistake.expectedMoveSan || mistake.expectedMoveLan} at ply {mistake.mistakePly}.
+                    </span>
+                  }
+                  meta={
+                    <Badge variant="info" size="sm">
+                      Key {mistake.mistakeKey}
                     </Badge>
-                  </div>
-
-                  <p className="text-xs text-text-muted">
-                    Expected: <span className="font-medium text-text-base">{mistake.expectedMoveSan || mistake.expectedMoveLan}</span> at ply {mistake.mistakePly}
-                  </p>
-
-                  <Button
-                    intent="secondary"
-                    size="sm"
-                    onClick={() => onTrainSpecificMistake(mistake)}
-                    className="w-full justify-center mt-1"
-                  >
-                    Train This Mistake
-                  </Button>
-                </div>
+                  }
+                  actions={
+                    <Button
+                      intent="secondary"
+                      size="sm"
+                      onClick={() => onTrainSpecificMistake(mistake)}
+                      className="w-full justify-center sm:w-auto"
+                    >
+                      Train this mistake
+                    </Button>
+                  }
+                />
               );
             })}
           </div>

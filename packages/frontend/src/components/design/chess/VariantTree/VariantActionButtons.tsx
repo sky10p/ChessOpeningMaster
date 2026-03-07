@@ -11,10 +11,10 @@ interface VariantActionButtonsProps {
 
 const VariantActionButtons: React.FC<VariantActionButtonsProps> = ({ actions }) => {
   return (
-    <div className="overflow-x-auto max-w-full mb-5 flex gap-2 items-center pb-2 px-2">
+    <div className="mb-3 flex max-w-full flex-wrap items-center gap-2">
       {actions.map((action, index) => (
         <VariantActionButton
-          key={index}
+          key={`${action.label}-${index}`}
           onClick={action.onClick}
           icon={action.icon}
           label={action.label}

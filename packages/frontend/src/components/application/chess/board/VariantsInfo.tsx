@@ -43,6 +43,7 @@ const VariantsInfo: React.FC = () => {
         currentMoveNode={currentMoveNode}
         selectedVariant={selectedVariant}
         setSelectedVariant={handleVariantChange}
+        compact
       ></VariantsTree>
 
   );

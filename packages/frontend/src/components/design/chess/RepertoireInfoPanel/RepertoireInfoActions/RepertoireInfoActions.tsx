@@ -2,22 +2,33 @@ import React from "react";
 import { RepertoireInfoActionButton } from "./RepertoireInfoActionButton";
 import { RepertoireInfoAction } from "./model";
 
-// Define props interface
 interface RepertoireInfoActionsProps {
   actions: RepertoireInfoAction[];
   moreOptionsAction?: RepertoireInfoAction;
 }
 
 export const RepertoireInfoActions: React.FC<RepertoireInfoActionsProps> = ({ actions, moreOptionsAction }) => {
+  const [primaryAction, ...secondaryActions] = actions;
+
   return (
-    <div className="overflow-x-auto w-full flex justify-end items-center gap-2 pb-2 px-2">
+    <div className="flex w-full flex-wrap items-center justify-end gap-2">
+      {primaryAction ? (
+        <RepertoireInfoActionButton
+          onClick={primaryAction.onClick}
+          icon={primaryAction.icon}
+          label={primaryAction.label}
+          intent="accent"
+          className="min-w-[8.5rem]"
+        />
+      ) : null}
       <div className="flex items-center justify-end gap-2">
-        {actions.map((action, index) => (
+        {secondaryActions.map((action, index) => (
           <RepertoireInfoActionButton
-            key={index}
+            key={`${action.label}-${index}`}
             onClick={action.onClick}
             icon={action.icon}
             label={action.label}
+            iconOnly
           />
         ))}
       </div>
@@ -25,6 +36,8 @@ export const RepertoireInfoActions: React.FC<RepertoireInfoActionsProps> = ({ ac
         <RepertoireInfoActionButton
           onClick={moreOptionsAction.onClick}
           icon={moreOptionsAction.icon}
+          label={moreOptionsAction.label}
+          iconOnly
         />
       )}
     </div>

@@ -19,7 +19,7 @@ import NewStudyModal from "./components/modals/NewStudyModal";
 import NewEntryModal from "./components/modals/NewEntryModal";
 import EditEntryModal from "./components/modals/EditEntryModal";
 import DeleteEntryModal from "./components/modals/DeleteEntryModal";
-import { Button, EmptyState } from "../../components/ui";
+import { Button, EmptyState, PageHeader, StatStrip } from "../../components/ui";
 import DeleteSessionModal from "./components/modals/DeleteSessionModal";
 import ManualTimeModal from "./components/modals/ManualTimeModal";
 import { Study, StudyEntry } from "./models";
@@ -88,6 +88,10 @@ const StudiesPage: React.FC = () => {
   const activeGroup = useMemo(
     () => groups.find((group) => group.id === activeGroupId) || null,
     [groups, activeGroupId]
+  );
+  const totalStudies = useMemo(
+    () => groups.reduce((sum, group) => sum + (group.studies?.length ?? 0), 0),
+    [groups]
   );
 
   const filteredStudies = useMemo<Study[]>(() => {
@@ -163,39 +167,65 @@ const StudiesPage: React.FC = () => {
 
   return (
     <PageRoot>
-      <PageFrame className="h-full py-0 sm:py-2">
-        <PageSurface>
-          <header className="shrink-0 border-b border-border-default bg-surface px-4 py-3 sm:px-5">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="space-y-1">
-                <h1 className="text-base font-semibold text-text-base sm:text-lg">Studies</h1>
-                <p className="text-sm text-text-muted">
-                  Manage study groups, practice sessions, and external resources.
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center justify-end gap-2">
-                {selectedStudy && (
-                  <Button
-                    type="button"
-                    intent="secondary"
-                    size="sm"
-                    onClick={() => setShowNewEntryModal(true)}
-                  >
-                    Add Entry
-                  </Button>
-                )}
+      <PageFrame className="h-full max-w-analytics py-4 sm:py-6">
+        <PageSurface className="gap-4 border-none bg-transparent shadow-none">
+          <PageHeader
+            eyebrow="Study library"
+            title="Studies"
+            description="Keep study groups, session timing, and supporting material in one place with a consistent list-detail workflow."
+            primaryAction={
+              <Button
+                type="button"
+                intent="primary"
+                size="md"
+                onClick={() => setShowNewStudy(true)}
+              >
+                <PlusIcon className="h-4 w-4" />
+                New Study
+              </Button>
+            }
+            secondaryActions={
+              selectedStudy ? (
                 <Button
                   type="button"
-                  intent="primary"
-                  size="sm"
-                  onClick={() => setShowNewStudy(true)}
+                  intent="secondary"
+                  size="md"
+                  onClick={() => setShowNewEntryModal(true)}
                 >
-                  <PlusIcon className="h-4 w-4" />
-                  New Study
+                  Add entry
                 </Button>
-              </div>
-            </div>
-          </header>
+              ) : undefined
+            }
+          />
+
+          <StatStrip
+            items={[
+              {
+                label: "Groups",
+                value: groups.length,
+                tone: "default",
+                detail: activeGroup ? `Current: ${activeGroup.name}` : "No active group",
+              },
+              {
+                label: "Study items",
+                value: totalStudies,
+                tone: "brand",
+                detail: `${filteredStudies.length} shown in current view`,
+              },
+              {
+                label: "Timer",
+                value: timerRunning ? "Running" : "Idle",
+                tone: timerRunning ? "success" : "default",
+                detail: selectedStudy ? selectedStudy.name : "No study selected",
+              },
+              {
+                label: "Tags",
+                value: allTags.length,
+                tone: "accent",
+                detail: selectedTags.length > 0 ? `${selectedTags.length} active filter(s)` : "No active tag filters",
+              },
+            ]}
+          />
 
           <div className="shrink-0 md:hidden">
             <StudyGroupMobile

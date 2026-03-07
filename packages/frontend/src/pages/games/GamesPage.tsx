@@ -20,7 +20,7 @@ import InsightsTab from "./tabs/InsightsTab";
 import SyncTab from "./tabs/SyncTab";
 import TrainingTab from "./tabs/TrainingTab";
 import { GamesTab } from "./types";
-import { Button, Badge, Tabs, TabButton } from "../../components/ui";
+import { Button, Badge, Tabs, TabButton, PageHeader, StatStrip } from "../../components/ui";
 import { PageFrame } from "../../components/design/layouts/PageFrame";
 import { PageRoot } from "../../components/design/layouts/PageRoot";
 import { PageSurface } from "../../components/design/layouts/PageSurface";
@@ -114,44 +114,73 @@ const GamesPage: React.FC = () => {
 
   return (
     <PageRoot>
-      <PageFrame className="h-full py-0 sm:py-2">
-        <PageSurface>
-          <header className="shrink-0 px-4 py-3 bg-surface border-b border-border-default">
-            <div className="flex items-center justify-between gap-3">
-              <h1 className="text-base font-semibold text-text-base">Games Intelligence</h1>
+      <PageFrame className="h-full max-w-analytics py-4 sm:py-6">
+        <PageSurface className="gap-4 border-none bg-transparent shadow-none">
+          <PageHeader
+            eyebrow="Games intelligence"
+            title="Games"
+            description="Convert imported games into training signals, mapping confidence, and sync operations without losing the task hierarchy."
+            primaryAction={
+              <Button
+                intent="primary"
+                size="md"
+                title="Regenerate training plan"
+                onClick={regeneratePlan}
+              >
+                <SparklesIcon className="w-4 h-4" />
+                Regenerate plan
+              </Button>
+            }
+            secondaryActions={
+              <Button
+                intent="secondary"
+                size="md"
+                title="Refresh data"
+                onClick={() => {
+                  void loadData();
+                }}
+              >
+                <ArrowPathIcon className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+                Refresh
+              </Button>
+            }
+            meta={
+              message ? (
+                <Badge variant="info" size="sm">
+                  {message}
+                </Badge>
+              ) : undefined
+            }
+          />
 
-              <div className="flex items-center gap-2">
-                <Button
-                  intent="secondary"
-                  size="sm"
-                  title="Refresh data"
-                  onClick={() => {
-                    void loadData();
-                  }}
-                >
-                  <ArrowPathIcon className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-                  <span className="hidden sm:inline">Refresh</span>
-                </Button>
-
-                <Button
-                  intent="primary"
-                  size="sm"
-                  title="Regenerate training plan"
-                  onClick={regeneratePlan}
-                >
-                  <SparklesIcon className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Regenerate Plan</span>
-                  <span className="sm:hidden">Plan</span>
-                </Button>
-              </div>
-            </div>
-
-            {message ? (
-              <div className="mt-2 rounded-lg bg-interactive border border-border-default px-3 py-2 text-xs text-text-base">
-                {message}
-              </div>
-            ) : null}
-          </header>
+          <StatStrip
+            items={[
+              {
+                label: "Games",
+                value: stats?.totalGames ?? 0,
+                tone: "default",
+                detail: `${stats?.uniqueLines ?? 0} unique lines`,
+              },
+              {
+                label: "Mapped",
+                value: `${Math.round(mappedRatio * 100)}%`,
+                tone: "brand",
+                detail: "Connected to repertoire lines",
+              },
+              {
+                label: "Off-book",
+                value: `${Math.round(manualReviewRatio * 100)}%`,
+                tone: "warning",
+                detail: "Needs manual review",
+              },
+              {
+                label: "Training queue",
+                value: actionableTrainingItems.length,
+                tone: "accent",
+                detail: `${highPriorityTrainingItems} high priority`,
+              },
+            ]}
+          />
 
           <Tabs variant="pill" className="shrink-0 gap-1 p-2 sm:p-3 bg-surface border-b border-border-subtle">
             {tabs.map((tab) => {

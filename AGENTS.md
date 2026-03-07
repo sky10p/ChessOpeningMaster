@@ -15,7 +15,7 @@ ChessKeep is a monorepo application for managing chess opening repertoires. It u
 - **Charts**: Recharts
 
 ### Backend (`packages/backend`)
-- **Runtime**: Node.js (v20.11.1)
+- **Runtime**: Node.js (v20.19.0)
 - **Framework**: Express.js with TypeScript
 - **Database**: MongoDB 5.x
 - **Testing**: Jest + Supertest + mongodb-memory-server
@@ -416,7 +416,20 @@ yarn start:backend:dev
 ```
 
 ### Node Version
-Use Node.js v20.11.1 (specified in volta config).
+Use Node.js v20.19.0 (specified in volta config).
+
+## MCP Tooling (Codex and Copilot)
+
+Project MCP setup is documented in `src/doc/MCP-Setup.md`.
+
+Configured MCP servers:
+- `context7`
+- `playwright`
+- `chrome-devtools`
+
+Compatibility note:
+- `chrome-devtools-mcp` requires Node `>=20.19.0`.
+- The project runtime is pinned to Node `20.19.0` in Volta.
 
 ## Testing Strategy
 

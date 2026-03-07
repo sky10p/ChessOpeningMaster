@@ -1,4 +1,5 @@
 import React from "react";
+import { Button } from "../../../ui";
 
 interface VariantActionButtonProps {
   onClick: () => void;
@@ -11,14 +12,11 @@ const VariantActionButton: React.FC<VariantActionButtonProps> = ({
   icon,
   label,
 }) => (
-  <div className="flex flex-col items-center">
-    <button onClick={onClick} className="text-gray-700 my-2">
-      {icon}
-    </button>
-    {label && <span className="text-xs text-center truncate">
-      {label}
-    </span>
-    }
+  <div className="min-w-0">
+    <Button onClick={onClick} intent="secondary" size="sm" className="w-full justify-center gap-2">
+      <span className="shrink-0">{icon}</span>
+      {label ? <span className="truncate">{label}</span> : null}
+    </Button>
   </div>
 );
 

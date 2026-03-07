@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { MoveVariantNode } from "../../../../models/VariantNode";
 import { TextDialog } from "../../dialogs/TextDialog";
 import { ConfirmDialog } from "../../dialogs/ConfirmDialog";
+import { Tooltip } from "../../../ui";
 
 interface VariantMovementsSubpanelProps {
   moves: MoveVariantNode[];
@@ -47,6 +48,17 @@ const MoveItem: React.FC<{
     <span className="font-medium">{move.getMove().san}</span>
     {move.variantName && <span className="ml-1 text-yellow-400">📖</span>}
   </span>
+);
+
+const VariantReference: React.FC<{ name: string }> = ({ name }) => (
+  <>
+    <div className="mt-1 max-w-full sm:hidden">
+      <span className="block text-[11px] leading-snug text-text-subtle">{name}</span>
+    </div>
+    <Tooltip content={name} className="hidden sm:block">
+      <span className="mt-1 block text-xs leading-snug text-text-subtle">{name}</span>
+    </Tooltip>
+  </>
 );
 
 export const VariantMovementsSubpanel: React.FC<VariantMovementsSubpanelProps> = ({
@@ -135,7 +147,7 @@ export const VariantMovementsSubpanel: React.FC<VariantMovementsSubpanelProps> =
           {turns.map((turn) => (
             <div key={turn.whiteMove.id} className="grid grid-cols-12 py-1.5 border-b border-border-subtle last:border-0">
               <div className="col-span-1 text-sm font-semibold text-text-subtle flex items-center">{`${turn.turnNumber}.`}</div>
-              <div className="col-span-5 cursor-pointer flex items-center" onClick={() => goToMove(turn.whiteMove)}>
+              <div className="col-span-5 cursor-pointer flex flex-col items-start justify-center" onClick={() => goToMove(turn.whiteMove)}>
                 <MoveItem
                   move={turn.whiteMove}
                   currentMoveNode={currentMoveNode}
@@ -143,12 +155,10 @@ export const VariantMovementsSubpanel: React.FC<VariantMovementsSubpanelProps> =
                   onClick={() => goToMove(turn.whiteMove)}
                 />
                 {turn.whiteMove.variantName && (
-                  <span className="ml-2 text-xs text-text-subtle hidden sm:inline-block truncate max-w-[100px]" title={turn.whiteMove.variantName}>
-                    {turn.whiteMove.variantName}
-                  </span>
+                  <VariantReference name={turn.whiteMove.variantName} />
                 )}
               </div>
-              <div className="col-span-5 cursor-pointer flex items-center" onClick={() => turn.blackMove && goToMove(turn.blackMove)}>
+              <div className="col-span-5 cursor-pointer flex flex-col items-start justify-center" onClick={() => turn.blackMove && goToMove(turn.blackMove)}>
                 {turn.blackMove && (
                   <>
                     <MoveItem
@@ -158,9 +168,7 @@ export const VariantMovementsSubpanel: React.FC<VariantMovementsSubpanelProps> =
                       onClick={() => turn.blackMove && goToMove(turn.blackMove)}
                     />
                     {turn.blackMove.variantName && (
-                      <span className="ml-2 text-xs text-text-subtle hidden sm:inline-block truncate max-w-[100px]" title={turn.blackMove.variantName}>
-                        {turn.blackMove.variantName}
-                      </span>
+                      <VariantReference name={turn.blackMove.variantName} />
                     )}
                   </>
                 )}

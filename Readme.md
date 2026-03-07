@@ -109,6 +109,20 @@ To install and run ChessKeep on your local environment, follow these steps:
 4. Set up your web server and MongoDB following specific instructions for your environment.
 5. Use the following yarn commands to run the project in development or production mode.
 
+## AI Tooling (MCP)
+
+MCP configuration for Codex and GitHub Copilot is documented in:
+
+- [src/doc/MCP-Setup.md](src/doc/MCP-Setup.md)
+
+Current workspace MCP servers:
+
+- `context7`
+- `playwright`
+- `chrome-devtools`
+
+Note: `chrome-devtools-mcp` requires Node `>=20.19.0`; this project now pins Node `20.19.0` in Volta.
+
 ## Database Migrations
 
 MongoDB structure changes are tracked in the migration system documented in [MIGRATIONS.md](MIGRATIONS.md).

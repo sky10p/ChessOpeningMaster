@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Card } from "../../../components/ui";
+import { Badge, Button, Card, SectionHeader } from "../../../components/ui";
 
 interface TrainOpeningActionsProps {
   totalVariantsCount: number;
@@ -13,18 +13,31 @@ export const TrainOpeningActions: React.FC<TrainOpeningActionsProps> = ({
   onViewOpening,
 }) => {
   return (
-    <Card className="border-border-default bg-surface" padding="default" elevation="raised">
-      <div className="flex flex-col gap-3">
-        <h3 className="text-base font-semibold text-text-base">Train Opening</h3>
-        <p className="text-sm text-text-muted">
-          Start normal training for all {totalVariantsCount} variants. Use actions in each variant row for per-variant Normal or Focus mode.
-        </p>
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <Button intent="primary" size="sm" onClick={onStartNormalMode} className="justify-center sm:w-fit">
-            Train All Variants
+    <Card className="border-border-default bg-surface" padding="relaxed" elevation="raised">
+      <div className="flex flex-col gap-4">
+        <SectionHeader
+          title="Start review"
+          description="Launch the opening-level session or jump into the editor when you need to inspect the full line tree."
+          action={
+            <Badge variant="brand" size="sm">
+              {totalVariantsCount} variants ready
+            </Badge>
+          }
+        />
+        <div className="grid gap-3 rounded-2xl border border-border-subtle bg-surface-raised p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+          <div className="space-y-1">
+            <p className="text-sm font-semibold text-text-base">Primary next action</p>
+            <p className="text-sm leading-6 text-text-muted">
+              Review the full opening in one session, then use per-variant controls below when you need targeted repetition.
+            </p>
+          </div>
+          <Button intent="primary" size="md" onClick={onStartNormalMode} className="justify-center sm:w-fit">
+            Start review
           </Button>
-          <Button intent="secondary" size="sm" onClick={onViewOpening} className="justify-center sm:w-fit">
-            View Opening
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button intent="secondary" size="md" onClick={onViewOpening} className="justify-center sm:w-fit">
+            Open editor
           </Button>
         </div>
       </div>

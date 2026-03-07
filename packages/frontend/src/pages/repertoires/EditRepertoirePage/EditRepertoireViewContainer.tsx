@@ -98,6 +98,7 @@ const EditRepertoireViewContainer: React.FC = () => {
   useEffect(() => {
     addIconHeader({
       key: "trainRepertoire",
+      label: "Train",
       icon: <BookOpenIcon />,
       onClick: () => {
         navigate(getTrainRepertoireRoute(repertoireId));
@@ -105,11 +106,13 @@ const EditRepertoireViewContainer: React.FC = () => {
     });
     addIconHeader({
       key: "saveRepertoire",
+      label: "Save",
       icon: <SaveIcon />,
       onClick: saveRepertory,
     });
     addIconHeader({
       key: "moreOptions",
+      label: "Export",
       icon: <EllipsisVerticalIcon />,
       onClick: toggleMenuHeader,
     });
