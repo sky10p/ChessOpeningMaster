@@ -9,6 +9,7 @@ import { useIsMobile } from "../../hooks/useIsMobile";
 import { useNavigationUtils } from "../../utils/navigationUtils";
 import { getPathSurfaceModel } from "../../utils/path/pathSurfaceModel";
 import { isNewVariantPath, isStudyPath, isStudiedVariantPath } from "../PathPage/helpers";
+import { StaticChessboard } from "../../components/design/chess/StaticChessboard";
 
 export const DashboardPage = () => {
   const navigate = useNavigate();
@@ -25,6 +26,16 @@ export const DashboardPage = () => {
     () => getPathSurfaceModel(path, plan, pathLoading),
     [path, plan, pathLoading]
   );
+  const boardPreview = React.useMemo(() => {
+    if (!path || !(isStudiedVariantPath(path) || isNewVariantPath(path)) || !path.startingFen) {
+      return null;
+    }
+
+    return {
+      fen: path.startingFen,
+      orientation: path.orientation,
+    };
+  }, [path]);
 
   const handlePrimaryAction = React.useCallback(() => {
     if (pathLoading) {
@@ -35,7 +46,7 @@ export const DashboardPage = () => {
       return;
     }
     if (path && (isStudiedVariantPath(path) || isNewVariantPath(path))) {
-      goToRepertoire(path.repertoireId, path.name);
+      goToRepertoire(path.repertoireId, path.name, path.startingFen);
       return;
     }
     navigate("/path?view=forecast");
@@ -97,24 +108,36 @@ export const DashboardPage = () => {
               ) : (
                 <div className="space-y-4">
                   <div className="rounded-2xl border border-border-subtle bg-surface-raised p-5 sm:p-6">
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-text-subtle">
-                      Recommended next step
-                    </p>
-                    <h2 className="mt-3 text-3xl font-semibold leading-tight tracking-[-0.03em] text-text-base">
-                      {surfaceModel.nextAction.title}
-                    </h2>
-                    <p className="mt-3 max-w-3xl text-sm leading-6 text-text-muted sm:text-base">
-                      {surfaceModel.nextAction.description}
-                    </p>
-                    <div className="mt-5 flex flex-wrap gap-2">
-                      <Button intent="primary" size="lg" onClick={handlePrimaryAction} disabled={pathLoading}>
-                        {surfaceModel.nextAction.primaryLabel}
-                      </Button>
-                      {surfaceModel.nextAction.secondaryActionLabel ? (
-                        <Button intent="secondary" size="lg" onClick={handleSecondaryHeroAction} disabled={pathLoading}>
-                          {surfaceModel.nextAction.secondaryActionLabel}
-                        </Button>
+                    <div className={boardPreview ? "grid gap-5 lg:grid-cols-[minmax(0,240px)_minmax(0,1fr)] lg:items-center" : undefined}>
+                      {boardPreview ? (
+                        <div className="overflow-hidden rounded-2xl border border-border-default bg-surface shadow-surface">
+                          <StaticChessboard
+                            fen={boardPreview.fen}
+                            orientation={boardPreview.orientation}
+                          />
+                        </div>
                       ) : null}
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-text-subtle">
+                          Recommended next step
+                        </p>
+                        <h2 className="mt-3 text-3xl font-semibold leading-tight tracking-[-0.03em] text-text-base">
+                          {surfaceModel.nextAction.title}
+                        </h2>
+                        <p className="mt-3 max-w-3xl text-sm leading-6 text-text-muted sm:text-base">
+                          {surfaceModel.nextAction.description}
+                        </p>
+                        <div className="mt-5 flex flex-wrap gap-2">
+                          <Button intent="primary" size="lg" onClick={handlePrimaryAction} disabled={pathLoading}>
+                            {surfaceModel.nextAction.primaryLabel}
+                          </Button>
+                          {surfaceModel.nextAction.secondaryActionLabel ? (
+                            <Button intent="secondary" size="lg" onClick={handleSecondaryHeroAction} disabled={pathLoading}>
+                              {surfaceModel.nextAction.secondaryActionLabel}
+                            </Button>
+                          ) : null}
+                        </div>
+                      </div>
                     </div>
                   </div>
 

@@ -34,6 +34,8 @@ const baseUsePaths = {
     repertoireId: "1",
     repertoireName: "Test Repertoire",
     name: "Italian Game",
+    orientation: "white",
+    startingFen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
   } as never,
   plan: {
     overdueCount: 2,
@@ -87,6 +89,7 @@ describe("DashboardPage", () => {
     expect(screen.getByRole("button", { name: "Open Path" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Start review" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Focus train" })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Chess board position" })).toBeInTheDocument();
     expect(screen.queryByText("Variants tracked")).not.toBeInTheDocument();
     expect(screen.queryByText("Reviewed with errors")).not.toBeInTheDocument();
     expect(screen.queryByText("This week")).not.toBeInTheDocument();
@@ -101,7 +104,11 @@ describe("DashboardPage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Start review" }));
 
-    expect(mockGoToRepertoire).toHaveBeenCalledWith("1", "Italian Game");
+    expect(mockGoToRepertoire).toHaveBeenCalledWith(
+      "1",
+      "Italian Game",
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    );
     expect(mockNavigate).not.toHaveBeenCalledWith("/path?view=forecast");
   });
 
@@ -139,6 +146,7 @@ describe("DashboardPage", () => {
 
     expect(mockNavigate).toHaveBeenCalledWith("/studies?groupId=group-1&studyId=study-1");
     expect(screen.queryByRole("button", { name: "Focus train" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("img", { name: "Chess board position" })).not.toBeInTheDocument();
   });
 
   it("falls back to Path forecast when there is no immediate lesson", () => {
@@ -157,5 +165,6 @@ describe("DashboardPage", () => {
 
     expect(mockNavigate).toHaveBeenCalledWith("/path?view=forecast");
     expect(screen.queryByRole("button", { name: "Focus train" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("img", { name: "Chess board position" })).not.toBeInTheDocument();
   });
 });

@@ -54,9 +54,23 @@ const ActionButtons: React.FC<{
 }> = ({ target, openRepertoire, openTrainRepertoire }) => {
   if (!target) return null;
   return (
-    <div className="flex gap-1.5 shrink-0">
-      <Button intent="secondary" size="xs" onClick={() => openRepertoire(target.repertoireId, target.variantName)}>View</Button>
-      <Button intent="primary" size="xs" onClick={() => openTrainRepertoire(target.repertoireId, target.variantName)}>Train</Button>
+    <div className="flex w-full flex-col gap-1.5 shrink-0 sm:w-auto sm:flex-row">
+      <Button
+        intent="secondary"
+        size="xs"
+        className="w-full justify-center sm:w-auto"
+        onClick={() => openRepertoire(target.repertoireId, target.variantName)}
+      >
+        View
+      </Button>
+      <Button
+        intent="primary"
+        size="xs"
+        className="w-full justify-center sm:w-auto"
+        onClick={() => openTrainRepertoire(target.repertoireId, target.variantName)}
+      >
+        Train
+      </Button>
     </div>
   );
 };
@@ -74,7 +88,7 @@ const TrainingTab: React.FC<TrainingTabProps> = ({
   markDone,
 }) => (
   <div className="space-y-4">
-    <div className="flex flex-wrap gap-2">
+    <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
       {[
         { label: "Actionable", value: actionableTrainingItems.length, color: "text-text-base" },
         { label: "High Priority", value: highPriorityTrainingItems, color: "text-warning" },
@@ -103,7 +117,7 @@ const TrainingTab: React.FC<TrainingTabProps> = ({
                 const whyNow = item.whyNow ?? [];
                 return (
                   <div key={item.lineKey} className="rounded-lg border border-border-subtle p-3 space-y-2">
-                    <div className="flex items-start justify-between gap-2">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <p className="text-sm font-medium text-text-base leading-snug">
                         <span className="text-text-subtle mr-1">#{index + 1}</span>
                         {buildLineTitle(item.openingName, item.variantName, item.repertoireName)}
@@ -166,7 +180,7 @@ const TrainingTab: React.FC<TrainingTabProps> = ({
                 const target = openingTargetFromLine(line.lineKey);
                 return (
                   <div key={line.lineKey} className="rounded-lg border border-border-subtle p-3 space-y-2">
-                    <div className="flex items-start justify-between gap-2">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <p className="text-sm font-medium text-text-base leading-snug">
                         {buildLineTitle(line.openingName, line.variantName, line.repertoireName)}
                       </p>

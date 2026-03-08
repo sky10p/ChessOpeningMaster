@@ -2,6 +2,7 @@ import { MoveVariantNode } from "../models/VariantNode";
 import { TrainVariant, Variant } from "../models/chess.models";
 import {
   computeNextMastery as computeSharedNextMastery,
+  getVariantEntryPly as getSharedVariantEntryPly,
   getOpeningNameFromVariant as getSharedOpeningNameFromVariant,
   getVariantStartPly as getSharedVariantStartPly,
   mergeMistakeSnapshotItems,
@@ -63,7 +64,7 @@ export const getVariantStartPly = (variant: Variant): number =>
   getSharedVariantStartPly(variant);
 
 export const getNormalizedVariantStartPly = (variant: Variant): number =>
-  Math.max(0, getVariantStartPly(variant) - 1);
+  Math.max(0, getSharedVariantEntryPly(variant));
 
 export const getEffectiveReplayStartPly = (
   variant: Variant,
@@ -72,9 +73,10 @@ export const getEffectiveReplayStartPly = (
 ): number => {
   const normalizedStored = Math.max(0, Math.floor(storedVariantStartPly));
   const namedStartPly = getVariantStartPly(variant);
+  const exactEntryPly = getSharedVariantEntryPly(variant);
   const adjustedStored =
     normalizedStored === namedStartPly
-      ? Math.max(0, namedStartPly - 1)
+      ? exactEntryPly
       : normalizedStored;
   const maxBeforeMistake = Math.max(0, Math.floor(mistakePly) - 1);
   if (adjustedStored >= maxBeforeMistake) {

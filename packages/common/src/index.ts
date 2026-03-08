@@ -47,6 +47,7 @@ export {
 export { getOrientationAwareFen } from "./utils/fenUtils";
 export {
   computeNextMastery,
+  getVariantEntryPly,
   getOpeningNameFromVariant,
   getVariantStartPly,
   mergeMistakeSnapshotItems,

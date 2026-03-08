@@ -19,7 +19,7 @@ import NewStudyModal from "./components/modals/NewStudyModal";
 import NewEntryModal from "./components/modals/NewEntryModal";
 import EditEntryModal from "./components/modals/EditEntryModal";
 import DeleteEntryModal from "./components/modals/DeleteEntryModal";
-import { Button, EmptyState, PageHeader, StatStrip } from "../../components/ui";
+import { Button, Card, EmptyState, PageHeader, StatStrip, type StatStripItem } from "../../components/ui";
 import DeleteSessionModal from "./components/modals/DeleteSessionModal";
 import ManualTimeModal from "./components/modals/ManualTimeModal";
 import { Study, StudyEntry } from "./models";
@@ -28,8 +28,10 @@ import StudyGroupMobile from "../../components/application/StudyGroupMobile";
 import { PageFrame } from "../../components/design/layouts/PageFrame";
 import { PageRoot } from "../../components/design/layouts/PageRoot";
 import { PageSurface } from "../../components/design/layouts/PageSurface";
+import { useIsMobile } from "../../hooks/useIsMobile";
 
 const StudiesPage: React.FC = () => {
+  const isMobile = useIsMobile();
   const {
     groups,
     loading,
@@ -165,27 +167,82 @@ const StudiesPage: React.FC = () => {
     setGroupError(null);
   }, []);
 
+  const statsItems = useMemo<StatStripItem[]>(
+    () => [
+      {
+        label: "Groups",
+        value: groups.length,
+        tone: "default",
+        detail: activeGroup ? `Current: ${activeGroup.name}` : "No active group",
+      },
+      {
+        label: "Study items",
+        value: totalStudies,
+        tone: "brand",
+        detail: `${filteredStudies.length} shown in current view`,
+      },
+      {
+        label: "Timer",
+        value: timerRunning ? "Running" : "Idle",
+        tone: timerRunning ? "success" : "default",
+        detail: selectedStudy ? selectedStudy.name : "No study selected",
+      },
+      {
+        label: "Tags",
+        value: allTags.length,
+        tone: "accent",
+        detail: selectedTags.length > 0 ? `${selectedTags.length} active filter(s)` : "No active tag filters",
+      },
+    ],
+    [activeGroup, allTags.length, filteredStudies.length, groups.length, selectedStudy, selectedTags.length, timerRunning, totalStudies]
+  );
+
+  const mobilePrimaryAction = selectedStudy ? (
+    <Button
+      type="button"
+      intent="primary"
+      size="md"
+      className="w-full justify-center"
+      onClick={() => setShowNewEntryModal(true)}
+    >
+      Add entry
+    </Button>
+  ) : (
+    <Button
+      type="button"
+      intent="primary"
+      size="md"
+      className="w-full justify-center"
+      onClick={() => setShowNewStudy(true)}
+    >
+      <PlusIcon className="h-4 w-4" />
+      New Study
+    </Button>
+  );
+
+  const desktopPrimaryAction = (
+    <Button
+      type="button"
+      intent="primary"
+      size="md"
+      onClick={() => setShowNewStudy(true)}
+    >
+      <PlusIcon className="h-4 w-4" />
+      New Study
+    </Button>
+  );
+
   return (
     <PageRoot>
       <PageFrame className="h-full max-w-analytics py-4 sm:py-6">
         <PageSurface className="gap-4 border-none bg-transparent shadow-none">
           <PageHeader
-            eyebrow="Study library"
+            eyebrow={isMobile ? undefined : "Study library"}
             title="Studies"
-            description="Keep study groups, session timing, and supporting material in one place with a consistent list-detail workflow."
-            primaryAction={
-              <Button
-                type="button"
-                intent="primary"
-                size="md"
-                onClick={() => setShowNewStudy(true)}
-              >
-                <PlusIcon className="h-4 w-4" />
-                New Study
-              </Button>
-            }
+            description={isMobile ? undefined : "Keep study groups, session timing, and supporting material in one place with a consistent list-detail workflow."}
+            primaryAction={isMobile ? mobilePrimaryAction : desktopPrimaryAction}
             secondaryActions={
-              selectedStudy ? (
+              !isMobile && selectedStudy ? (
                 <Button
                   type="button"
                   intent="secondary"
@@ -196,36 +253,43 @@ const StudiesPage: React.FC = () => {
                 </Button>
               ) : undefined
             }
+            className={isMobile ? "gap-3 px-4 py-4" : undefined}
           />
 
-          <StatStrip
-            items={[
-              {
-                label: "Groups",
-                value: groups.length,
-                tone: "default",
-                detail: activeGroup ? `Current: ${activeGroup.name}` : "No active group",
-              },
-              {
-                label: "Study items",
-                value: totalStudies,
-                tone: "brand",
-                detail: `${filteredStudies.length} shown in current view`,
-              },
-              {
-                label: "Timer",
-                value: timerRunning ? "Running" : "Idle",
-                tone: timerRunning ? "success" : "default",
-                detail: selectedStudy ? selectedStudy.name : "No study selected",
-              },
-              {
-                label: "Tags",
-                value: allTags.length,
-                tone: "accent",
-                detail: selectedTags.length > 0 ? `${selectedTags.length} active filter(s)` : "No active tag filters",
-              },
-            ]}
-          />
+          <Card padding="default" className="sm:hidden">
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-text-subtle">
+                  Current focus
+                </div>
+                <div className="text-lg font-semibold text-text-base">
+                  {selectedStudy ? selectedStudy.name : activeGroup?.name || "Choose a study group"}
+                </div>
+                <div className="text-sm text-text-muted">
+                  {selectedStudy
+                    ? `${activeGroup?.name || "Studies"} · ${timerRunning ? "Timer running" : "Ready to practice"}`
+                    : activeGroup
+                      ? `${filteredStudies.length} ${filteredStudies.length === 1 ? "study" : "studies"} in this group`
+                      : "Create or pick a group to keep the next action visible."}
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2 text-xs text-text-subtle">
+                <span className="rounded-lg border border-border-subtle bg-surface-raised px-3 py-2">
+                  {groups.length} {groups.length === 1 ? "group" : "groups"}
+                </span>
+                <span className="rounded-lg border border-border-subtle bg-surface-raised px-3 py-2">
+                  {totalStudies} {totalStudies === 1 ? "study item" : "study items"}
+                </span>
+                <span className="rounded-lg border border-border-subtle bg-surface-raised px-3 py-2">
+                  {selectedTags.length > 0 ? `${selectedTags.length} tag filters` : "No tag filters"}
+                </span>
+              </div>
+            </div>
+          </Card>
+
+          <div className="hidden sm:block">
+            <StatStrip items={statsItems} />
+          </div>
 
           <div className="shrink-0 md:hidden">
             <StudyGroupMobile
@@ -257,16 +321,18 @@ const StudiesPage: React.FC = () => {
             </div>
 
             <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
-              <div className="sticky top-0 z-10 bg-surface/95 backdrop-blur">
-                <TagFilterBar
-                  allTags={allTags as string[]}
-                  selectedTags={selectedTags}
-                  tagFilter={tagFilter}
-                  onTagInput={handleTagInput}
-                  onTagSelect={handleTagSelect}
-                  onTagRemove={handleTagRemove}
-                />
-              </div>
+              {!selectedStudy ? (
+                <div className="sticky top-0 z-10 bg-surface/95 backdrop-blur">
+                  <TagFilterBar
+                    allTags={allTags as string[]}
+                    selectedTags={selectedTags}
+                    tagFilter={tagFilter}
+                    onTagInput={handleTagInput}
+                    onTagSelect={handleTagSelect}
+                    onTagRemove={handleTagRemove}
+                  />
+                </div>
+              ) : null}
 
               <div className="px-3 py-4 sm:px-5 sm:py-5">
                 {loading ? (
@@ -339,6 +405,10 @@ const StudiesPage: React.FC = () => {
                 )}
               </div>
             </main>
+          </div>
+
+          <div className="sm:hidden">
+            <StatStrip items={statsItems} />
           </div>
 
           <NewStudyModal

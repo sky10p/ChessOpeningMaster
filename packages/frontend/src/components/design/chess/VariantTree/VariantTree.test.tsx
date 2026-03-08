@@ -4,8 +4,10 @@ import '@testing-library/jest-dom';
 import VariantTree from './VariantTree';
 import { Variant } from '../../../../models/chess.models';
 import { MoveVariantNode } from '@chess-opening-master/common';
+import { MenuContext } from '../../../../contexts/MenuContext';
 
 const mockGoToTrainRepertoire = jest.fn();
+const mockToggleMenu = jest.fn();
 
 jest.mock('../../../../utils/navigationUtils', () => ({
   useNavigationUtils: () => ({
@@ -210,6 +212,61 @@ describe('VariantTree', () => {
       fireEvent.click(selectionButton);
       
       expect(screen.getByText('Select Variant')).toBeInTheDocument();
+    });
+  });
+
+  describe("Mobile editor mode", () => {
+    it("shows the current line card before the move list without overflowing the mobile action row", () => {
+      render(<VariantTree {...defaultProps} compact mobileEditorMode />);
+
+      const currentLineLabel = screen.getByText("Current line");
+      const activeBadge = screen.getByText("Active e4");
+      const moveButton = screen.getByRole("button", { name: "e4" });
+
+      expect(screen.getByRole("button", { name: mockVariants[0].fullName })).toBeInTheDocument();
+      expect(activeBadge).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "More variant actions" })).toBeInTheDocument();
+      expect(moveButton).toBeInTheDocument();
+      expect(currentLineLabel.compareDocumentPosition(moveButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    it("falls back to the start position label when the current node has no move", () => {
+      render(
+        <VariantTree
+          {...defaultProps}
+          compact
+          mobileEditorMode
+          currentMoveNode={new MoveVariantNode()}
+        />
+      );
+
+      expect(screen.getByText("Active Start position")).toBeInTheDocument();
+    });
+
+    it("keeps train variant inside the variant actions menu", () => {
+      render(
+        <MenuContext.Provider
+          value={{
+            open: false,
+            showMenu: jest.fn(),
+            closeMenu: jest.fn(),
+            toggleMenu: mockToggleMenu,
+          }}
+        >
+          <VariantTree {...defaultProps} compact mobileEditorMode />
+        </MenuContext.Provider>
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "More variant actions" }));
+
+      expect(mockToggleMenu).toHaveBeenCalled();
+      expect(mockToggleMenu.mock.calls[0][1]).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ name: "Train variant" }),
+          expect.objectContaining({ name: "Download" }),
+          expect.objectContaining({ name: "Copy PGN" }),
+        ])
+      );
     });
   });
 

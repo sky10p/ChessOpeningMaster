@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { AlertColor } from "./models";
+import { Button } from "../../ui";
 
 
 interface AlertContainerProps {
@@ -27,17 +28,24 @@ export const Alert: React.FC<AlertContainerProps> = ({
   }, [open, setOpen, autoHideDuration]);
 
   const severityStyles = {
-    success: "bg-green-100 border-green-500 text-green-700",
-    error: "bg-red-100 border-red-500 text-red-700",
-    warning: "bg-yellow-100 border-yellow-500 text-yellow-700",
-    info: "bg-blue-100 border-blue-500 text-blue-700",
+    success: "border-success bg-surface text-text-base",
+    error: "border-danger bg-surface text-text-base",
+    warning: "border-warning bg-surface text-text-base",
+    info: "border-brand bg-surface text-text-base",
   };
 
   return (
     open ? (
-      <div className={`fixed bottom-4 left-4 border-l-4 p-4 ${severityStyles[alertSeverity]} rounded shadow-lg transition transform duration-300 ease-in-out ${open ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-        <span>{alertMessage}</span>
-        <button onClick={() => setOpen(false)} className="ml-4 text-gray-500">&times;</button>
+      <div
+        className={`fixed left-3 right-3 z-[60] rounded-xl border-l-4 p-4 shadow-elevated transition transform duration-300 ease-in-out sm:left-4 sm:right-auto sm:max-w-md ${severityStyles[alertSeverity]} ${open ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+        style={{ bottom: "calc(env(safe-area-inset-bottom, 0px) + var(--app-mobile-bottom-offset, 0px) + 0.75rem)" }}
+      >
+        <div className="flex items-start gap-3">
+          <span className="flex-1 text-sm leading-6">{alertMessage}</span>
+          <Button intent="ghost" size="sm" onClick={() => setOpen(false)} className="min-h-[32px] px-2 py-1">
+            ×
+          </Button>
+        </div>
       </div>
     ) : null
   );

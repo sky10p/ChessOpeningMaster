@@ -291,7 +291,7 @@ describe("TrainRepertoireContext.utils", () => {
     expect(mastery).toBeLessThanOrEqual(100);
   });
 
-  it("normalizes variant start ply to parent of named start move", () => {
+  it("normalizes variant start ply to the named start move itself", () => {
     const variant = createVariant("A");
     variant.moves = [
       createPositionNode("e2e4", 1),
@@ -299,7 +299,30 @@ describe("TrainRepertoireContext.utils", () => {
       createPositionNode("g1f3", 3, "A"),
       createPositionNode("b8c6", 4),
     ];
-    expect(getNormalizedVariantStartPly(variant)).toBe(2);
+    expect(getNormalizedVariantStartPly(variant)).toBe(3);
+  });
+
+  it("normalizes derived variant start ply to the last branch-defining move", () => {
+    const anchor = createPositionNode("g1f3", 3, "A");
+    const branchA = createPositionNode("b8c6", 4);
+    const bridge = createPositionNode("f1b5", 5);
+    const branchB = createPositionNode("a7a6", 6);
+
+    const root = new MoveVariantNode();
+    root.children = [anchor];
+    anchor.parent = root;
+    anchor.children = [branchA, createPositionNode("d7d6", 4)];
+    branchA.parent = anchor;
+    branchA.children = [bridge];
+    bridge.parent = branchA;
+    bridge.children = [branchB, createPositionNode("g8f6", 6)];
+    branchB.parent = bridge;
+
+    const variant = createVariant("A");
+    variant.fullName = "Opening: A (2. ...Nc6 3. ...a6)";
+    variant.moves = [anchor, branchA, bridge, branchB];
+
+    expect(getNormalizedVariantStartPly(variant)).toBe(6);
   });
 
   it("falls back to game start when stored replay start is at or after mistake parent", () => {
@@ -312,6 +335,29 @@ describe("TrainRepertoireContext.utils", () => {
       createPositionNode("f1b5", 5),
     ];
     expect(getEffectiveReplayStartPly(variant, 5, 3)).toBe(0);
+  });
+
+  it("keeps replay start aligned with exact derived entry when stored value is legacy named-anchor ply", () => {
+    const anchor = createPositionNode("g1f3", 3, "A");
+    const branchA = createPositionNode("b8c6", 4);
+    const bridge = createPositionNode("f1b5", 5);
+    const branchB = createPositionNode("a7a6", 6);
+
+    const root = new MoveVariantNode();
+    root.children = [anchor];
+    anchor.parent = root;
+    anchor.children = [branchA, createPositionNode("d7d6", 4)];
+    branchA.parent = anchor;
+    branchA.children = [bridge];
+    bridge.parent = branchA;
+    bridge.children = [branchB, createPositionNode("g8f6", 6)];
+    branchB.parent = bridge;
+
+    const variant = createVariant("A");
+    variant.fullName = "Opening: A (2. ...Nc6 3. ...a6)";
+    variant.moves = [anchor, branchA, bridge, branchB];
+
+    expect(getEffectiveReplayStartPly(variant, 3, 8)).toBe(6);
   });
 
   it("computes replay target parent ply from expected ply without parent pointers", () => {

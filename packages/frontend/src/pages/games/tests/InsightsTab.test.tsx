@@ -61,4 +61,47 @@ describe("InsightsTab", () => {
     expect(screen.getByText("Aug")).toBeInTheDocument();
     expect(screen.getByText("Sep")).toBeInTheDocument();
   });
+
+  it("renders actionable sections before analytics in mobile DOM order", () => {
+    render(
+      <InsightsTab
+        stats={{
+          totalGames: 12,
+          wins: 6,
+          draws: 2,
+          losses: 4,
+          winRate: 0.5,
+          bySource: [],
+          mappedToRepertoireCount: 8,
+          needsManualReviewCount: 2,
+          uniqueLines: 5,
+          openingPerformance: [],
+          variantPerformance: [],
+          gamesByMonth: [],
+          unmappedOpenings: [],
+          unusedRepertoires: [],
+          topOpenings: [],
+          linesToStudy: [],
+        }}
+        mappedRatio={0.67}
+        manualReviewRatio={0.17}
+        wdl={{ win: 0.5, draw: 0.17, loss: 0.33 }}
+        gamesByMonth={[]}
+        variantPerformance={[]}
+        weakestVariants={[]}
+        strongestVariants={[]}
+        offBookOpenings={[]}
+        trainingIdeas={[]}
+        openRepertoire={jest.fn()}
+        openTrainRepertoire={jest.fn()}
+      />
+    );
+
+    const weakest = screen.getByText("Weakest Variants");
+    const month = screen.getByText("Games By Month");
+    const stats = screen.getByText("Win Rate");
+
+    expect(weakest.compareDocumentPosition(month) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(month.compareDocumentPosition(stats) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
 });

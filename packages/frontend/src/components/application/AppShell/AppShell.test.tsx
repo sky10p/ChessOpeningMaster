@@ -59,6 +59,14 @@ const LocationDisplay: React.FC = () => {
   return <div data-testid="location-display">{location.pathname}</div>;
 };
 
+const setViewportWidth = (width: number) => {
+  Object.defineProperty(window, "innerWidth", {
+    configurable: true,
+    writable: true,
+    value: width,
+  });
+};
+
 const renderShell = (initialEntry = "/dashboard") =>
   render(
     <MemoryRouter initialEntries={[initialEntry]}>
@@ -71,6 +79,12 @@ const renderShell = (initialEntry = "/dashboard") =>
 describe("AppShell", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    setViewportWidth(1280);
+    Object.defineProperty(window, "scrollY", {
+      configurable: true,
+      writable: true,
+      value: 0,
+    });
     jest.spyOn(repertoireRepository, "getRepertoireOverview").mockResolvedValue({
       repertoires: [
         {
@@ -169,5 +183,35 @@ describe("AppShell", () => {
     expect(
       screen.getByText("Plan the queue, inspect the forecast, and switch into the next lesson when you are ready to execute.")
     ).toBeInTheDocument();
+  });
+
+  it("keeps the mobile header stable and uses an expandable bottom dock", () => {
+    setViewportWidth(390);
+    renderShell("/repertoires");
+
+    const mobileHeader = screen.getByTestId("app-shell-mobile-header");
+    const mobileNav = screen.getByTestId("app-shell-mobile-nav");
+    const navToggle = screen.getByTestId("app-shell-mobile-nav-toggle");
+
+    expect(mobileHeader.className).toContain("sticky top-0");
+    expect(mobileNav).toBeInTheDocument();
+    expect(within(mobileHeader).getByText("Repertoires")).toBeInTheDocument();
+    expect(document.documentElement.style.getPropertyValue("--app-mobile-bottom-offset")).toBe("5.5rem");
+
+    fireEvent.click(navToggle);
+
+    expect(screen.getByRole("button", { name: "Today" })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Repertoires" })).toHaveLength(2);
+    expect(screen.getByRole("button", { name: "More" })).toBeInTheDocument();
+    expect(document.documentElement.style.getPropertyValue("--app-mobile-bottom-offset")).toBe("14rem");
+
+    Object.defineProperty(window, "scrollY", {
+      configurable: true,
+      writable: true,
+      value: 160,
+    });
+    fireEvent.scroll(window);
+
+    expect(within(mobileHeader).getByText("Repertoires")).toBeInTheDocument();
   });
 });

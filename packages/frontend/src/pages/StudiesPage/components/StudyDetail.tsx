@@ -99,25 +99,7 @@ const StudyDetail: React.FC<StudyDetailProps> = ({
       </Card>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
-        <div className="xl:col-span-8">
-          <Card padding="default" className="w-full">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <div>
-                <h3 className="text-base font-semibold text-text-base">Entries</h3>
-                <p className="text-sm text-text-muted">
-                  {study.entries.length} {study.entries.length === 1 ? "entry" : "entries"}
-                </p>
-              </div>
-            </div>
-            <EntryList
-              entries={study.entries || []}
-              onEditEntry={onEditEntry}
-              onDeleteEntry={onDeleteEntry}
-            />
-          </Card>
-        </div>
-
-        <div className="flex flex-col gap-4 xl:col-span-4">
+        <div className="flex flex-col gap-4 xl:order-2 xl:col-span-4">
           <Card padding="default">
             <div className="mb-4">
               <h3 className="text-base font-semibold text-text-base">Practice</h3>
@@ -144,6 +126,24 @@ const StudyDetail: React.FC<StudyDetailProps> = ({
               sessions={sessions}
               onDeleteSession={onDeleteSession}
               totalTime={totalTime}
+            />
+          </Card>
+        </div>
+
+        <div className="xl:order-1 xl:col-span-8">
+          <Card padding="default" className="w-full">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <h3 className="text-base font-semibold text-text-base">Entries</h3>
+                <p className="text-sm text-text-muted">
+                  {study.entries.length} {study.entries.length === 1 ? "entry" : "entries"}
+                </p>
+              </div>
+            </div>
+            <EntryList
+              entries={study.entries || []}
+              onEditEntry={onEditEntry}
+              onDeleteEntry={onDeleteEntry}
             />
           </Card>
         </div>

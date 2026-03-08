@@ -5,6 +5,7 @@ import {
   Bars3Icon,
   BookOpenIcon,
   ChartBarIcon,
+  ChevronDownIcon,
   HomeIcon,
   MagnifyingGlassIcon,
   MoonIcon,
@@ -147,6 +148,7 @@ export const AppShell: React.FC<AppShellProps> = ({
   const [searchValue, setSearchValue] = React.useState("");
   const [searchStatus, setSearchStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
   const [searchOverview, setSearchOverview] = React.useState<RepertoireOverviewResponse>(EMPTY_OVERVIEW);
+  const [mobileNavExpanded, setMobileNavExpanded] = React.useState(false);
   const searchOverviewFetchedAtRef = React.useRef<number | null>(null);
   const routeMeta = getRouteMeta(location.pathname);
   const favoriteRepertoires = React.useMemo(
@@ -244,6 +246,51 @@ export const AppShell: React.FC<AppShellProps> = ({
     };
   }, [authenticated, searchOpen]);
 
+  React.useEffect(() => {
+    setMobileNavExpanded(false);
+  }, [location.pathname]);
+
+  React.useEffect(() => {
+    if (!authenticated || typeof window === "undefined") {
+      return;
+    }
+
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setMobileNavExpanded(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [authenticated]);
+
+  React.useEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    const isMobileViewport = typeof window !== "undefined" && window.innerWidth < 1024;
+    const offset = !authenticated || !isMobileViewport
+      ? "0px"
+      : !isImmersiveWorkspace
+        ? mobileNavExpanded
+          ? "14rem"
+          : "5.5rem"
+        : footerState.isVisible && footerState.icons.length > 0
+          ? "5.5rem"
+          : "0px";
+
+    document.documentElement.style.setProperty("--app-mobile-bottom-offset", offset);
+
+    return () => {
+      document.documentElement.style.setProperty("--app-mobile-bottom-offset", "0px");
+    };
+  }, [authenticated, footerState.icons.length, footerState.isVisible, isImmersiveWorkspace, mobileNavExpanded]);
+
   const handleLogout = React.useCallback(async () => {
     if (authEnabled) {
       await logout().catch(() => undefined);
@@ -256,6 +303,11 @@ export const AppShell: React.FC<AppShellProps> = ({
     setSearchOpen(false);
     setSearchValue("");
   }, []);
+
+  const activePrimaryNavItem = React.useMemo(
+    () => primaryNav.find((item) => isActiveRoute(location.pathname, item.href)) ?? primaryNav[0],
+    [location.pathname]
+  );
 
   if (!authenticated) {
     return <>{children}</>;
@@ -369,8 +421,11 @@ export const AppShell: React.FC<AppShellProps> = ({
         </aside>
 
         <div className="flex min-h-screen flex-col">
-          <header className="sticky top-0 z-40 border-b border-border-subtle bg-page/95 backdrop-blur">
-            <div className="flex items-center gap-3 px-4 py-3 sm:px-6">
+          <header
+            data-testid="app-shell-mobile-header"
+            className="sticky top-0 z-40 overflow-hidden border-b border-border-subtle bg-page lg:bg-page/95 lg:backdrop-blur"
+          >
+            <div className="flex items-center gap-3 px-4 py-2.5 sm:px-6 sm:py-3">
               <div className="flex items-center gap-2 lg:hidden">
                 <IconButton label="Open menu" onClick={() => setOpen(true)}>
                   <Bars3Icon className="h-5 w-5" />
@@ -380,7 +435,7 @@ export const AppShell: React.FC<AppShellProps> = ({
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-text-subtle">
                   {routeMeta.title}
                 </p>
-                <p className={cn("text-sm text-text-muted", isImmersiveWorkspace ? "hidden sm:block sm:truncate" : "truncate")}>
+                <p className={cn("hidden text-sm text-text-muted lg:block", isImmersiveWorkspace ? "sm:truncate" : "truncate")}>
                   {routeMeta.description}
                 </p>
               </div>
@@ -415,7 +470,7 @@ export const AppShell: React.FC<AppShellProps> = ({
               </div>
             </div>
             {icons.length > 0 ? (
-              <div className="flex gap-2 overflow-x-auto border-t border-border-subtle px-4 py-2 md:hidden">
+              <div className="flex gap-2 overflow-x-auto border-t border-border-subtle bg-page px-4 py-2 md:hidden">
                 {icons.map((icon) => (
                   <Button
                     key={icon.key}
@@ -435,7 +490,7 @@ export const AppShell: React.FC<AppShellProps> = ({
           <main
             className={cn(
               "flex min-h-0 flex-1 flex-col",
-              !isImmersiveWorkspace && "pb-20 lg:pb-0",
+              !isImmersiveWorkspace && "pb-24 lg:pb-0",
               isImmersiveWorkspace && footerState.isVisible && "pb-24 lg:pb-0"
             )}
           >
@@ -444,38 +499,81 @@ export const AppShell: React.FC<AppShellProps> = ({
         </div>
 
         {!isImmersiveWorkspace ? (
-          <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border-subtle bg-surface/95 px-2 py-2 backdrop-blur lg:hidden">
-            <div className="grid grid-cols-5 gap-1">
-              {primaryNav.map((item) => {
-                const active = isActiveRoute(location.pathname, item.href);
-                return (
+          <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 px-3 pb-3 lg:hidden">
+            <div
+              data-testid="app-shell-mobile-nav"
+              className={cn(
+                "pointer-events-auto ml-auto mr-auto w-full max-w-md rounded-[1.75rem] border border-border-subtle bg-surface shadow-elevated transition-all duration-200",
+                mobileNavExpanded ? "px-3 py-3" : "px-3 py-2"
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <Button
+                  intent="ghost"
+                  size="sm"
+                  className="min-h-[44px] flex-1 justify-start rounded-2xl px-3"
+                  onClick={() => navigate(activePrimaryNavItem.href)}
+                >
+                  {activePrimaryNavItem.icon}
+                  {activePrimaryNavItem.label}
+                </Button>
+                <Button
+                  data-testid="app-shell-mobile-nav-toggle"
+                  intent={mobileNavExpanded ? "primary" : "secondary"}
+                  size="sm"
+                  className="min-h-[44px] shrink-0 rounded-2xl px-3"
+                  onClick={() => setMobileNavExpanded((current) => !current)}
+                >
+                  <Bars3Icon className="h-5 w-5" />
+                  Menu
+                  <ChevronDownIcon
+                    className={cn("h-4 w-4 transition-transform duration-200", mobileNavExpanded && "rotate-180")}
+                  />
+                </Button>
+              </div>
+
+              {mobileNavExpanded ? (
+                <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border-subtle pt-3">
+                  {primaryNav.map((item) => {
+                    const active = isActiveRoute(location.pathname, item.href);
+                    return (
+                      <Button
+                        key={item.href}
+                        intent={active ? "primary" : "ghost"}
+                        size="sm"
+                        className="min-h-[52px] justify-start rounded-2xl px-3"
+                        onClick={() => {
+                          navigate(item.href);
+                          setMobileNavExpanded(false);
+                        }}
+                      >
+                        {item.icon}
+                        {item.label}
+                      </Button>
+                    );
+                  })}
                   <Button
-                    key={item.href}
-                    intent={active ? "primary" : "ghost"}
+                    intent={open ? "primary" : "secondary"}
                     size="sm"
-                    className="min-h-[52px] flex-col gap-1"
-                    onClick={() => navigate(item.href)}
+                    className="min-h-[52px] justify-start rounded-2xl px-3"
+                    onClick={() => {
+                      setOpen(true);
+                      setMobileNavExpanded(false);
+                    }}
                   >
-                    {item.icon}
-                    <span className="text-[11px]">{item.shortLabel}</span>
+                    <Bars3Icon className="h-5 w-5" />
+                    More
                   </Button>
-                );
-              })}
-              <Button
-                intent={open ? "primary" : "ghost"}
-                size="sm"
-                className="min-h-[52px] flex-col gap-1"
-                onClick={() => setOpen(true)}
-              >
-                <Bars3Icon className="h-5 w-5" />
-                <span className="text-[11px]">More</span>
-              </Button>
+                </div>
+              ) : null}
             </div>
-          </nav>
+          </div>
         ) : null}
 
         {isImmersiveWorkspace && footerState.isVisible && footerState.icons.length > 0 ? (
-          <div className="fixed inset-x-0 bottom-0 z-50 border-t border-border-subtle bg-surface/95 px-3 py-2 backdrop-blur lg:hidden">
+          <div
+            className="fixed inset-x-0 bottom-0 z-50 border-t border-border-subtle bg-surface px-3 py-2 shadow-elevated lg:hidden"
+          >
             <div className="grid auto-cols-fr grid-flow-col gap-2 overflow-x-auto">
               {footerState.icons.map((icon) => (
                 <Button

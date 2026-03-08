@@ -42,6 +42,7 @@ const baseUsePaths = {
     errors: 3,
     lastDate: new Date("2026-02-15"),
     dueAt: new Date("2026-02-16"),
+    startingFen: "fen-start",
   },
   loading: false,
   error: null,
@@ -171,5 +172,17 @@ describe("PathPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Remove this variant from path" }));
 
     expect(mockShowConfirmDialog).toHaveBeenCalled();
+  });
+
+  it("passes starting fen into review navigation for exact deep links", () => {
+    renderPage("/path?view=lesson");
+
+    fireEvent.click(screen.getByRole("button", { name: "Start Review" }));
+
+    expect(mockGoToRepertoire).toHaveBeenCalledWith(
+      "repertoire-456",
+      "French Defense",
+      "fen-start"
+    );
   });
 });

@@ -166,7 +166,7 @@ const PathPage: React.FC = () => {
 
   const goToReviewVariant = () => {
     if (isStudiedVariantPath(path) || isNewVariantPath(path)) {
-      goToRepertoire(path.repertoireId, path.name);
+      goToRepertoire(path.repertoireId, path.name, path.startingFen);
     }
   };
 

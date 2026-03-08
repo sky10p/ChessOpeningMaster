@@ -9,22 +9,40 @@ interface TrainOpeningMistakeSummaryProps {
   mistakes: VariantMistake[];
   onReviewDueMistakes: () => void;
   onTrainSpecificMistake: (mistake: VariantMistake) => void;
+  compact?: boolean;
+  visibleLimit?: number;
 }
 
 export const TrainOpeningMistakeSummary: React.FC<TrainOpeningMistakeSummaryProps> = ({
   mistakes,
   onReviewDueMistakes,
   onTrainSpecificMistake,
+  compact = false,
+  visibleLimit,
 }) => {
   const now = new Date();
   const todayDayKey = toUtcDateKey(now);
   const dueMistakes = getDueTrainMistakes(mistakes, now);
+  const orderedMistakes = [...mistakes].sort((left, right) => {
+    const leftDue = isTrainMistakeDue(left, now, todayDayKey);
+    const rightDue = isTrainMistakeDue(right, now, todayDayKey);
+    if (leftDue !== rightDue) {
+      return leftDue ? -1 : 1;
+    }
+    return left.variantName.localeCompare(right.variantName);
+  });
+  const visibleMistakes =
+    typeof visibleLimit === "number" ? orderedMistakes.slice(0, visibleLimit) : orderedMistakes;
 
   return (
     <Card padding="relaxed" elevation="raised" className="flex h-full flex-col">
       <SectionHeader
         title="Mistakes"
-        description="Review stored errors separately when a line needs reinforcement instead of a full opening run."
+        description={
+          compact
+            ? undefined
+            : "Review stored errors separately when a line needs reinforcement instead of a full opening run."
+        }
         action={
           mistakes.length > 0 ? (
             <Badge variant={dueMistakes.length > 0 ? "warning" : "default"} size="sm">
@@ -55,7 +73,7 @@ export const TrainOpeningMistakeSummary: React.FC<TrainOpeningMistakeSummaryProp
           </Button>
 
           <div className="space-y-3 overflow-y-auto pr-1 flex-1">
-            {mistakes.slice(0, 16).map((mistake) => {
+            {visibleMistakes.map((mistake) => {
               const isDue = isTrainMistakeDue(mistake, now, todayDayKey);
               return (
                 <ListRow
@@ -75,9 +93,11 @@ export const TrainOpeningMistakeSummary: React.FC<TrainOpeningMistakeSummaryProp
                     </span>
                   }
                   meta={
-                    <Badge variant="info" size="sm">
-                      Key {mistake.mistakeKey}
-                    </Badge>
+                    compact ? undefined : (
+                      <Badge variant="info" size="sm">
+                        Key {mistake.mistakeKey}
+                      </Badge>
+                    )
                   }
                   actions={
                     <Button

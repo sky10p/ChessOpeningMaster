@@ -87,6 +87,19 @@ describe("useNavigationUtils", () => {
 
       expect(mockNavigate).toHaveBeenCalledWith("/repertoire/test-id");
     });
+
+    it("includes fen when provided for exact review deep links", () => {
+      const { result } = renderHook(() => useNavigationUtils());
+
+      result.current.goToRepertoire("test-id", "Italian Game", "fen-value");
+
+      expect(mockNavigate).toHaveBeenCalledWith(
+        getRepertoireEditorRoute("test-id", {
+          variantName: "Italian Game",
+          fen: "fen-value",
+        })
+      );
+    });
   });
 
   describe("goToTrainRepertoire", () => {

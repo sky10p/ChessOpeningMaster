@@ -53,38 +53,8 @@ const InsightsTab: React.FC<InsightsTabProps> = ({
   openRepertoire,
   openTrainRepertoire,
 }) => (
-  <>
-    {/* ── Stat Cards ── */}
-    <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3">
-      {([
-        { label: "Games",        value: stats?.totalGames ?? 0,       sub: null },
-        { label: "Win Rate",     value: formatPercent(stats?.winRate ?? 0), sub: `${stats?.wins ?? 0}W · ${stats?.draws ?? 0}D · ${stats?.losses ?? 0}L` },
-        { label: "Mapped",       value: formatPercent(mappedRatio),    sub: "to repertoire" },
-        { label: "Off-Book",     value: formatPercent(manualReviewRatio), sub: "needs review" },
-        { label: "Unique Lines", value: stats?.uniqueLines ?? 0,       sub: null },
-      ] as const).map(({ label, value, sub }) => (
-        <Card key={label}>
-          <p className="text-[11px] text-text-subtle mb-1">{label}</p>
-          <p className="text-2xl font-semibold text-text-base">{value}</p>
-          {sub ? <p className="text-[11px] text-text-subtle mt-1">{sub}</p> : null}
-        </Card>
-      ))}
-    </div>
-
-    {/* ── Result Split ── */}
-    <Card>
-      <SectionTitle>Result Split</SectionTitle>
-      <WDLBar win={wdl.win} draw={wdl.draw} loss={wdl.loss} />
-    </Card>
-
-    {/* ── Games by Month ── */}
-    <Card>
-      <SectionTitle>Games By Month</SectionTitle>
-      <MonthChart gamesByMonth={gamesByMonth} />
-    </Card>
-
-    {/* ── Weakest & Strongest side by side ── */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+  <div className="grid gap-4">
+    <div className="grid grid-cols-1 gap-3 sm:order-4 sm:grid-cols-2">
       <Card>
         <SectionTitle>Weakest Variants</SectionTitle>
         {weakestVariants.length === 0
@@ -121,8 +91,7 @@ const InsightsTab: React.FC<InsightsTabProps> = ({
       </Card>
     </div>
 
-    {/* ── Off-Book Openings & Training Ideas ── */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <div className="grid grid-cols-1 gap-3 sm:order-5 sm:grid-cols-2">
       <Card>
         <SectionTitle>Off-Book Openings</SectionTitle>
         {offBookOpenings.length === 0
@@ -154,40 +123,71 @@ const InsightsTab: React.FC<InsightsTabProps> = ({
       </Card>
     </div>
 
-    {/* ── Performance By Variant (last) ── */}
-    <Card>
-      <SectionTitle>Performance By Variant</SectionTitle>
-      {variantPerformance.length === 0
-        ? <p className="text-sm text-text-subtle">No variant data for current filters.</p>
-        : <div className="space-y-4">
-            {variantPerformance.slice(0, 8).map((v) => (
-              <div key={v.variantKey}>
-                <div className="flex items-center justify-between gap-2 mb-1.5">
-                  <p className="text-sm text-text-muted truncate">{v.variantName}</p>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-xs text-text-subtle tabular-nums">{v.games}g</span>
-                    <span className="text-sm font-semibold tabular-nums text-text-base">{formatPercent(v.successRate)}</span>
-                    {v.repertoireId ? (
-                      <>
-                        <Button intent="secondary" size="xs" onClick={() => openRepertoire(v.repertoireId as string, v.variantName)}>View</Button>
-                        <Button intent="primary" size="xs" onClick={() => openTrainRepertoire(v.repertoireId as string, v.variantName)}>Train</Button>
-                      </>
-                    ) : null}
+    <div className="sm:order-2">
+      <Card>
+        <SectionTitle>Result Split</SectionTitle>
+        <WDLBar win={wdl.win} draw={wdl.draw} loss={wdl.loss} />
+      </Card>
+    </div>
+
+    <div className="sm:order-3">
+      <Card>
+        <SectionTitle>Games By Month</SectionTitle>
+        <MonthChart gamesByMonth={gamesByMonth} />
+      </Card>
+    </div>
+
+    <div className="sm:order-6">
+      <Card>
+        <SectionTitle>Performance By Variant</SectionTitle>
+        {variantPerformance.length === 0
+          ? <p className="text-sm text-text-subtle">No variant data for current filters.</p>
+          : <div className="space-y-4">
+              {variantPerformance.slice(0, 8).map((v) => (
+                <div key={v.variantKey}>
+                  <div className="flex flex-col gap-2 mb-1.5 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-sm text-text-muted truncate">{v.variantName}</p>
+                    <div className="flex flex-wrap items-center gap-2 shrink-0">
+                      <span className="text-xs text-text-subtle tabular-nums">{v.games}g</span>
+                      <span className="text-sm font-semibold tabular-nums text-text-base">{formatPercent(v.successRate)}</span>
+                      {v.repertoireId ? (
+                        <>
+                          <Button intent="secondary" size="xs" onClick={() => openRepertoire(v.repertoireId as string, v.variantName)}>View</Button>
+                          <Button intent="primary" size="xs" onClick={() => openTrainRepertoire(v.repertoireId as string, v.variantName)}>Train</Button>
+                        </>
+                      ) : null}
+                    </div>
+                  </div>
+                  <WDLMiniBar wins={v.wins} draws={v.draws} losses={v.losses} />
+                  <div className="mt-1 flex gap-3 text-[11px] text-text-subtle tabular-nums">
+                    <span className="text-success">{v.wins}W</span>
+                    <span>{v.draws}D</span>
+                    <span className="text-danger">{v.losses}L</span>
+                    {typeof v.averageMappingConfidence === "number" ? <span>Map {formatPercent(v.averageMappingConfidence)}</span> : null}
                   </div>
                 </div>
-                <WDLMiniBar wins={v.wins} draws={v.draws} losses={v.losses} />
-                <div className="mt-1 flex gap-3 text-[11px] text-text-subtle tabular-nums">
-                  <span className="text-success">{v.wins}W</span>
-                  <span>{v.draws}D</span>
-                  <span className="text-danger">{v.losses}L</span>
-                  {typeof v.averageMappingConfidence === "number" ? <span>Map {formatPercent(v.averageMappingConfidence)}</span> : null}
-                </div>
-              </div>
-            ))}
-          </div>
-      }
-    </Card>
-  </>
+              ))}
+            </div>
+        }
+      </Card>
+    </div>
+
+    <div className="grid grid-cols-2 gap-3 sm:order-1 sm:grid-cols-3 xl:grid-cols-5">
+      {([
+        { label: "Games", value: stats?.totalGames ?? 0, sub: null },
+        { label: "Win Rate", value: formatPercent(stats?.winRate ?? 0), sub: `${stats?.wins ?? 0}W · ${stats?.draws ?? 0}D · ${stats?.losses ?? 0}L` },
+        { label: "Mapped", value: formatPercent(mappedRatio), sub: "to repertoire" },
+        { label: "Off-Book", value: formatPercent(manualReviewRatio), sub: "needs review" },
+        { label: "Unique Lines", value: stats?.uniqueLines ?? 0, sub: null },
+      ] as const).map(({ label, value, sub }) => (
+        <Card key={label}>
+          <p className="text-[11px] text-text-subtle mb-1">{label}</p>
+          <p className="text-2xl font-semibold text-text-base">{value}</p>
+          {sub ? <p className="text-[11px] text-text-subtle mt-1">{sub}</p> : null}
+        </Card>
+      ))}
+    </div>
+  </div>
 );
 
 export default InsightsTab;

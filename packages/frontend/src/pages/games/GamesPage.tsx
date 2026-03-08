@@ -20,11 +20,13 @@ import InsightsTab from "./tabs/InsightsTab";
 import SyncTab from "./tabs/SyncTab";
 import TrainingTab from "./tabs/TrainingTab";
 import { GamesTab } from "./types";
-import { Button, Badge, Tabs, TabButton, PageHeader, StatStrip } from "../../components/ui";
+import { Button, Badge, Card, Tabs, TabButton, PageHeader, StatStrip } from "../../components/ui";
 import { PageFrame } from "../../components/design/layouts/PageFrame";
 import { PageRoot } from "../../components/design/layouts/PageRoot";
 import { PageSurface } from "../../components/design/layouts/PageSurface";
 import { buildTrainExecutionSearch, getRepertoireEditorRoute, getTrainRepertoireRoute } from "../../utils/appRoutes";
+import { useIsMobile } from "../../hooks/useIsMobile";
+import { cn } from "../../utils/cn";
 
 const TAB_ICONS: Record<GamesTab, React.ReactNode> = {
   insights: <ChartBarIcon className="w-4 h-4" />,
@@ -36,6 +38,7 @@ const TAB_ICONS: Record<GamesTab, React.ReactNode> = {
 const isGamesTab = (value: string | null): value is GamesTab => tabs.some((tab) => tab.id === value);
 
 const GamesPage: React.FC = () => {
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedTab = isGamesTab(searchParams.get("tab")) ? (searchParams.get("tab") as GamesTab) : "insights";
@@ -110,76 +113,135 @@ const GamesPage: React.FC = () => {
   }, [navigate]);
 
   const showFilters = selectedTab !== "sync";
+  const statItems = React.useMemo(
+    () => [
+      {
+        label: "Games",
+        value: stats?.totalGames ?? 0,
+        tone: "default" as const,
+        detail: `${stats?.uniqueLines ?? 0} unique lines`,
+      },
+      {
+        label: "Mapped",
+        value: `${Math.round(mappedRatio * 100)}%`,
+        tone: "brand" as const,
+        detail: "Connected to repertoire lines",
+      },
+      {
+        label: "Off-book",
+        value: `${Math.round(manualReviewRatio * 100)}%`,
+        tone: "warning" as const,
+        detail: "Needs manual review",
+      },
+      {
+        label: "Training queue",
+        value: actionableTrainingItems.length,
+        tone: "accent" as const,
+        detail: `${highPriorityTrainingItems} high priority`,
+      },
+    ],
+    [actionableTrainingItems.length, highPriorityTrainingItems, manualReviewRatio, mappedRatio, stats?.totalGames, stats?.uniqueLines]
+  );
 
   return (
     <PageRoot>
       <PageFrame className="h-full max-w-analytics py-4 sm:py-6">
         <PageSurface className="gap-4 border-none bg-transparent shadow-none">
           <PageHeader
-            eyebrow="Games intelligence"
+            eyebrow={isMobile ? undefined : "Games intelligence"}
             title="Games"
-            description="Convert imported games into training signals, mapping confidence, and sync operations without losing the task hierarchy."
+            description={isMobile ? undefined : "Convert imported games into training signals, mapping confidence, and sync operations without losing the task hierarchy."}
             primaryAction={
-              <Button
-                intent="primary"
-                size="md"
-                title="Regenerate training plan"
-                onClick={regeneratePlan}
-              >
-                <SparklesIcon className="w-4 h-4" />
-                Regenerate plan
-              </Button>
+              isMobile ? undefined : (
+                <Button
+                  intent="primary"
+                  size="md"
+                  title="Regenerate training plan"
+                  onClick={regeneratePlan}
+                >
+                  <SparklesIcon className="w-4 h-4" />
+                  Regenerate plan
+                </Button>
+              )
             }
             secondaryActions={
-              <Button
-                intent="secondary"
-                size="md"
-                title="Refresh data"
-                onClick={() => {
-                  void loadData();
-                }}
-              >
-                <ArrowPathIcon className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-                Refresh
-              </Button>
+              !isMobile ? (
+                <Button
+                  intent="secondary"
+                  size="md"
+                  title="Refresh data"
+                  onClick={() => {
+                    void loadData();
+                  }}
+                >
+                  <ArrowPathIcon className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+                  Refresh
+                </Button>
+              ) : undefined
             }
             meta={
-              message ? (
+              !isMobile && message ? (
                 <Badge variant="info" size="sm">
                   {message}
                 </Badge>
               ) : undefined
             }
+            className={isMobile ? "gap-3 px-4 py-4" : undefined}
           />
 
-          <StatStrip
-            items={[
-              {
-                label: "Games",
-                value: stats?.totalGames ?? 0,
-                tone: "default",
-                detail: `${stats?.uniqueLines ?? 0} unique lines`,
-              },
-              {
-                label: "Mapped",
-                value: `${Math.round(mappedRatio * 100)}%`,
-                tone: "brand",
-                detail: "Connected to repertoire lines",
-              },
-              {
-                label: "Off-book",
-                value: `${Math.round(manualReviewRatio * 100)}%`,
-                tone: "warning",
-                detail: "Needs manual review",
-              },
-              {
-                label: "Training queue",
-                value: actionableTrainingItems.length,
-                tone: "accent",
-                detail: `${highPriorityTrainingItems} high priority`,
-              },
-            ]}
-          />
+          <div className="hidden sm:block">
+            <StatStrip items={statItems} />
+          </div>
+
+          <Card padding="compact" className="sm:hidden">
+            <div className="space-y-3">
+              {message ? (
+                <Badge variant="info" size="sm" className="w-fit">
+                  {message}
+                </Badge>
+              ) : null}
+              <div className={cn("grid gap-2", showFilters ? "grid-cols-3" : "grid-cols-2")}>
+                <Button
+                  intent="secondary"
+                  size="sm"
+                  className="justify-center"
+                  title="Refresh data"
+                  onClick={() => {
+                    void loadData();
+                  }}
+                >
+                  <ArrowPathIcon className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+                  Refresh
+                </Button>
+                <Button
+                  intent="primary"
+                  size="sm"
+                  className="justify-center"
+                  title="Regenerate training plan"
+                  onClick={regeneratePlan}
+                >
+                  <SparklesIcon className="w-4 h-4" />
+                  Plan
+                </Button>
+                {showFilters ? (
+                  <Button
+                    intent="secondary"
+                    size="sm"
+                    className="relative justify-center"
+                    onClick={() => setShowMobileFilters(true)}
+                  >
+                    <FunnelIcon className="w-3.5 h-3.5" />
+                    Filters
+                    {activeFiltersCount > 0 ? (
+                      <Badge variant="brand" size="sm" className="absolute -top-1.5 -right-1.5 rounded-full">
+                        {activeFiltersCount}
+                      </Badge>
+                    ) : null}
+                  </Button>
+                ) : null}
+              </div>
+            </div>
+          </Card>
 
           <Tabs variant="pill" className="shrink-0 gap-1 p-2 sm:p-3 bg-surface border-b border-border-subtle">
             {tabs.map((tab) => {
@@ -200,25 +262,6 @@ const GamesPage: React.FC = () => {
                 </TabButton>
               );
             })}
-
-            {showFilters ? (
-              <div className="sm:hidden ml-auto flex items-center pr-3">
-                <Button
-                  intent="secondary"
-                  size="sm"
-                  onClick={() => setShowMobileFilters(true)}
-                  className="relative"
-                >
-                  <FunnelIcon className="w-3.5 h-3.5" />
-                  Filters
-                  {activeFiltersCount > 0 ? (
-                    <Badge variant="brand" size="sm" className="absolute -top-1.5 -right-1.5 rounded-full">
-                      {activeFiltersCount}
-                    </Badge>
-                  ) : null}
-                </Button>
-              </div>
-            ) : null}
           </Tabs>
 
           {showFilters ? (
@@ -316,6 +359,10 @@ const GamesPage: React.FC = () => {
                 openTrainRepertoire={openTrainRepertoire}
               />
             ) : null}
+
+            <div className="sm:hidden">
+              <StatStrip items={statItems} />
+            </div>
           </div>
         </PageSurface>
       </PageFrame>

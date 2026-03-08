@@ -7,6 +7,7 @@ interface TrainOpeningVariantListProps {
   onViewVariant: (variantName: string) => void;
   onTrainVariantNormal: (variantName: string) => void;
   onTrainVariantFocus: (variantName: string) => void;
+  compact?: boolean;
 }
 
 const formatDueLabel = (dueAt?: Date): string => {
@@ -40,13 +41,18 @@ export const TrainOpeningVariantList: React.FC<TrainOpeningVariantListProps> = (
   onViewVariant,
   onTrainVariantNormal,
   onTrainVariantFocus,
+  compact = false,
 }) => {
   return (
     <Card className="border-border-default bg-surface" padding="relaxed" elevation="raised">
       <div className="flex flex-col gap-4">
         <SectionHeader
           title="Variants"
-          description="Use targeted training when one line needs extra repetition instead of rerunning the whole opening."
+          description={
+            compact
+              ? undefined
+              : "Use targeted training when one line needs extra repetition instead of rerunning the whole opening."
+          }
           action={<span className="text-xs text-text-subtle">{variants.length} total</span>}
         />
         {variants.length === 0 ? (
@@ -71,49 +77,85 @@ export const TrainOpeningVariantList: React.FC<TrainOpeningVariantListProps> = (
                 }
                 description={
                   <span className="leading-6">
-                    {formatDueLabel(variant.dueAt)}. {variant.dailyErrorCount > 0 ? `${variant.dailyErrorCount} active errors to revisit.` : "No active daily errors."}
+                    {formatDueLabel(variant.dueAt)}.{" "}
+                    {variant.dailyErrorCount > 0
+                      ? `${variant.dailyErrorCount} active errors to revisit.`
+                      : compact
+                        ? "Line ready for review."
+                        : "No active daily errors."}
                   </span>
                 }
                 meta={
-                  <>
-                    <Badge variant="default" size="sm">
-                      Streak {variant.perfectRunStreak}
-                    </Badge>
-                    <Badge variant={variant.dailyErrorCount > 0 ? "danger" : "success"} size="sm">
-                      Errors {variant.dailyErrorCount}
-                    </Badge>
-                    <Badge variant="info" size="sm">
-                      Rating {variant.lastRating || "none"}
-                    </Badge>
-                  </>
+                  compact ? undefined : (
+                    <>
+                      <Badge variant="default" size="sm">
+                        Streak {variant.perfectRunStreak}
+                      </Badge>
+                      <Badge variant={variant.dailyErrorCount > 0 ? "danger" : "success"} size="sm">
+                        Errors {variant.dailyErrorCount}
+                      </Badge>
+                      <Badge variant="info" size="sm">
+                        Rating {variant.lastRating || "none"}
+                      </Badge>
+                    </>
+                  )
                 }
                 actions={
-                  <>
-                    <Button
-                      intent="ghost"
-                      size="sm"
-                      onClick={() => onViewVariant(variant.variantName)}
-                      className="justify-center"
-                    >
-                      Open line
-                    </Button>
-                    <Button
-                      intent="secondary"
-                      size="sm"
-                      onClick={() => onTrainVariantNormal(variant.variantName)}
-                      className="justify-center"
-                    >
-                      Train variant
-                    </Button>
-                    <Button
-                      intent="accent"
-                      size="sm"
-                      onClick={() => onTrainVariantFocus(variant.variantName)}
-                      className="justify-center"
-                    >
-                      Focus mistakes
-                    </Button>
-                  </>
+                  compact ? (
+                    <>
+                      <Button
+                        intent="secondary"
+                        size="sm"
+                        onClick={() => onTrainVariantNormal(variant.variantName)}
+                        className="w-full justify-center sm:w-auto"
+                      >
+                        Train variant
+                      </Button>
+                      <Button
+                        intent="ghost"
+                        size="sm"
+                        onClick={() => onViewVariant(variant.variantName)}
+                        className="w-full justify-center sm:w-auto"
+                      >
+                        Open line
+                      </Button>
+                      <Button
+                        intent="outline"
+                        size="sm"
+                        onClick={() => onTrainVariantFocus(variant.variantName)}
+                        className="w-full justify-center sm:w-auto"
+                      >
+                        Focus mistakes
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        intent="ghost"
+                        size="sm"
+                        onClick={() => onViewVariant(variant.variantName)}
+                        className="justify-center"
+                      >
+                        Open line
+                      </Button>
+                      <Button
+                        intent="secondary"
+                        size="sm"
+                        onClick={() => onTrainVariantNormal(variant.variantName)}
+                        className="justify-center"
+                      >
+                        Train variant
+                      </Button>
+                      <Button
+                        intent="accent"
+                        size="sm"
+                        onClick={() => onTrainVariantFocus(variant.variantName)}
+                        className="justify-center"
+                      >
+                        Focus mistakes
+                      </Button>
+                    </>
+                  )
                 }
               />
             ))}
