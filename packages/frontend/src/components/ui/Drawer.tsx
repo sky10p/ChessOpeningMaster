@@ -2,6 +2,18 @@ import React from "react";
 import { cn } from "../../utils/cn";
 import { Button } from "./Button";
 
+const FOCUSABLE_SELECTOR = [
+  'a[href]:not([tabindex="-1"])',
+  'button:not([disabled]):not([tabindex="-1"])',
+  'textarea:not([disabled]):not([tabindex="-1"])',
+  'input:not([disabled]):not([tabindex="-1"])',
+  'select:not([disabled]):not([tabindex="-1"])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(",");
+
+const getFocusableElements = (element: HTMLElement | null): HTMLElement[] =>
+  element ? Array.from(element.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)) : [];
+
 export interface DrawerProps {
   open: boolean;
   title: string;
@@ -29,6 +41,13 @@ export const Drawer: React.FC<DrawerProps> = ({
   React.useEffect(() => {
     if (!open) return;
     previousFocusRef.current = document.activeElement as HTMLElement;
+    const focusable = getFocusableElements(drawerRef.current);
+    if (focusable.length > 0) {
+      focusable[0].focus();
+      return () => {
+        previousFocusRef.current?.focus();
+      };
+    }
     drawerRef.current?.focus();
     return () => {
       previousFocusRef.current?.focus();
@@ -38,24 +57,39 @@ export const Drawer: React.FC<DrawerProps> = ({
   React.useEffect(() => {
     if (!open) return;
     const handleKeyDown = (event: KeyboardEvent) => {
+      const drawer = drawerRef.current;
+      if (!drawer) {
+        return;
+      }
       if (event.key === "Escape") {
         onClose();
         return;
       }
       if (event.key !== "Tab") return;
-      const focusable = drawerRef.current?.querySelectorAll<HTMLElement>(
-        'a[href],button:not([disabled]),textarea,input,select,[tabindex]:not([tabindex="-1"])'
-      );
-      if (!focusable || focusable.length === 0) return;
+      const focusable = getFocusableElements(drawer);
+      if (focusable.length === 0) {
+        if (document.activeElement === drawer) {
+          event.preventDefault();
+        }
+        return;
+      }
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
+      const activeElement = document.activeElement as HTMLElement | null;
+
+      if (!activeElement || !drawer.contains(activeElement)) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus();
+        return;
+      }
+
       if (event.shiftKey) {
-        if (document.activeElement === first) {
+        if (activeElement === first || activeElement === drawer) {
           event.preventDefault();
           last.focus();
         }
       } else {
-        if (document.activeElement === last) {
+        if (activeElement === last || activeElement === drawer) {
           event.preventDefault();
           first.focus();
         }
@@ -74,6 +108,7 @@ export const Drawer: React.FC<DrawerProps> = ({
       <button
         type="button"
         aria-label="Close drawer"
+        tabIndex={-1}
         className="flex-1 cursor-default"
         onClick={onClose}
       />

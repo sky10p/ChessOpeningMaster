@@ -29,6 +29,19 @@ export interface PathSurfaceModel {
   todaySummary: TodaySummaryModel;
 }
 
+const getProgressValue = (todaySummary: TodayPlanProgress, plan: PathPlanSummary | null): string => {
+  if (!plan) {
+    return "Loading...";
+  }
+  if (todaySummary.plannedTodayTarget === 0) {
+    if (todaySummary.completedToday === 0) {
+      return "No items";
+    }
+    return `${todaySummary.completedToday} completed`;
+  }
+  return `${todaySummary.completedToday} / ${todaySummary.plannedTodayTarget}`;
+};
+
 const getNextActionModel = (path: Path | null, loading: boolean): NextActionModel => {
   if (loading) {
     return {
@@ -87,10 +100,8 @@ export const getPathSurfaceModel = (path: Path | null, plan: PathPlanSummary | n
       ...todaySummary,
       overdueNow: plan?.overdueCount ?? 0,
       dueToday: plan?.dueTodayCount ?? 0,
-      progressValue: `${todaySummary.completedToday} / ${todaySummary.plannedTodayTarget}`,
-      progressDetail: todaySummary.exceededTarget
-        ? "Target reached"
-        : `${todaySummary.remainingToTarget} remaining`,
+      progressValue: getProgressValue(todaySummary, plan),
+      progressDetail: todaySummary.todayPlanMessage,
     },
   };
 };

@@ -82,4 +82,47 @@ describe("getPathSurfaceModel", () => {
     expect(loadingResult.nextAction.secondaryActionLabel).toBeUndefined();
     expect(loadingResult.nextAction.secondaryActionKind).toBeUndefined();
   });
+
+  it("uses the today plan message when the daily target is fully completed", () => {
+    const result = getPathSurfaceModel(
+      { message: "All caught up" },
+      {
+        ...basePlan,
+        completedTodayCount: 4,
+        completedDueToday: 3,
+        completedNewToday: 1,
+        estimatedTodayTotal: 4,
+      },
+      false
+    );
+
+    expect(result.todaySummary.progressValue).toBe("4 / 4");
+    expect(result.todaySummary.progressDetail).toBe("Great—you hit today’s target.");
+  });
+
+  it("shows loading copy instead of 0 / 0 while the plan is missing", () => {
+    const result = getPathSurfaceModel({ message: "All caught up" }, null, false);
+
+    expect(result.todaySummary.progressValue).toBe("Loading...");
+    expect(result.todaySummary.progressDetail).toBe("Loading today plan...");
+  });
+
+  it("shows a no-scheduled state instead of 0 / 0 when nothing is planned", () => {
+    const result = getPathSurfaceModel(
+      { message: "All caught up" },
+      {
+        ...basePlan,
+        reviewDueCount: 0,
+        suggestedNewToday: 0,
+        estimatedTodayTotal: 0,
+        completedTodayCount: 0,
+        completedDueToday: 0,
+        completedNewToday: 0,
+      },
+      false
+    );
+
+    expect(result.todaySummary.progressValue).toBe("No items");
+    expect(result.todaySummary.progressDetail).toBe("No scheduled items for today in this scope.");
+  });
 });
