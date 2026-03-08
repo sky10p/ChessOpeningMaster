@@ -33,18 +33,15 @@ describe("RegisterPage", () => {
       </MemoryRouter>
     );
 
-    fireEvent.change(screen.getByPlaceholderText("Username"), { target: { value: "user" } });
-    fireEvent.change(screen.getByPlaceholderText("Password"), { target: { value: "a" } });
-    fireEvent.change(screen.getByPlaceholderText("Confirm password"), { target: { value: "a" } });
-    fireEvent.click(screen.getByRole("button", { name: "Register" }));
+    fireEvent.change(screen.getByLabelText("Username"), { target: { value: "user" } });
+    fireEvent.change(screen.getByLabelText("Password"), { target: { value: "a" } });
+    fireEvent.change(screen.getByLabelText("Confirm password"), { target: { value: "a" } });
+    fireEvent.click(screen.getByRole("button", { name: "Create account" }));
 
     await waitFor(() => {
       expect(
-        screen.getByText(
-          "Password must be at least 8 characters and include uppercase, lowercase, number, and special character",
-          { selector: "div" }
-        )
-      ).toBeInTheDocument();
+        screen.getAllByText("Password must be at least 8 characters and include uppercase, lowercase, number, and special character")
+      ).toHaveLength(2);
     });
     expect(mockRegister).not.toHaveBeenCalled();
   });
@@ -58,10 +55,10 @@ describe("RegisterPage", () => {
       </MemoryRouter>
     );
 
-    fireEvent.change(screen.getByPlaceholderText("Username"), { target: { value: "user" } });
-    fireEvent.change(screen.getByPlaceholderText("Password"), { target: { value: "StrongPass1!" } });
-    fireEvent.change(screen.getByPlaceholderText("Confirm password"), { target: { value: "StrongPass1!" } });
-    fireEvent.click(screen.getByRole("button", { name: "Register" }));
+    fireEvent.change(screen.getByLabelText("Username"), { target: { value: "user" } });
+    fireEvent.change(screen.getByLabelText("Password"), { target: { value: "StrongPass1!" } });
+    fireEvent.change(screen.getByLabelText("Confirm password"), { target: { value: "StrongPass1!" } });
+    fireEvent.click(screen.getByRole("button", { name: "Create account" }));
 
     await waitFor(() => {
       expect(mockRegister).toHaveBeenCalledWith("user", "StrongPass1!");

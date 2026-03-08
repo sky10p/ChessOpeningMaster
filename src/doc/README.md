@@ -68,6 +68,10 @@ This directory contains architecture and implementation guides for ChessKeep.
 ### [Dashboard Spaced Repetition Insights](Dashboard-Spaced-Repetition-Insights.md)
 - Dashboard path/scheduler analytics data flow
 
+### [MCP Setup](MCP-Setup.md)
+- Codex and GitHub Copilot MCP server setup
+- Node compatibility notes for local MCP execution
+
 ## Quick Start for Agents
 
 ### Understanding the Codebase
@@ -83,6 +87,7 @@ This directory contains architecture and implementation guides for ChessKeep.
 10. Read [Game Imports and Training Plan Guide](Game-Imports-Guide.md) for `/games` UX changes.
 11. Read [Game Import Service Architecture](Game-Import-Service-Architecture.md) for `/games` backend changes.
 12. Read [Training Queue Guide](Training-Queue-Guide.md) for games training prioritization.
+13. Read [MCP Setup](MCP-Setup.md) when updating AI tooling or developer assistant setup.
 
 ### Debugging Issues
 1. Check [Troubleshooting Guide](Troubleshooting-Guide.md).

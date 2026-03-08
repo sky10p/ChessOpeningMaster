@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { TrainOpeningResponse } from "@chess-opening-master/common";
-import { Button, Card, MasteryBadge } from "../../components/ui";
+import { Badge, Button, Card, EmptyState, MasteryBadge, PageHeader, SectionHeader, StatStrip } from "../../components/ui";
 import { StaticChessboard } from "../../components/design/chess/StaticChessboard";
 import { PageFrame } from "../../components/design/layouts/PageFrame";
 import { PageRoot } from "../../components/design/layouts/PageRoot";
+import { useIsMobile } from "../../hooks/useIsMobile";
 import { getTrainOpening } from "../../repository/train/train";
 import { useNavigationUtils } from "../../utils/navigationUtils";
 import { START_FEN } from "../../utils/getOpeningFen";
@@ -13,7 +14,6 @@ import {
   getRepertoiresRoute,
   getTrainRepertoireRoute,
 } from "../../utils/appRoutes";
-import { TrainOpeningActions } from "../train/components/TrainOpeningActions";
 import { TrainOpeningMistakeSummary } from "../train/components/TrainOpeningMistakeSummary";
 import { TrainOpeningVariantList } from "../train/components/TrainOpeningVariantList";
 import { getDueTrainMistakes } from "../train/mistakeUtils";
@@ -23,6 +23,7 @@ const RepertoireOpeningPage: React.FC = () => {
   const location = useLocation();
   const { goToRepertoire } = useNavigationUtils();
   const { repertoireId = "", openingName = "" } = useParams();
+  const isMobile = useIsMobile();
   const [payload, setPayload] = useState<TrainOpeningResponse | null>(null);
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
 
@@ -122,8 +123,15 @@ const RepertoireOpeningPage: React.FC = () => {
   if (status === "loading") {
     return (
       <PageRoot>
-        <PageFrame className="max-w-6xl py-4 sm:py-6">
-          <Card className="h-32 animate-pulse border-border-subtle bg-surface-raised" />
+        <PageFrame className="max-w-analytics py-4 sm:py-6">
+          <div className="space-y-4">
+            <Card className="h-36 animate-pulse border-border-subtle bg-surface-raised" />
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <Card key={index} className="h-28 animate-pulse border-border-subtle bg-surface-raised" />
+              ))}
+            </div>
+          </div>
         </PageFrame>
       </PageRoot>
     );
@@ -132,21 +140,78 @@ const RepertoireOpeningPage: React.FC = () => {
   if (status === "error" || !payload) {
     return (
       <PageRoot>
-        <PageFrame className="max-w-6xl py-4 sm:py-6">
-          <Card className="border-border-default bg-surface" padding="default">
-            <p className="text-sm text-text-muted">Unable to load opening details.</p>
-            <div className="mt-3">
-              <Button intent="secondary" size="sm" onClick={() => navigate(backTarget)}>
+        <PageFrame className="max-w-analytics py-4 sm:py-6">
+          <EmptyState
+            title="Unable to load opening details"
+            description="The opening hub could not be loaded right now."
+            action={
+              <Button intent="secondary" size="md" onClick={() => navigate(backTarget)}>
                 Back
               </Button>
-            </div>
-          </Card>
+            }
+          />
         </PageFrame>
       </PageRoot>
     );
   }
 
   const dueMistakes = getDueTrainMistakes(payload.mistakes);
+  const hasVariants = payload.variants.length > 0;
+  const metaBadges = (
+    <>
+      <MasteryBadge score={payload.stats.masteryScore} size="sm">
+        Mastery {payload.stats.masteryScore}%
+      </MasteryBadge>
+      <Badge variant="brand" size="sm">
+        {payload.orientation === "black" ? "Black repertoire" : "White repertoire"}
+      </Badge>
+      <Badge variant="warning" size="sm">
+        {payload.stats.dueVariantsCount} due variants
+      </Badge>
+      <Badge variant="danger" size="sm">
+        {payload.stats.dueMistakesCount} due mistakes
+      </Badge>
+    </>
+  );
+  const mobileSummaryBadges = (
+    <>
+      <Badge variant="info" size="sm">
+        {payload.orientation === "black" ? "Black repertoire" : "White repertoire"}
+      </Badge>
+      <Badge variant="warning" size="sm">
+        {payload.stats.dueVariantsCount} due variants
+      </Badge>
+      <Badge variant="danger" size="sm">
+        {payload.stats.dueMistakesCount} due mistakes
+      </Badge>
+    </>
+  );
+  const statItems = [
+    {
+      label: "Due variants",
+      value: payload.stats.dueVariantsCount,
+      tone: "warning" as const,
+      detail: "Ready for normal review now",
+    },
+    {
+      label: "Due mistakes",
+      value: payload.stats.dueMistakesCount,
+      tone: "danger" as const,
+      detail: `${dueMistakes.length} ready for reinforcement`,
+    },
+    {
+      label: "Variants",
+      value: payload.stats.totalVariantsCount,
+      tone: "brand" as const,
+      detail: "Available inside this opening",
+    },
+    {
+      label: "Mistakes reduced (7d)",
+      value: payload.stats.mistakesReducedLast7Days,
+      tone: "success" as const,
+      detail: "Recent reinforcement progress",
+    },
+  ];
 
   const handleReviewDueMistakes = () => {
     const mistakeKeys = dueMistakes
@@ -165,88 +230,172 @@ const RepertoireOpeningPage: React.FC = () => {
 
   return (
     <PageRoot>
-      <PageFrame className="max-w-6xl py-4 sm:py-6">
-        <div className="mb-3">
-          <Button intent="ghost" size="sm" onClick={() => navigate(backTarget)}>
-            Back
-          </Button>
-        </div>
-        <Card className="mb-4 border-border-default bg-surface" padding="default">
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[220px_1fr]">
-            <div className="overflow-hidden rounded-lg border border-border-subtle bg-surface-raised">
-              <StaticChessboard
-                fen={payload.openingFen || START_FEN}
-                orientation={payload.orientation || "white"}
+      <PageFrame className="max-w-analytics py-4 sm:py-6">
+        <div className="space-y-4">
+          {isMobile ? (
+            <>
+              <div className="flex items-center">
+                <Button intent="ghost" size="sm" onClick={() => navigate(backTarget)}>
+                  Back
+                </Button>
+              </div>
+
+              <Card
+                className="border-border-default bg-surface"
+                padding="relaxed"
+                elevation="raised"
+                role="region"
+                aria-labelledby="opening-hero-title"
+              >
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-text-subtle">
+                      {payload.repertoireName}
+                    </p>
+                    <h1
+                      id="opening-hero-title"
+                      className="text-[1.75rem] font-semibold leading-tight tracking-[-0.03em] text-text-base"
+                    >
+                      {payload.openingName}
+                    </h1>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {mobileSummaryBadges}
+                  </div>
+
+                  <div className="overflow-hidden rounded-2xl border border-border-subtle bg-surface-raised">
+                    <StaticChessboard
+                      fen={payload.openingFen || START_FEN}
+                      orientation={payload.orientation || "white"}
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Button
+                      intent="primary"
+                      size="lg"
+                      onClick={handleStartNormalMode}
+                      disabled={!hasVariants}
+                      className="w-full justify-center"
+                    >
+                      Start review
+                    </Button>
+                    <Button
+                      intent="secondary"
+                      size="md"
+                      onClick={handleViewOpening}
+                      className="w-full justify-center"
+                    >
+                      Open editor
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            </>
+          ) : (
+            <PageHeader
+              eyebrow={payload.repertoireName}
+              title={payload.openingName}
+              description="Review the full opening, inspect individual lines, or switch into mistake reinforcement without leaving the repertoire workflow."
+              primaryAction={
+                <Button intent="primary" size="md" onClick={handleStartNormalMode} disabled={!hasVariants}>
+                  Start review
+                </Button>
+              }
+              secondaryActions={
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <Button intent="ghost" size="md" onClick={() => navigate(backTarget)}>
+                    Back
+                  </Button>
+                  <Button intent="secondary" size="md" onClick={handleViewOpening}>
+                    Open editor
+                  </Button>
+                </div>
+              }
+              meta={metaBadges}
+            />
+          )}
+
+          {!isMobile ? (
+            <StatStrip
+              items={statItems}
+            />
+          ) : null}
+
+          {isMobile ? (
+            <div className="space-y-4">
+              <TrainOpeningVariantList
+                variants={payload.variants}
+                onViewVariant={handleViewVariant}
+                onTrainVariantNormal={handleTrainVariantNormal}
+                onTrainVariantFocus={handleTrainVariantFocus}
+                compact
+              />
+
+              <TrainOpeningMistakeSummary
+                mistakes={payload.mistakes}
+                onReviewDueMistakes={handleReviewDueMistakes}
+                onTrainSpecificMistake={(mistake) =>
+                  handleTrainSpecificMistake(mistake.mistakeKey, mistake.variantName)
+                }
+                compact
+                visibleLimit={4}
               />
             </div>
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-text-subtle">
-                    {payload.repertoireName}
-                  </p>
-                  <h1 className="text-2xl font-semibold leading-tight text-text-base">
-                    {payload.openingName}
-                  </h1>
-                </div>
-                <div className="flex items-center gap-2">
-                  <MasteryBadge score={payload.stats.masteryScore} size="sm" />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                <div className="rounded-md border border-border-subtle bg-surface-raised px-3 py-2">
-                  <div className="text-xs text-text-subtle">Due Variants</div>
-                  <div className="text-sm font-semibold text-text-base">
-                    {payload.stats.dueVariantsCount}
+          ) : (
+            <div className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(20rem,1fr)]">
+              <div className="space-y-4">
+                <Card className="border-border-default bg-surface" padding="relaxed">
+                  <div className="grid gap-5 lg:grid-cols-[minmax(16rem,20rem)_minmax(0,1fr)]">
+                    <div className="overflow-hidden rounded-2xl border border-border-subtle bg-surface-raised">
+                      <StaticChessboard
+                        fen={payload.openingFen || START_FEN}
+                        orientation={payload.orientation || "white"}
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <SectionHeader
+                        title="Opening snapshot"
+                        description="Use the board preview to confirm position context before jumping into review or line-level practice."
+                      />
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="rounded-xl border border-border-subtle bg-surface-raised px-4 py-3">
+                          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-text-subtle">What matters now</p>
+                          <p className="mt-2 text-sm leading-6 text-text-muted">
+                            Prioritize due variants first, then use mistake reinforcement when one tactical branch keeps failing.
+                          </p>
+                        </div>
+                        <div className="rounded-xl border border-border-subtle bg-surface-raised px-4 py-3">
+                          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-text-subtle">Review rule</p>
+                          <p className="mt-2 text-sm leading-6 text-text-muted">
+                            Due variants are ready now and not already completed today. Future variants stay de-emphasized until scheduled.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div className="rounded-md border border-border-subtle bg-surface-raised px-3 py-2">
-                  <div className="text-xs text-text-subtle">Due Mistakes</div>
-                  <div className="text-sm font-semibold text-text-base">
-                    {payload.stats.dueMistakesCount}
-                  </div>
-                </div>
-                <div className="rounded-md border border-border-subtle bg-surface-raised px-3 py-2">
-                  <div className="text-xs text-text-subtle">Variants</div>
-                  <div className="text-sm font-semibold text-text-base">
-                    {payload.stats.totalVariantsCount}
-                  </div>
-                </div>
-                <div className="rounded-md border border-border-subtle bg-surface-raised px-3 py-2">
-                  <div className="text-xs text-text-subtle">Mistakes Reduced (7d)</div>
-                  <div className="text-sm font-semibold text-text-base">
-                    {payload.stats.mistakesReducedLast7Days}
-                  </div>
-                </div>
-              </div>
-              <p className="text-xs text-text-muted">
-                Due variants are scheduled for review now and not already reviewed today. Non-due variants are scheduled for a future date.
-              </p>
-            </div>
-          </div>
-        </Card>
+                </Card>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="space-y-4">
-            <TrainOpeningActions
-              totalVariantsCount={payload.variants.length}
-              onStartNormalMode={handleStartNormalMode}
-              onViewOpening={handleViewOpening}
-            />
-            <TrainOpeningVariantList
-              variants={payload.variants}
-              onViewVariant={handleViewVariant}
-              onTrainVariantNormal={handleTrainVariantNormal}
-              onTrainVariantFocus={handleTrainVariantFocus}
-            />
-          </div>
-          <TrainOpeningMistakeSummary
-            mistakes={payload.mistakes}
-            onReviewDueMistakes={handleReviewDueMistakes}
-            onTrainSpecificMistake={(mistake) =>
-              handleTrainSpecificMistake(mistake.mistakeKey, mistake.variantName)
-            }
-          />
+                <TrainOpeningVariantList
+                  variants={payload.variants}
+                  onViewVariant={handleViewVariant}
+                  onTrainVariantNormal={handleTrainVariantNormal}
+                  onTrainVariantFocus={handleTrainVariantFocus}
+                />
+              </div>
+
+              <div className="space-y-4">
+                <TrainOpeningMistakeSummary
+                  mistakes={payload.mistakes}
+                  onReviewDueMistakes={handleReviewDueMistakes}
+                  onTrainSpecificMistake={(mistake) =>
+                    handleTrainSpecificMistake(mistake.mistakeKey, mistake.variantName)
+                  }
+                />
+              </div>
+            </div>
+          )}
         </div>
       </PageFrame>
     </PageRoot>

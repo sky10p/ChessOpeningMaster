@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { MemoryRouter } from "react-router-dom";
 import RepertoireOpeningPage from "./RepertoireOpeningPage";
@@ -13,12 +13,17 @@ import {
 const mockNavigate = jest.fn();
 const mockUseParams = jest.fn();
 const mockUseLocation = jest.fn();
+const mockUseIsMobile = jest.fn();
 
 jest.mock("react-router-dom", () => ({
   ...jest.requireActual("react-router-dom"),
   useNavigate: () => mockNavigate,
   useParams: () => mockUseParams(),
   useLocation: () => mockUseLocation(),
+}));
+
+jest.mock("../../hooks/useIsMobile", () => ({
+  useIsMobile: () => mockUseIsMobile(),
 }));
 
 const openingPayload = {
@@ -83,6 +88,7 @@ const openingPayload = {
 describe("RepertoireOpeningPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseIsMobile.mockReturnValue(false);
     mockUseParams.mockReturnValue({
       repertoireId: "rep-1",
       openingName: "Italian Game",
@@ -142,7 +148,7 @@ describe("RepertoireOpeningPage", () => {
     );
 
     expect(await screen.findByText("Italian Game")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Train All Variants" }));
+    fireEvent.click(screen.getByRole("button", { name: "Start review" }));
 
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith(
@@ -163,14 +169,38 @@ describe("RepertoireOpeningPage", () => {
 
     expect(await screen.findByText("Italian Game")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "View Opening" }));
+    fireEvent.click(screen.getByRole("button", { name: "Open editor" }));
     expect(mockNavigate).toHaveBeenCalledWith(
       getRepertoireEditorRoute("rep-1", { variantName: "Italian Game" })
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "View Variant" }));
+    fireEvent.click(screen.getByRole("button", { name: "Open line" }));
     expect(mockNavigate).toHaveBeenCalledWith(
       getRepertoireEditorRoute("rep-1", { variantName: "Italian Game: Main Line" })
     );
+  });
+
+  it("renders the mobile hero with board and prioritizes variants before mistakes", async () => {
+    mockUseIsMobile.mockReturnValue(true);
+
+    render(
+      <MemoryRouter>
+        <RepertoireOpeningPage />
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByRole("heading", { name: "Italian Game" })).toBeInTheDocument();
+    expect(screen.getAllByText("Italian Game")).toHaveLength(1);
+    expect(screen.queryByText("Due variants")).not.toBeInTheDocument();
+    expect(screen.queryByText("Position preview")).not.toBeInTheDocument();
+
+    const hero = screen.getByRole("region", { name: "Italian Game" });
+    expect(within(hero).getByRole("img", { name: /chess board position/i })).toBeInTheDocument();
+    expect(within(hero).getByRole("button", { name: "Start review" })).toBeInTheDocument();
+    expect(within(hero).getByRole("button", { name: "Open editor" })).toBeInTheDocument();
+
+    const variantsHeading = screen.getByText("Variants");
+    const mistakesHeading = screen.getByText("Mistakes");
+    expect(variantsHeading.compareDocumentPosition(mistakesHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });

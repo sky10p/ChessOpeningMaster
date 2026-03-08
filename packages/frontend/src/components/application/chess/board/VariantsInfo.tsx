@@ -6,7 +6,7 @@ import { useAlertContext } from "../../../../contexts/AlertContext";
 import { useRepertoireInfo } from "../../../../hooks/useRepertoireInfo";
 import { useVariantNavigation } from "../../../../hooks/useVariantNavigation";
 
-const VariantsInfo: React.FC = () => {
+const VariantsInfo: React.FC<{ mobileEditorMode?: boolean }> = ({ mobileEditorMode = false }) => {
   const {
     variants,
     repertoireId,
@@ -23,28 +23,35 @@ const VariantsInfo: React.FC = () => {
   useDialogContext();
   useAlertContext();
 
- const {deleteVariant, copyVariantToRepertoire, copyVariantsToRepertoire, deleteVariants, copyVariantPGN,downloadVariantPGN} = useRepertoireInfo();
+  const {
+    deleteVariant,
+    copyVariantToRepertoire,
+    copyVariantsToRepertoire,
+    deleteVariants,
+    copyVariantPGN,
+    downloadVariantPGN,
+  } = useRepertoireInfo();
 
   return (
-
-      <VariantsTree
-        variants={variants}
-        repertoireId={repertoireId}
-        orientation={orientation}
-        deleteVariant={deleteVariant}
-        copyVariantToRepertoire={copyVariantToRepertoire}
-        copyVariantsToRepertoire={copyVariantsToRepertoire}
-        copyVariantPGN={copyVariantPGN}
-        downloadVariantPGN={downloadVariantPGN}
-        deleteVariants={deleteVariants}
-        changeNameMove={changeNameMove}
-        deleteMove={deleteMove}
-        goToMove={goToMove}
-        currentMoveNode={currentMoveNode}
-        selectedVariant={selectedVariant}
-        setSelectedVariant={handleVariantChange}
-      ></VariantsTree>
-
+    <VariantsTree
+      variants={variants}
+      repertoireId={repertoireId}
+      orientation={orientation}
+      deleteVariant={deleteVariant}
+      copyVariantToRepertoire={copyVariantToRepertoire}
+      copyVariantsToRepertoire={copyVariantsToRepertoire}
+      copyVariantPGN={copyVariantPGN}
+      downloadVariantPGN={downloadVariantPGN}
+      deleteVariants={deleteVariants}
+      changeNameMove={changeNameMove}
+      deleteMove={deleteMove}
+      goToMove={goToMove}
+      currentMoveNode={currentMoveNode}
+      selectedVariant={selectedVariant}
+      setSelectedVariant={handleVariantChange}
+      compact
+      mobileEditorMode={mobileEditorMode}
+    />
   );
 };
 

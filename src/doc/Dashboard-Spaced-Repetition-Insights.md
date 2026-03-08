@@ -1,98 +1,103 @@
-# Dashboard Spaced Repetition Insights
+# Dashboard — Today Landing Page
 
-This document describes the dashboard `Path Insights` tab and its spaced-repetition metrics.
+This document describes the redesigned `DashboardPage`, which is now a single "Today" landing view rather than a multi-tab workspace.
 
 ## Purpose
 
-The `Path Insights` tab answers:
+The dashboard answers one focused question: **what should I do right now?** It surfaces:
 
-- What is due now and in the short term?
-- How heavy is the next 14-day review load?
-- Which variants and openings are likely to appear next?
-- How is recent review quality distributed (`again`, `hard`, `good`, `easy`)?
+- The next recommended lesson from the path queue.
+- Today's review progress against the daily target.
+- This week's due-load at a glance (`due today`, `overdue now`, `next 7 days`).
+- Quick entry points to adjacent flows (Games, Library, Openings needing work).
+- Compact repertoire-wide KPI strip (variants tracked, errors, mastery).
 
-The main `Dashboard` tab stays focused on general repertoire KPIs, while `Path Insights` is the planning-focused view.
+The full planning view (14-day forecast, variant queue, analytics) lives on `/path`.
 
-## Frontend Entry Points
+## Architecture
 
-- Tab section:
-  - `packages/frontend/src/pages/DashboardPage/sections/PathInsightsSection.tsx`
-- Insights panel:
-  - `packages/frontend/src/pages/DashboardPage/sections/DashboardSection/components/SpacedRepetitionInsightsPanel.tsx`
-- Data hook:
-  - `packages/frontend/src/pages/DashboardPage/sections/DashboardSection/hooks/usePathInsights.ts`
-- Dashboard page tab wiring:
-  - `packages/frontend/src/pages/DashboardPage/DashboardPage.tsx`
+### Page file
 
-## Openings Board Preview
+`packages/frontend/src/pages/DashboardPage/DashboardPage.tsx`
 
-- Opening cards compute a preview position with `getOpeningFen` from:
-  - `packages/frontend/src/utils/getOpeningFen.ts`
-- The utility traverses the repertoire move tree by SAN moves and returns the FEN for the matching `variantName`.
-- If no matching opening is found or board-state resolution fails, cards use the initial chess start FEN as fallback.
+There are **no tabs**. The page is a single vertically-scrolling layout using the canonical `PageRoot + PageFrame + PageSurface + PageHeader + StatStrip` structure.
 
-## Backend/API Dependencies
+### Data hooks
 
-The tab reuses path-insight APIs:
+| Hook | Source | Purpose |
+|---|---|---|
+| `useDashboard` | `hooks/useDashboard` | Loads repertoire list for KPI strip |
+| `usePaths` | `hooks/usePaths` | Loads next path lesson and plan summary |
+| `useDashboardData` | `DashboardSection/hooks/useDashboardData` | Derives variant counts and progress stats from repertoire list |
 
-- `GET /paths/plan`
-- `GET /paths/analytics`
+Both `loadPath()` and `loadInsights()` from `usePaths` are called on mount.
 
-Repository client:
+## Backend/API dependencies
 
-- `packages/frontend/src/repository/paths/paths.ts`
+| Endpoint | Used for |
+|---|---|
+| `GET /paths` | Next lesson (path) |
+| `GET /paths/plan` | `plan` object: `dueTodayCount`, `overdueCount`, `forecastDays`, etc. |
+| `GET /paths/analytics` | Available via `usePaths.analytics` but not shown on the today page |
 
-Default hook behavior:
+## Layout
 
-- orientation filter (`all` / `white` / `black`) is propagated,
-- analytics date range defaults to last 30 days,
-- `New/Day` default cap is `5` (`DEFAULT_DAILY_NEW_LIMIT`).
+```
+PageHeader      — title, primary CTA, meta badges
+StatStrip       — variants tracked / errors / mastery / daily target
+──────────────────────────────────────────────────────────────────────────
+grid: [Next lesson card (1.6fr)]   [Sidebar (1fr)]
+──────────────────────────────────────────────────────────────────────────
+Next lesson card:
+  • "Recommended next action" hero block with action label + description
+  • Progress mini-grid: Reviews today / New learned / Plan message
+Sidebar (desktop: This week first; mobile: Quick access first):
+  • Due today, Overdue, Next 7 days
+  • Quick access: Games, Library, Openings needing work
+```
 
-## Metrics and Definitions
+## Metrics displayed
 
-Summary cards include inline info tooltips:
+| Metric | Source field | Where shown |
+|---|---|---|
+| Variants tracked | `totalVariants` | `StatStrip` |
+| Reviewed with errors | `progressStats.reviewedWithErrors` | `StatStrip` |
+| Reviewed cleanly | `progressStats.reviewedOK` | `StatStrip` |
+| Daily target | `todayPlan.plannedTodayTarget` | `StatStrip` |
+| Due today | `plan.dueTodayCount` | `PageHeader` meta + sidebar |
+| Overdue | `plan.overdueCount` | `PageHeader` meta + sidebar |
+| Next 7 days | forecast sum | sidebar |
+| Reviews today | `todayPlan.completedReviewsToday / reviewTargetToday` | progress mini-grid |
+| New learned | `todayPlan.completedNewToday / newTargetToday` | progress mini-grid |
 
-- `Overdue`: variants whose due date already passed and are still pending.
-- `Due today`: variants scheduled exactly for today.
-- `Due next 7d`: total due load for the first 7 forecast days (including today).
-- `Suggested new`: recommended number of brand-new variants to add today after due-load and `New/Day` cap are considered.
-- `New/Day`: maximum number of new variants the planner can introduce per day for the current view.
+## Next action label logic
 
-## Visuals
+| Path type | Label | Description |
+|---|---|---|
+| Loading | `"Loading next lesson"` | Preparing... |
+| Empty / no path | `"Open forecast"` | All caught up; use forecast |
+| `studyPath` | `"Open study"` | Study name |
+| `studiedVariantPath` | `"Review due variant"` | Repertoire + variant name |
+| `newVariantPath` | `"Start new variant"` | Repertoire + variant name |
+| Fallback | `"Open queue"` | Open queue to continue |
 
-The panel renders:
+Primary CTA navigates to `/path` for variants/queue or to `/studies?groupId=...&studyId=...` for study paths.
 
-1. Summary cards with tooltips.
-2. Upcoming due-load chart (14 days).
-3. Likely next variants queue list.
-4. Rating distribution chart (`again/hard/good/easy`).
-5. Openings entering queue ranked list with progress bars (long-name friendly on mobile and desktop).
+## What was removed
 
-## UX Notes
+The previous DashboardPage had four tabs: `Dashboard`, `Overview`, `Path Insights`, and `Studies`. All tabs and subcomponents have been replaced by the single "Today" layout. Full path planning data is now accessed via `/path`.
 
-- `Open Path` CTA links to `/path` for full planning and action workflow.
-- Mobile layout stacks cards/lists/charts vertically.
-- Desktop layout uses multi-column grouping for quick scan.
-
-## Main Dashboard Tab Components
-
-The main `Dashboard` tab (section `"dashboard"`) is rendered by `DashboardSection` and includes these key components:
-
-- `TodaysFocusCard` — derives a single priority action from `ProgressStats`:
-  - If there are variants with errors → directs user to the Errors view.
-  - If there are unreviewed variants → directs user to start reviewing.
-  - If everything is reviewed → shows a practice prompt.
-  - If there are no variants yet → encourages creating a repertoire.
-  - Source: `packages/frontend/src/pages/DashboardPage/sections/DashboardSection/components/TodaysFocusCard.tsx`
-
-- `TrainingQueuePreview` — fetches the cached training overview (`getCachedTrainOverview`) and surfaces the top 5 due openings ranked by `dueVariantsCount + dueMistakesCount`. Links to the `/repertoires` page.
-  - Source: `packages/frontend/src/pages/DashboardPage/sections/DashboardSection/components/TrainingQueuePreview.tsx`
-
-Both components are rendered before the collapsible `Performance` and `Mastery & Activity` sections in `DashboardSection`.
+Previously used components that are no longer part of the dashboard:
+- `DashboardSection` — functionality absorbed directly into `DashboardPage`
+- `PathInsightsSection` — full planning view relocated to `/path`
+- `OverviewSection` — removed
+- `StudiesSection` — removed from dashboard; `/studies` route still exists
+- `usePathInsights` hook — replaced by `usePaths`
+- `TodaysFocusCard`, `TrainingQueuePreview` — removed
 
 ## Testing
 
-- Dashboard tests mock `usePathInsights`:
-  - `packages/frontend/src/pages/DashboardPage/DashboardPage.test.tsx`
+Dashboard tests mock `usePaths` (not `usePathInsights`):
+- `packages/frontend/src/pages/DashboardPage/DashboardPage.test.tsx`
 
 This keeps tests deterministic and avoids async fetch side effects.

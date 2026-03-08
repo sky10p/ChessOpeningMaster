@@ -4,8 +4,10 @@ import '@testing-library/jest-dom';
 import VariantTree from './VariantTree';
 import { Variant } from '../../../../models/chess.models';
 import { MoveVariantNode } from '@chess-opening-master/common';
+import { MenuContext } from '../../../../contexts/MenuContext';
 
 const mockGoToTrainRepertoire = jest.fn();
+const mockToggleMenu = jest.fn();
 
 jest.mock('../../../../utils/navigationUtils', () => ({
   useNavigationUtils: () => ({
@@ -95,15 +97,10 @@ describe('VariantTree', () => {
     it('should call goToTrainRepertoire with correct parameters when Train button is clicked', () => {
       render(<VariantTree {...defaultProps} />);
       
-      const trainLabel = screen.getByText('Train');
-      expect(trainLabel).toBeInTheDocument();
-      
-      const trainButton = trainLabel.parentElement?.querySelector('button');
+      const trainButton = screen.getByRole('button', { name: 'Train' });
       expect(trainButton).toBeInTheDocument();
       
-      if (trainButton) {
-        fireEvent.click(trainButton);
-      }
+      fireEvent.click(trainButton);
       
       expect(mockGoToTrainRepertoire).toHaveBeenCalledWith(
         defaultProps.repertoireId,
@@ -138,12 +135,8 @@ describe('VariantTree', () => {
       
       render(<VariantTree {...customProps} />);
       
-      const trainLabel = screen.getByText('Train');
-      const trainButton = trainLabel.parentElement?.querySelector('button');
-      
-      if (trainButton) {
-        fireEvent.click(trainButton);
-      }
+      const trainButton = screen.getByRole('button', { name: 'Train' });
+      fireEvent.click(trainButton);
       
       expect(mockGoToTrainRepertoire).toHaveBeenCalledWith(
         customProps.repertoireId,
@@ -170,12 +163,8 @@ describe('VariantTree', () => {
     it('should call downloadVariantPGN when Download button is clicked', () => {
       render(<VariantTree {...defaultProps} />);
       
-      const downloadLabel = screen.getByText('Download');
-      const downloadButton = downloadLabel.parentElement?.querySelector('button');
-      
-      if (downloadButton) {
-        fireEvent.click(downloadButton);
-      }
+      const downloadButton = screen.getByRole('button', { name: 'Download' });
+      fireEvent.click(downloadButton);
       
       expect(defaultProps.downloadVariantPGN).toHaveBeenCalledWith(defaultProps.selectedVariant);
     });
@@ -183,12 +172,8 @@ describe('VariantTree', () => {
     it('should call copyVariantPGN when Copy PGN button is clicked', () => {
       render(<VariantTree {...defaultProps} />);
       
-      const copyPgnLabel = screen.getByText('Copy PGN');
-      const copyPgnButton = copyPgnLabel.parentElement?.querySelector('button');
-      
-      if (copyPgnButton) {
-        fireEvent.click(copyPgnButton);
-      }
+      const copyPgnButton = screen.getByRole('button', { name: 'Copy PGN' });
+      fireEvent.click(copyPgnButton);
       
       expect(defaultProps.copyVariantPGN).toHaveBeenCalledWith(defaultProps.selectedVariant);
     });
@@ -196,12 +181,8 @@ describe('VariantTree', () => {
     it('should call copyVariantToRepertoire when Copy variant button is clicked', () => {
       render(<VariantTree {...defaultProps} />);
       
-      const copyVariantLabel = screen.getByText('Copy variant');
-      const copyVariantButton = copyVariantLabel.parentElement?.querySelector('button');
-      
-      if (copyVariantButton) {
-        fireEvent.click(copyVariantButton);
-      }
+      const copyVariantButton = screen.getByRole('button', { name: 'Copy variant' });
+      fireEvent.click(copyVariantButton);
       
       expect(defaultProps.copyVariantToRepertoire).toHaveBeenCalledWith(defaultProps.selectedVariant);
     });
@@ -211,13 +192,13 @@ describe('VariantTree', () => {
     it('should display selectedVariant name in selection button', () => {
       render(<VariantTree {...defaultProps} />);
       
-      expect(screen.getByText('Italian Game')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Italian Game' })).toBeInTheDocument();
     });
 
     it('should open variant selection dialog when selection button is clicked', () => {
       render(<VariantTree {...defaultProps} />);
       
-      const selectionButton = screen.getByText('Italian Game');
+      const selectionButton = screen.getByRole('button', { name: 'Italian Game' });
       fireEvent.click(selectionButton);
       
       expect(screen.getByText('Select Variant')).toBeInTheDocument();
@@ -227,10 +208,65 @@ describe('VariantTree', () => {
     it('should call setSelectedVariant when variant is selected from dialog', () => {
       render(<VariantTree {...defaultProps} />);
       
-      const selectionButton = screen.getByText('Italian Game');
+      const selectionButton = screen.getByRole('button', { name: 'Italian Game' });
       fireEvent.click(selectionButton);
       
       expect(screen.getByText('Select Variant')).toBeInTheDocument();
+    });
+  });
+
+  describe("Mobile editor mode", () => {
+    it("shows the current line card before the move list without overflowing the mobile action row", () => {
+      render(<VariantTree {...defaultProps} compact mobileEditorMode />);
+
+      const currentLineLabel = screen.getByText("Current line");
+      const activeBadge = screen.getByText("Active e4");
+      const moveButton = screen.getByRole("button", { name: "e4" });
+
+      expect(screen.getByRole("button", { name: mockVariants[0].fullName })).toBeInTheDocument();
+      expect(activeBadge).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "More variant actions" })).toBeInTheDocument();
+      expect(moveButton).toBeInTheDocument();
+      expect(currentLineLabel.compareDocumentPosition(moveButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    it("falls back to the start position label when the current node has no move", () => {
+      render(
+        <VariantTree
+          {...defaultProps}
+          compact
+          mobileEditorMode
+          currentMoveNode={new MoveVariantNode()}
+        />
+      );
+
+      expect(screen.getByText("Active Start position")).toBeInTheDocument();
+    });
+
+    it("keeps train variant inside the variant actions menu", () => {
+      render(
+        <MenuContext.Provider
+          value={{
+            open: false,
+            showMenu: jest.fn(),
+            closeMenu: jest.fn(),
+            toggleMenu: mockToggleMenu,
+          }}
+        >
+          <VariantTree {...defaultProps} compact mobileEditorMode />
+        </MenuContext.Provider>
+      );
+
+      fireEvent.click(screen.getByRole("button", { name: "More variant actions" }));
+
+      expect(mockToggleMenu).toHaveBeenCalled();
+      expect(mockToggleMenu.mock.calls[0][1]).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ name: "Train variant" }),
+          expect.objectContaining({ name: "Download" }),
+          expect.objectContaining({ name: "Copy PGN" }),
+        ])
+      );
     });
   });
 
@@ -238,7 +274,7 @@ describe('VariantTree', () => {
     it('should render successfully with all required props', () => {
       render(<VariantTree {...defaultProps} />);
       
-      expect(screen.getByText('Italian Game')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Italian Game' })).toBeInTheDocument();
     });
 
     it('should not render action buttons when selectedVariant is null', () => {
@@ -276,12 +312,8 @@ describe('VariantTree', () => {
       
       render(<VariantTree {...customProps} />);
       
-      const trainLabel = screen.getByText('Train');
-      const trainButton = trainLabel.parentElement?.querySelector('button');
-      
-      if (trainButton) {
-        fireEvent.click(trainButton);
-      }
+      const trainButton = screen.getByRole('button', { name: 'Train' });
+      fireEvent.click(trainButton);
       
       expect(mockGoToTrainRepertoire).toHaveBeenCalledWith(
         customRepertoireId,

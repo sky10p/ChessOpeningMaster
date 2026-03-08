@@ -51,4 +51,29 @@ describe("VariantMovementsPanel", () => {
     expect(deleteMove).toHaveBeenCalledTimes(1);
     expect(deleteMove).toHaveBeenCalledWith(move);
   });
+
+  it("renders a mobile move navigation list and keeps active move selection clickable", () => {
+    const whiteMove = createMoveNode("move-1", "e4", "w");
+    const blackMove = createMoveNode("move-2", "e5", "b");
+    const goToMove = jest.fn();
+
+    render(
+      <VariantMovementsPanel
+        moves={[whiteMove, blackMove]}
+        currentMoveNode={blackMove}
+        mobileMode
+        goToMove={goToMove}
+        deleteMove={jest.fn()}
+        changeNameMove={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText("1.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "e4" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "e5" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "e5" }));
+
+    expect(goToMove).toHaveBeenCalledWith(blackMove);
+  });
 });

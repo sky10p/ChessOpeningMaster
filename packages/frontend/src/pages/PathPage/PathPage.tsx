@@ -1,24 +1,19 @@
-﻿import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { FunnelIcon } from "@heroicons/react/24/outline";
+import { BoardOrientation, PathCategory } from "@chess-opening-master/common";
 import { usePaths } from "../../hooks/usePaths";
 import { useDialogContext } from "../../contexts/DialogContext";
 import { useNavigationUtils } from "../../utils/navigationUtils";
-import { useNavigate } from "react-router-dom";
-import {
-  ArrowPathIcon,
-  FunnelIcon,
-} from "@heroicons/react/24/outline";
-import { Button, Badge, Input, Select } from "../../components/ui";
-import {
-  BoardOrientation,
-  PathCategory,
-} from "@chess-opening-master/common";
-import { isStudiedVariantPath, isStudyPath, isNewVariantPath } from "./helpers";
-import { getTodayPlanProgress } from "../../utils/path/todayPlanProgress";
+import { Button, Badge, Input, Select, PageHeader, Tabs, TabButton } from "../../components/ui";
+import { getPathSurfaceModel } from "../../utils/path/pathSurfaceModel";
 import { PageFrame } from "../../components/design/layouts/PageFrame";
 import { PageRoot } from "../../components/design/layouts/PageRoot";
 import { PageSurface } from "../../components/design/layouts/PageSurface";
-import { PathLessonView } from "./components/PathLessonView";
-import { PathForecastView } from "./components/PathForecastView";
+import { PathLessonView } from "./components/PathLessonViewResponsive";
+import { PathForecastView } from "./components/PathForecastViewResponsive";
+import { useIsMobile } from "../../hooks/useIsMobile";
+import { isNewVariantPath, isStudiedVariantPath, isStudyPath } from "./helpers";
 
 type FilterOrientation = BoardOrientation | "all";
 type PathView = "lesson" | "forecast";
@@ -67,7 +62,10 @@ const categoryLabels: Record<PathCategory | "all", string> = {
   studyToReview: "Study reviews",
 };
 
+const resolveView = (value: string | null): PathView => (value === "lesson" ? "lesson" : "forecast");
+
 const PathPage: React.FC = () => {
+  const isMobile = useIsMobile();
   const {
     path,
     loading,
@@ -83,10 +81,12 @@ const PathPage: React.FC = () => {
   const { showConfirmDialog } = useDialogContext();
   const { goToRepertoire, goToTrainRepertoire } = useNavigationUtils();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState<PathCategory | "all">("all");
-  const [selectedView, setSelectedView] = useState<PathView>("lesson");
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [filters, setFilters] = useState<PathFiltersState>(defaultFilters);
+
+  const selectedView = resolveView(searchParams.get("view"));
 
   const apiFilters = useMemo(
     () => ({
@@ -123,11 +123,34 @@ const PathPage: React.FC = () => {
     return tags;
   }, [selectedCategory, apiFilters]);
 
+  const hasActiveFilters = useMemo(() => {
+    const defaults = defaultFilters();
+
+    return (
+      selectedCategory !== "all" ||
+      filters.orientation !== defaults.orientation ||
+      filters.openingName.trim() !== defaults.openingName ||
+      filters.fen.trim() !== defaults.fen ||
+      filters.dateFrom !== defaults.dateFrom ||
+      filters.dateTo !== defaults.dateTo ||
+      filters.dailyNewLimit !== defaults.dailyNewLimit
+    );
+  }, [filters, selectedCategory]);
+
   useEffect(() => {
     const categoryForApi = selectedCategory === "all" ? undefined : (selectedCategory as PathCategory);
     void loadPath(categoryForApi, apiFilters);
     void loadInsights(apiFilters);
   }, [loadInsights, loadPath, selectedCategory, apiFilters]);
+
+  const handleSelectView = useCallback(
+    (view: PathView) => {
+      const nextSearchParams = new URLSearchParams(searchParams);
+      nextSearchParams.set("view", view);
+      setSearchParams(nextSearchParams, { replace: true });
+    },
+    [searchParams, setSearchParams]
+  );
 
   const goToStudy = () => {
     if (isStudyPath(path)) {
@@ -143,7 +166,7 @@ const PathPage: React.FC = () => {
 
   const goToReviewVariant = () => {
     if (isStudiedVariantPath(path) || isNewVariantPath(path)) {
-      goToRepertoire(path.repertoireId, path.name);
+      goToRepertoire(path.repertoireId, path.name, path.startingFen);
     }
   };
 
@@ -174,207 +197,176 @@ const PathPage: React.FC = () => {
   };
 
   const nextSevenDueCount = (plan?.forecastDays || []).slice(0, 7).reduce((sum, entry) => sum + entry.dueCount, 0);
-  const {
-    reviewTargetToday,
-    newTargetToday,
-    plannedTodayTarget,
-    completedReviewsToday,
-    completedNewToday,
-    completedToday,
-    remainingToTarget,
-    remainingReviewsTarget,
-    remainingNewTarget,
-    exceededTarget,
-    todayPlanMessage,
-  } = useMemo(() => getTodayPlanProgress(plan), [plan]);
+  const surfaceModel = useMemo(() => getPathSurfaceModel(path, plan, loading), [path, plan, loading]);
 
   return (
     <PageRoot>
-      <PageFrame className="h-full py-0 sm:py-2">
-        <PageSurface>
-          <div className="flex-1 min-h-0 flex flex-col relative p-2 sm:p-6 overflow-y-auto">
-        <div className="w-full max-w-6xl mx-auto mt-1 sm:mt-2 flex flex-col gap-4 pb-4">
-          <div className="rounded-2xl border border-border-default bg-surface px-4 py-4 sm:px-6">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-brand/20 p-2">
-                  <ArrowPathIcon className="h-6 w-6 sm:h-7 sm:w-7 text-brand" />
+      <PageFrame className="h-full max-w-analytics py-4 sm:py-6">
+        <PageSurface className="gap-4 border-none bg-transparent shadow-none">
+          <div className="flex min-h-0 flex-1 flex-col gap-4 pb-4">
+            <PageHeader
+              eyebrow={isMobile ? undefined : "Path"}
+              title="Path"
+              description={
+                isMobile
+                  ? undefined
+                  : "Use forecast to shape the queue, then switch to next lesson when you are ready to execute."
+              }
+              className={isMobile ? "gap-3 px-4 py-4" : undefined}
+            />
+
+            <div className="sticky top-0 z-10 space-y-3 rounded-xl border border-border-default bg-surface/95 p-2 backdrop-blur sm:p-3">
+              <Tabs variant="segment" className="w-full">
+                <TabButton
+                  variant="segment"
+                  active={selectedView === "forecast"}
+                  onClick={() => handleSelectView("forecast")}
+                >
+                  Path forecast
+                </TabButton>
+                <TabButton
+                  variant="segment"
+                  active={selectedView === "lesson"}
+                  onClick={() => handleSelectView("lesson")}
+                >
+                  Next lesson
+                </TabButton>
+              </Tabs>
+
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 sm:flex sm:items-center">
+                  <Select
+                    id="category-select"
+                    size="sm"
+                    value={selectedCategory}
+                    onChange={(event) => setSelectedCategory(event.target.value as PathCategory | "all")}
+                  >
+                    <option value="all">All Paths</option>
+                    <option value="variantsWithErrors">Variants with Errors</option>
+                    <option value="newVariants">New Variants</option>
+                    <option value="oldVariants">Old Variants</option>
+                    <option value="studyToReview">Studies to Review</option>
+                  </Select>
+                  <Button
+                    type="button"
+                    intent="secondary"
+                    size="sm"
+                    onClick={() => setShowAdvancedFilters((previousValue) => !previousValue)}
+                  >
+                    <FunnelIcon className="h-4 w-4" />
+                    {isMobile ? "Filters" : showAdvancedFilters ? "Hide filters" : "Show filters"}
+                  </Button>
                 </div>
-                <div>
-                  <h1 className="text-xl sm:text-2xl font-bold text-text-base">Path</h1>
-                  <p className="text-xs sm:text-sm text-text-muted">Next lesson first. Forecast when you want the bigger plan.</p>
-                </div>
+                {!isMobile ? (
+                  <Button type="button" intent="secondary" size="sm" onClick={clearFilters}>
+                    Reset scope
+                  </Button>
+                ) : null}
               </div>
-            </div>
-          </div>
 
-          <div className="sticky top-0 z-10 rounded-xl border border-border-default bg-surface/95 backdrop-blur p-2 sm:p-3 space-y-3">
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                intent={selectedView === "lesson" ? "primary" : "secondary"}
-                size="sm"
-                className="w-full justify-center"
-                onClick={() => setSelectedView("lesson")}
-              >
-                Next lesson
-              </Button>
-              <Button
-                intent={selectedView === "forecast" ? "accent" : "secondary"}
-                size="sm"
-                className="w-full justify-center"
-                onClick={() => setSelectedView("forecast")}
-              >
-                Path forecast
-              </Button>
-            </div>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
-                <Select
-                  id="category-select"
-                  size="sm"
-                  value={selectedCategory}
-                  onChange={(event) => setSelectedCategory(event.target.value as PathCategory | "all")}
-                >
-                  <option value="all">All Paths</option>
-                  <option value="variantsWithErrors">Variants with Errors</option>
-                  <option value="newVariants">New Variants</option>
-                  <option value="oldVariants">Old Variants</option>
-                  <option value="studyToReview">Studies to Review</option>
-                </Select>
-                <Button
-                  type="button"
-                  intent="secondary"
-                  size="sm"
-                  onClick={() => setShowAdvancedFilters((previousValue) => !previousValue)}
-                >
-                  <FunnelIcon className="h-4 w-4" />
-                  {showAdvancedFilters ? "Hide filters" : "Show filters"}
-                </Button>
-              </div>
-              <Button
-                type="button"
-                intent="secondary"
-                size="sm"
-                onClick={clearFilters}
-              >
-                Reset scope
-              </Button>
-            </div>
-
-            {activeFilterTags.length > 0 && (
-              <div className="flex gap-2 overflow-x-auto pb-1">
-                {activeFilterTags.map((tag) => (
-                  <Badge key={tag} variant="default" size="sm" className="whitespace-nowrap">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            )}
-
-            {showAdvancedFilters && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2 border-t border-border-default">
-                <Select
-                  id="orientation-filter"
-                  label="Color"
-                  size="sm"
-                  value={filters.orientation}
-                  onChange={(event) => setFilterField("orientation", event.target.value as FilterOrientation)}
-                >
-                  <option value="all">All</option>
-                  <option value="white">White</option>
-                  <option value="black">Black</option>
-                </Select>
-                <Input
-                  id="opening-filter"
-                  label="Opening"
-                  size="sm"
-                  value={filters.openingName}
-                  onChange={(event) => setFilterField("openingName", event.target.value)}
-                  placeholder="e.g. Sicilian"
-                />
-                <Input
-                  id="fen-filter"
-                  label="FEN contains"
-                  size="sm"
-                  value={filters.fen}
-                  onChange={(event) => setFilterField("fen", event.target.value)}
-                  placeholder="piece placement..."
-                />
-                <Input
-                  id="date-from"
-                  label="Analytics from"
-                  type="date"
-                  size="sm"
-                  value={filters.dateFrom}
-                  onChange={(event) => setFilterField("dateFrom", event.target.value)}
-                />
-                <Input
-                  id="date-to"
-                  label="Analytics to"
-                  type="date"
-                  size="sm"
-                  value={filters.dateTo}
-                  onChange={(event) => setFilterField("dateTo", event.target.value)}
-                />
-                <div className="flex flex-col">
-                  <label htmlFor="daily-new-limit" className="text-text-muted mb-1 text-sm flex items-center gap-1">
-                    <span>Daily new limit</span>
-                    <span
-                      className="inline-flex items-center justify-center h-4 w-4 rounded-full border border-border-subtle text-text-subtle cursor-help text-[10px]"
-                      title="Maximum number of brand-new variants to introduce per day. It does not affect due reviews."
+              {(activeFilterTags.length > 0 || (isMobile && hasActiveFilters)) ? (
+                <div className="space-y-2">
+                  {activeFilterTags.length > 0 ? (
+                    <div className="flex gap-2 overflow-x-auto pb-1">
+                      {activeFilterTags.map((tag) => (
+                        <Badge key={tag} variant="default" size="sm" className="whitespace-nowrap">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  ) : null}
+                  {isMobile && hasActiveFilters ? (
+                    <Button
+                      type="button"
+                      intent="secondary"
+                      size="sm"
+                      className="w-full justify-center"
+                      onClick={clearFilters}
                     >
-                      ?
-                    </span>
-                  </label>
+                      Reset scope
+                    </Button>
+                  ) : null}
+                </div>
+              ) : null}
+
+              {showAdvancedFilters ? (
+                <div className="grid grid-cols-1 gap-3 border-t border-border-default pt-2 sm:grid-cols-2 lg:grid-cols-3">
+                  <Select
+                    id="orientation-filter"
+                    label="Color"
+                    size="sm"
+                    value={filters.orientation}
+                    onChange={(event) => setFilterField("orientation", event.target.value as FilterOrientation)}
+                  >
+                    <option value="all">All</option>
+                    <option value="white">White</option>
+                    <option value="black">Black</option>
+                  </Select>
+                  <Input
+                    id="opening-filter"
+                    label="Opening"
+                    size="sm"
+                    value={filters.openingName}
+                    onChange={(event) => setFilterField("openingName", event.target.value)}
+                    placeholder="e.g. Sicilian"
+                  />
+                  <Input
+                    id="fen-filter"
+                    label="FEN contains"
+                    size="sm"
+                    value={filters.fen}
+                    onChange={(event) => setFilterField("fen", event.target.value)}
+                    placeholder="piece placement..."
+                  />
+                  <Input
+                    id="date-from"
+                    label="Analytics from"
+                    type="date"
+                    size="sm"
+                    value={filters.dateFrom}
+                    onChange={(event) => setFilterField("dateFrom", event.target.value)}
+                  />
+                  <Input
+                    id="date-to"
+                    label="Analytics to"
+                    type="date"
+                    size="sm"
+                    value={filters.dateTo}
+                    onChange={(event) => setFilterField("dateTo", event.target.value)}
+                  />
                   <Input
                     id="daily-new-limit"
+                    label="Daily new limit"
                     size="sm"
                     value={filters.dailyNewLimit}
                     onChange={(event) => setFilterField("dailyNewLimit", event.target.value)}
                     placeholder="5"
                   />
                 </div>
-              </div>
+              ) : null}
+            </div>
+
+            {selectedView === "forecast" ? (
+              <PathForecastView
+                plan={plan}
+                analytics={analytics}
+                insightsLoading={insightsLoading}
+                loading={loading}
+                insightsError={insightsError}
+                nextSevenDueCount={nextSevenDueCount}
+              />
+            ) : (
+              <PathLessonView
+                path={path}
+                loading={loading}
+                error={error}
+                nextAction={surfaceModel.nextAction}
+                onGoToReviewVariant={goToReviewVariant}
+                onGoToTrainVariant={goToTrainVariant}
+                onGoToStudy={goToStudy}
+                onRemoveVariant={handleRemoveVariant}
+              />
             )}
-          </div>
-
-          {selectedView === "lesson" && (
-            <PathLessonView
-              path={path}
-              loading={loading}
-              error={error}
-              plan={plan}
-              nextSevenDueCount={nextSevenDueCount}
-              completedReviewsToday={completedReviewsToday}
-              reviewTargetToday={reviewTargetToday}
-              completedNewToday={completedNewToday}
-              newTargetToday={newTargetToday}
-              plannedTodayTarget={plannedTodayTarget}
-              completedToday={completedToday}
-              remainingToTarget={remainingToTarget}
-              remainingReviewsTarget={remainingReviewsTarget}
-              remainingNewTarget={remainingNewTarget}
-              exceededTarget={exceededTarget}
-              todayPlanMessage={todayPlanMessage}
-              onGoToReviewVariant={goToReviewVariant}
-              onGoToTrainVariant={goToTrainVariant}
-              onGoToStudy={goToStudy}
-              onRemoveVariant={handleRemoveVariant}
-              onSwitchToForecast={() => setSelectedView("forecast")}
-            />
-          )}
-
-          {selectedView === "forecast" && (
-            <PathForecastView
-              plan={plan}
-              analytics={analytics}
-              insightsLoading={insightsLoading}
-              loading={loading}
-              insightsError={insightsError}
-              nextSevenDueCount={nextSevenDueCount}
-            />
-          )}
-          </div>
           </div>
         </PageSurface>
       </PageFrame>

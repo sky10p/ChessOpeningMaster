@@ -1,0 +1,776 @@
+import React from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { RepertoireOverviewResponse } from "@chess-opening-master/common";
+import {
+  Bars3Icon,
+  BookOpenIcon,
+  ChartBarIcon,
+  ChevronDownIcon,
+  HomeIcon,
+  MagnifyingGlassIcon,
+  MoonIcon,
+  Squares2X2Icon,
+  SunIcon,
+  TrophyIcon,
+} from "@heroicons/react/24/outline";
+import { ArrowRightEndOnRectangleIcon, ChevronRightIcon, PlusIcon } from "@heroicons/react/24/solid";
+import {
+  downloadRepertoiresBackup,
+  getRepertoireOverview,
+} from "../../../repository/repertoires/repertoires";
+import { logout } from "../../../repository/auth/auth";
+import { useHeaderState } from "../../../contexts/HeaderContext";
+import { useNavbarDispatch, useNavbarState } from "../../../contexts/NavbarContext";
+import { useFooterState } from "../../../contexts/FooterContext";
+import { useTheme } from "../../../hooks/useTheme";
+import { Badge, Button, Drawer, IconButton, Input } from "../../ui";
+import { cn } from "../../../utils/cn";
+import { getRepertoireEditorRoute, getRepertoireOpeningRoute } from "../../../utils/appRoutes";
+
+interface AppShellProps {
+  authEnabled: boolean;
+  authenticated: boolean;
+  onLoggedOut: () => void;
+  children: React.ReactNode;
+}
+
+type NavItem = {
+  label: string;
+  shortLabel: string;
+  href: string;
+  icon: React.ReactNode;
+};
+
+type QuickSearchResult = {
+  id: string;
+  title: string;
+  subtitle: string;
+  href: string;
+  kind: "repertoire" | "opening";
+};
+
+const EMPTY_OVERVIEW: RepertoireOverviewResponse = { repertoires: [] };
+const SEARCH_OVERVIEW_CACHE_MS = 5 * 60 * 1000;
+
+const primaryNav: NavItem[] = [
+  {
+    label: "Today",
+    shortLabel: "Today",
+    href: "/dashboard",
+    icon: <HomeIcon className="h-5 w-5" />,
+  },
+  {
+    label: "Repertoires",
+    shortLabel: "Repertoires",
+    href: "/repertoires",
+    icon: <Squares2X2Icon className="h-5 w-5" />,
+  },
+  {
+    label: "Games",
+    shortLabel: "Games",
+    href: "/games",
+    icon: <TrophyIcon className="h-5 w-5" />,
+  },
+  {
+    label: "Studies",
+    shortLabel: "Studies",
+    href: "/studies",
+    icon: <BookOpenIcon className="h-5 w-5" />,
+  },
+];
+
+const getRouteMeta = (pathname: string) => {
+  if (pathname.startsWith("/dashboard")) {
+    return {
+      title: "Today",
+      description: "Focus on the next lesson, your daily targets, and the work that matters now.",
+    };
+  }
+  if (pathname.startsWith("/path")) {
+    return {
+      title: "Path",
+      description: "Plan the queue, inspect the forecast, and switch into the next lesson when you are ready to execute.",
+    };
+  }
+  if (pathname.startsWith("/repertoires")) {
+    return {
+      title: "Repertoires",
+      description: "Manage your opening library, track due work, and jump into training.",
+    };
+  }
+  if (pathname.startsWith("/games")) {
+    return {
+      title: "Games",
+      description: "Turn imported games into mapped signals, training queues, and opening insights.",
+    };
+  }
+  if (pathname.startsWith("/studies")) {
+    return {
+      title: "Studies",
+      description: "Organize study groups, keep sessions moving, and review supporting material.",
+    };
+  }
+  if (pathname.startsWith("/repertoire/")) {
+    return {
+      title: "Repertoire Editor",
+      description: "Author lines, review positions, and keep the current branch in focus.",
+    };
+  }
+  if (pathname.startsWith("/train/repertoires/")) {
+    return {
+      title: "Training Session",
+      description: "Stay on the current move, resolve mistakes, and finish the run with clear progress.",
+    };
+  }
+  return {
+    title: "ChessKeep",
+    description: "Professional training workflows for your opening repertoire.",
+  };
+};
+
+const isActiveRoute = (pathname: string, href: string) =>
+  href === "/dashboard" ? pathname === "/" || pathname.startsWith("/dashboard") || pathname.startsWith("/path") : pathname.startsWith(href);
+
+export const AppShell: React.FC<AppShellProps> = ({
+  authEnabled,
+  authenticated,
+  onLoggedOut,
+  children,
+}) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { icons, isSaving } = useHeaderState();
+  const { repertoires, open } = useNavbarState();
+  const { setOpen, updateRepertoires } = useNavbarDispatch();
+  const footerState = useFooterState();
+  const { theme, toggleTheme } = useTheme();
+  const [searchOpen, setSearchOpen] = React.useState(false);
+  const [searchValue, setSearchValue] = React.useState("");
+  const [searchStatus, setSearchStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
+  const [searchOverview, setSearchOverview] = React.useState<RepertoireOverviewResponse>(EMPTY_OVERVIEW);
+  const [mobileNavExpanded, setMobileNavExpanded] = React.useState(false);
+  const searchOverviewFetchedAtRef = React.useRef<number | null>(null);
+  const routeMeta = getRouteMeta(location.pathname);
+  const favoriteRepertoires = React.useMemo(
+    () => repertoires.filter((repertoire) => repertoire.favorite && !repertoire.disabled).slice(0, 8),
+    [repertoires]
+  );
+  const normalizedSearchValue = searchValue.trim().toLowerCase();
+  const filteredFavorites = React.useMemo(
+    () =>
+      favoriteRepertoires.filter((repertoire) =>
+        repertoire.name.toLowerCase().includes(normalizedSearchValue)
+      ),
+    [favoriteRepertoires, normalizedSearchValue]
+  );
+  const quickSearchResults = React.useMemo<QuickSearchResult[]>(() => {
+    if (!normalizedSearchValue || searchStatus !== "success") {
+      return [];
+    }
+
+    return searchOverview.repertoires
+      .flatMap((repertoire) => {
+        const results: QuickSearchResult[] = [];
+
+        if (repertoire.repertoireName.toLowerCase().includes(normalizedSearchValue)) {
+          results.push({
+            id: `repertoire:${repertoire.repertoireId}`,
+            title: repertoire.repertoireName,
+            subtitle: `Repertoire | ${repertoire.openings.length} openings`,
+            href: getRepertoireEditorRoute(repertoire.repertoireId),
+            kind: "repertoire",
+          });
+        }
+
+        repertoire.openings
+          .filter((opening) => opening.openingName.toLowerCase().includes(normalizedSearchValue))
+          .forEach((opening) => {
+            results.push({
+              id: `opening:${repertoire.repertoireId}:${opening.openingName}`,
+              title: opening.openingName,
+              subtitle: repertoire.repertoireName,
+              href: getRepertoireOpeningRoute(repertoire.repertoireId, opening.openingName),
+              kind: "opening",
+            });
+          });
+
+        return results;
+      })
+      .slice(0, 12);
+  }, [normalizedSearchValue, searchOverview.repertoires, searchStatus]);
+  const isImmersiveWorkspace =
+    location.pathname.startsWith("/repertoire/") ||
+    location.pathname.startsWith("/train/repertoires/");
+
+  React.useEffect(() => {
+    if (!authenticated) {
+      return;
+    }
+    void updateRepertoires();
+  }, [authenticated, updateRepertoires]);
+
+  React.useEffect(() => {
+    if (!authenticated || !searchOpen) {
+      return;
+    }
+
+    const cachedAt = searchOverviewFetchedAtRef.current;
+    if (cachedAt !== null && Date.now() - cachedAt < SEARCH_OVERVIEW_CACHE_MS) {
+      return;
+    }
+
+    let ignore = false;
+
+    const loadSearchOverview = async () => {
+      try {
+        setSearchStatus("loading");
+        const payload = await getRepertoireOverview();
+        if (ignore) {
+          return;
+        }
+        setSearchOverview(payload);
+        searchOverviewFetchedAtRef.current = Date.now();
+        setSearchStatus("success");
+      } catch {
+        if (ignore) {
+          return;
+        }
+        setSearchStatus("error");
+      }
+    };
+
+    void loadSearchOverview();
+
+    return () => {
+      ignore = true;
+    };
+  }, [authenticated, searchOpen]);
+
+  React.useEffect(() => {
+    setMobileNavExpanded(false);
+  }, [location.pathname]);
+
+  React.useEffect(() => {
+    if (!authenticated || typeof window === "undefined") {
+      return;
+    }
+
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setMobileNavExpanded(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [authenticated]);
+
+  React.useEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    const isMobileViewport = typeof window !== "undefined" && window.innerWidth < 1024;
+    const offset = !authenticated || !isMobileViewport
+      ? "0px"
+      : !isImmersiveWorkspace
+        ? mobileNavExpanded
+          ? "14rem"
+          : "5.5rem"
+        : footerState.isVisible && footerState.icons.length > 0
+          ? "5.5rem"
+          : "0px";
+
+    document.documentElement.style.setProperty("--app-mobile-bottom-offset", offset);
+
+    return () => {
+      document.documentElement.style.setProperty("--app-mobile-bottom-offset", "0px");
+    };
+  }, [authenticated, footerState.icons.length, footerState.isVisible, isImmersiveWorkspace, mobileNavExpanded]);
+
+  const handleLogout = React.useCallback(async () => {
+    if (authEnabled) {
+      await logout().catch(() => undefined);
+    }
+    onLoggedOut();
+    navigate("/login");
+  }, [authEnabled, navigate, onLoggedOut]);
+
+  const handleCloseSearch = React.useCallback(() => {
+    setSearchOpen(false);
+    setSearchValue("");
+  }, []);
+
+  const activePrimaryNavItem = React.useMemo(
+    () => primaryNav.find((item) => isActiveRoute(location.pathname, item.href)) ?? primaryNav[0],
+    [location.pathname]
+  );
+
+  if (!authenticated) {
+    return <>{children}</>;
+  }
+
+  return (
+    <>
+      <div className="min-h-screen bg-page text-text-base lg:grid lg:grid-cols-[18rem_minmax(0,1fr)]">
+        <aside className="hidden h-screen border-r border-border-subtle bg-page-subtle lg:sticky lg:top-0 lg:flex lg:flex-col">
+          <div className="border-b border-border-subtle px-5 py-5">
+            <Link to="/dashboard" className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand text-text-on-brand shadow-surface">
+                <ChartBarIcon className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-text-subtle">ChessKeep</p>
+                <p className="text-sm text-text-muted">Opening training workspace</p>
+              </div>
+            </Link>
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-4 py-5">
+            <nav className="space-y-1">
+              {primaryNav.map((item) => {
+                const active = isActiveRoute(location.pathname, item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    className={cn(
+                      "flex items-center justify-between rounded-xl px-3 py-3 text-sm font-medium transition-colors",
+                      active
+                        ? "bg-brand text-text-on-brand shadow-surface"
+                        : "text-text-muted hover:bg-surface hover:text-text-base"
+                    )}
+                  >
+                    <span className="flex items-center gap-3">
+                      {item.icon}
+                      {item.label}
+                    </span>
+                    {active ? <ChevronRightIcon className="h-4 w-4" /> : null}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            <div className="mt-6 rounded-2xl border border-border-subtle bg-surface px-4 py-4 shadow-sm">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-text-base">Quick create</p>
+                  <p className="text-xs text-text-muted">Start a new repertoire from your library.</p>
+                </div>
+                <Button intent="primary" size="sm" onClick={() => navigate("/repertoires?create=1")}>
+                  <PlusIcon className="h-4 w-4" />
+                  New
+                </Button>
+              </div>
+            </div>
+
+            <div className="mt-6 space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-text-base">Favorites</p>
+                  <p className="text-xs text-text-muted">Pinned repertoires for fast re-entry.</p>
+                </div>
+                {favoriteRepertoires.length > 0 ? (
+                  <Badge variant="brand" size="sm">
+                    {favoriteRepertoires.length}
+                  </Badge>
+                ) : null}
+              </div>
+              <div className="space-y-2">
+                {favoriteRepertoires.length > 0 ? (
+                  favoriteRepertoires.map((repertoire) => (
+                    <Link
+                      key={repertoire._id}
+                      to={`/repertoire/${repertoire._id}`}
+                      className="flex items-center justify-between rounded-xl border border-border-subtle bg-surface px-3 py-3 text-sm text-text-muted transition-colors hover:border-border-default hover:text-text-base"
+                    >
+                      <span className="truncate">{repertoire.name}</span>
+                      <ChevronRightIcon className="h-4 w-4 shrink-0 text-text-subtle" />
+                    </Link>
+                  ))
+                ) : (
+                  <div className="rounded-xl border border-dashed border-border-default px-3 py-4 text-sm text-text-muted">
+                    Favorite repertoires will appear here.
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3 border-t border-border-subtle px-4 py-4">
+            <Button intent="secondary" size="sm" className="w-full justify-between" onClick={toggleTheme}>
+              <span className="flex items-center gap-2">
+                {theme === "dark" ? <MoonIcon className="h-4 w-4" /> : <SunIcon className="h-4 w-4" />}
+                {theme === "dark" ? "Dark mode" : "Light mode"}
+              </span>
+              <span className="text-xs text-text-subtle">{theme === "dark" ? "On" : "Off"}</span>
+            </Button>
+            <Button intent="outline" size="sm" className="w-full justify-center" onClick={() => void downloadRepertoiresBackup()}>
+              Download backup
+            </Button>
+            {authEnabled ? (
+              <Button intent="ghost" size="sm" className="w-full justify-center" onClick={() => void handleLogout()}>
+                <ArrowRightEndOnRectangleIcon className="h-4 w-4" />
+                Log out
+              </Button>
+            ) : null}
+          </div>
+        </aside>
+
+        <div className="flex min-h-screen flex-col">
+          <header
+            data-testid="app-shell-mobile-header"
+            className="sticky top-0 z-40 overflow-hidden border-b border-border-subtle bg-page lg:bg-page/95 lg:backdrop-blur"
+          >
+            <div className="flex items-center gap-3 px-4 py-2.5 sm:px-6 sm:py-3">
+              <div className="flex items-center gap-2 lg:hidden">
+                <IconButton label="Open menu" onClick={() => setOpen(true)}>
+                  <Bars3Icon className="h-5 w-5" />
+                </IconButton>
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-text-subtle">
+                  {routeMeta.title}
+                </p>
+                <p className={cn("hidden text-sm text-text-muted lg:block", isImmersiveWorkspace ? "sm:truncate" : "truncate")}>
+                  {routeMeta.description}
+                </p>
+              </div>
+              <div className="hidden items-center gap-2 md:flex">
+                {!isImmersiveWorkspace ? (
+                  <Button intent="secondary" size="sm" onClick={() => setSearchOpen(true)}>
+                    <MagnifyingGlassIcon className="h-4 w-4" />
+                    Search
+                  </Button>
+                ) : null}
+                {isSaving ? (
+                  <Badge variant="accent" size="sm">
+                    Saving
+                  </Badge>
+                ) : (
+                  <Badge variant="default" size="sm">
+                    Synced
+                  </Badge>
+                )}
+                {icons.map((icon) => (
+                  <Button
+                    key={icon.key}
+                    intent="secondary"
+                    size="sm"
+                    onClick={icon.onClick}
+                    className="justify-center"
+                  >
+                    {icon.icon}
+                    {icon.label ?? icon.key}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            {icons.length > 0 ? (
+              <div className="flex gap-2 overflow-x-auto border-t border-border-subtle bg-page px-4 py-2 md:hidden">
+                {icons.map((icon) => (
+                  <Button
+                    key={icon.key}
+                    intent="secondary"
+                    size="sm"
+                    onClick={icon.onClick}
+                    className="shrink-0"
+                  >
+                    {icon.icon}
+                    {icon.label ?? icon.key}
+                  </Button>
+                ))}
+              </div>
+            ) : null}
+          </header>
+
+          <main
+            className={cn(
+              "flex min-h-0 flex-1 flex-col",
+              !isImmersiveWorkspace && "pb-24 lg:pb-0",
+              isImmersiveWorkspace && footerState.isVisible && "pb-24 lg:pb-0"
+            )}
+          >
+            {children}
+          </main>
+        </div>
+
+        {!isImmersiveWorkspace ? (
+          <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 px-3 pb-3 lg:hidden">
+            <div
+              data-testid="app-shell-mobile-nav"
+              className={cn(
+                "pointer-events-auto ml-auto mr-auto w-full max-w-md rounded-[1.75rem] border border-border-subtle bg-surface shadow-elevated transition-all duration-200",
+                mobileNavExpanded ? "px-3 py-3" : "px-3 py-2"
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <Button
+                  intent="ghost"
+                  size="sm"
+                  className="min-h-[44px] flex-1 justify-start rounded-2xl px-3"
+                  onClick={() => navigate(activePrimaryNavItem.href)}
+                >
+                  {activePrimaryNavItem.icon}
+                  {activePrimaryNavItem.label}
+                </Button>
+                <Button
+                  data-testid="app-shell-mobile-nav-toggle"
+                  intent={mobileNavExpanded ? "primary" : "secondary"}
+                  size="sm"
+                  className="min-h-[44px] shrink-0 rounded-2xl px-3"
+                  onClick={() => setMobileNavExpanded((current) => !current)}
+                >
+                  <Bars3Icon className="h-5 w-5" />
+                  Menu
+                  <ChevronDownIcon
+                    className={cn("h-4 w-4 transition-transform duration-200", mobileNavExpanded && "rotate-180")}
+                  />
+                </Button>
+              </div>
+
+              {mobileNavExpanded ? (
+                <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border-subtle pt-3">
+                  {primaryNav.map((item) => {
+                    const active = isActiveRoute(location.pathname, item.href);
+                    return (
+                      <Button
+                        key={item.href}
+                        intent={active ? "primary" : "ghost"}
+                        size="sm"
+                        className="min-h-[52px] justify-start rounded-2xl px-3"
+                        onClick={() => {
+                          navigate(item.href);
+                          setMobileNavExpanded(false);
+                        }}
+                      >
+                        {item.icon}
+                        {item.label}
+                      </Button>
+                    );
+                  })}
+                  <Button
+                    intent={open ? "primary" : "secondary"}
+                    size="sm"
+                    className="min-h-[52px] justify-start rounded-2xl px-3"
+                    onClick={() => {
+                      setOpen(true);
+                      setMobileNavExpanded(false);
+                    }}
+                  >
+                    <Bars3Icon className="h-5 w-5" />
+                    More
+                  </Button>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+
+        {isImmersiveWorkspace && footerState.isVisible && footerState.icons.length > 0 ? (
+          <div
+            className="fixed inset-x-0 bottom-0 z-50 border-t border-border-subtle bg-surface px-3 py-2 shadow-elevated lg:hidden"
+          >
+            <div className="grid auto-cols-fr grid-flow-col gap-2 overflow-x-auto">
+              {footerState.icons.map((icon) => (
+                <Button
+                  key={icon.key}
+                  intent="secondary"
+                  size="sm"
+                  className="min-h-[44px] flex-col gap-1 rounded-2xl px-2 py-2"
+                  onClick={icon.onClick}
+                >
+                  {icon.icon}
+                  <span className="text-[11px]">{icon.label}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </div>
+
+      <Drawer
+        open={open}
+        title="Navigate"
+        description="Primary sections, favorites, and utility actions."
+        onClose={() => setOpen(false)}
+        footer={
+          <div className="flex items-center justify-between gap-3">
+            <Button intent="secondary" size="sm" onClick={toggleTheme}>
+              {theme === "dark" ? <MoonIcon className="h-4 w-4" /> : <SunIcon className="h-4 w-4" />}
+              {theme === "dark" ? "Dark" : "Light"}
+            </Button>
+            {authEnabled ? (
+              <Button intent="ghost" size="sm" onClick={() => void handleLogout()}>
+                <ArrowRightEndOnRectangleIcon className="h-4 w-4" />
+                Log out
+              </Button>
+            ) : null}
+          </div>
+        }
+      >
+        <div className="space-y-6">
+          <div className="space-y-2">
+            {primaryNav.map((item) => {
+              const active = isActiveRoute(location.pathname, item.href);
+              return (
+                <Button
+                  key={item.href}
+                  intent={active ? "primary" : "secondary"}
+                  size="md"
+                  className="w-full justify-between"
+                  onClick={() => {
+                    navigate(item.href);
+                    setOpen(false);
+                  }}
+                >
+                  <span className="flex items-center gap-3">
+                    {item.icon}
+                    {item.label}
+                  </span>
+                  <ChevronRightIcon className="h-4 w-4" />
+                </Button>
+              );
+            })}
+          </div>
+
+          <div className="space-y-2">
+            <Button
+              intent="primary"
+              size="md"
+              className="w-full justify-center"
+              onClick={() => {
+                navigate("/repertoires?create=1");
+                setOpen(false);
+              }}
+            >
+              <PlusIcon className="h-4 w-4" />
+              New repertoire
+            </Button>
+            <Button
+              intent="outline"
+              size="md"
+              className="w-full justify-center"
+              onClick={() => void downloadRepertoiresBackup()}
+            >
+              Download backup
+            </Button>
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <p className="text-sm font-semibold text-text-base">Favorites</p>
+              <p className="text-sm text-text-muted">Pinned repertoires for quick access.</p>
+            </div>
+            {favoriteRepertoires.length > 0 ? (
+              <div className="space-y-2">
+                {favoriteRepertoires.map((repertoire) => (
+                  <Button
+                    key={repertoire._id}
+                    intent="secondary"
+                    size="md"
+                    className="w-full justify-between"
+                    onClick={() => {
+                      navigate(getRepertoireEditorRoute(repertoire._id));
+                      setOpen(false);
+                    }}
+                  >
+                    <span className="truncate">{repertoire.name}</span>
+                    <ChevronRightIcon className="h-4 w-4" />
+                  </Button>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-xl border border-dashed border-border-default px-3 py-4 text-sm text-text-muted">
+                No favorite repertoires yet.
+              </div>
+            )}
+          </div>
+        </div>
+      </Drawer>
+
+      <Drawer
+        open={searchOpen}
+        title="Quick search"
+        description="Jump to a repertoire or opening."
+        onClose={handleCloseSearch}
+      >
+        <div className="space-y-4">
+          <Input
+            label="Search library"
+            value={searchValue}
+            onChange={(event) => setSearchValue(event.target.value)}
+            placeholder="Type a repertoire or opening name..."
+          />
+          <div className="space-y-2">
+            {!normalizedSearchValue && filteredFavorites.length > 0 ? (
+              filteredFavorites.map((repertoire) => (
+                <Button
+                  key={repertoire._id}
+                  intent="secondary"
+                  size="md"
+                  className="w-full justify-between"
+                  onClick={() => {
+                    navigate(getRepertoireEditorRoute(repertoire._id));
+                    handleCloseSearch();
+                  }}
+                >
+                  <span className="truncate">{repertoire.name}</span>
+                  <ChevronRightIcon className="h-4 w-4" />
+                </Button>
+              ))
+            ) : null}
+            {!normalizedSearchValue && filteredFavorites.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-border-default px-3 py-5 text-sm text-text-muted">
+                No favorite repertoires yet.
+              </div>
+            ) : null}
+            {normalizedSearchValue && searchStatus === "loading" ? (
+              <div className="rounded-xl border border-border-subtle px-3 py-5 text-sm text-text-muted">
+                Searching your library...
+              </div>
+            ) : null}
+            {normalizedSearchValue && searchStatus === "error" ? (
+              <div className="rounded-xl border border-dashed border-danger/30 px-3 py-5 text-sm text-danger">
+                Unable to search your library right now.
+              </div>
+            ) : null}
+            {normalizedSearchValue && searchStatus === "success" && quickSearchResults.length > 0 ? (
+              quickSearchResults.map((result) => (
+                <Button
+                  key={result.id}
+                  intent="secondary"
+                  size="md"
+                  className="w-full justify-between"
+                  onClick={() => {
+                    navigate(result.href);
+                    handleCloseSearch();
+                  }}
+                >
+                  <span className="min-w-0 text-left">
+                    <span className="block truncate text-sm text-text-base">{result.title}</span>
+                    <span className="block truncate text-xs text-text-subtle">{result.subtitle}</span>
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <Badge variant={result.kind === "opening" ? "info" : "default"} size="sm">
+                      {result.kind === "opening" ? "Opening" : "Repertoire"}
+                    </Badge>
+                    <ChevronRightIcon className="h-4 w-4" />
+                  </span>
+                </Button>
+              ))
+            ) : null}
+            {normalizedSearchValue && searchStatus === "success" && quickSearchResults.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-border-default px-3 py-5 text-sm text-text-muted">
+                No matching repertoire or opening.
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </Drawer>
+    </>
+  );
+};

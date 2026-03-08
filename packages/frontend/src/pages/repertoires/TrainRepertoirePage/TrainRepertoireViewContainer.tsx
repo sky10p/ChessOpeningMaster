@@ -102,6 +102,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
     const headerIcons = [
       {
         key: "examMode",
+        label: "Exam mode",
         icon: <ExamIcon />,
         onClick: () => {
           showNumberDialog({
@@ -123,6 +124,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
       },
       {
         key: "selectTrainVariants",
+        label: "Variants",
         icon: <CheckListIcon />,
         onClick: () => {
           showTrainVariantsDialog({
@@ -141,6 +143,7 @@ const TrainRepertoireViewContainer: React.FC = () => {
       },
       {
         key: "goToEditRepertoire",
+        label: "Edit",
         icon: <PencilIcon />,
         onClick: () => {
           const queryParams = new URLSearchParams(location.search);

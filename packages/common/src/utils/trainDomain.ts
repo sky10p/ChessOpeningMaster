@@ -3,6 +3,8 @@ import { MistakeSnapshotItem, ReviewRating } from "../types/Variants";
 type VariantMoveLike = {
   variantName?: string;
   position: number;
+  parent?: VariantMoveLike | null;
+  children?: VariantMoveLike[];
 };
 
 type VariantLike<TMove extends VariantMoveLike = VariantMoveLike> = {
@@ -33,6 +35,40 @@ export const getVariantStartPly = <TMove extends VariantMoveLike>(
     }
   });
   return Math.max(0, startPly);
+};
+
+const getMoveParent = <TMove extends VariantMoveLike>(
+  variantMoves: TMove[],
+  moveNode: TMove,
+  index: number
+): VariantMoveLike | null => {
+  if (moveNode.parent) {
+    return moveNode.parent;
+  }
+  if (index > 0) {
+    return variantMoves[index - 1] ?? null;
+  }
+  return null;
+};
+
+export const getVariantEntryPly = <TMove extends VariantMoveLike>(
+  variant: VariantLike<TMove>
+): number => {
+  const anchorPly = getVariantStartPly(variant);
+  let entryPly = anchorPly;
+
+  variant.moves.forEach((moveNode, index) => {
+    if (moveNode.position <= anchorPly || moveNode.variantName) {
+      return;
+    }
+
+    const parent = getMoveParent(variant.moves, moveNode, index);
+    if ((parent?.children?.length || 0) > 1) {
+      entryPly = moveNode.position;
+    }
+  });
+
+  return Math.max(0, entryPly);
 };
 
 export const mergeMistakeSnapshotItems = (

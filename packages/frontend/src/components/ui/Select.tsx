@@ -4,11 +4,11 @@ import { cn } from "../../utils/cn";
 
 const selectVariants = cva(
   [
-    "w-full rounded-md border bg-surface text-text-base",
+    "w-full rounded-md border bg-surface text-text-base shadow-sm",
     "transition-colors appearance-none cursor-pointer",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:border-transparent",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:border-transparent",
     "disabled:cursor-not-allowed disabled:opacity-50",
-    "bg-[url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E\")] bg-right bg-no-repeat",
+    "bg-[url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E\")] bg-right bg-no-repeat",
   ],
   {
     variants: {

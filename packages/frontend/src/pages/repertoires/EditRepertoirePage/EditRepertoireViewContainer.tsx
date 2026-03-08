@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "../../../components/ui";
 import { useRepertoireContext } from "../../../contexts/RepertoireContext";
 import { useHeaderDispatch } from "../../../contexts/HeaderContext";
 import { useMenuContext } from "../../../contexts/MenuContext";
@@ -26,6 +27,7 @@ import { RepertoireWorkspaceLayout } from "../shared/RepertoireWorkspaceLayout";
 import { useAlertContext } from "../../../contexts/AlertContext";
 import { useRepertoireMastery } from "../../../hooks/useRepertoireMastery";
 import { MasteryBadge } from "../../../components/ui/MasteryBadge";
+import { useIsMobile } from "../../../hooks/useIsMobile";
 import { getTrainRepertoireRoute } from "../../../utils/appRoutes";
 
 type FooterSection = "variants" | "comments" | "statistics" | "stockfish";
@@ -33,6 +35,7 @@ type FooterSection = "variants" | "comments" | "statistics" | "stockfish";
 const EditRepertoireViewContainer: React.FC = () => {
   const navigate = useNavigate();
   const [panelSelected, setPanelSelected] = useState<FooterSection>("variants");
+  const isMobile = useIsMobile();
 
   const { 
     repertoireId, 
@@ -96,8 +99,13 @@ const EditRepertoireViewContainer: React.FC = () => {
   };
 
   useEffect(() => {
+    if (isMobile) {
+      return undefined;
+    }
+
     addIconHeader({
       key: "trainRepertoire",
+      label: "Train",
       icon: <BookOpenIcon />,
       onClick: () => {
         navigate(getTrainRepertoireRoute(repertoireId));
@@ -105,11 +113,13 @@ const EditRepertoireViewContainer: React.FC = () => {
     });
     addIconHeader({
       key: "saveRepertoire",
+      label: "Save",
       icon: <SaveIcon />,
       onClick: saveRepertory,
     });
     addIconHeader({
       key: "moreOptions",
+      label: "Export",
       icon: <EllipsisVerticalIcon />,
       onClick: toggleMenuHeader,
     });
@@ -119,7 +129,7 @@ const EditRepertoireViewContainer: React.FC = () => {
       removeIconHeader("saveRepertoire");
       removeIconHeader("moreOptions");
     };
-  }, [navigate, repertoireId, saveRepertory, getPgn, toggleMenu]);
+  }, [getPgn, isMobile, navigate, repertoireId, saveRepertory, toggleMenu]);
 
   useEffect(() => {
     setIsVisible(true);
@@ -161,11 +171,26 @@ const EditRepertoireViewContainer: React.FC = () => {
     <RepertoireWorkspaceLayout
       title={repertoireName}
       titleExtra={masteryScore !== null ? <MasteryBadge score={masteryScore} size="sm" /> : undefined}
+      mobileActionRow={
+        isMobile ? (
+          <>
+            <Button intent="primary" size="sm" className="justify-center" onClick={() => navigate(getTrainRepertoireRoute(repertoireId))}>
+              Train
+            </Button>
+            <Button intent="secondary" size="sm" className="justify-center" onClick={saveRepertory}>
+              Save
+            </Button>
+            <Button intent="outline" size="sm" className="justify-center" onClick={toggleMenuHeader}>
+              Export
+            </Button>
+          </>
+        ) : undefined
+      }
       board={<BoardContainer />}
       boardActions={<BoardActionsContainer />}
       mobilePanel={
         <>
-          {panelSelected === "variants" && <VariantsInfo />}
+          {panelSelected === "variants" && <VariantsInfo mobileEditorMode={isMobile} />}
           {panelSelected === "comments" && <BoardCommentContainer />}
           {panelSelected === "statistics" && <StatisticsPanel fen={chess.fen()} />}
           {panelSelected === "stockfish" && (

@@ -11,3 +11,9 @@ export { MasteryBadge, getMasteryTier, type MasteryBadgeProps } from "./MasteryB
 export { CollapsibleSection, type CollapsibleSectionProps } from "./CollapsibleSection";
 export { MetricTitle, type MetricTitleProps } from "./MetricTitle";
 export { Tooltip } from "./Tooltip";
+export { PageHeader, type PageHeaderProps } from "./PageHeader";
+export { SectionHeader, type SectionHeaderProps } from "./SectionHeader";
+export { StatStrip, type StatStripProps, type StatStripItem } from "./StatStrip";
+export { InlineAlert, type InlineAlertProps } from "./InlineAlert";
+export { ListRow, type ListRowProps } from "./ListRow";
+export { Drawer, type DrawerProps } from "./Drawer";

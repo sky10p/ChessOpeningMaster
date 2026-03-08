@@ -1,5 +1,6 @@
 import React from "react";
 import { ArrowPathIcon, ArrowRightIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { Button } from "../../../ui";
 
 interface BoardActionsProps {
   next: () => void;
@@ -17,35 +18,38 @@ const BoardActions: React.FC<BoardActionsProps> = ({
   rotateBoard,
 }) => {
   return (
-    <div className="flex justify-center items-center mt-1">
-      <button
-        className="text-textLight disabled:opacity-50"
+    <div className="flex items-center gap-2">
+      <Button
+        intent="ghost"
+        size="sm"
+        className="min-h-[40px] rounded-full px-3"
         onClick={prev}
         disabled={!hasPrev()}
-        title="Previous move"
         aria-label="Previous move"
       >
         <ArrowLeftIcon className="h-6 w-6" />
-      </button>
+      </Button>
       
-      <button
-        className="text-textLight disabled:opacity-50 mx-2"
+      <Button
+        intent="ghost"
+        size="sm"
+        className="min-h-[40px] rounded-full px-3"
         onClick={next}
         disabled={!hasNext()}
-        title="Next move"
         aria-label="Next move"
       >
         <ArrowRightIcon className="h-6 w-6" />
-      </button>
+      </Button>
       
-      <button 
-        className="text-textLight" 
+      <Button
+        intent="ghost"
+        size="sm"
+        className="min-h-[40px] rounded-full px-3"
         onClick={rotateBoard}
-        title="Rotate board"
         aria-label="Rotate board"
       >
         <ArrowPathIcon className="h-6 w-6" />
-      </button>
+      </Button>
     </div>
   );
 };

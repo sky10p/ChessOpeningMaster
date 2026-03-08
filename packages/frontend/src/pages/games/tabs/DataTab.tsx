@@ -29,14 +29,14 @@ const DataTab: React.FC<DataTabProps> = ({
   openTrainRepertoire,
 }) => (
   <div className="space-y-4">
-    <div className="bg-surface rounded-xl border border-border-subtle p-4 flex flex-wrap items-center justify-between gap-3">
+    <div className="bg-surface rounded-xl border border-border-subtle p-4 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
       <p className="text-sm text-text-muted">
         <span className="font-semibold text-text-base">{games.length}</span>
         <span className="text-text-subtle"> games in current view</span>
       </p>
-      <div className="flex gap-2">
-        <Button intent="danger" size="xs" onClick={() => { void clearFiltered(); }}>Delete filtered</Button>
-        <Button intent="danger" size="xs" onClick={() => { void clearAll(); }}>Delete all</Button>
+      <div className="grid grid-cols-2 gap-2 sm:flex">
+        <Button intent="danger" size="xs" className="w-full justify-center" onClick={() => { void clearFiltered(); }}>Delete filtered</Button>
+        <Button intent="danger" size="xs" className="w-full justify-center" onClick={() => { void clearAll(); }}>Delete all</Button>
       </div>
     </div>
 
@@ -48,7 +48,7 @@ const DataTab: React.FC<DataTabProps> = ({
             const opening = getOpeningLabel(game);
             return (
               <div key={game.id} className="px-4 py-3 hover:bg-surface-raised/40 transition-colors">
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0 flex-1 space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-sm font-medium text-text-base truncate">{opening}{game.openingDetection.eco ? ` (${game.openingDetection.eco})` : ""}</span>
@@ -61,19 +61,33 @@ const DataTab: React.FC<DataTabProps> = ({
                       <p className="text-xs text-text-subtle">
                         {buildLineTitle(opening, game.openingMapping.variantName, game.openingMapping.repertoireName)}
                         {" · "}{formatPercent(game.openingMapping.confidence)} conf.
-                        {game.openingMapping.requiresManualReview ? <span className="text-amber-400"> · needs review</span> : null}
+                        {game.openingMapping.requiresManualReview ? <span className="text-warning"> · needs review</span> : null}
                       </p>
                     ) : null}
                     <p className="text-xs font-mono text-text-subtle truncate">{game.movesSan.slice(0, 12).join(" ")}</p>
                   </div>
-                  <div className="flex flex-col gap-1.5 shrink-0">
+                  <div className="grid w-full grid-cols-2 gap-2 shrink-0 sm:flex sm:w-auto sm:flex-col">
                     {game.openingMapping.repertoireId ? (
                       <>
-                        <Button intent="secondary" size="xs" onClick={() => openRepertoire(game.openingMapping.repertoireId as string, game.openingMapping.variantName || opening)}>View</Button>
-                        <Button intent="primary" size="xs" onClick={() => openTrainRepertoire(game.openingMapping.repertoireId as string, game.openingMapping.variantName || opening)}>Train</Button>
+                        <Button
+                          intent="secondary"
+                          size="xs"
+                          className="w-full justify-center"
+                          onClick={() => openRepertoire(game.openingMapping.repertoireId as string, game.openingMapping.variantName || opening)}
+                        >
+                          View
+                        </Button>
+                        <Button
+                          intent="primary"
+                          size="xs"
+                          className="w-full justify-center"
+                          onClick={() => openTrainRepertoire(game.openingMapping.repertoireId as string, game.openingMapping.variantName || opening)}
+                        >
+                          Train
+                        </Button>
                       </>
                     ) : null}
-                    <Button intent="danger" size="xs" onClick={() => { void removeGame(game.id); }}>Delete</Button>
+                    <Button intent="danger" size="xs" className="col-span-2 w-full justify-center" onClick={() => { void removeGame(game.id); }}>Delete</Button>
                   </div>
                 </div>
               </div>

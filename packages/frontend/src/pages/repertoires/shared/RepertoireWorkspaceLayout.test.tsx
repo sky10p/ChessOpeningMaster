@@ -8,6 +8,7 @@ describe("RepertoireWorkspaceLayout", () => {
     const { container } = render(
       <RepertoireWorkspaceLayout
         title="My Repertoire"
+        mobileActionRow={<div data-testid="mobile-actions">Mobile actions</div>}
         board={<div data-testid="board">Board</div>}
         boardActions={<div data-testid="board-actions">Actions</div>}
         mobilePanel={<div data-testid="mobile-panel">Mobile panel</div>}
@@ -16,6 +17,7 @@ describe("RepertoireWorkspaceLayout", () => {
     );
 
     expect(screen.getByText("My Repertoire")).toBeInTheDocument();
+    expect(screen.getByTestId("mobile-actions")).toBeInTheDocument();
     expect(screen.getByTestId("board")).toBeInTheDocument();
     expect(screen.getByTestId("board-actions")).toBeInTheDocument();
     expect(screen.getByTestId("mobile-panel")).toBeInTheDocument();

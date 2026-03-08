@@ -57,9 +57,10 @@ jest.mock('../../../../hooks/useVariantNavigation', () => ({
 
 jest.mock('../../../design/chess/VariantTree/VariantTree', () => ({
   __esModule: true,
-  default: (props: { setSelectedVariant: (variant: unknown) => void }) => (
+  default: (props: { setSelectedVariant: (variant: unknown) => void; mobileEditorMode?: boolean }) => (
     <div data-testid="variant-tree">
       <div>setSelectedVariant prop type: {typeof props.setSelectedVariant}</div>
+      <div>mobileEditorMode: {String(props.mobileEditorMode)}</div>
       <button onClick={() => props.setSelectedVariant(null)}>Test setSelectedVariant</button>
     </div>
   ),
@@ -94,5 +95,11 @@ describe('VariantsInfo', () => {
     render(<VariantsInfo />);
     
     expect(mockHandleVariantChange).toBeDefined();
+  });
+
+  it("passes mobileEditorMode through to VariantTree", () => {
+    const { getByText } = render(<VariantsInfo mobileEditorMode />);
+
+    expect(getByText("mobileEditorMode: true")).toBeInTheDocument();
   });
 });

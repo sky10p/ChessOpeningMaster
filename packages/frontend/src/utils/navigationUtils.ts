@@ -14,9 +14,18 @@ const resolveId = (repertoireIdOrObject: string | IRepertoire): string =>
 export const useNavigationUtils = () => {
   const navigate = useNavigate();
 
-  const goToRepertoire = useCallback((repertoireIdOrObject: string | IRepertoire, variantName?: string) => {
+  const goToRepertoire = useCallback((
+    repertoireIdOrObject: string | IRepertoire,
+    variantName?: string,
+    fen?: string
+  ) => {
     const repertoireId = resolveId(repertoireIdOrObject);
-    navigate(getRepertoireEditorRoute(repertoireId, variantName ? { variantName } : undefined));
+    navigate(
+      getRepertoireEditorRoute(
+        repertoireId,
+        variantName || fen ? { variantName, fen } : undefined
+      )
+    );
   }, [navigate]);
 
   const goToTrainRepertoire = useCallback((repertoireIdOrObject: string | IRepertoire, variantName?: string) => {

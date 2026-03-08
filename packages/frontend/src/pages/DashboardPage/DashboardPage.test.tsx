@@ -1,12 +1,15 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
-import { BrowserRouter } from "react-router-dom";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { MemoryRouter, useNavigate } from "react-router-dom";
 import "@testing-library/jest-dom";
-import * as useDashboardModule from "../../hooks/useDashboard";
-import * as pathInsightsHookModule from "./sections/DashboardSection/hooks/usePathInsights";
-import * as trainRepository from "../../repository/train/train";
+import * as usePathsModule from "../../hooks/usePaths";
+import * as navigationUtilsModule from "../../utils/navigationUtils";
 import { DashboardPage } from "./DashboardPage";
-import { IRepertoireDashboard } from "@chess-opening-master/common";
+
+jest.mock("react-router-dom", () => ({
+  ...jest.requireActual("react-router-dom"),
+  useNavigate: jest.fn(),
+}));
 
 class ResizeObserver {
   observe = jest.fn();
@@ -16,91 +19,152 @@ class ResizeObserver {
 
 window.ResizeObserver = ResizeObserver;
 
-const emptyMoveNode = { id: "root", move: null, children: [] };
-const mockRepertoires: IRepertoireDashboard[] = [
-  {
-    _id: "1",
-    name: "Test Repertoire",
+const mockNavigate = jest.fn();
+const mockGoToRepertoire = jest.fn();
+const mockGoToTrainRepertoire = jest.fn();
+const mockLoadPath = jest.fn();
+const mockLoadInsights = jest.fn();
+
+const baseUsePaths = {
+  loadPath: mockLoadPath,
+  loadInsights: mockLoadInsights,
+  path: {
+    id: "path-1",
+    type: "newVariant",
+    repertoireId: "1",
+    repertoireName: "Test Repertoire",
+    name: "Italian Game",
     orientation: "white",
-    moveNodes: emptyMoveNode,
-    variantsInfo: [],
-    order: 0,
-  },
-];
+    startingFen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+  } as never,
+  plan: {
+    overdueCount: 2,
+    dueTodayCount: 3,
+    reviewDueCount: 3,
+    completedDueToday: 1,
+    completedNewToday: 1,
+    completedTodayCount: 2,
+    suggestedNewToday: 2,
+    estimatedTodayTotal: 5,
+    forecastDays: [],
+  } as never,
+  loading: false,
+  error: null,
+  removeVariantFromPath: jest.fn(),
+  category: undefined,
+  setCategory: jest.fn(),
+  filters: {},
+  setFilters: jest.fn(),
+  analytics: null,
+  insightsLoading: false,
+  insightsError: null,
+};
 
 describe("DashboardPage", () => {
   beforeEach(() => {
-    jest.spyOn(trainRepository, "getCachedTrainOverview").mockImplementation(
-      () => new Promise(() => undefined)
-    );
-
-    jest.spyOn(pathInsightsHookModule, "usePathInsights").mockReturnValue({
-      pathPlan: {
-        todayKey: "2026-02-15",
-        overdueCount: 0,
-        dueTodayCount: 0,
-        reviewDueCount: 0,
-        completedTodayCount: 0,
-        newVariantsAvailable: 0,
-        suggestedNewToday: 0,
-        estimatedTodayTotal: 0,
-        upcoming: [],
-        forecastDays: [],
-        nextVariants: [],
-        upcomingOpenings: [],
-      },
-      pathAnalytics: {
-        rangeStart: "2026-01-17",
-        rangeEnd: "2026-02-15",
-        totalReviews: 0,
-        ratingBreakdown: { again: 0, hard: 0, good: 0, easy: 0 },
-        dailyReviews: [],
-        topOpenings: [],
-        topFens: [],
-      },
-      loadingPathInsights: false,
-      pathInsightsError: null,
-    });
-
-    jest.spyOn(useDashboardModule, "useDashboard").mockReturnValue({
-      repertoires: mockRepertoires,
-      loading: false,
-      setRepertoires: jest.fn(),
-      updateRepertoires: jest.fn().mockResolvedValue(undefined),
+    jest.clearAllMocks();
+    (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
+    jest.spyOn(usePathsModule, "usePaths").mockReturnValue(baseUsePaths as never);
+    jest.spyOn(navigationUtilsModule, "useNavigationUtils").mockReturnValue({
+      goToRepertoire: mockGoToRepertoire,
+      goToTrainRepertoire: mockGoToTrainRepertoire,
+      goToTrainRepertoireWithVariants: jest.fn(),
+      goToTrainOpening: jest.fn(),
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
-  it("renders the reduced dashboard tab set", () => {
+  it("renders the focused Today landing page without legacy summary blocks", () => {
     render(
-      <BrowserRouter>
+      <MemoryRouter>
         <DashboardPage />
-      </BrowserRouter>
+      </MemoryRouter>
     );
 
-    expect(screen.getByRole("tab", { name: /dashboard/i })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: /overview/i })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: /path insights/i })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: /studies/i })).toBeInTheDocument();
-    expect(screen.queryByRole("tab", { name: /repertoires/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("tab", { name: /openings/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Today" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Next action" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Open Path" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Start review" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Focus train" })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Chess board position" })).toBeInTheDocument();
+    expect(screen.queryByText("Variants tracked")).not.toBeInTheDocument();
+    expect(screen.queryByText("Reviewed with errors")).not.toBeInTheDocument();
+    expect(screen.queryByText("This week")).not.toBeInTheDocument();
   });
 
-  it("redirects legacy openings dashboard links to /repertoires filters", async () => {
-    window.history.pushState({}, "", "/dashboard?section=openings&status=errors");
-
+  it("executes the real review action for variant paths", () => {
     render(
-      <BrowserRouter>
+      <MemoryRouter>
         <DashboardPage />
-      </BrowserRouter>
+      </MemoryRouter>
     );
 
-    await waitFor(() => {
-      expect(window.location.pathname).toBe("/repertoires");
-      expect(window.location.search).toBe("?status=errors");
+    fireEvent.click(screen.getByRole("button", { name: "Start review" }));
+
+    expect(mockGoToRepertoire).toHaveBeenCalledWith(
+      "1",
+      "Italian Game",
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    );
+    expect(mockNavigate).not.toHaveBeenCalledWith("/path?view=forecast");
+  });
+
+  it("executes focus train directly for variant paths", () => {
+    render(
+      <MemoryRouter>
+        <DashboardPage />
+      </MemoryRouter>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Focus train" }));
+
+    expect(mockGoToTrainRepertoire).toHaveBeenCalledWith("1", "Italian Game");
+  });
+
+  it("opens the study directly for study paths", () => {
+    (usePathsModule.usePaths as jest.Mock).mockReturnValue({
+      ...baseUsePaths,
+      path: {
+        type: "study",
+        groupId: "group-1",
+        studyId: "study-1",
+        name: "Endgame Study",
+        lastSession: "2026-03-06",
+      },
     });
+
+    render(
+      <MemoryRouter>
+        <DashboardPage />
+      </MemoryRouter>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Open study" }));
+
+    expect(mockNavigate).toHaveBeenCalledWith("/studies?groupId=group-1&studyId=study-1");
+    expect(screen.queryByRole("button", { name: "Focus train" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("img", { name: "Chess board position" })).not.toBeInTheDocument();
+  });
+
+  it("falls back to Path forecast when there is no immediate lesson", () => {
+    (usePathsModule.usePaths as jest.Mock).mockReturnValue({
+      ...baseUsePaths,
+      path: { message: "All caught up" },
+    });
+
+    render(
+      <MemoryRouter>
+        <DashboardPage />
+      </MemoryRouter>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Open forecast" }));
+
+    expect(mockNavigate).toHaveBeenCalledWith("/path?view=forecast");
+    expect(screen.queryByRole("button", { name: "Focus train" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("img", { name: "Chess board position" })).not.toBeInTheDocument();
   });
 });

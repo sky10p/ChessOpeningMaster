@@ -332,6 +332,8 @@ export const TrainRepertoireContextProvider: React.FC<
   const directMistakeSessionStartedKeyRef = React.useRef<string | null>(null);
   const fullRunRetryKeyRef = React.useRef<string | null>(null);
   const mistakeOnlyCompletionSessionKeyRef = React.useRef<string | null>(null);
+  const pendingAutoPlayTimeoutRef = React.useRef<number | null>(null);
+  const goToMoveRef = React.useRef(goToMove);
   const directMistakeSessionKey = useMemo(
     () =>
       `${repertoireId}::${openingName || ""}::${Array.from(
@@ -500,12 +502,6 @@ export const TrainRepertoireContextProvider: React.FC<
     trainingPhase,
     variants,
   ]);
-
-  const playOpponentMove = useCallback(async () => {
-    await sleep(350);
-    const randomMove = Math.floor(Math.random() * allowedMoves.length);
-    goToMove(allowedMoves[randomMove]);
-  }, [allowedMoves, goToMove]);
 
   const chooseTrainVariantsToTrain = useCallback(
     (selectedTrainVariants: TrainVariant[]) => {
@@ -861,7 +857,10 @@ export const TrainRepertoireContextProvider: React.FC<
         }
         return trainVariant;
       });
-      setTrainVariants(newTrainVariants);
+      const hasChanges = newTrainVariants.some((tv, i) => tv !== trainVariants[i]);
+      if (hasChanges) {
+        setTrainVariants(newTrainVariants);
+      }
       return newTrainVariants;
     },
     [
@@ -1698,32 +1697,56 @@ export const TrainRepertoireContextProvider: React.FC<
   ]);
 
   useEffect(() => {
-    if (allowedMoves.length === 0) {
-      if (trainingPhase === "standard") {
-        initBoard();
-        if (
-          trainVariants.some(
-            (trainVariant) =>
-              trainVariant.state === "inProgress" ||
-              trainVariant.state === "discarded"
-          )
-        ) {
-          setTrainVariants(
-            trainVariants.map((trainVariant) => {
-              if (trainVariant.state === "discarded") {
-                return { ...trainVariant, state: "inProgress" } as TrainVariant;
-              }
-              return trainVariant;
-            })
-          );
+    goToMoveRef.current = goToMove;
+  }, [goToMove]);
+
+  useEffect(() => {
+    if (allowedMoves.length !== 0 || trainingPhase !== "standard") {
+      return;
+    }
+    initBoard();
+    setTrainVariants((previousTrainVariants) => {
+      let hasReset = false;
+      const nextTrainVariants = previousTrainVariants.map((trainVariant) => {
+        if (trainVariant.state !== "discarded") {
+          return trainVariant;
         }
+        hasReset = true;
+        return { ...trainVariant, state: "inProgress" } as TrainVariant;
+      });
+      return hasReset ? nextTrainVariants : previousTrainVariants;
+    });
+  }, [allowedMoves.length, initBoard, trainingPhase]);
+
+  useEffect(() => {
+    if (allowedMoves.length === 0) {
+      if (pendingAutoPlayTimeoutRef.current !== null) {
+        window.clearTimeout(pendingAutoPlayTimeoutRef.current);
+        pendingAutoPlayTimeoutRef.current = null;
       }
       return;
     }
-    if (turn !== orientation && trainingPhase !== "reinforcement") {
-      void playOpponentMove();
+    if (pendingAutoPlayTimeoutRef.current !== null) {
+      window.clearTimeout(pendingAutoPlayTimeoutRef.current);
+      pendingAutoPlayTimeoutRef.current = null;
     }
-  }, [allowedMoves, initBoard, orientation, playOpponentMove, trainVariants, trainingPhase, turn]);
+    if (turn !== orientation && trainingPhase !== "reinforcement") {
+      const nextMove = allowedMoves[0];
+      if (!nextMove) {
+        return;
+      }
+      pendingAutoPlayTimeoutRef.current = window.setTimeout(() => {
+        pendingAutoPlayTimeoutRef.current = null;
+        goToMoveRef.current(nextMove);
+      }, 350);
+    }
+    return () => {
+      if (pendingAutoPlayTimeoutRef.current !== null) {
+        window.clearTimeout(pendingAutoPlayTimeoutRef.current);
+        pendingAutoPlayTimeoutRef.current = null;
+      }
+    };
+  }, [allowedMoves, orientation, trainingPhase, turn]);
 
   const focusModeProgress = useMemo(() => {
     if (trainingPhase === "reinforcement") {

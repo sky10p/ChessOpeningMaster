@@ -4,9 +4,9 @@ import { cn } from "../../utils/cn";
 
 const inputVariants = cva(
   [
-    "w-full rounded-md border bg-surface text-text-base placeholder:text-text-subtle",
+    "w-full rounded-md border bg-surface text-text-base placeholder:text-text-subtle shadow-sm",
     "transition-colors",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:border-transparent",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:border-transparent",
     "disabled:cursor-not-allowed disabled:opacity-50",
   ],
   {

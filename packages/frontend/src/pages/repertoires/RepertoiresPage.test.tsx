@@ -274,6 +274,43 @@ describe("RepertoiresPage", () => {
     });
   });
 
+  it("opens and closes the create drawer through the query param", async () => {
+    renderPage();
+
+    expect(await screen.findByText("Main White")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /create repertoire/i }));
+
+    expect(screen.getByTestId("location-display")).toHaveTextContent("/repertoires?create=1");
+    const dialog = screen.getByRole("dialog", { name: /create repertoire/i });
+    expect(dialog).toBeInTheDocument();
+
+    fireEvent.click(within(dialog).getByRole("button", { name: /cancel/i }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("location-display")).toHaveTextContent("/repertoires");
+      expect(screen.queryByRole("dialog", { name: /create repertoire/i })).not.toBeInTheDocument();
+    });
+  });
+
+  it("creates a repertoire from the drawer and navigates to the editor", async () => {
+    jest.spyOn(repertoireRepository, "createRepertoire").mockResolvedValue({ insertedId: "rep-4" });
+
+    renderPage("/repertoires?create=1");
+
+    const dialog = await screen.findByRole("dialog", { name: /create repertoire/i });
+    fireEvent.change(within(dialog).getByLabelText(/repertoire name/i), {
+      target: { value: "  New Repertoire  " },
+    });
+    fireEvent.click(within(dialog).getAllByRole("button", { name: /create repertoire/i })[0]);
+
+    await waitFor(() => {
+      expect(repertoireRepository.createRepertoire).toHaveBeenCalledWith("New Repertoire");
+      expect(mockUpdateNavbarRepertoires).toHaveBeenCalled();
+      expect(screen.getByTestId("location-display")).toHaveTextContent("/repertoire/rep-4");
+    });
+  });
+
   it("navigates to the opening detail route from the opening view action", async () => {
     renderPage();
 

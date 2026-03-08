@@ -113,7 +113,7 @@ describe("TrainOpeningPage", () => {
     mockUseLocation.mockReturnValue({ search: "" });
   });
 
-  it("navigates with standard mode query when train all variants is clicked", async () => {
+  it("navigates with standard mode query when start review is clicked", async () => {
     jest.spyOn(trainRepository, "getTrainOpening").mockResolvedValue(openingPayload);
 
     render(
@@ -123,7 +123,7 @@ describe("TrainOpeningPage", () => {
     );
 
     expect(await screen.findByText("Italian Game")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Train All Variants" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Start review" })[0]);
 
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith(
@@ -194,7 +194,7 @@ describe("TrainOpeningPage", () => {
     );
 
     expect(await screen.findByText("Italian Game")).toBeInTheDocument();
-    fireEvent.click(screen.getAllByRole("button", { name: "Train This Mistake" })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: "Train this mistake" })[0]);
 
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith(
@@ -234,7 +234,7 @@ describe("TrainOpeningPage", () => {
     );
 
     expect(await screen.findByText("Italian Game")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "View Opening" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Open editor" })[0]);
 
     expect(mockNavigate).toHaveBeenCalledWith(
       getRepertoireEditorRoute("rep-1", { variantName: "Italian Game" })
@@ -251,7 +251,7 @@ describe("TrainOpeningPage", () => {
     );
 
     expect(await screen.findByText("Italian Game")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "View Variant" }));
+    fireEvent.click(screen.getByRole("button", { name: "Open line" }));
 
     expect(mockNavigate).toHaveBeenCalledWith(
       getRepertoireEditorRoute("rep-1", { variantName: "Italian Game: Main Line" })
