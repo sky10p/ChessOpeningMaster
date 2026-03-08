@@ -96,7 +96,6 @@ const GamesPage: React.FC = () => {
     offBookSignalCount,
     offBookOpenings,
     gamesByMonth,
-    maxMonthGames,
     gamesByMonthGroups,
     trainingIdeas,
     openingTargetFromLine,
@@ -252,7 +251,6 @@ const GamesPage: React.FC = () => {
                 manualReviewRatio={manualReviewRatio}
                 wdl={wdl}
                 gamesByMonth={gamesByMonth}
-                maxMonthGames={maxMonthGames}
                 variantPerformance={variantPerformance}
                 weakestVariants={weakestVariants}
                 strongestVariants={strongestVariants}

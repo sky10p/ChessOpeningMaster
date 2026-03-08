@@ -12,7 +12,6 @@ type InsightsTabProps = {
   manualReviewRatio: number;
   wdl: { win: number; draw: number; loss: number };
   gamesByMonth: Array<{ month: string; games: number }>;
-  maxMonthGames: number;
   variantPerformance: Array<{
     variantKey: string;
     variantName: string;
@@ -46,7 +45,6 @@ const InsightsTab: React.FC<InsightsTabProps> = ({
   manualReviewRatio,
   wdl,
   gamesByMonth,
-  maxMonthGames,
   variantPerformance,
   weakestVariants,
   strongestVariants,
@@ -82,7 +80,7 @@ const InsightsTab: React.FC<InsightsTabProps> = ({
     {/* ── Games by Month ── */}
     <Card>
       <SectionTitle>Games By Month</SectionTitle>
-      <MonthChart gamesByMonth={gamesByMonth} maxMonthGames={maxMonthGames} />
+      <MonthChart gamesByMonth={gamesByMonth} />
     </Card>
 
     {/* ── Weakest & Strongest side by side ── */}

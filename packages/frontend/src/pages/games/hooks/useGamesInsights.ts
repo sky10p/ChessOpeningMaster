@@ -94,7 +94,6 @@ export const useGamesInsights = (stats: GamesStatsSummary | null, games: Importe
     .slice(0, 8), [stats]);
 
   const gamesByMonth = stats?.gamesByMonth || [];
-  const maxMonthGames = gamesByMonth.reduce((max, month) => Math.max(max, month.games), 0);
 
   const gamesByMonthGroups = React.useMemo(() => {
     const groups = new Map<string, ImportedGame[]>();
@@ -152,7 +151,6 @@ export const useGamesInsights = (stats: GamesStatsSummary | null, games: Importe
     offBookSignalCount,
     offBookOpenings,
     gamesByMonth,
-    maxMonthGames,
     gamesByMonthGroups,
     trainingIdeas,
     openingTargetFromLine,
