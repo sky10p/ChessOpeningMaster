@@ -17,6 +17,7 @@ export const RepertoireInfoActions: React.FC<RepertoireInfoActionsProps> = ({ ac
           onClick={primaryAction.onClick}
           icon={primaryAction.icon}
           label={primaryAction.label}
+          disabled={primaryAction.disabled}
           intent="accent"
           className="min-w-[8.5rem]"
         />
@@ -28,6 +29,7 @@ export const RepertoireInfoActions: React.FC<RepertoireInfoActionsProps> = ({ ac
             onClick={action.onClick}
             icon={action.icon}
             label={action.label}
+            disabled={action.disabled}
             iconOnly
           />
         ))}
@@ -37,6 +39,7 @@ export const RepertoireInfoActions: React.FC<RepertoireInfoActionsProps> = ({ ac
           onClick={moreOptionsAction.onClick}
           icon={moreOptionsAction.icon}
           label={moreOptionsAction.label}
+          disabled={moreOptionsAction.disabled}
           iconOnly
         />
       )}

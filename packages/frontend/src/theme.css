@@ -143,6 +143,10 @@ textarea {
 }
 
 @layer base {
+  :focus {
+    outline: none;
+  }
+
   h1 {
     @apply text-[2rem] font-semibold leading-[1.2] tracking-[-0.02em] text-text-base;
   }

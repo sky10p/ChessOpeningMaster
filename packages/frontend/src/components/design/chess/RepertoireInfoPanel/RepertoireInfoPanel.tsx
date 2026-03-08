@@ -75,27 +75,32 @@ export const RepertoireInfoPanel: React.FC<RepertoireInfoPanelProps> = ({
   const [showSelectVariantDialog, setShowSelectVariantDialog] = useState(false);
   const [activePanel, setActivePanel] = React.useState<RepertoireInfoPanelMode>("moves");
   const { lines, depth, maxDepth } = useStockfish(fen, NUM_LINES, activePanel === "engine");
+  const hasSelectedVariant = Boolean(selectedVariant);
 
-  const actions = [
+  const actions: RepertoireInfoAction[] = [
     {
       onClick: () => selectedVariant && goToTrainRepertoire(repertoireId, selectedVariant.fullName),
       icon: <AcademicCapIcon className="h-5 w-5 text-accent" />,
       label: "Train",
+      disabled: !hasSelectedVariant,
     },
     {
       onClick: () => selectedVariant && downloadVariantPGN(selectedVariant),
       icon: <ArrowDownTrayIcon className="h-5 w-5 text-accent" />,
       label: "Download",
+      disabled: !hasSelectedVariant,
     },
     {
       onClick: () => selectedVariant && copyVariantPGN(selectedVariant),
       icon: <ClipboardIcon className="h-5 w-5 text-accent" />,
       label: "Copy PGN",
+      disabled: !hasSelectedVariant,
     },
     {
       onClick: () => selectedVariant && deleteVariant(selectedVariant),
       icon: <TrashIcon className="h-5 w-5 text-danger" />,
       label: "Delete variant",
+      disabled: !hasSelectedVariant,
     },
   ];
 

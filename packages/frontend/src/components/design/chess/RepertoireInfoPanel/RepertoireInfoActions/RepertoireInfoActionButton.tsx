@@ -9,6 +9,7 @@ interface RepertoireInfoActionButtonProps {
   className?: string;
   iconOnly?: boolean;
   intent?: "primary" | "secondary" | "danger" | "ghost" | "accent" | "outline";
+  disabled?: boolean;
 }
 
 export const RepertoireInfoActionButton: React.FC<RepertoireInfoActionButtonProps> = ({
@@ -18,10 +19,16 @@ export const RepertoireInfoActionButton: React.FC<RepertoireInfoActionButtonProp
   className,
   iconOnly = false,
   intent = "secondary",
+  disabled = false,
 }) => {
   if (iconOnly) {
     return (
-      <IconButton label={label ?? "Action"} onClick={onClick} className={cn("border border-border-default bg-surface-raised text-text-muted hover:bg-interactive hover:text-text-base", className)}>
+      <IconButton
+        label={label ?? "Action"}
+        onClick={onClick}
+        disabled={disabled}
+        className={cn("border border-border-default bg-surface-raised text-text-muted hover:bg-interactive hover:text-text-base", className)}
+      >
         {icon}
       </IconButton>
     );
@@ -29,7 +36,7 @@ export const RepertoireInfoActionButton: React.FC<RepertoireInfoActionButtonProp
 
   return (
     <div className={cn("min-w-0", className)}>
-      <Button intent={intent} size="sm" onClick={onClick} className="w-full justify-center gap-2 truncate">
+      <Button intent={intent} size="sm" onClick={onClick} disabled={disabled} className="w-full justify-center gap-2 truncate">
         <span className="shrink-0">{icon}</span>
         {label ? <span className="truncate">{label}</span> : null}
       </Button>

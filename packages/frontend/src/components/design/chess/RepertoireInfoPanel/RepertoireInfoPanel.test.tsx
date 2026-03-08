@@ -171,11 +171,19 @@ describe('RepertoireInfoPanel - Train Variant Action', () => {
       
       render(<RepertoireInfoPanel {...propsWithoutSelectedVariant} />);
       
-      const trainButton = screen.getByText('Train').closest('div')?.querySelector('button');
+      const trainButton = screen.getByRole('button', { name: 'Train' });
+      const downloadButton = screen.getByRole('button', { name: 'Download' });
+      const copyPgnButton = screen.getByRole('button', { name: 'Copy PGN' });
+      const deleteVariantButton = screen.getByRole('button', { name: 'Delete variant' });
+      const moreOptionsButton = screen.getByRole('button', { name: 'More options' });
       
-      if (trainButton) {
-        fireEvent.click(trainButton);
-      }
+      expect(trainButton).toBeDisabled();
+      expect(downloadButton).toBeDisabled();
+      expect(copyPgnButton).toBeDisabled();
+      expect(deleteVariantButton).toBeDisabled();
+      expect(moreOptionsButton).toBeEnabled();
+
+      fireEvent.click(trainButton);
       
       expect(mockGoToTrainRepertoire).not.toHaveBeenCalled();
     });
